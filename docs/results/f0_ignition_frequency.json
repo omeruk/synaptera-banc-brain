@@ -1,0 +1,44 @@
+{
+ "arms": {
+  "v1": {
+   "ignited": 0,
+   "n": 100,
+   "proportion": 0.0,
+   "ci95": [
+    0.0,
+    0.03621669264519054
+   ],
+   "secondary_ignited": 0,
+   "ignited_seeds": []
+  },
+  "new": {
+   "ignited": 0,
+   "n": 100,
+   "proportion": 0.0,
+   "ci95": [
+    0.0,
+    0.03621669264519054
+   ],
+   "secondary_ignited": 1,
+   "ignited_seeds": []
+  },
+  "new_delay": {
+   "ignited": 0,
+   "n": 100,
+   "proportion": 0.0,
+   "ci95": [
+    0.0,
+    0.03621669264519054
+   ],
+   "secondary_ignited": 1,
+   "ignited_seeds": []
+  }
+ },
+ "fisher_two_sided": {
+  "primary_v1_vs_new": 1.0,
+  "new_delay_vs_v1": 1.0,
+  "new_delay_vs_new": 1.0
+ },
+ "alpha": 0.05,
+ "primary_significant": false
+}

@@ -64,6 +64,7 @@ FLIGHT_FIELDS = (
     # contacts and timing
     _f("platform_contact", (), np.int8), _f("tower_contact", (), np.int8), _f("tower_penetration"),
     _f("min_tower_clearance"), _f("is_feeding", (), np.int8), _f("leg_pose", (), np.int8),
+    _f("yaw_perturb_torque", note="external body-z torque pulse (uN mm); experiment design"),
     _f("step_time"), _f("rss_gb"),
     # coupling
     _f("cmd_source", (), np.int32, note="interval whose engine output was applied (-1 = neutral command)"),
