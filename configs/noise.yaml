@@ -1,0 +1,9 @@
+# Physical noise of the body (review M5: seeds that actually change the physics). Default amplitudes are 0 =
+# the deterministic v1 physics; an experiment enables them in its pre-registered configuration.
+groups:
+  - origin: E
+    source: "engineering scaffold for seed-dependent physics: Ornstein-Uhlenbeck gust force (uN) and torque (uN*mm) on the thorax; amplitudes are experiment-design choices set per pre-registration, never tuned on behaviour"
+    values:
+      gust_force_sigma: 0.0
+      gust_torque_sigma: 0.0
+      gust_tau: 0.05

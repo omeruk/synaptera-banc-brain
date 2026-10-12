@@ -1,0 +1,40 @@
+# Arena of the flight experiments (x20 scale; mm, s). Ported from synaptera@c94796d:flight/config.py.
+# The fly itself is not scaled (~2.5 mm body).
+groups:
+  - origin: E
+    unit: mm
+    source: "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)"
+    values:
+      scale: 20.0
+      tower1: [[160.0, 200.0], [-100.0, 160.0], [0.0, 200.0]]
+      tower2: [[280.0, 320.0], [60.0, 300.0], [0.0, 200.0]]
+      takeoff_pedestal: [0.0, 0.0, 5.0, 19.5]
+      food_platform: [440.0, 80.0, 10.0, 169.5]
+      food_pos: [440.0, 80.0, 170.0]
+      food_drop_radius: 0.5
+      start_pos: [0.0, 0.0, 20.0]
+      arena_half_size: [700.0, 600.0]
+  - origin: E
+    unit: mm
+    source: "3D odour field grid (Dijkstra path distance around obstacles); towers are 8 voxels thick"
+    values:
+      odor_grid_bounds: [[-60.0, 500.0], [-160.0, 360.0], [0.0, 300.0]]
+      odor_grid_res: 5.0
+      odor_d0: 20.0
+  - origin: E
+    unit: s
+    source: "MuJoCo physics step of the flight body (v1 PHYSICS_DT); the coupling interval is configured elsewhere"
+    values:
+      physics_dt: 0.0001
+  - origin: E
+    source: "contact softening of the obstacle geoms (CLAUDE.md of v1); fly-arena pairs keep FlyGym defaults"
+    values:
+      obstacle_solimp: "0.9 0.999 0.001 0.5 2"
+      obstacle_solref: "0.02 1"
+  - origin: E
+    source: "arena texture (v1 brain-control Step 0, R4): high-contrast checkers so T4/T5 motion exists away from edges; periods keep >= ~10 deg at typical viewing distances"
+    values:
+      texture_rgb: [[0.2, 0.2, 0.2], [0.8, 0.8, 0.8]]
+      obstacle_tex_period: 20.0
+      ground_tex_period: 40.0
+      platform_dark_rgba: [0.03, 0.03, 0.03, 1.0]

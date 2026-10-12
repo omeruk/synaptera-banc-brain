@@ -1,0 +1,60 @@
+# Migration checklist
+
+Source commit `c94796d480ad2e77476bb110ab9a1bbf52e27118`. Details and reasons: `docs/06_NEW_PROJECT_SETUP.md`.
+Order matters (dependency order). Each item: adapt -> test -> commit.
+
+- [x] **1.** `flight/groups.py` → `connectome/schema.py, connectome/homologs.py` (adapt): keep the id<->index mapping and partner_profiles/select_sugar_homologs; do NOT carry the NeuroFly-adapted lines (38-39, 85-161, 334-366: legacy group rule, neuron_positions) or the legacy groups; FlyWire/BANC adapters on the common schema
+- [x] **2.** `scripts/make_descending_neurons.py` → `connectome/adapters/flywire783.py` (adapt): the DN list becomes part of the adapter; write the BANC equivalent
+- [x] **3.** `scripts/make_sugar_grn.py` → `scripts/make_crosswalk.py` (adapt): homolog selection generalised to crosswalk generation (including the MN9/CB0701 candidate)
+- [x] **4.** `scripts/make_nt_silent.py` → `connectome/sign_rules.py` (pattern): sign variants collected in one edge-table transform (silent/impute/literature)
+- [x] **5.** `scripts/make_nt_impute.py` → `connectome/sign_rules.py` (pattern): same
+- [x] **6.** `scripts/make_nt_literature.py` → `connectome/sign_rules.py` (pattern): same
+- [x] **7.** `flight/brain.py` → `engine/lif_brian2.py, engine/protocol.py` (adapt): NeuralEngine interface (reset/set_inputs/advance/rates); Poisson input without delay (M4); the fixed 25 ms interval goes, coupling interval from config; activity-matched shuffled control (M3); warn on dev+shuffle (L6); legacy flags not carried
+- [x] **8.** `flight/config.py` → `configs/arena_x20.yaml, body/arena.py` (adapt): a frozen ArenaSpec instead of module globals; move_takeoff_pedestal -> with_start_offset; constants with origin class in configs/assumptions.json
+- [x] **9.** `flight/quasi_steady.py` → `body/quasi_steady.py, motor/legacy_reflexes.py` (adapt): PHI_MAX amplitude limit + clip record (H5); stroke-plane angle and anisotropic damping option (M9); haltere PD moves to the REFLEX arm
+- [x] **10.** `flight/body.py` → `body/flygym_body.py, body/arena.py` (adapt): step(cmd, dt) takes a duration; FlyGym private API in one adapter (M6); InnerLoop interface; physical noise in body/noise.py (M5)
+- [x] **11.** `flight/head_reflex.py` → `motor/legacy_reflexes.py` (adapt): REFLEX-labelled control arm; constants in configs/reflex.yaml (with origin class)
+- [x] **12.** `flight/visual_input.py` → `sense/vision_flyvis.py` (adapt): keep FlyVis alignment + transduction; loom term as sub-frame mean (L1); empty-frame guard; number of sub-frames from config (H4); column source from the dataset (separate for BANC)
+- [x] **13.** `flight/vision_boundary.py` → `sense/vision_boundary.py` (adapt): keep the boundary-layer rule; remove the hard-coded ~/Downloads path (L4); column assignment must be rebuilt for BANC (risk)
+- [x] **14.** `scripts/make_t45_transduction.py` → `scripts/make_transduction.py` (adapt): merged into one script; result compared with numeric tolerance (M7)
+- [x] **15.** `scripts/make_visual_transduction.py` → `scripts/make_transduction.py` (adapt): same
+- [x] **16.** `scripts/make_vision_boundary.py` → `scripts/make_vision_boundary.py` (adapt): parametric by dataset (FlyWire/BANC)
+- [x] **17.** `scripts/prepare_neuron_geometry.py` → `connectome/geometry.py` (pattern): soma/arbor centroids from the common schema
+- [x] **18.** `flight/vis_stim.py` → `tasks/t0_stimuli.py` (take): open-loop stimuli (yaw, loom, flow) are generic; unchanged
+- [x] **19.** `flight/sensors.py` → `sense/ (gaze, odour sampling, surface, expansion)` (adapt): do NOT carry LoomBias (NeuroFly adaptation); do not carry l_eff=10 mm or the antenna_real flag
+- [ ] **20.** `simulation_data/odor_field_3d.py` → `sense/odor_field.py` (adapt): deferred (olfaction sub-plan); obstacles from ArenaSpec
+- [ ] **21.** `flight/olfaction_full.py` → `sense/olfaction.py` (adapt): deferred; off by default (plan section 6)
+- [ ] **22.** `scripts/make_orn_spontaneous.py` → `scripts/make_orn_spontaneous.py` (adapt): deferred, with the olfaction sub-plan
+- [x] **23.** `flight/readouts.py` → `motor/readouts.py` (adapt): readout types from a pre-registered config and crosswalk names; a readout failing the symmetry gate is rejected (H2); the post-hoc DNp15 choice is not inherited
+- [x] **24.** `flight/vnc_bridge.py` → `motor/legacy_bridge.py` (adapt): hand-made bridge as a CONTROL ARM; explicit error when ablating without a baseline (L2); outputs go to the command queue
+- [x] **25.** `fly_flight_brain_body_simulation.py` → `coupling/scheduler.py, run.py` (pattern): main loop rewritten: causal command queue (H1), 5 ms coupling interval, result-file protection (M1), meta record; Codex dependency only when vision is on (M2)
+- [x] **26.** `flight/recorder.py` → `coupling/recorder.py` (adapt): HDF5 schema + label/origin fields; overwrite protection (M1); streaming spike record (L9)
+- [x] **27.** `scripts/ladder_replay.py` → `coupling/replay.py` (pattern): bit-exact replay audit
+- [ ] **28.** `flight/readout_model.py` → `train/readout_ridge.py` (adapt): wider lambda grid (M10); keep the filter and the bypass arm; DAgger in train/dagger.py
+- [ ] **29.** `scripts/ladder_fit.py` → `train/` (pattern): training-script pattern
+- [ ] **30.** `scripts/make_dn_reference.py` → `tasks/t0_openloop.py` (pattern): reference-stimulus protocol pattern
+- [ ] **31.** `scripts/fetch_data.py` → `scripts/fetch_data.py` (adapt): add the BANC files; numeric tolerance in the hash comparison (M7); brain_model/model.py under third_party/ by hash
+- [ ] **32.** `scripts/verify_report_final.py` → `scripts/verify_report.py` (pattern): pattern: recompute report numbers from the records
+- [ ] **33.** `render_flight_video_v2.py` → `scripts/render_video.py` (pattern): video from the record (brain panel, label strip); later
+- [ ] **34.** `requirements-flight.txt` → `requirements.txt` (adapt): same versions + the banc client
+- [x] **35.** `tests/conftest.py` → `tests/conftest.py` (adapt): missing data -> skip logic; do not carry the list of walking scripts (L5)
+- [x] **36.** `tests/flight/test_body.py` → `tests/test_body.py` (adapt): to the new body API
+- [x] **37.** `tests/flight/test_start_pose.py` → `tests/test_body_pose.py` (adapt): same
+- [x] **38.** `tests/flight/test_hybrid.py` → `tests/test_hand_scaffold.py` (adapt): remove the turn_hand tests
+- [ ] **39.** `tests/flight/test_brain.py` → `tests/test_engine_lif.py` (adapt): to the NeuralEngine interface
+- [x] **40.** `tests/flight/test_readouts.py` → `tests/test_readouts.py` (adapt): crosswalk names
+- [x] **41.** `tests/flight/test_vnc_bridge.py` → `tests/test_legacy_bridge.py` (adapt): add an L2 test
+- [x] **42.** `tests/flight/test_visual_input.py` → `tests/test_vision_flyvis.py` (adapt): add an L1 test
+- [x] **43.** `tests/flight/test_vision_boundary.py` → `tests/test_vision_boundary.py` (adapt): by dataset
+- [x] **44.** `tests/flight/test_vis_stim.py` → `tests/test_t0_stimuli.py` (take): unchanged (import path only)
+- [x] **45.** `tests/flight/test_vis_stim_followup.py` → `tests/test_t0_stimuli_followup.py` (take): same
+- [ ] **46.** `tests/flight/test_readout_model.py` → `tests/test_readout_ridge.py` (adapt): lambda grid
+- [x] **47.** `tests/flight/test_readout_record.py` → `tests/test_recorder.py` (pattern): recorder test pattern
+- [ ] **48.** `tests/flight/test_smoke_hdf5.py` → `tests/test_smoke_run.py` (pattern): smoke-run pattern
+- [ ] **49.** `tests/flight/test_odor_field_3d.py` → `tests/test_odor_field.py` (adapt): deferred
+- [ ] **50.** `tests/flight/test_olfaction_full.py` → `tests/test_olfaction.py` (adapt): deferred
+- [ ] **51.** `THIRD_PARTY.md` → `THIRD_PARTY.md` (pattern): licence-audit pattern; add BANC CC BY 4.0
+- [ ] **52.** `NOTICE.md` → `NOTICE.md` (pattern): attributions (Shiu, FlyGym, FlyVis, BANC)
+- [x] **53.** `flight/groups.py:select_leg_sugar_grns` → `connectome/homologs.py` (adapt): added 2026-10-12 on request; generalised to `select_by_profile` + FlyWire wrapper (own code, not NeuroFly-adapted)
+- [x] **54.** `scripts/make_nt_{silent,impute,literature}.py` → `scripts/make_sign_tables.py` (adapt): added 2026-10-12 on request; regenerates the v1 tables from Codex `neurons.csv.gz` (identical)
+- [x] **55.** `flight/hybrid.py` (minus `turn_hand`) → `motor/hand_scaffold.py` (adapt): added 2026-10-12; HAND phases, thrust, tilt, wing command; own code. The odour turn map `turn_hand` and the FlyVis `LoomBias` are NeuroFly adaptations and are NOT carried (see open question in the summary)

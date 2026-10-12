@@ -1,0 +1,45 @@
+# Stroke-averaged wing model and leg poses of the flight body. Ported from synaptera@c94796d:flight/config.py.
+groups:
+  - origin: P
+    source: "Drosophila hover stroke amplitude (Fry et al. 2003, order of magnitude) and wing-beat frequency"
+    values:
+      phi0_deg: 140.0
+      f0_hz: 218.0
+  - origin: P
+    unit: s
+    source: "flapping counter-torque time constant (Hedrick et al. 2009, order of magnitude)"
+    values:
+      rot_damp_tau: 0.05
+  - origin: E
+    source: "engineering scaffold of the stroke-averaged model (v1 Stage 3 calibration targets, hand-set): terminal speed at the cruise tilt sets the translational counter-force; arm and turn gains set the wing torques"
+    values:
+      terminal_speed_ref: 300.0      # mm/s at cruise_pitch_deg
+      cruise_pitch_deg: 12.0
+      wing_arm_lat: 1.5              # mm, spanwise centre of lift from the body axis
+      turn_dphi_deg: 5.0             # stroke-amplitude asymmetry per unit turn_bias
+      yaw_rate_per_turn: 5.0         # rad/s steady yaw rate per unit turn_bias
+      yaw_damping_tau: 0.02          # s, total yaw damping time constant incl. counter-torque
+  - origin: E
+    unit: deg
+    source: "review H5: the stroke amplitude has a geometric limit near 180 deg (Drosophila approaches it in manoeuvres); amplitudes above it are clipped and the clip events recorded. v1 had no limit (193.8 / 206.3 deg reachable)"
+    values:
+      phi_max_deg: 180.0
+  - origin: E
+    source: "review M9 options, default OFF so the reference is the v1 model: stroke-plane angle about body y (deg) and the factor on the translational counter-force along body z (anisotropic damping)"
+    values:
+      stroke_plane_deg: 0.0
+      damp_axial_ratio: 1.0
+  - origin: E
+    unit: deg
+    source: "leg poses: offsets from the walking standing pose (HAND, v1 VARSAYIM; checked by rendering, never tuned on behaviour); R-side roll/yaw mirrored"
+    values:
+      tuck_pose_offsets: {FFemur: -40, MFemur: -40, HFemur: -40, FTibia: 75, MTibia: 55, HTibia: 60, FCoxa_roll: -25, MCoxa_roll: -25, HCoxa_roll: -25}
+      flight_pose_offsets: {FCoxa: -35, FFemur: -45, FTibia: 75, FCoxa_roll: -25, MCoxa: 30, MFemur: 15, MTibia: -25, MCoxa_roll: -35, HCoxa: 30, HFemur: 15, HTibia: -25, HCoxa_roll: -30}
+      feed_pose_offsets: {FFemur: -15, FTibia: 30, HFemur: 15, HTibia: -20}
+  - origin: P
+    unit: s
+    source: "leg transition durations: mid-points of literature ranges (tuck 50-100 ms, Fraenkel 1932; extend 100-200 ms, Tammero & Dickinson 2002, van Breugel & Dickinson 2012); v1 notes they were not yet checked against the papers. Feed ramp 0.3 s is a v1 assumption"
+    values:
+      leg_tuck_ramp_s: 0.075
+      leg_extend_ramp_s: 0.150
+      leg_feed_ramp_s: 0.300

@@ -1,0 +1,58 @@
+{
+ "lat0": {
+  "criteria": {
+   "landed_step": 120,
+   "S1": true,
+   "S2": true,
+   "tower_contact_steps": 0,
+   "max_penetration_mm": 0.0,
+   "feeding_steps": 115,
+   "first_feeding_step": 122
+  },
+  "vs_v1": {
+   "n_steps": 300,
+   "pos_diff_mm": {
+    "max": 0.2724780718012116,
+    "final": 0.2509957977458961,
+    "mean": 0.04629781096155719,
+    "rms": 0.0847914228569706,
+    "first_step_above_1mm": null
+   },
+   "phase_identical": true,
+   "phase_steps_differing": 0,
+   "wings_on_identical": true,
+   "leg_pose_steps_differing": 65,
+   "heading_diff_deg_max": 0.158870913575224,
+   "speed_diff_max_mm_s": 1.6083788292485721
+  },
+  "wall_s": 221.10383105278015
+ },
+ "lat1": {
+  "criteria": {
+   "landed_step": 120,
+   "S1": true,
+   "S2": true,
+   "tower_contact_steps": 0,
+   "max_penetration_mm": 0.0,
+   "feeding_steps": 120,
+   "first_feeding_step": 123
+  },
+  "vs_v1": {
+   "n_steps": 300,
+   "pos_diff_mm": {
+    "max": 0.269982492874153,
+    "final": 0.1898378224494258,
+    "mean": 0.044369420477742734,
+    "rms": 0.08211884215635165,
+    "first_step_above_1mm": null
+   },
+   "phase_identical": true,
+   "phase_steps_differing": 0,
+   "wings_on_identical": true,
+   "leg_pose_steps_differing": 60,
+   "heading_diff_deg_max": 0.12522177157187434,
+   "speed_diff_max_mm_s": 1.4597266139275793
+  },
+  "wall_s": 217.79277658462524
+ }
+}

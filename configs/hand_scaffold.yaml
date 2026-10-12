@@ -1,0 +1,42 @@
+# HAND scaffold (take-off, cruise, approach, descend, touchdown): hand-made control terms, label HAND. Ported from
+# synaptera@c94796d:flight/hybrid.py and the HAND constants of flight/config.py. NOT included: the odour turn map
+# turn_hand (ODOR_TURN_GAIN / ODOR_TURN_K) and the FlyVis LoomBias gain / decay / clamp, which are NeuroFly
+# adaptations (docs/ADAPTED_CODE.md of v1) and are not carried over.
+groups:
+  - origin: E
+    unit: mm
+    source: "HAND constants set from geometry and the cruise calibration in brain-free runs (v1 scripts/diag/hyb_landing.py), not fitted to success. approach_clear: thorax target above the platform top (tarsi hang <= 3 mm lower); r_approach clear of tower 2 (its nearest edge is 120 mm from the platform centre); r_descend / v_descend: platform radius 10 mm"
+    values:
+      approach_clear: 8.0
+      r_approach: 100.0
+      r_descend: 4.0
+      v_descend: 40.0
+  - origin: E
+    source: "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)"
+    values:
+      z_gain: 2.0              # 1/s
+      vz_max: 150.0            # mm/s
+      land_vz: 30.0            # mm/s
+      v_gain: 3.0              # 1/s
+      tilt_max_deg: 20.0       # body tilt limit of the position controller
+      brake_deg_per_100: 20.0  # deg per 100 mm/s velocity error
+      vz_damp_ref: 400.0       # mm/s: alt = (vz_des - vz) / vz_damp_ref
+      lift_frac_range: [0.3, 1.8]
+  - origin: E
+    source: "take-off and touchdown logic (v1 config): 10 steps of 25 ms take-off, lift boost 0.10, touchdown = 2 tarsus contacts for 2 consecutive steps; step counts are in intervals of 25 ms in v1 and are converted to seconds here"
+    values:
+      takeoff_s: 0.25
+      takeoff_lift: 0.10
+      touchdown_legs: 2
+      touchdown_s: 0.05
+      calib_s: 0.25
+  - origin: E
+    source: "HAND odour vertical-gradient collective term pitch_odor = k tanh(gain I_grad) (v1 legacy controller map; own code, not in the NeuroFly adaptation list); zero without an odour field"
+    values:
+      odor_grad_k: 0.8
+      odor_grad_gain: 10.0
+  - origin: E
+    unit: deg
+    source: "landing brake slope reference of the HAND tilt controller (v1 LAND_BRAKE_PITCH_DEG)"
+    values:
+      land_brake_pitch_deg: 20.0
