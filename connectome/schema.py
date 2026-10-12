@@ -87,6 +87,11 @@ class IdIndex:
         return self._ids[np.asarray(indices, dtype=np.int64)]
 
 
+def descending_neurons(neurons: pd.DataFrame, super_class: str = "descending") -> pd.DataFrame:
+    """Rows of the descending neurons (``super_class`` label of the dataset), in table order."""
+    return neurons.loc[neurons["super_class"] == super_class]
+
+
 def validate_neurons(neurons: pd.DataFrame) -> None:
     miss = [c for c in NEURON_COLUMNS if c not in neurons.columns]
     if miss:

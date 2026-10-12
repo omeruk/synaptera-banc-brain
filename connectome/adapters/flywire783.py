@@ -1,7 +1,7 @@
 """FlyWire v783 adapter: the Shiu et al. 2023 model files + FlyWire annotations -> the common schema.
 
-Ported from synaptera@c94796d:flight/groups.py (paths, load_root_ids, SHIU_SUGAR) and the loading part of
-scripts/make_descending_neurons.py. Row order of the neurons table is the row order of Completeness_783.csv,
+Ported from synaptera@c94796d:flight/groups.py (paths, load_root_ids, SHIU_SUGAR) and
+scripts/make_descending_neurons.py (the DN list is now a view of the neurons table, not a separate file). Row order of the neurons table is the row order of Completeness_783.csv,
 which is the Brian2 neuron index of the Shiu model; the edge ``sign`` is the Shiu rule (the ``Excitatory``
 column: every transmitter other than GABA / glutamate is +1).
 """
@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from connectome.adapters import file_sha256
+from connectome import schema
 from connectome.schema import NEURON_COLUMNS, Connectome, normalise_side
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -71,6 +72,20 @@ def load_neurons(brain_dir=BRAIN_DIR, codex_neurons=None) -> pd.DataFrame:
     for c in _EXTRA_COLUMNS:
         out[c] = ann[c].to_numpy(object)
     return out[list(NEURON_COLUMNS) + list(_EXTRA_COLUMNS)]
+
+
+DN_SUPER_CLASS = "descending"
+LEGACY_DN_COLUMNS = ("root_id", "cell_type", "top_nt", "side")
+
+
+def descending_neurons(neurons: pd.DataFrame) -> pd.DataFrame:
+    """The FlyWire v783 descending neurons (annotation super_class "descending" among the simulated neurons) as
+    the table the v1 DN readouts read (brain_model/descending_neurons.csv: root_id, cell_type, top_nt, side).
+    Rows are in neurons-table (Completeness) order; v1 wrote them in annotation order, so compare as sets."""
+    dn = schema.descending_neurons(neurons, DN_SUPER_CLASS)
+    return pd.DataFrame({"root_id": dn["id"].to_numpy(), "cell_type": dn["cell_type"].to_numpy(),
+                         "top_nt": dn["top_nt"].to_numpy(), "side": dn["side"].to_numpy()},
+                        columns=list(LEGACY_DN_COLUMNS))
 
 
 def load_edges(brain_dir=BRAIN_DIR) -> pd.DataFrame:

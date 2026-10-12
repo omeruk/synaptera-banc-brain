@@ -49,3 +49,19 @@ def test_sides_and_types_present(cx):
     assert set(cx.neurons["side"]) <= {"left", "right", "center", "unknown"}
     assert (cx.neurons["cell_type"] == "LB3").sum() >= 56
     assert cx.neurons["region"].eq("brain").all()
+
+
+def test_descending_view_matches_v1_dn_table(cx):
+    """The DN view equals brain_model/descending_neurons.csv (v1) as a set of (root_id, cell_type, top_nt, side)."""
+    dn = fw.descending_neurons(cx.neurons)
+    ref = pd.read_csv(fw.BRAIN_DIR / "descending_neurons.csv")
+    assert len(dn) == len(ref) == 1299
+    assert list(dn.columns) == list(ref.columns) == list(fw.LEGACY_DN_COLUMNS)
+    m = dn.merge(ref, on="root_id", suffixes=("", "_ref"), validate="one_to_one")
+    assert len(m) == 1299
+    assert (m["cell_type"].astype(str) == m["cell_type_ref"].astype(str)).all()
+    assert (m["top_nt"].astype(str) == m["top_nt_ref"].astype(str)).all()
+    # v1 kept the raw side label (left / right / center); the schema normalises the same values
+    assert (m["side"] == m["side_ref"].astype(str).str.strip().str.lower()
+            .where(lambda s: s.isin(["left", "right", "center"]), "unknown")).all()
+    assert dn["side"].value_counts().to_dict() == {"right": 646, "left": 645, "center": 8}
