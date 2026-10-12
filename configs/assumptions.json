@@ -30,6 +30,22 @@
       "used_in": [
         "connectome/sign_rules.py:NT_MODULATORY"
       ]
+    },
+    "connectome.pred_sign_shiu": {
+      "value": {
+        "ACH": 1,
+        "DA": 1,
+        "SER": 1,
+        "OCT": 1,
+        "GABA": -1,
+        "GLUT": -1
+      },
+      "unit": "sign",
+      "origin": "P",
+      "source": "Shiu et al. 2023 model rule: every transmitter other than GABA / glutamate is excitatory; used by the 'impute' variant to give a predicted neuron its vote. HIST and TYR (BANC) have no entry on purpose: F1 decision",
+      "used_in": [
+        "connectome/sign_rules.py:PRED_SIGN_SHIU"
+      ]
     }
   }
 }

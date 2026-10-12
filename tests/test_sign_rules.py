@@ -97,3 +97,95 @@ def test_v1_silent_table_counts_via_real_neurons():
     cx = Connectome("fw", n, pd.DataFrame({"pre": [], "post": [], "n_syn": [], "sign": []}, dtype=np.int64))
     assert len(SR.silent_rule(cx, "broad").neurons) == 20_719
     assert len(SR.silent_rule(cx, "narrow").neurons) == 1_677
+
+
+# ── impute ───────────────────────────────────────────────────────────────────
+def _impute_cx():
+    """Cell type 'T': predicted ACH (out 30), GABA (out 10), empty E1 (out 5, published +1), empty E2 (no outputs).
+    Cell type 'U': predicted GABA only (out 7) -> empty E3 (out 3) becomes -1. Empty E4: no cell type.
+    Cell type 'V': two predicted neurons tie (ACH 10 / GABA 10) -> empty E5 imputed 0."""
+    rows = [("T", "ACH"), ("T", "GABA"), ("T", np.nan), ("T", np.nan), ("U", "GABA"), ("U", np.nan),
+            (np.nan, np.nan), ("V", "ACH"), ("V", "GABA"), ("V", np.nan), ("W", "ACH")]
+    n = neurons_table([dict(id=i, cell_type=ct, side="left") for i, (ct, _) in enumerate(rows)])
+    n["nt"] = [nt for _, nt in rows]
+    n["nt_conf"] = [0.0 if isinstance(nt, float) else 0.9 for _, nt in rows]
+    out = {0: 30, 1: 10, 2: 5, 4: 7, 5: 3, 6: 2, 7: 10, 8: 10, 9: 4, 10: 1}
+    tr, sg = [], []
+    for i, w in out.items():
+        tr.append((i, 10, w))                       # everyone projects to the (target-only) neuron 10
+        sg.append(-1 if rows[i][1] == "GABA" else 1)
+    e = edges_table(tr)
+    e["sign"] = sg
+    return Connectome("imp", n, e)
+
+
+def test_impute_table_votes_and_zero_cases():
+    cx = _impute_cx()
+    t = SR.impute_table(cx).set_index("id")
+    assert list(SR.impute_table(cx).columns) == list(SR.IMPUTE_COLUMNS)
+    assert set(t.index) == {2, 3, 5, 6, 9}
+    assert t.loc[2, ["imputed_sign", "n_peers", "peer_syn_pos", "peer_syn_neg"]].tolist() == [1, 2, 30, 10]
+    assert t.loc[3, "imputed_sign"] == 0 and t.loc[3, "published_sign"] == 0   # no outputs -> unchanged
+    assert t.loc[5, "imputed_sign"] == -1
+    assert t.loc[6, "imputed_sign"] == 0 and t.loc[6, "n_peers"] == 0           # no cell type
+    assert t.loc[9, "imputed_sign"] == 0 and t.loc[9, "peer_syn_pos"] == 10     # tie
+
+
+def test_impute_uses_predicted_transmitter_not_published_sign():
+    cx = _impute_cx()
+    e = cx.edges.copy()
+    e.loc[e["pre"] == 0, "sign"] = -1            # published sign of the ACH neuron flipped (the 473 v1 cases)
+    t = SR.impute_table(Connectome("imp2", cx.neurons, e)).set_index("id")
+    assert t.loc[2, "peer_syn_pos"] == 30        # still votes as ACH (+)
+
+
+def test_impute_apply_changes_only_empty_neurons_and_keeps_zero_edges():
+    cx = _impute_cx()
+    out = SR.apply_sign_rules(cx, [SR.impute_rule(cx)])
+    changed = np.flatnonzero(out.edges["sign"].to_numpy() != cx.edges["sign"].to_numpy())
+    pre, _ = cx.edge_endpoints()
+    assert set(pre[changed]) == {5}              # E3: +1 published -> -1 imputed; E1 already +1 = +1
+    rep = out.meta["sign_rules"][0]
+    assert rep["syn_exc_to_inh"] == 3 and rep["n_neurons_changed"] == 1 and rep["n_imputable"] == 2
+    # an edge that is silent stays silent
+    z = cx.edges.copy()
+    z.loc[z["pre"] == 5, "sign"] = 0
+    out2 = SR.apply_sign_rules(Connectome("z", cx.neurons, z), [SR.NeuronSignRule("impute", np.array([5]), np.array([-1], np.int8))])
+    assert (out2.edges.loc[out2.edges["pre"] == 5, "sign"] == 0).all()
+
+
+def test_impute_unknown_transmitter_must_be_mapped():
+    cx = _impute_cx()
+    n = cx.neurons.copy()
+    n.loc[0, "nt"] = "HIST"
+    with pytest.raises(ValueError, match="HIST"):
+        SR.impute_table(Connectome("h", n, cx.edges))
+    t = SR.impute_table(Connectome("h", n, cx.edges), pred_sign={**SR.PRED_SIGN_SHIU, "HIST": -1})
+    assert t.set_index("id").loc[2, "peer_syn_neg"] == 40
+
+
+def test_silent_excludes_impute_but_impute_literature_compose():
+    cx = _impute_cx()
+    with pytest.raises(ValueError, match="excludes"):
+        SR.apply_sign_rules(cx, [SR.NeuronSignRule("silent", np.array([0]), np.zeros(1, np.int8)),
+                                 SR.NeuronSignRule("impute", np.array([1]), np.array([1], np.int8))])
+    with pytest.raises(ValueError, match="duplicate"):
+        r = SR.NeuronSignRule("impute", np.array([1]), np.array([1], np.int8))
+        SR.apply_sign_rules(cx, [r, r])
+
+
+def test_v1_impute_table_published_signs_match_shiu_edges():
+    """Real FlyWire: every neuron of data/nt_impute_783.csv has the published sign v1 recorded (the Shiu
+    ``Excitatory`` sign of its outgoing edges) and the rule built from the table selects the imputable ones."""
+    from connectome.adapters import flywire783 as fw
+    cx = fw.load_connectome(hash_files=False)
+    t = pd.read_csv(ROOT / "data" / "nt_impute_783.csv")
+    _, published = SR._published_sign(cx)
+    idx = cx.index.index_of(t["root_id"].to_numpy())
+    np.testing.assert_array_equal(published[idx], t["published_sign"].to_numpy())
+    rule = SR.impute_rule_from_table(cx, t)
+    assert len(rule.neurons) == int((t["imputed_sign"] != 0).sum())
+    out = SR.apply_sign_rules(cx, [rule])
+    rep = out.meta["sign_rules"][0]
+    ch = (t["imputed_sign"] != 0) & (t["imputed_sign"] != t["published_sign"])
+    assert rep["n_neurons_changed"] == int(ch.sum())
