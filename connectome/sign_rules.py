@@ -302,3 +302,56 @@ def literature_rule(cx: Connectome, table: pd.DataFrame) -> NeuronSignRule:
         info=dict(n_types=int(len(set(t.tolist()))),
                   rule="w = |w| * sign_lit on every outgoing synapse of the neurons of types with "
                        "sign_lit != 0 (ACh +1, GABA -1, Glu -1; Schlegel et al. 2024 known_nt)"))
+
+
+# ── base sign of an unsigned graph: the Shiu rule, and the named BANC variants ───────────────────────────────
+# Decision (prereg/01_banc_sign_rule.md): reference arm = the Shiu rule exactly as in v1: GABA and Glu -> -1,
+# every other transmitter (ACh, DA, SER, OCT, HIST, TYR) and a missing prediction -> +1. Variants are flags:
+#   hist_inhibitory  HIST -> -1 (histamine acts through HisCl chloride channels, e.g. photoreceptors)
+#   nt_impute        missing prediction -> sign of the cell type's synapse-weighted majority (v1 N1)
+INHIBITORY_NT = ("GABA", "GLUT")            # connectome.inhibitory_nt
+BANC_PRED_SIGN = {**PRED_SIGN_SHIU, "HIST": 1, "TYR": 1}   # Shiu mapping extended; votes of the impute rule
+SIGN_VARIANTS = ("hist_inhibitory", "nt_impute")
+
+
+def shiu_neuron_sign(nt: pd.Series) -> np.ndarray:
+    """+1 / -1 per neuron under the Shiu rule (inhibitory transmitters -1; everything else, incl. missing, +1)."""
+    return np.where(nt.isin(INHIBITORY_NT).to_numpy(), -1, 1).astype(np.int8)
+
+
+def nt_counts(cx: Connectome) -> dict:
+    """Per transmitter label: neurons and outgoing synapses (label "none" = missing prediction)."""
+    lab = cx.neurons["nt"].fillna("none").to_numpy(object)
+    pre, _ = cx.edge_endpoints()
+    out_syn = np.bincount(pre, weights=cx.edges["n_syn"].to_numpy(np.float64), minlength=cx.n_neurons)
+    res = {}
+    for t in sorted(set(lab.tolist())):
+        m = lab == t
+        res[t] = dict(neurons=int(m.sum()), out_synapses=int(out_syn[m].sum()))
+    return res
+
+
+def assign_signs(cx: Connectome, variants=()) -> Connectome:
+    """Signed Connectome from an unsigned one: Shiu rule, then the requested named variants.
+
+    The rule name and the counts per transmitter are recorded in ``meta`` (``sign_rule``, ``nt_counts``,
+    ``sign_variants``) for the QA report. Variants are model variants, never the reference."""
+    unknown = sorted(set(variants) - set(SIGN_VARIANTS))
+    if unknown:
+        raise ValueError(f"unknown sign variants {unknown}; choose from {SIGN_VARIANTS}")
+    if cx.signed:
+        raise ValueError(f"{cx.name} already has signs")
+    pre, _ = cx.edge_endpoints()
+    neuron_sign = shiu_neuron_sign(cx.neurons["nt"])
+    edges = cx.edges.copy()
+    edges["sign"] = neuron_sign[pre].astype(np.int64)
+    meta = dict(cx.meta, sign_rule="shiu_v1", signed=True, nt_counts=nt_counts(cx), sign_variants=list(variants))
+    out = Connectome(cx.name, cx.neurons, edges, meta)
+    rules = []
+    if "hist_inhibitory" in variants:
+        idx = np.flatnonzero((cx.neurons["nt"] == "HIST").to_numpy())
+        rules.append(NeuronSignRule("hist_inhibitory", idx, np.full(len(idx), -1, np.int8),
+                                    dict(rule="MODEL VARIANT: HIST -> -1 (HisCl chloride channel)")))
+    if "nt_impute" in variants:
+        rules.append(impute_rule(out, BANC_PRED_SIGN))
+    return apply_sign_rules(out, rules) if rules else out

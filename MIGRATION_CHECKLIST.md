@@ -55,3 +55,5 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [ ] **50.** `tests/flight/test_olfaction_full.py` → `tests/test_olfaction.py` (adapt): deferred
 - [ ] **51.** `THIRD_PARTY.md` → `THIRD_PARTY.md` (pattern): licence-audit pattern; add BANC CC BY 4.0
 - [ ] **52.** `NOTICE.md` → `NOTICE.md` (pattern): attributions (Shiu, FlyGym, FlyVis, BANC)
+- [x] **53.** `flight/groups.py:select_leg_sugar_grns` → `connectome/homologs.py` (adapt): added 2026-10-12 on request; generalised to `select_by_profile` + FlyWire wrapper (own code, not NeuroFly-adapted)
+- [x] **54.** `scripts/make_nt_{silent,impute,literature}.py` → `scripts/make_sign_tables.py` (adapt): added 2026-10-12 on request; regenerates the v1 tables from Codex `neurons.csv.gz` (identical)

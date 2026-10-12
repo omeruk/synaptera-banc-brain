@@ -132,3 +132,48 @@ def select_homologs(cx: Connectome, *, cell_type: str, seed_ids, k: int = SUGAR_
             rows.append(dict(id=int(ids[i]), side=str(cand["side"].iloc[i]), source=f"homolog_knn{k}",
                              knn_frac=float(fr)))
     return pd.DataFrame(rows, columns=["id", "side", "source", "knn_frac"]), stats
+
+
+def select_by_profile(cx: Connectome, *, positive_ids, negative_ids, query_ids, k: int = SUGAR_KNN) -> tuple[pd.DataFrame, dict]:
+    """Label ``query_ids`` by the kNN vote of a labelled pool (positive / negative ids) on partner-type profiles.
+
+    Returns (DataFrame id, side, cell_type, knn_frac, selected; loo) with loo = leave-one-out counts inside
+    the pool: tp, n_positive, fp, n_negative, k."""
+    pos = np.asarray(positive_ids, dtype=np.int64)
+    neg = np.asarray(negative_ids, dtype=np.int64)
+    q = np.asarray(query_ids, dtype=np.int64)
+    x = partner_profiles(np.concatenate([pos, neg, q]), cx)
+    pool, queries = x[:len(pos) + len(neg)], x[len(pos) + len(neg):]
+    is_pos = np.r_[np.ones(len(pos), bool), np.zeros(len(neg), bool)]
+    loo = knn_positive_fraction(pool, is_pos, pool, k, exclude_self=True) > 0.5
+    stats = dict(tp=int((loo & is_pos).sum()), n_positive=int(len(pos)), fp=int((loo & ~is_pos).sum()),
+                 n_negative=int(len(neg)), k=k)
+    frac = knn_positive_fraction(pool, is_pos, queries, k)
+    nrn = cx.neurons.set_index("id")
+    df = pd.DataFrame({"id": q, "side": nrn["side"].reindex(q).astype(str).to_numpy(),
+                       "cell_type": nrn["cell_type"].reindex(q).astype(str).to_numpy(), "knn_frac": frac,
+                       "selected": frac > 0.5})
+    return df, stats
+
+
+# FlyWire v783 annotation labels of the leg-GRN selection (SPEC_SENSORY_INPUTS 2.4 of v1)
+LEG_GRN_SUBCLASS = "SA_VTV_pro_meso_meta"
+
+
+def select_leg_sugar_grns(cx: Connectome, k: int = SUGAR_KNN, leg_subclass: str = LEG_GRN_SUBCLASS):
+    """Sugar-like leg (tarsal) GRNs by connectivity profile.
+
+    Ported from synaptera@c94796d:flight/groups.py:select_leg_sugar_grns. Labelled pool: labellar GRNs of
+    cell_sub_class sugar/water (positive) and bitter (negative); query: ``sensory_ascending`` gustatory
+    neurons of ``leg_subclass``. A leg GRN is selected when the majority of its k most similar pool neurons
+    are sugar/water. Needs the extra columns cell_sub_class, cell_class and super_class (FlyWire annotations);
+    a dataset with other labels passes the ids to :func:`select_by_profile` itself."""
+    n = cx.neurons
+    for c in ("cell_sub_class", "cell_class", "super_class"):
+        if c not in n.columns:
+            raise ValueError(f"neurons table lacks {c!r}")
+    gust = n["cell_class"] == "gustatory"
+    sugar = n.loc[gust & (n["super_class"] == "sensory") & (n["cell_sub_class"] == "sugar/water"), "id"]
+    bitter = n.loc[gust & (n["super_class"] == "sensory") & (n["cell_sub_class"] == "bitter"), "id"]
+    leg = n.loc[gust & (n["super_class"] == "sensory_ascending") & (n["cell_sub_class"] == leg_subclass), "id"]
+    return select_by_profile(cx, positive_ids=sugar, negative_ids=bitter, query_ids=leg, k=k)

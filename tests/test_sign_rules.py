@@ -264,3 +264,40 @@ def test_v1_literature_table_reproduced_from_annotations():
     assert (mine["confidence"] == legacy).mean() > 0.97          # confidence is report-only
     rule = SR.literature_rule(cx, ref)
     assert len(rule.neurons) == int(r.loc[r["sign_lit"] != 0, "n"].sum())
+
+
+# ── base sign of an unsigned graph (prereg/01_banc_sign_rule.md) ─────────────────────────────────────────────
+def _unsigned():
+    nt = ["ACH", "GABA", "GLUT", "HIST", "TYR", np.nan, "DA", np.nan]
+    ct = ["A", "A", "B", "H", "B", "A", "B", "Z"]
+    n = neurons_table([dict(id=i, cell_type=ct[i], side="left") for i in range(8)])
+    n["nt"] = nt
+    n["nt_conf"] = [0.0 if isinstance(x, float) else 0.9 for x in nt]
+    e = edges_table([(i, (i + 1) % 8, 10 + i) for i in range(8)]).drop(columns="sign")
+    return Connectome("u", n, e)
+
+
+def test_shiu_rule_is_the_reference():
+    s = SR.assign_signs(_unsigned())
+    sign = s.edges.set_index("pre")["sign"].to_dict()
+    assert sign == {0: 1, 1: -1, 2: -1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1}   # HIST, TYR and missing -> +1
+    assert s.meta["sign_rule"] == "shiu_v1" and s.meta["sign_variants"] == []
+    c = s.meta["nt_counts"]
+    assert c["none"]["neurons"] == 2 and c["HIST"]["out_synapses"] == 13 and c["GABA"]["neurons"] == 1
+
+
+def test_hist_inhibitory_and_nt_impute_variants_are_named_flags():
+    u = _unsigned()
+    h = SR.assign_signs(u, ["hist_inhibitory"])
+    assert h.edges.set_index("pre")["sign"][3] == -1 and h.meta["sign_variants"] == ["hist_inhibitory"]
+    assert h.meta["sign_rules"][0]["name"] == "hist_inhibitory" and h.meta["sign_rules"][0]["syn_exc_to_inh"] == 13
+    # nt_impute: cell type A has ACH (+) and GABA (-) predicted peers; neuron 5 (A, missing) follows the heavier
+    i = SR.assign_signs(u, ["nt_impute"])
+    rep = i.meta["sign_rules"][0]
+    assert rep["name"] == "impute"
+    both = SR.assign_signs(u, ["hist_inhibitory", "nt_impute"])
+    assert [r["name"] for r in both.meta["sign_rules"]] == ["hist_inhibitory", "impute"]
+    with pytest.raises(ValueError, match="unknown"):
+        SR.assign_signs(u, ["bogus"])
+    with pytest.raises(ValueError, match="already"):
+        SR.assign_signs(h)

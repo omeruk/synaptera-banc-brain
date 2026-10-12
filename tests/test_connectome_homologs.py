@@ -65,3 +65,25 @@ def test_sugar_homologs_reproduce_v1_table():
     assert loo == dict(tp=19, n_positive=20, fp=2, n_negative=44)
     merged = df.merge(ref, left_on="id", right_on="root_id", suffixes=("", "_ref"))
     assert (merged["source"] == merged["source_ref"]).all() and (merged["side"] == merged["side_ref"]).all()
+
+
+def test_select_by_profile_toy():
+    cx, pos, right_a = lb3_like()
+    neg = [i for i in range(6) if i not in pos]
+    df, loo = H.select_by_profile(cx, positive_ids=pos, negative_ids=neg, query_ids=[50, 51, 52], k=3)
+    assert loo["tp"] == 3 and loo["fp"] == 0 and loo["k"] == 3
+    assert df.set_index("id")["selected"].to_dict() == {50: True, 51: False, 52: True}
+
+
+def test_leg_sugar_grns_reproduce_v1_table():
+    """FlyWire v783: 74 leg GRNs, 12 selected (all SA_VTV_2, knn_frac 1.0) = data/leg_sugar_grn_783.csv."""
+    from connectome.adapters import flywire783 as fw
+    cx = fw.load_connectome(hash_files=False)
+    df, loo = H.select_leg_sugar_grns(cx)
+    ref = pd.read_csv(fw.REPO_ROOT / "data" / "leg_sugar_grn_783.csv")
+    assert len(df) == len(ref) == 74
+    m = df.merge(ref, left_on="id", right_on="root_id", suffixes=("", "_ref"))
+    assert len(m) == 74
+    assert (m["selected"] == m["selected_ref"]).all()
+    np.testing.assert_allclose(m["knn_frac"], m["knn_frac_ref"], atol=1e-9)
+    assert int(df["selected"].sum()) == 12 and loo["n_positive"] == 129 and loo["n_negative"] == 65

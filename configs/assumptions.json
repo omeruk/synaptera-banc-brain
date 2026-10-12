@@ -123,7 +123,7 @@
       "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); weight per synapse; Shiu et al. describe it as the model's one free parameter",
       "shiu_param": "w_syn",
       "used_in": [],
-      "fitted_to": "UNVERIFIED: the quantity w_syn was fitted to is not stated in this repository; fill from Shiu et al. 2023 before any claim that rests on it"
+      "fitted_to": "Shiu et al. 2024 (Nature 634:210): the single free parameter, set so that 100 Hz activation of the sugar GRNs gives about 80 % of the maximal MN9 rate. SECONDARY SOURCE (State of Brain Emulation Report 2025); TODO: confirm against the paper's Methods"
     },
     "engine.shiu.f_poi": {
       "value": 250,
@@ -166,6 +166,36 @@
       "origin": "E",
       "source": "docs/05_ARCHITECTURE_PLAN.md 3.4: 25 ms is too coarse for reflexes; the scheduler reads it from the configuration, the engine takes whatever advance(dt_ms) it is given",
       "used_in": []
+    },
+    "connectome.inhibitory_nt": {
+      "value": [
+        "GABA",
+        "GLUT"
+      ],
+      "unit": "transmitter labels",
+      "origin": "P",
+      "source": "Shiu et al. 2024 sign rule (GABA and glutamate inhibitory, every other transmitter excitatory), reference arm of the BANC sign assignment; prereg/01_banc_sign_rule.md",
+      "used_in": [
+        "connectome/sign_rules.py:INHIBITORY_NT"
+      ]
+    },
+    "connectome.banc_pred_sign": {
+      "value": {
+        "ACH": 1,
+        "DA": 1,
+        "SER": 1,
+        "OCT": 1,
+        "GABA": -1,
+        "GLUT": -1,
+        "HIST": 1,
+        "TYR": 1
+      },
+      "unit": "sign",
+      "origin": "P",
+      "source": "Shiu mapping extended to the BANC labels HIST and TYR (+1 as 'every other transmitter'); votes of the nt_impute variant; prereg/01_banc_sign_rule.md",
+      "used_in": [
+        "connectome/sign_rules.py:BANC_PRED_SIGN"
+      ]
     }
   }
 }

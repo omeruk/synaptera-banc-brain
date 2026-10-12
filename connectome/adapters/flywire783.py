@@ -31,8 +31,8 @@ SHIU_SUGAR_IDS = (720575940624963786, 720575940630233916, 720575940637568838, 72
                   720575940611875570)
 
 _ANN_COLUMNS = ["root_id", "cell_type", "hemibrain_type", "cell_class", "super_class", "side", "soma_x", "soma_y",
-                "soma_z", "status", "top_nt", "known_nt", "known_nt_source"]
-_EXTRA_COLUMNS = ("top_nt", "known_nt", "known_nt_source")
+                "soma_z", "status", "top_nt", "known_nt", "known_nt_source", "cell_sub_class"]
+_EXTRA_COLUMNS = ("top_nt", "known_nt", "known_nt_source", "cell_sub_class")
 
 
 def load_root_ids(brain_dir=BRAIN_DIR) -> np.ndarray:
