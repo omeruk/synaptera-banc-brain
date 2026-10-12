@@ -16,3 +16,9 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+
+# data directories that are symlinks (git worktrees)
+/banc
+/brain_model
+/data
+/runs
