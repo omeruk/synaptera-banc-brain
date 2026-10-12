@@ -14,14 +14,14 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [x] **9.** `flight/quasi_steady.py` → `body/quasi_steady.py, motor/legacy_reflexes.py` (adapt): PHI_MAX amplitude limit + clip record (H5); stroke-plane angle and anisotropic damping option (M9); haltere PD moves to the REFLEX arm
 - [x] **10.** `flight/body.py` → `body/flygym_body.py, body/arena.py` (adapt): step(cmd, dt) takes a duration; FlyGym private API in one adapter (M6); InnerLoop interface; physical noise in body/noise.py (M5)
 - [x] **11.** `flight/head_reflex.py` → `motor/legacy_reflexes.py` (adapt): REFLEX-labelled control arm; constants in configs/reflex.yaml (with origin class)
-- [ ] **12.** `flight/visual_input.py` → `sense/vision_flyvis.py` (adapt): keep FlyVis alignment + transduction; loom term as sub-frame mean (L1); empty-frame guard; number of sub-frames from config (H4); column source from the dataset (separate for BANC)
-- [ ] **13.** `flight/vision_boundary.py` → `sense/vision_boundary.py` (adapt): keep the boundary-layer rule; remove the hard-coded ~/Downloads path (L4); column assignment must be rebuilt for BANC (risk)
-- [ ] **14.** `scripts/make_t45_transduction.py` → `scripts/make_transduction.py` (adapt): merged into one script; result compared with numeric tolerance (M7)
-- [ ] **15.** `scripts/make_visual_transduction.py` → `scripts/make_transduction.py` (adapt): same
-- [ ] **16.** `scripts/make_vision_boundary.py` → `scripts/make_vision_boundary.py` (adapt): parametric by dataset (FlyWire/BANC)
-- [ ] **17.** `scripts/prepare_neuron_geometry.py` → `connectome/geometry.py` (pattern): soma/arbor centroids from the common schema
-- [ ] **18.** `flight/vis_stim.py` → `tasks/t0_stimuli.py` (take): open-loop stimuli (yaw, loom, flow) are generic; unchanged
-- [ ] **19.** `flight/sensors.py` → `sense/ (gaze, odour sampling, surface, expansion)` (adapt): do NOT carry LoomBias (NeuroFly adaptation); do not carry l_eff=10 mm or the antenna_real flag
+- [x] **12.** `flight/visual_input.py` → `sense/vision_flyvis.py` (adapt): keep FlyVis alignment + transduction; loom term as sub-frame mean (L1); empty-frame guard; number of sub-frames from config (H4); column source from the dataset (separate for BANC)
+- [x] **13.** `flight/vision_boundary.py` → `sense/vision_boundary.py` (adapt): keep the boundary-layer rule; remove the hard-coded ~/Downloads path (L4); column assignment must be rebuilt for BANC (risk)
+- [x] **14.** `scripts/make_t45_transduction.py` → `scripts/make_transduction.py` (adapt): merged into one script; result compared with numeric tolerance (M7)
+- [x] **15.** `scripts/make_visual_transduction.py` → `scripts/make_transduction.py` (adapt): same
+- [x] **16.** `scripts/make_vision_boundary.py` → `scripts/make_vision_boundary.py` (adapt): parametric by dataset (FlyWire/BANC)
+- [x] **17.** `scripts/prepare_neuron_geometry.py` → `connectome/geometry.py` (pattern): soma/arbor centroids from the common schema
+- [x] **18.** `flight/vis_stim.py` → `tasks/t0_stimuli.py` (take): open-loop stimuli (yaw, loom, flow) are generic; unchanged
+- [x] **19.** `flight/sensors.py` → `sense/ (gaze, odour sampling, surface, expansion)` (adapt): do NOT carry LoomBias (NeuroFly adaptation); do not carry l_eff=10 mm or the antenna_real flag
 - [ ] **20.** `simulation_data/odor_field_3d.py` → `sense/odor_field.py` (adapt): deferred (olfaction sub-plan); obstacles from ArenaSpec
 - [ ] **21.** `flight/olfaction_full.py` → `sense/olfaction.py` (adapt): deferred; off by default (plan section 6)
 - [ ] **22.** `scripts/make_orn_spontaneous.py` → `scripts/make_orn_spontaneous.py` (adapt): deferred, with the olfaction sub-plan
@@ -57,3 +57,4 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [ ] **52.** `NOTICE.md` → `NOTICE.md` (pattern): attributions (Shiu, FlyGym, FlyVis, BANC)
 - [x] **53.** `flight/groups.py:select_leg_sugar_grns` → `connectome/homologs.py` (adapt): added 2026-10-12 on request; generalised to `select_by_profile` + FlyWire wrapper (own code, not NeuroFly-adapted)
 - [x] **54.** `scripts/make_nt_{silent,impute,literature}.py` → `scripts/make_sign_tables.py` (adapt): added 2026-10-12 on request; regenerates the v1 tables from Codex `neurons.csv.gz` (identical)
+- [ ] **55.** `flight/hybrid.py` (minus `turn_hand`) → `motor/hand_scaffold.py` (adapt): added 2026-10-12; HAND phases, thrust, tilt, wing command; own code. The odour turn map `turn_hand` and the FlyVis `LoomBias` are NeuroFly adaptations and are NOT carried (see open question in the summary)

@@ -1,0 +1,22 @@
+# Boundary layer between FlyVis and the connectome. Ported from synaptera@c94796d:flight/vision_boundary.py.
+# Rules fixed before any behaviour (v1 SPEC_SENSORY_INPUTS 2.1, Stage B); never tuned on behaviour.
+groups:
+  - origin: E
+    source: "a FlyVis-matched type is driven when >= boundary_frac of its outgoing synapses (synapse-count weighted) go to neurons that are NOT of a FlyVis-matched type (VPNs, LPTCs, central brain, optic-lobe types FlyVis lacks)"
+    values:
+      boundary_frac: 0.5
+  - origin: E
+    source: "a_ref below a_ref_min = no measurable positive response to the standard stimulus set: the type stays in the group, its rate is held at 0 Hz (v1: Tm4 1.1e-5); r_central: hex radius of the central columns used for a_ref (FlyVis extent 15, rim a0 differs)"
+    values:
+      a_ref_min: 0.001
+      r_central: 10
+  - origin: E
+    source: "column of a driven neuron without a column assignment (v1 validation on columnar neurons before any behaviour): partner-mean column rule, then arbor-centroid surfaces (cubic, per hemisphere and neuropil) fitted on a columnar reference type"
+    values:
+      centroid_ref: {ME: [Mi1], LO: [Tm1], LOP: [T4a, T4b, T4c, T4d]}
+      surface_deg: 3
+  - origin: E
+    source: "standard stimulus set of the transduction calibration: full-field ON step 0.5 -> 0.8 and OFF step 0.5 -> 0.2 (plus the grating in the 4 T4/T5 preferred directions)"
+    values:
+      step_on: 0.8
+      step_off: 0.2
