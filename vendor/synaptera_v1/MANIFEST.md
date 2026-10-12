@@ -1,9 +1,9 @@
-# vendor/synaptera_v1 — Synaptera v1.0.0'dan değiştirilmeden kopyalanan dosyalar
+# vendor/synaptera_v1 — files copied unchanged from Synaptera v1.0.0
 
-Kaynak: https://github.com/omeruk/synaptera, commit `c94796d480ad2e77476bb110ab9a1bbf52e27118`. Bu dosyalar **referanstır**, içe aktarılmaz;
-yeni kod proje düzeninde yazılır ve her dosyanın başına kaynağı (yol + bu commit) not edilir.
+Source: https://github.com/omeruk/synaptera, commit `c94796d480ad2e77476bb110ab9a1bbf52e27118`. These files are **reference only** and are never
+imported; the new code is written in the project layout and each new file notes its source (path + this commit).
 
-| dosya | karar | hedef | SHA-256 |
+| file | decision | target | SHA-256 |
 |---|---|---|---|
 | `flight/groups.py` | adapt | `connectome/schema.py, connectome/homologs.py` | `7da5835867f66351…` |
 | `scripts/make_descending_neurons.py` | adapt | `connectome/adapters/flywire783.py` | `8ab1f2dd5240af96…` |
@@ -23,7 +23,7 @@ yeni kod proje düzeninde yazılır ve her dosyanın başına kaynağı (yol + b
 | `scripts/make_vision_boundary.py` | adapt | `scripts/make_vision_boundary.py` | `7111f8488b0ef430…` |
 | `scripts/prepare_neuron_geometry.py` | pattern | `connectome/geometry.py` | `e3439dbadd0acfa8…` |
 | `flight/vis_stim.py` | take | `tasks/t0_stimuli.py` | `4bf718cfa256ba77…` |
-| `flight/sensors.py` | adapt | `sense/ (gaze, odor örnekleme, yüzey, genişleme)` | `401b6b058791f27e…` |
+| `flight/sensors.py` | adapt | `sense/ (gaze, odour sampling, surface, expansion)` | `401b6b058791f27e…` |
 | `simulation_data/odor_field_3d.py` | adapt | `sense/odor_field.py` | `5fbfb25e148c259a…` |
 | `flight/olfaction_full.py` | adapt | `sense/olfaction.py` | `48d43948035b38f4…` |
 | `scripts/make_orn_spontaneous.py` | adapt | `scripts/make_orn_spontaneous.py` | `a36306c2ba960a45…` |
