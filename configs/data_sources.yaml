@@ -1,0 +1,37 @@
+# External data files used by the pipeline: name, SHA-256 and origin. The files themselves are never committed
+# (banc/, brain_model/, data/ are in .gitignore). A test compares the hashes with the local files when present.
+sources:
+  banc_neurons:
+    path: banc/neurons-banc.csv.gz
+    sha256: 40a2201554a8c34d2c4b07c8322543a07c1b3faf5acafbac363fd1a3d0fa617f
+    bytes: 2881728
+    origin: "FlyWire Codex, BANC (Brain And Nerve Cord) neuron table, download of 2026-10-12 (sign-in required)"
+    rows: 158262
+    licence: "CC BY 4.0 (BANC); derived files carry this licence"
+  banc_connections:
+    path: banc/connections_princeton-banc.csv.gz
+    sha256: 8772298eb69455759c7b4a23ee1d1843f5b389965e312524e652415f8a09b312
+    bytes: 29164674
+    origin: "FlyWire Codex, BANC connections (princeton), one row per neuron pair and neuropil, download of 2026-10-12"
+    rows: 3990039
+    licence: "CC BY 4.0 (BANC); derived files carry this licence"
+  flywire783_completeness:
+    path: brain_model/Completeness_783.csv
+    sha256: bbb847a4cc2caaa7a16349722d220c087317b946d148d4d592d94d250617a311
+    origin: "philshiu/Drosophila_brain_model@91bdd1e (scripts/fetch_data.py pin)"
+    licence: "FlyWire data CC BY-NC 4.0"
+  flywire783_connectivity:
+    path: brain_model/Connectivity_783.parquet
+    sha256: efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347
+    origin: "philshiu/Drosophila_brain_model@91bdd1e (scripts/fetch_data.py pin)"
+    licence: "FlyWire data CC BY-NC 4.0"
+  flywire783_annotations:
+    path: brain_model/flywire_annotations.tsv
+    sha256: 533db093e12d8de350fd20875a967f8f74acace633ff22118eefff550d5dcbc1
+    origin: "flyconnectome/flywire_annotations@c03ad46 (scripts/fetch_data.py pin)"
+    licence: "FlyWire data CC BY-NC 4.0"
+  shiu_model_py:
+    path: brain_model/model.py
+    sha256: fc45837d7122c6ce2a7f3f2f23c515992e4b232aadb919efabb72337fac88e4e
+    origin: "philshiu/Drosophila_brain_model@91bdd1e"
+    licence: "MIT (Shiu et al.)"

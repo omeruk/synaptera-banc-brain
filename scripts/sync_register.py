@@ -19,6 +19,8 @@ def synced() -> dict:
     d = json.loads(REGISTER.read_text())
     consts = {k: v for k, v in d["constants"].items() if v.get("config_file") is None}
     for yml in sorted(configs.CONFIG_DIR.glob("*.yaml")):
+        if "groups" not in __import__("yaml").safe_load(yml.read_text()):
+            continue                       # not a constants file (e.g. data_sources.yaml)
         for k, rec in configs.entries(yml.stem).items():
             consts[f"{yml.stem}.{k}"] = dict(rec, config_file=f"configs/{yml.name}", used_in=[])
     d["constants"] = consts
