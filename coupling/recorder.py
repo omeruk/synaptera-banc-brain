@@ -20,7 +20,8 @@ from pathlib import Path
 import h5py
 import numpy as np
 
-LABELS = ("BRAIN", "VNC", "HAND", "REFLEX", "TRAINED", "FLYVIS", "STATE")
+LABELS = ("BRAIN", "VNC", "HAND", "REFLEX", "TRAINED", "FLYVIS", "STATE", "REPLAY")
+# REPLAY: a command term replayed open-loop from an earlier record (a regression test of the port, never a result)
 
 
 @dataclass(frozen=True)
