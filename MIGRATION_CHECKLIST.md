@@ -27,7 +27,7 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [ ] **22.** `scripts/make_orn_spontaneous.py` → `scripts/make_orn_spontaneous.py` (adapt): deferred, with the olfaction sub-plan
 - [x] **23.** `flight/readouts.py` → `motor/readouts.py` (adapt): readout types from a pre-registered config and crosswalk names; a readout failing the symmetry gate is rejected (H2); the post-hoc DNp15 choice is not inherited
 - [x] **24.** `flight/vnc_bridge.py` → `motor/legacy_bridge.py` (adapt): hand-made bridge as a CONTROL ARM; explicit error when ablating without a baseline (L2); outputs go to the command queue
-- [ ] **25.** `fly_flight_brain_body_simulation.py` → `coupling/scheduler.py, run.py` (pattern): main loop rewritten: causal command queue (H1), 5 ms coupling interval, result-file protection (M1), meta record; Codex dependency only when vision is on (M2)
+- [x] **25.** `fly_flight_brain_body_simulation.py` → `coupling/scheduler.py, run.py` (pattern): main loop rewritten: causal command queue (H1), 5 ms coupling interval, result-file protection (M1), meta record; Codex dependency only when vision is on (M2)
 - [x] **26.** `flight/recorder.py` → `coupling/recorder.py` (adapt): HDF5 schema + label/origin fields; overwrite protection (M1); streaming spike record (L9)
 - [x] **27.** `scripts/ladder_replay.py` → `coupling/replay.py` (pattern): bit-exact replay audit
 - [ ] **28.** `flight/readout_model.py` → `train/readout_ridge.py` (adapt): wider lambda grid (M10); keep the filter and the bypass arm; DAgger in train/dagger.py
