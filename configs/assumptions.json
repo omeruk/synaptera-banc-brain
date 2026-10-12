@@ -59,6 +59,113 @@
       "used_in": [
         "connectome/sign_rules.py:FAST_NT_SIGN"
       ]
+    },
+    "engine.shiu.v_0": {
+      "value": -0.052,
+      "unit": "V",
+      "origin": "P",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); resting potential, Kakaria & de Bivort 2017",
+      "shiu_param": "v_0",
+      "used_in": []
+    },
+    "engine.shiu.v_rst": {
+      "value": -0.052,
+      "unit": "V",
+      "origin": "P",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); reset potential, Kakaria & de Bivort 2017",
+      "shiu_param": "v_rst",
+      "used_in": []
+    },
+    "engine.shiu.v_th": {
+      "value": -0.045,
+      "unit": "V",
+      "origin": "P",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); spike threshold, Kakaria & de Bivort 2017",
+      "shiu_param": "v_th",
+      "used_in": []
+    },
+    "engine.shiu.t_mbr": {
+      "value": 0.02,
+      "unit": "s",
+      "origin": "P",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); membrane time constant, Kakaria & de Bivort 2017",
+      "shiu_param": "t_mbr",
+      "used_in": []
+    },
+    "engine.shiu.tau": {
+      "value": 0.005,
+      "unit": "s",
+      "origin": "P",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); synaptic time constant, Juergensen et al. 2021",
+      "shiu_param": "tau",
+      "used_in": []
+    },
+    "engine.shiu.t_rfc": {
+      "value": 0.0022,
+      "unit": "s",
+      "origin": "P",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); refractory period, Lazar et al. 2021",
+      "shiu_param": "t_rfc",
+      "used_in": []
+    },
+    "engine.shiu.t_dly": {
+      "value": 0.0018,
+      "unit": "s",
+      "origin": "P",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); synaptic delay, Paul et al. 2015",
+      "shiu_param": "t_dly",
+      "used_in": []
+    },
+    "engine.shiu.w_syn": {
+      "value": 0.000275,
+      "unit": "V",
+      "origin": "F",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); weight per synapse; Shiu et al. describe it as the model's one free parameter",
+      "shiu_param": "w_syn",
+      "used_in": [],
+      "fitted_to": "UNVERIFIED: the quantity w_syn was fitted to is not stated in this repository; fill from Shiu et al. 2023 before any claim that rests on it"
+    },
+    "engine.shiu.f_poi": {
+      "value": 250,
+      "unit": "1",
+      "origin": "E",
+      "source": "philshiu/Drosophila_brain_model@91bdd1e model.py default_params (read at run time from the pinned, hashed file); scaling of the Poisson synapse; model.py comment: '250 is sufficient to cause spiking'",
+      "shiu_param": "f_poi",
+      "used_in": []
+    },
+    "engine.clock_dt_ms": {
+      "value": 0.1,
+      "unit": "ms",
+      "origin": "E",
+      "source": "Brian2 default clock the Shiu model was run at; engine asserts advance() is a multiple of it",
+      "used_in": [
+        "engine/lif_brian2.py:CLOCK_DT_MS"
+      ]
+    },
+    "engine.history_ms": {
+      "value": 200.0,
+      "unit": "ms",
+      "origin": "E",
+      "source": "length of the recent-spike window kept for rates(); a larger rates() window raises",
+      "used_in": [
+        "engine/lif_brian2.py:HISTORY_MS"
+      ]
+    },
+    "connectome.dev_min_syn": {
+      "value": 10,
+      "unit": "synapses",
+      "origin": "E",
+      "source": "synaptera@c94796d:flight/brain.py DEV_MIN_SYN; partner threshold of the DEV subnet (never a result)",
+      "used_in": [
+        "connectome/controls.py:DEV_MIN_SYN"
+      ]
+    },
+    "coupling.interval_ms": {
+      "value": 5.0,
+      "unit": "ms",
+      "origin": "E",
+      "source": "docs/05_ARCHITECTURE_PLAN.md 3.4: 25 ms is too coarse for reflexes; the scheduler reads it from the configuration, the engine takes whatever advance(dt_ms) it is given",
+      "used_in": []
     }
   }
 }

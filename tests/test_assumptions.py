@@ -22,3 +22,16 @@ def test_constant_is_classified_and_matches_code(key):
         if isinstance(value, tuple):
             value = list(value)
         assert value == c["value"] or (not isinstance(value, list) and float(value) == pytest.approx(c["value"])), ref
+
+
+@pytest.mark.parametrize("key", sorted(k for k, c in REGISTER["constants"].items() if "shiu_param" in c))
+def test_shiu_parameters_equal_the_pinned_model(key):
+    """The registered Shiu parameters are what the hashed brain_model/model.py defines."""
+    from conftest import MODEL_PY
+    if not MODEL_PY.exists():
+        pytest.skip("brain_model/model.py missing")
+    pytest.importorskip("brian2")
+    from engine.lif_brian2 import load_shiu_model
+    model, _ = load_shiu_model(MODEL_PY)
+    c = REGISTER["constants"][key]
+    assert float(model.default_params[c["shiu_param"]]) == pytest.approx(c["value"], rel=1e-9)
