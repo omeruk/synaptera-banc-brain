@@ -14,7 +14,22 @@
       "origin": "F",
       "fitted_to": "leave-one-out classification of the left LB3 neurons (Shiu sugar vs other) on FlyWire v783; k=5 gave 19/20 sugar, 2/44 false positives (Synaptera v1 selection, anatomy only)",
       "source": "synaptera@c94796d:flight/groups.py SUGAR_KNN",
-      "used_in": ["connectome/homologs.py:SUGAR_KNN"]
+      "used_in": [
+        "connectome/homologs.py:SUGAR_KNN"
+      ]
+    },
+    "connectome.nt_modulatory": {
+      "value": [
+        "DA",
+        "SER",
+        "OCT"
+      ],
+      "unit": "transmitter labels",
+      "origin": "P",
+      "source": "dopamine, serotonin and octopamine act as slow neuromodulators; the Shiu model nevertheless treats them as fast excitation. Classification from the Synaptera v1 --nt-modulatory-silent decision (SPEC_BRAIN_CONTROL Step 0 decisions II); used only by the named model variant 'silent'",
+      "used_in": [
+        "connectome/sign_rules.py:NT_MODULATORY"
+      ]
     }
   }
 }

@@ -19,4 +19,6 @@ def test_constant_is_classified_and_matches_code(key):
     for ref in c["used_in"]:
         module, attr = ref.split(":")
         value = getattr(importlib.import_module(module.removesuffix(".py").replace("/", ".")), attr)
-        assert value == c["value"] or float(value) == pytest.approx(c["value"]), ref
+        if isinstance(value, tuple):
+            value = list(value)
+        assert value == c["value"] or (not isinstance(value, list) and float(value) == pytest.approx(c["value"])), ref
