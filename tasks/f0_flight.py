@@ -277,11 +277,15 @@ class F0Decider:
         self.record = None
         self.acc = None            # perch calibration accumulator
         self.collect = False
+        self.active = False        # the bridge filter runs in the flight loop only (as in v1)
 
     def decide(self, k, engine):
         hz = self.ro.hz(engine, self.interval_ms)
         if self.collect:
             self.acc.append(hz)
+        if not self.active:
+            self.record = dict(net_rate=float(engine.rates(["all"], self.interval_ms)["all"].mean()))
+            return self.neutral
         _, used = self.bridge.update_hz(hz)
         out = dict(feed=self.bridge.proboscis(used), steer=self.bridge.steer(used), used=used)
         self.record = dict(net_rate=float(engine.rates(["all"], self.interval_ms)["all"].mean()))
@@ -317,6 +321,7 @@ def run(args, log=print) -> dict:
 
     # closed loop
     plant.stage = "flight"
+    dec.active = True
     state = {"k": 0}
 
     def on_interval(k, r):

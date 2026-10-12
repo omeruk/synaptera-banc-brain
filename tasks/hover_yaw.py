@@ -166,6 +166,7 @@ def run(args, log=print):
     persist = float(eng.rates(["all"], args.interval_ms)["all"].mean())
     p["bridge"].set_baseline(base)
     plant.stage = "flight"
+    dec.active = True
 
     def on_interval(k, r):
         f = {n: v for n, v in r.items() if n in rec.fields and n != "cmd_source"}
