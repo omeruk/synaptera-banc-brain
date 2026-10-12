@@ -1,4 +1,4 @@
-# veri (asla commit edilmez; scripts/fetch_data.py ile indirilir)
+# data (never committed; downloaded with scripts/fetch_data.py)
 brain_model/
 data/
 banc/
@@ -7,7 +7,7 @@ runs/
 *.npz
 *.parquet
 *.feather
-# çıktı
+# outputs
 *.mp4
 plots/
 logs/
