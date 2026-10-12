@@ -5,7 +5,7 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 
 - [x] **1.** `flight/groups.py` → `connectome/schema.py, connectome/homologs.py` (adapt): keep the id<->index mapping and partner_profiles/select_sugar_homologs; do NOT carry the NeuroFly-adapted lines (38-39, 85-161, 334-366: legacy group rule, neuron_positions) or the legacy groups; FlyWire/BANC adapters on the common schema
 - [x] **2.** `scripts/make_descending_neurons.py` → `connectome/adapters/flywire783.py` (adapt): the DN list becomes part of the adapter; write the BANC equivalent
-- [ ] **3.** `scripts/make_sugar_grn.py` → `scripts/make_crosswalk.py` (adapt): homolog selection generalised to crosswalk generation (including the MN9/CB0701 candidate)
+- [x] **3.** `scripts/make_sugar_grn.py` → `scripts/make_crosswalk.py` (adapt): homolog selection generalised to crosswalk generation (including the MN9/CB0701 candidate)
 - [ ] **4.** `scripts/make_nt_silent.py` → `connectome/sign_rules.py` (pattern): sign variants collected in one edge-table transform (silent/impute/literature)
 - [ ] **5.** `scripts/make_nt_impute.py` → `connectome/sign_rules.py` (pattern): same
 - [ ] **6.** `scripts/make_nt_literature.py` → `connectome/sign_rules.py` (pattern): same

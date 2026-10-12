@@ -20,12 +20,13 @@ SUGAR_KNN = 5          # k of the kNN vote (configs/assumptions.json: connectome
 _CHUNK = 2048          # queries per similarity block
 
 
-def partner_profiles(ids, cx: Connectome) -> np.ndarray:
-    """L2-normalised partner-type profiles, one row per id (row order = ``ids``).
+def partner_features(ids, cx: Connectome) -> pd.DataFrame:
+    """Raw (un-normalised) partner-type synapse counts, one row per id (row order = ``ids``), one column per
+    feature ``"<in|out>|<partner type>|<i|c>"``.
 
     Partner type = cell_type, else cell_type_alt. A partner without a type contributes nothing. A partner
-    counts as ipsilateral only when both sides are known and equal (an unknown side is contralateral, as in
-    Synaptera v1)."""
+    counts as ipsilateral (i) only when both sides are known and equal (an unknown side is contralateral, c,
+    as in Synaptera v1)."""
     ids = np.asarray(ids, dtype=np.int64)
     rows = cx.index.index_of(ids)
     nrn = cx.neurons
@@ -47,9 +48,38 @@ def partner_profiles(ids, cx: Connectome) -> np.ndarray:
         parts.append(pd.DataFrame({"row": me_i[ok], "feat": feat.to_numpy(), "w": wt[ok]}))
     f = pd.concat(parts, ignore_index=True)
     mat = f.pivot_table(index="row", columns="feat", values="w", aggfunc="sum", fill_value=0)
-    x = mat.reindex(rows).fillna(0).to_numpy(float)
-    x /= np.linalg.norm(x, axis=1, keepdims=True) + 1e-12
-    return x
+    out = mat.reindex(rows).fillna(0)
+    out.index = ids
+    return out
+
+
+def _unit_rows(x: np.ndarray) -> np.ndarray:
+    return x / (np.linalg.norm(x, axis=1, keepdims=True) + 1e-12)
+
+
+def partner_profiles(ids, cx: Connectome) -> np.ndarray:
+    """L2-normalised partner-type profiles (see :func:`partner_features`), one row per id."""
+    return _unit_rows(partner_features(ids, cx).to_numpy(float))
+
+
+def cross_dataset_cosine(ids_a, cx_a: Connectome, ids_b, cx_b: Connectome) -> pd.DataFrame:
+    """Cosine similarity of partner-type profiles across two datasets, on the features (direction, partner
+    type name, ipsi/contra) that exist in both. Only meaningful where the type vocabularies agree, so the
+    share of each neuron's synapses that falls on shared features is returned too.
+
+    Returns a DataFrame indexed by ids_a with one cosine column per ids_b entry (``cos_<id>``), plus
+    ``shared_frac_a`` (per row) and a row ``shared_frac_b`` stored in ``attrs``."""
+    fa, fb = partner_features(ids_a, cx_a), partner_features(ids_b, cx_b)
+    shared = fa.columns.intersection(fb.columns)
+    xa, xb = fa[shared].to_numpy(float), fb[shared].to_numpy(float)
+    cos = _unit_rows(xa) @ _unit_rows(xb).T
+    out = pd.DataFrame(cos, index=fa.index, columns=[f"cos_{i}" for i in fb.index])
+    tot_a, tot_b = fa.to_numpy(float).sum(axis=1), fb.to_numpy(float).sum(axis=1)
+    out["shared_frac_a"] = np.divide(xa.sum(axis=1), tot_a, out=np.zeros(len(tot_a)), where=tot_a > 0)
+    out.attrs["shared_frac_b"] = np.divide(xb.sum(axis=1), tot_b, out=np.zeros(len(tot_b)),
+                                           where=tot_b > 0).tolist()
+    out.attrs["n_shared_features"] = int(len(shared))
+    return out
 
 
 def knn_positive_fraction(pool: np.ndarray, positive: np.ndarray, queries: np.ndarray, k: int = SUGAR_KNN,

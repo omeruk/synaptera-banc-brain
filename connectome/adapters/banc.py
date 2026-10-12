@@ -47,3 +47,22 @@ def descending_neurons(neurons: pd.DataFrame) -> pd.DataFrame:
     dn = schema.descending_neurons(neurons, DN_SUPER_CLASS)
     return pd.DataFrame({"root_id": dn["id"].to_numpy(), "cell_type": dn["cell_type"].to_numpy(),
                          "top_nt": dn["nt"].to_numpy(), "side": dn["side"].to_numpy()})
+
+
+def load_edges_unsigned(path) -> pd.DataFrame:
+    """Codex ``connections_princeton-banc.csv.gz`` aggregated to one row per neuron pair (synapse counts of all
+    neuropils summed). No ``sign`` column: the transmitter -> sign rule is an F1 decision."""
+    c = pd.read_csv(path, usecols=["pre_root_id", "post_root_id", "syn_count"])
+    g = c.groupby(["pre_root_id", "post_root_id"], sort=True)["syn_count"].sum().reset_index()
+    return pd.DataFrame({"pre": g["pre_root_id"].to_numpy(np.int64), "post": g["post_root_id"].to_numpy(np.int64),
+                         "n_syn": g["syn_count"].to_numpy(np.int64)})
+
+
+def load_connectome_unsigned(neurons_path, connections_path, hash_files: bool = True) -> schema.Connectome:
+    """BANC as an *unsigned* Connectome (anatomy only: profiles, degrees, crosswalk evidence)."""
+    from connectome.adapters import file_sha256
+    meta = dict(dataset="banc", sign_rule=None, signed=False, neurons=str(neurons_path),
+                connections=str(connections_path))
+    if hash_files:
+        meta["sha256"] = {"neurons": file_sha256(neurons_path), "connections": file_sha256(connections_path)}
+    return schema.Connectome("banc", load_neurons(neurons_path), load_edges_unsigned(connections_path), meta)

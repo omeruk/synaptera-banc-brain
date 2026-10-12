@@ -12,7 +12,9 @@ neurons : one row per neuron, in the dataset's *engine order* (row position == n
 edges : one row per directed neuron pair.
     Columns EDGE_COLUMNS. ``pre`` / ``post`` are neuron *ids* (dataset-native int64), ``n_syn`` is the
     unsigned synapse count, ``sign`` is +1 / -1 (0 = silenced). The signed weight in synapse units is
-    ``sign * n_syn``; the sign rule that produced ``sign`` is recorded in ``Connectome.meta``.
+    ``sign * n_syn``; the sign rule that produced ``sign`` is recorded in ``Connectome.meta``. A graph
+    without a ``sign`` column is *unsigned*: usable for anatomy (profiles, degrees), refused by
+    ``signed_weights()`` so that it can never be turned into a network by accident.
 
 The mapping from ids to engine indices is :class:`IdIndex`; a sign rule or a group selection never relies
 on position arithmetic.
@@ -28,6 +30,7 @@ import pandas as pd
 NEURON_COLUMNS = ("id", "cell_type", "cell_type_alt", "cell_class", "super_class", "side", "region",
                   "nt", "nt_conf", "soma_x", "soma_y", "soma_z", "status")
 EDGE_COLUMNS = ("pre", "post", "n_syn", "sign")
+REQUIRED_EDGE_COLUMNS = ("pre", "post", "n_syn")   # ``sign`` may be absent: an unsigned graph (sign rule not decided)
 
 SIDES = ("left", "right", "center", "unknown")
 REGIONS = ("brain", "SEZ", "neck", "VNC")      # NaN = not assigned by the adapter
@@ -109,12 +112,12 @@ def validate_neurons(neurons: pd.DataFrame) -> None:
 
 
 def validate_edges(edges: pd.DataFrame, index: IdIndex | None = None) -> None:
-    miss = [c for c in EDGE_COLUMNS if c not in edges.columns]
+    miss = [c for c in REQUIRED_EDGE_COLUMNS if c not in edges.columns]
     if miss:
         raise ValueError(f"edges table lacks columns {miss}")
     if len(edges) and (edges["n_syn"].to_numpy() <= 0).any():
         raise ValueError("edges.n_syn must be positive")
-    if not edges["sign"].isin((-1, 0, 1)).all():
+    if "sign" in edges.columns and not edges["sign"].isin((-1, 0, 1)).all():
         raise ValueError("edges.sign must be in {-1, 0, +1}")
     if index is not None:
         index.index_of(edges["pre"].to_numpy())
@@ -145,8 +148,14 @@ class Connectome:
         return (self.index.index_of(self.edges["pre"].to_numpy()),
                 self.index.index_of(self.edges["post"].to_numpy()))
 
+    @property
+    def signed(self) -> bool:
+        return "sign" in self.edges.columns
+
     def signed_weights(self) -> np.ndarray:
-        """sign * n_syn (synapse units), int64, edge order."""
+        """sign * n_syn (synapse units), int64, edge order. Refused for an unsigned graph."""
+        if not self.signed:
+            raise ValueError(f"{self.name}: the edge table has no sign column (sign rule not decided)")
         return (self.edges["sign"].to_numpy(np.int64) * self.edges["n_syn"].to_numpy(np.int64))
 
     def select(self, mask) -> np.ndarray:
