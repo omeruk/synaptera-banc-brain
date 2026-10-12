@@ -30,3 +30,13 @@ groups:
       touchdown_legs: 2
       touchdown_s: 0.05
       calib_s: 0.25
+  - origin: E
+    source: "HAND odour vertical-gradient collective term pitch_odor = k tanh(gain I_grad) (v1 legacy controller map; own code, not in the NeuroFly adaptation list); zero without an odour field"
+    values:
+      odor_grad_k: 0.8
+      odor_grad_gain: 10.0
+  - origin: E
+    unit: deg
+    source: "landing brake slope reference of the HAND tilt controller (v1 LAND_BRAKE_PITCH_DEG)"
+    values:
+      land_brake_pitch_deg: 20.0

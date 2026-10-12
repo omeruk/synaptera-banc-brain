@@ -25,11 +25,11 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [ ] **20.** `simulation_data/odor_field_3d.py` → `sense/odor_field.py` (adapt): deferred (olfaction sub-plan); obstacles from ArenaSpec
 - [ ] **21.** `flight/olfaction_full.py` → `sense/olfaction.py` (adapt): deferred; off by default (plan section 6)
 - [ ] **22.** `scripts/make_orn_spontaneous.py` → `scripts/make_orn_spontaneous.py` (adapt): deferred, with the olfaction sub-plan
-- [ ] **23.** `flight/readouts.py` → `motor/readouts.py` (adapt): readout types from a pre-registered config and crosswalk names; a readout failing the symmetry gate is rejected (H2); the post-hoc DNp15 choice is not inherited
-- [ ] **24.** `flight/vnc_bridge.py` → `motor/legacy_bridge.py` (adapt): hand-made bridge as a CONTROL ARM; explicit error when ablating without a baseline (L2); outputs go to the command queue
+- [x] **23.** `flight/readouts.py` → `motor/readouts.py` (adapt): readout types from a pre-registered config and crosswalk names; a readout failing the symmetry gate is rejected (H2); the post-hoc DNp15 choice is not inherited
+- [x] **24.** `flight/vnc_bridge.py` → `motor/legacy_bridge.py` (adapt): hand-made bridge as a CONTROL ARM; explicit error when ablating without a baseline (L2); outputs go to the command queue
 - [ ] **25.** `fly_flight_brain_body_simulation.py` → `coupling/scheduler.py, run.py` (pattern): main loop rewritten: causal command queue (H1), 5 ms coupling interval, result-file protection (M1), meta record; Codex dependency only when vision is on (M2)
-- [ ] **26.** `flight/recorder.py` → `coupling/recorder.py` (adapt): HDF5 schema + label/origin fields; overwrite protection (M1); streaming spike record (L9)
-- [ ] **27.** `scripts/ladder_replay.py` → `coupling/replay.py` (pattern): bit-exact replay audit
+- [x] **26.** `flight/recorder.py` → `coupling/recorder.py` (adapt): HDF5 schema + label/origin fields; overwrite protection (M1); streaming spike record (L9)
+- [x] **27.** `scripts/ladder_replay.py` → `coupling/replay.py` (pattern): bit-exact replay audit
 - [ ] **28.** `flight/readout_model.py` → `train/readout_ridge.py` (adapt): wider lambda grid (M10); keep the filter and the bypass arm; DAgger in train/dagger.py
 - [ ] **29.** `scripts/ladder_fit.py` → `train/` (pattern): training-script pattern
 - [ ] **30.** `scripts/make_dn_reference.py` → `tasks/t0_openloop.py` (pattern): reference-stimulus protocol pattern
@@ -38,18 +38,18 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [ ] **33.** `render_flight_video_v2.py` → `scripts/render_video.py` (pattern): video from the record (brain panel, label strip); later
 - [ ] **34.** `requirements-flight.txt` → `requirements.txt` (adapt): same versions + the banc client
 - [x] **35.** `tests/conftest.py` → `tests/conftest.py` (adapt): missing data -> skip logic; do not carry the list of walking scripts (L5)
-- [ ] **36.** `tests/flight/test_body.py` → `tests/test_body.py` (adapt): to the new body API
-- [ ] **37.** `tests/flight/test_start_pose.py` → `tests/test_body_pose.py` (adapt): same
-- [ ] **38.** `tests/flight/test_hybrid.py` → `tests/test_hand_scaffold.py` (adapt): remove the turn_hand tests
+- [x] **36.** `tests/flight/test_body.py` → `tests/test_body.py` (adapt): to the new body API
+- [x] **37.** `tests/flight/test_start_pose.py` → `tests/test_body_pose.py` (adapt): same
+- [x] **38.** `tests/flight/test_hybrid.py` → `tests/test_hand_scaffold.py` (adapt): remove the turn_hand tests
 - [ ] **39.** `tests/flight/test_brain.py` → `tests/test_engine_lif.py` (adapt): to the NeuralEngine interface
-- [ ] **40.** `tests/flight/test_readouts.py` → `tests/test_readouts.py` (adapt): crosswalk names
-- [ ] **41.** `tests/flight/test_vnc_bridge.py` → `tests/test_legacy_bridge.py` (adapt): add an L2 test
-- [ ] **42.** `tests/flight/test_visual_input.py` → `tests/test_vision_flyvis.py` (adapt): add an L1 test
-- [ ] **43.** `tests/flight/test_vision_boundary.py` → `tests/test_vision_boundary.py` (adapt): by dataset
-- [ ] **44.** `tests/flight/test_vis_stim.py` → `tests/test_t0_stimuli.py` (take): unchanged (import path only)
-- [ ] **45.** `tests/flight/test_vis_stim_followup.py` → `tests/test_t0_stimuli_followup.py` (take): same
+- [x] **40.** `tests/flight/test_readouts.py` → `tests/test_readouts.py` (adapt): crosswalk names
+- [x] **41.** `tests/flight/test_vnc_bridge.py` → `tests/test_legacy_bridge.py` (adapt): add an L2 test
+- [x] **42.** `tests/flight/test_visual_input.py` → `tests/test_vision_flyvis.py` (adapt): add an L1 test
+- [x] **43.** `tests/flight/test_vision_boundary.py` → `tests/test_vision_boundary.py` (adapt): by dataset
+- [x] **44.** `tests/flight/test_vis_stim.py` → `tests/test_t0_stimuli.py` (take): unchanged (import path only)
+- [x] **45.** `tests/flight/test_vis_stim_followup.py` → `tests/test_t0_stimuli_followup.py` (take): same
 - [ ] **46.** `tests/flight/test_readout_model.py` → `tests/test_readout_ridge.py` (adapt): lambda grid
-- [ ] **47.** `tests/flight/test_readout_record.py` → `tests/test_recorder.py` (pattern): recorder test pattern
+- [x] **47.** `tests/flight/test_readout_record.py` → `tests/test_recorder.py` (pattern): recorder test pattern
 - [ ] **48.** `tests/flight/test_smoke_hdf5.py` → `tests/test_smoke_run.py` (pattern): smoke-run pattern
 - [ ] **49.** `tests/flight/test_odor_field_3d.py` → `tests/test_odor_field.py` (adapt): deferred
 - [ ] **50.** `tests/flight/test_olfaction_full.py` → `tests/test_olfaction.py` (adapt): deferred
@@ -57,4 +57,4 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [ ] **52.** `NOTICE.md` → `NOTICE.md` (pattern): attributions (Shiu, FlyGym, FlyVis, BANC)
 - [x] **53.** `flight/groups.py:select_leg_sugar_grns` → `connectome/homologs.py` (adapt): added 2026-10-12 on request; generalised to `select_by_profile` + FlyWire wrapper (own code, not NeuroFly-adapted)
 - [x] **54.** `scripts/make_nt_{silent,impute,literature}.py` → `scripts/make_sign_tables.py` (adapt): added 2026-10-12 on request; regenerates the v1 tables from Codex `neurons.csv.gz` (identical)
-- [ ] **55.** `flight/hybrid.py` (minus `turn_hand`) → `motor/hand_scaffold.py` (adapt): added 2026-10-12; HAND phases, thrust, tilt, wing command; own code. The odour turn map `turn_hand` and the FlyVis `LoomBias` are NeuroFly adaptations and are NOT carried (see open question in the summary)
+- [x] **55.** `flight/hybrid.py` (minus `turn_hand`) → `motor/hand_scaffold.py` (adapt): added 2026-10-12; HAND phases, thrust, tilt, wing command; own code. The odour turn map `turn_hand` and the FlyVis `LoomBias` are NeuroFly adaptations and are NOT carried (see open question in the summary)

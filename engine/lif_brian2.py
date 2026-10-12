@@ -15,11 +15,16 @@ Ported from synaptera@c94796d:flight/brain.py (FlightBrain). Changes with respec
 Brian2's SpikeMonitor still keeps every spike of a run (review L9); ``spike_sink`` receives each interval's
 spikes so the recorder (coupling/recorder.py) can stream them to disk.
 
+Randomness: Brian2 draws from one process-global generator, so several engines in one process share a noise
+stream. ``reset(seed)`` re-seeds it: call it right before every run you want to be reproducible (the
+coupling scheduler and ``measure_rate`` do).
+
 Cost of a short interval (measured on this aarch64 machine, 2k-60k neurons, cython target): every
 ``Network.run`` call carries a fixed overhead of ~50-90 ms independent of network size, ~40 ms of it Brian's
 debug logging (``quiet_logging=True`` raises the handlers to WARNING). At a 5 ms coupling interval 1 s of
 simulated time is 200 calls, i.e. ~10-15 s of overhead before any synaptic work; GeNN or an in-run
-network_operation coupling (plan 3.5) removes it.
+network_operation coupling removes it: ``run_coupled`` runs all intervals inside ONE ``Network.run`` and calls
+back at every boundary (measured 2-4 ms per interval instead of 56-61 ms, identical spike counts).
 """
 from __future__ import annotations
 
@@ -31,7 +36,7 @@ from collections import deque
 from pathlib import Path
 
 import numpy as np
-from brian2 import Hz, Network, NeuronGroup, PoissonGroup, SpikeMonitor, Synapses, defaultclock, ms
+from brian2 import Hz, Network, NetworkOperation, NeuronGroup, PoissonGroup, SpikeMonitor, Synapses, defaultclock, ms
 from brian2 import seed as brian_seed
 from brian2.utils.logger import BrianLogger
 
@@ -210,10 +215,10 @@ class Brian2LIFEngine:
                 self._rates[name] = arr.copy()
                 self._poisson[name].rates = arr * Hz
 
-    def advance(self, dt_ms: float) -> None:
-        n = _steps(dt_ms)
-        self.net.run(n * defaultclock.dt)
-        self._steps_done += n
+    def _collect(self, n_steps: int) -> None:
+        """Account for ``n_steps`` just simulated: read only the new part of the monitor, update the totals and
+        the recent-spike history, feed the spike sink."""
+        self._steps_done += n_steps
         n1 = int(self.spk_mon.num_spikes)
         i_new = np.asarray(self.spk_mon.i[self._n_seen:n1], dtype=np.int64)
         t_new = np.asarray(self.spk_mon.t_[self._n_seen:n1], dtype=np.float64)
@@ -225,6 +230,38 @@ class Brian2LIFEngine:
             self._hist.popleft()
         if self._sink is not None:
             self._sink(t_new, self.global_index[i_new].astype(np.int32))
+
+    def advance(self, dt_ms: float) -> None:
+        n = _steps(dt_ms)
+        self.net.run(n * defaultclock.dt)
+        self._collect(n)
+
+    def run_coupled(self, n_intervals: int, interval_ms: float, on_boundary) -> None:
+        """Simulate ``n_intervals`` coupling intervals inside ONE ``Network.run`` call.
+
+        ``on_boundary(j, engine)`` is called at t = j * interval for j = 0 .. n_intervals: j = 0 before anything
+        ran, j >= 1 right after interval j-1 completed (the engine's spike counts, rates() and history already
+        include it), j = n_intervals after the run. The callback may call ``set_inputs`` (takes effect for the
+        next interval) and read ``rates`` / ``spike_counts``. This removes the fixed ~50-90 ms per-``run()``
+        overhead (measured in coupling/benchmark and docs) that one ``advance`` call per interval carries."""
+        n = _steps(interval_ms)
+        state = {"j": 0}
+
+        def op(t):
+            j = state["j"]
+            if j > 0:
+                self._collect(n)
+            state["j"] = j + 1
+            on_boundary(j, self)
+
+        no = NetworkOperation(op, dt=n * defaultclock.dt, when="start", name="coupling_boundary")
+        self.net.add(no)
+        try:
+            self.net.run(n_intervals * n * defaultclock.dt)
+        finally:
+            self.net.remove(no)
+        self._collect(n)                                   # the last interval completed with the run
+        on_boundary(n_intervals, self)
 
     def rates(self, groups, window_ms: float) -> dict:
         w = _steps(window_ms)
