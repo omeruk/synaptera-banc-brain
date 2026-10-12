@@ -1,0 +1,18 @@
+# veri (asla commit edilmez; scripts/fetch_data.py ile indirilir)
+brain_model/
+data/
+banc/
+runs/
+*.h5
+*.npz
+*.parquet
+*.feather
+# çıktı
+*.mp4
+plots/
+logs/
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
