@@ -3,7 +3,7 @@
 Source commit `c94796d480ad2e77476bb110ab9a1bbf52e27118`. Details and reasons: `docs/06_NEW_PROJECT_SETUP.md`.
 Order matters (dependency order). Each item: adapt -> test -> commit.
 
-- [ ] **1.** `flight/groups.py` → `connectome/schema.py, connectome/homologs.py` (adapt): keep the id<->index mapping and partner_profiles/select_sugar_homologs; do NOT carry the NeuroFly-adapted lines (38-39, 85-161, 334-366: legacy group rule, neuron_positions) or the legacy groups; FlyWire/BANC adapters on the common schema
+- [x] **1.** `flight/groups.py` → `connectome/schema.py, connectome/homologs.py` (adapt): keep the id<->index mapping and partner_profiles/select_sugar_homologs; do NOT carry the NeuroFly-adapted lines (38-39, 85-161, 334-366: legacy group rule, neuron_positions) or the legacy groups; FlyWire/BANC adapters on the common schema
 - [ ] **2.** `scripts/make_descending_neurons.py` → `connectome/adapters/flywire783.py` (adapt): the DN list becomes part of the adapter; write the BANC equivalent
 - [ ] **3.** `scripts/make_sugar_grn.py` → `scripts/make_crosswalk.py` (adapt): homolog selection generalised to crosswalk generation (including the MN9/CB0701 candidate)
 - [ ] **4.** `scripts/make_nt_silent.py` → `connectome/sign_rules.py` (pattern): sign variants collected in one edge-table transform (silent/impute/literature)
@@ -37,7 +37,7 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [ ] **32.** `scripts/verify_report_final.py` → `scripts/verify_report.py` (pattern): pattern: recompute report numbers from the records
 - [ ] **33.** `render_flight_video_v2.py` → `scripts/render_video.py` (pattern): video from the record (brain panel, label strip); later
 - [ ] **34.** `requirements-flight.txt` → `requirements.txt` (adapt): same versions + the banc client
-- [ ] **35.** `tests/conftest.py` → `tests/conftest.py` (adapt): missing data -> skip logic; do not carry the list of walking scripts (L5)
+- [x] **35.** `tests/conftest.py` → `tests/conftest.py` (adapt): missing data -> skip logic; do not carry the list of walking scripts (L5)
 - [ ] **36.** `tests/flight/test_body.py` → `tests/test_body.py` (adapt): to the new body API
 - [ ] **37.** `tests/flight/test_start_pose.py` → `tests/test_body_pose.py` (adapt): same
 - [ ] **38.** `tests/flight/test_hybrid.py` → `tests/test_hand_scaffold.py` (adapt): remove the turn_hand tests

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "origin_classes": {
+    "M": "measured",
+    "P": "population prior (literature value, not measured on this dataset)",
+    "F": "fitted (fitted_to states what it was fitted to)",
+    "E": "engineering scaffold",
+    "I": "irrecoverable"
+  },
+  "constants": {
+    "connectome.sugar_knn": {
+      "value": 5,
+      "unit": "neurons",
+      "origin": "F",
+      "fitted_to": "leave-one-out classification of the left LB3 neurons (Shiu sugar vs other) on FlyWire v783; k=5 gave 19/20 sugar, 2/44 false positives (Synaptera v1 selection, anatomy only)",
+      "source": "synaptera@c94796d:flight/groups.py SUGAR_KNN",
+      "used_in": ["connectome/homologs.py:SUGAR_KNN"]
+    }
+  }
+}
