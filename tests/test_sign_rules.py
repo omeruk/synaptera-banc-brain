@@ -189,3 +189,78 @@ def test_v1_impute_table_published_signs_match_shiu_edges():
     rep = out.meta["sign_rules"][0]
     ch = (t["imputed_sign"] != 0) & (t["imputed_sign"] != t["published_sign"])
     assert rep["n_neurons_changed"] == int(ch.sum())
+
+
+# ── literature ───────────────────────────────────────────────────────────────
+def _lit_cx():
+    """Types: A (2 neurons, both 'acetylcholine'), B (2 neurons, 'gaba' and 'glutamate; gaba' -> disagree),
+    C ('gaba-negative; acetylcholine' -> ACh +1, 1 neuron), D (dopamine only), E (no known_nt), '[x]' placeholder."""
+    spec = [("A", "acetylcholine"), ("A", "acetylcholine"), ("B", "gaba"), ("B", "glutamate; gaba"),
+            ("C", "gaba-negative; acetylcholine"), ("D", "dopamine"), ("E", np.nan), ("[x]", "gaba")]
+    n = neurons_table([dict(id=i, cell_type=t, side="left") for i, (t, _) in enumerate(spec)])
+    n["known_nt"] = [k for _, k in spec]
+    n["known_nt_source"] = ["Foo et al. (immuno)", "Foo et al. (immuno)", "Bar (scRNA-seq)", "Bar (scRNA-seq)",
+                            "Baz (immuno, lineage based)", "x", np.nan, "y"]
+    tr = [(i, 7, 5) for i in range(7)]
+    e = edges_table(tr)
+    e["sign"] = [1, -1, 1, 1, -1, 1, 1]            # model: A has +1 and -1; C is inhibitory (wrong)
+    return Connectome("lit", n, e)
+
+
+def test_fast_nt_parsing():
+    assert SR.fast_nt("acetylcholine; gaba-negative") == ("acetylcholine",)
+    assert SR.fast_nt("gaba, glutamate") == ("gaba", "glutamate")
+    assert SR.fast_nt("dopamine; nitric oxide") == () and SR.fast_nt(np.nan) == ()
+
+
+def test_literature_table_rule():
+    cx = _lit_cx()
+    t = SR.literature_table(cx).set_index("cell_type")
+    assert list(SR.literature_table(cx).columns) == list(SR.LITERATURE_COLUMNS)
+    assert "[x]" not in t.index and "E" not in t.index
+    assert t.loc["A", "sign_lit"] == 1 and t.loc["A", "n_change"] == 1       # the -1 neuron changes
+    assert t.loc["B", "sign_lit"] == 0 and t.loc["B", "n_change"] == 0       # neurons disagree -> untouched
+    assert t.loc["C", "sign_lit"] == 1 and t.loc["C", "n_change"] == 1
+    assert t.loc["D", "sign_lit"] == 0 and t.loc["D", "fast_nt"] == ""
+    assert t.loc["A", "confidence"] == "high" and t.loc["B", "confidence"] == "medium"
+    assert t.loc["C", "confidence"] == "medium"                                # lineage based
+    assert SR.literature_table(cx, types=["A"]).shape[0] == 1
+
+
+def test_literature_apply_reports_changed_types():
+    cx = _lit_cx()
+    out = SR.apply_sign_rules(cx, [SR.literature_rule(cx, SR.literature_table(cx))])
+    s = out.edges.set_index("pre")["sign"]
+    assert s[0] == 1 and s[1] == 1 and s[4] == 1                               # A and C forced to +1
+    assert s[2] == 1 and s[3] == 1                                             # B untouched
+    rep = out.meta["sign_rules"][0]
+    assert rep["labels_changed"] == ["A", "C"] and rep["n_neurons_changed"] == 2
+    assert rep["syn_inh_to_exc"] == 10 and rep["n_types"] == 2
+
+
+def test_impute_then_literature_is_variant_n2_and_literature_wins():
+    cx = _lit_cx()
+    imp = SR.NeuronSignRule("impute", np.array([0, 1]), np.array([-1, -1], np.int8))
+    lit = SR.literature_rule(cx, SR.literature_table(cx))
+    out = SR.apply_sign_rules(cx, [imp, lit])
+    s = out.edges.set_index("pre")["sign"]
+    assert s[0] == 1 and s[1] == 1             # literature applied last
+    assert [r["name"] for r in out.meta["sign_rules"]] == ["impute", "literature"]
+
+
+def test_v1_literature_table_reproduced_from_annotations():
+    """FlyWire v783: the sign rule applied to the annotation known_nt reproduces v1's sign_lit / fast_nt / n for
+    every type of data/nt_literature_783.csv."""
+    from connectome.adapters import flywire783 as fw
+    cx = fw.load_connectome(hash_files=False)
+    ref = pd.read_csv(ROOT / "data" / "nt_literature_783.csv")
+    mine = SR.literature_table(cx, types=ref["cell_type"]).set_index("cell_type")
+    r = ref.set_index("cell_type")
+    assert set(mine.index) == set(r.index)
+    assert (mine["sign_lit"] == r["sign_lit"]).all()
+    assert (mine["fast_nt"] == r["fast_nt"].fillna("")).all()
+    assert (mine["n"] == r["n"]).all()
+    legacy = r["confidence"].map(SR._LEGACY_CONFIDENCE)
+    assert (mine["confidence"] == legacy).mean() > 0.97          # confidence is report-only
+    rule = SR.literature_rule(cx, ref)
+    assert len(rule.neurons) == int(r.loc[r["sign_lit"] != 0, "n"].sum())

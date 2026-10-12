@@ -8,7 +8,7 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [x] **3.** `scripts/make_sugar_grn.py` → `scripts/make_crosswalk.py` (adapt): homolog selection generalised to crosswalk generation (including the MN9/CB0701 candidate)
 - [x] **4.** `scripts/make_nt_silent.py` → `connectome/sign_rules.py` (pattern): sign variants collected in one edge-table transform (silent/impute/literature)
 - [x] **5.** `scripts/make_nt_impute.py` → `connectome/sign_rules.py` (pattern): same
-- [ ] **6.** `scripts/make_nt_literature.py` → `connectome/sign_rules.py` (pattern): same
+- [x] **6.** `scripts/make_nt_literature.py` → `connectome/sign_rules.py` (pattern): same
 - [ ] **7.** `flight/brain.py` → `engine/lif_brian2.py, engine/protocol.py` (adapt): NeuralEngine interface (reset/set_inputs/advance/rates); Poisson input without delay (M4); the fixed 25 ms interval goes, coupling interval from config; activity-matched shuffled control (M3); warn on dev+shuffle (L6); legacy flags not carried
 - [ ] **8.** `flight/config.py` → `configs/arena_x20.yaml, body/arena.py` (adapt): a frozen ArenaSpec instead of module globals; move_takeoff_pedestal -> with_start_offset; constants with origin class in configs/assumptions.json
 - [ ] **9.** `flight/quasi_steady.py` → `body/quasi_steady.py, motor/legacy_reflexes.py` (adapt): PHI_MAX amplitude limit + clip record (H5); stroke-plane angle and anisotropic damping option (M9); haltere PD moves to the REFLEX arm

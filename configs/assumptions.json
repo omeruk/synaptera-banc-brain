@@ -46,6 +46,19 @@
       "used_in": [
         "connectome/sign_rules.py:PRED_SIGN_SHIU"
       ]
+    },
+    "connectome.fast_nt_sign": {
+      "value": {
+        "acetylcholine": 1,
+        "gaba": -1,
+        "glutamate": -1
+      },
+      "unit": "sign",
+      "origin": "P",
+      "source": "Shiu et al. 2023 sign mapping for the three fast transmitters (ACh excitatory; GABA, glutamate inhibitory); applied to the literature transmitter of Schlegel et al. 2024 known_nt by the 'literature' variant",
+      "used_in": [
+        "connectome/sign_rules.py:FAST_NT_SIGN"
+      ]
     }
   }
 }

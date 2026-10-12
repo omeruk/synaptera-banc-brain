@@ -17,6 +17,7 @@ Every non-reference variant is a *model variant*: the applied rule and its effec
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -37,6 +38,7 @@ class NeuronSignRule:
     neurons: np.ndarray
     sign: np.ndarray              # +1 / -1 / 0 per neuron (0 = silence)
     info: dict = field(default_factory=dict)
+    labels: np.ndarray | None = None   # optional per-neuron label (cell type); reported for changed neurons
 
     def __post_init__(self):
         if len(self.neurons) != len(self.sign):
@@ -50,7 +52,8 @@ class NeuronSignRule:
         """The rule without the ``protected`` neurons (e.g. Poisson-driven input neurons, which v1 never silenced)."""
         keep = ~np.isin(self.neurons, np.asarray(protected, dtype=np.int64))
         info = dict(self.info, n_protected_kept=int((~keep).sum()))
-        return NeuronSignRule(self.name, self.neurons[keep], self.sign[keep], info)
+        labels = None if self.labels is None else self.labels[keep]
+        return NeuronSignRule(self.name, self.neurons[keep], self.sign[keep], info, labels)
 
 
 def apply_sign_rule(edge_sign: np.ndarray, pre: np.ndarray, n_syn: np.ndarray, n_neurons: int,
@@ -70,12 +73,15 @@ def apply_sign_rule(edge_sign: np.ndarray, pre: np.ndarray, n_syn: np.ndarray, n
     out = edge_sign.copy()
     out[sel] = new
     report = dict(
-        rule=rule.name, n_neurons=int(len(rule.neurons)), n_edges=int(len(sel)),
+        name=rule.name, n_neurons=int(len(rule.neurons)), n_edges=int(len(sel)),
         n_edges_changed=int(changed.sum()),
         n_neurons_changed=int(len(np.unique(pre[sel[changed]]))),
         syn_exc_to_inh=int(w[(old > 0) & (new < 0)].sum()), syn_inh_to_exc=int(w[(old < 0) & (new > 0)].sum()),
         syn_exc_to_zero=int(w[(old > 0) & (new == 0)].sum()), syn_inh_to_zero=int(w[(old < 0) & (new == 0)].sum()),
         syn_exc=int(w[old > 0].sum()), syn_inh=int(w[old < 0].sum()))
+    if rule.labels is not None:
+        changed_pre = np.unique(pre[sel[changed]])
+        report["labels_changed"] = sorted(set(rule.labels[np.searchsorted(rule.neurons, changed_pre)].tolist()))
     report.update(rule.info)
     return out, report
 
@@ -207,3 +213,92 @@ def impute_rule_from_table(cx: Connectome, table: pd.DataFrame) -> NeuronSignRul
 
 def impute_rule(cx: Connectome, pred_sign: dict | None = None) -> NeuronSignRule:
     return impute_rule_from_table(cx, impute_table(cx, pred_sign))
+
+
+# ── literature: fast transmitter of the cell type from the literature (v1 --nt-literature) ───────────────────
+FAST_NT_SIGN = {"acetylcholine": 1, "gaba": -1, "glutamate": -1}   # connectome.fast_nt_sign
+LITERATURE_COLUMNS = ("cell_type", "n", "known_nt", "fast_nt", "sign_lit", "source", "confidence", "model_sign",
+                      "n_change")
+# Verified in the primary text in v1 (REPORT_SENSORY_A2 2.2); appended to the annotation source of that type.
+LITERATURE_EXTRA_SOURCES = {
+    "lLN1_bc": "Eckstein et al. 2024 (Cell 187:2574; discussion: broad unilateral 'ALl1 dorsal' LNs likely "
+               "cholinergic, lLN1_bc mispredicted DA/5-HT); Huang et al. 2010 (Neuron 67:1021)"}
+_LEGACY_CONFIDENCE = {"orta": "medium", "y\u00fcksek": "high"}   # labels stored in v1 data/nt_literature_783.csv
+
+
+def fast_nt(known_nt) -> tuple:
+    """Fast transmitters named in a ``known_nt`` string (";" or "," separated; "-negative" entries, peptides,
+    NO and amines are ignored): a sorted tuple of FAST_NT_SIGN keys."""
+    if not isinstance(known_nt, str):
+        return ()
+    toks = {t.strip() for t in re.split(r"[;,]", known_nt)}
+    return tuple(sorted(t for t in toks if t in FAST_NT_SIGN))
+
+
+def literature_confidence(source: str) -> str:
+    """"medium" when the only evidence is scRNA-seq, lineage- / tract-based, or a morphological match to
+    Shang et al. 2007 cholinergic eLNs; else "high" (reported only, not used by the rule)."""
+    s = source.lower()
+    if "shang et al., 2007" in s or "lineage" in s or "tract based" in s:
+        return "medium"
+    if not any(k in s for k in ("immuno", "tapin", "easi-fish", "rnai", "intersection", "mcfo", "marcm")):
+        return "medium"
+    return "high"
+
+
+def _type_labels(cx: Connectome) -> pd.Series:
+    n = cx.neurons
+    return n["cell_type"].fillna(n["cell_type_alt"])
+
+
+def literature_table(cx: Connectome, types=None, extra_sources=None) -> pd.DataFrame:
+    """One row per cell type with a literature transmitter (LITERATURE_COLUMNS).
+
+    Needs the extra columns ``known_nt`` and ``known_nt_source`` on the neurons table (FlyWire annotations,
+    Schlegel et al. 2024). Sign rule (fixed before any run): exactly one fast transmitter in known_nt, shared
+    by every neuron of the type -> its sign (ACh +1, GABA -1, Glu -1); none, several, or neurons that disagree
+    -> 0 (no literature sign; untouched). ``types``: restrict to these cell types (v1: the types of the AL
+    persistent state); placeholder groups without a type ("[class]") are skipped."""
+    for c in ("known_nt", "known_nt_source"):
+        if c not in cx.neurons.columns:
+            raise ValueError(f"neurons table lacks the extra column {c!r}")
+    extra_sources = LITERATURE_EXTRA_SOURCES if extra_sources is None else extra_sources
+    typ = _type_labels(cx)
+    _, published = _published_sign(cx)
+    want = sorted(set(typ.dropna())) if types is None else sorted(set(types))
+    rows = []
+    for t in want:
+        if t.startswith("["):
+            continue
+        m = (typ == t).to_numpy()
+        kn = cx.neurons.loc[m, "known_nt"].dropna()
+        if kn.empty:
+            continue
+        fs = {fast_nt(k) for k in kn}
+        f = next(iter(fs)) if len(fs) == 1 else ()
+        sign = FAST_NT_SIGN[f[0]] if len(f) == 1 and len(kn) == int(m.sum()) else 0
+        src = "; ".join(sorted(set(cx.neurons.loc[m, "known_nt_source"].dropna())))
+        if t in extra_sources:
+            src += "; " + extra_sources[t]
+        ms = published[m]
+        rows.append(dict(cell_type=t, n=int(m.sum()), known_nt=" | ".join(sorted(set(kn))),
+                         fast_nt="/".join(f) if f else "", sign_lit=sign,
+                         source="Schlegel et al. 2024 known_nt: " + src, confidence=literature_confidence(src),
+                         model_sign=",".join(str(x) for x in sorted(set(ms.tolist()))),
+                         n_change=int(((ms != sign) & (sign != 0)).sum())))
+    return pd.DataFrame(rows, columns=list(LITERATURE_COLUMNS))
+
+
+def literature_rule(cx: Connectome, table: pd.DataFrame) -> NeuronSignRule:
+    """Rule from a :func:`literature_table` (or v1's data/nt_literature_783.csv): neurons of the types with
+    sign_lit != 0 get that sign on all outgoing synapses; other types are untouched."""
+    lit = table.loc[table["sign_lit"] != 0].set_index("cell_type")["sign_lit"]
+    typ = _type_labels(cx)
+    sel = typ.isin(lit.index).to_numpy()
+    idx = np.flatnonzero(sel)
+    t = typ.to_numpy(object)[idx]
+    return NeuronSignRule(
+        "literature", idx, lit.reindex(t).to_numpy(np.int8), labels=t,
+        info=dict(n_types=int(len(set(t.tolist()))),
+                  rule="w = |w| * sign_lit on every outgoing synapse of the neurons of types with "
+                       "sign_lit != 0 (ACh +1, GABA -1, Glu -1; Schlegel et al. 2024 known_nt)"))
