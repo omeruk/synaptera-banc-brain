@@ -10,10 +10,10 @@ Order matters (dependency order). Each item: adapt -> test -> commit.
 - [x] **5.** `scripts/make_nt_impute.py` → `connectome/sign_rules.py` (pattern): same
 - [x] **6.** `scripts/make_nt_literature.py` → `connectome/sign_rules.py` (pattern): same
 - [x] **7.** `flight/brain.py` → `engine/lif_brian2.py, engine/protocol.py` (adapt): NeuralEngine interface (reset/set_inputs/advance/rates); Poisson input without delay (M4); the fixed 25 ms interval goes, coupling interval from config; activity-matched shuffled control (M3); warn on dev+shuffle (L6); legacy flags not carried
-- [ ] **8.** `flight/config.py` → `configs/arena_x20.yaml, body/arena.py` (adapt): a frozen ArenaSpec instead of module globals; move_takeoff_pedestal -> with_start_offset; constants with origin class in configs/assumptions.json
-- [ ] **9.** `flight/quasi_steady.py` → `body/quasi_steady.py, motor/legacy_reflexes.py` (adapt): PHI_MAX amplitude limit + clip record (H5); stroke-plane angle and anisotropic damping option (M9); haltere PD moves to the REFLEX arm
-- [ ] **10.** `flight/body.py` → `body/flygym_body.py, body/arena.py` (adapt): step(cmd, dt) takes a duration; FlyGym private API in one adapter (M6); InnerLoop interface; physical noise in body/noise.py (M5)
-- [ ] **11.** `flight/head_reflex.py` → `motor/legacy_reflexes.py` (adapt): REFLEX-labelled control arm; constants in configs/reflex.yaml (with origin class)
+- [x] **8.** `flight/config.py` → `configs/arena_x20.yaml, body/arena.py` (adapt): a frozen ArenaSpec instead of module globals; move_takeoff_pedestal -> with_start_offset; constants with origin class in configs/assumptions.json
+- [x] **9.** `flight/quasi_steady.py` → `body/quasi_steady.py, motor/legacy_reflexes.py` (adapt): PHI_MAX amplitude limit + clip record (H5); stroke-plane angle and anisotropic damping option (M9); haltere PD moves to the REFLEX arm
+- [x] **10.** `flight/body.py` → `body/flygym_body.py, body/arena.py` (adapt): step(cmd, dt) takes a duration; FlyGym private API in one adapter (M6); InnerLoop interface; physical noise in body/noise.py (M5)
+- [x] **11.** `flight/head_reflex.py` → `motor/legacy_reflexes.py` (adapt): REFLEX-labelled control arm; constants in configs/reflex.yaml (with origin class)
 - [ ] **12.** `flight/visual_input.py` → `sense/vision_flyvis.py` (adapt): keep FlyVis alignment + transduction; loom term as sub-frame mean (L1); empty-frame guard; number of sub-frames from config (H4); column source from the dataset (separate for BANC)
 - [ ] **13.** `flight/vision_boundary.py` → `sense/vision_boundary.py` (adapt): keep the boundary-layer rule; remove the hard-coded ~/Downloads path (L4); column assignment must be rebuilt for BANC (risk)
 - [ ] **14.** `scripts/make_t45_transduction.py` → `scripts/make_transduction.py` (adapt): merged into one script; result compared with numeric tolerance (M7)

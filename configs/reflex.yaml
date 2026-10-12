@@ -1,0 +1,17 @@
+# REFLEX arm constants (hand-made inner loops, label REFLEX). Ported from synaptera@c94796d:flight/config.py and
+# flight/head_reflex.py. Fixed before any run, never tuned on behaviour.
+groups:
+  - origin: P
+    source: "haltere attitude loop: flies correct roll perturbations within ~30 ms (Beatus et al. 2015) -> critically damped settling 5.8/omega_n ~ 30 ms"
+    values:
+      haltere_omega_n: 200.0     # rad/s
+      haltere_zeta: 1.0
+  - origin: E
+    source: "head (gaze) stabilisation reflex, hand-set and motivated by the gaze-stabilisation literature (Davis & Mongeau 2023; Cellini, Salem & Mongeau 2022); not traced to a specific source (v1 VARSAYIM)"
+    values:
+      head_gain: [0.6, 0.5, 0.5]       # yaw, pitch, roll
+      head_theta_max_deg: 15.0
+      head_yaw_reset_deg: 9.0
+      head_tau_rc: 0.2                 # s, re-centring leak
+      head_kp: 190.0                   # -> 1/(190+10) = 5 ms tracking latency
+      head_turn_rate: 1.0              # rad/s: a sub-step counts as turning above this body yaw rate

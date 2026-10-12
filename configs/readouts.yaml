@@ -1,0 +1,24 @@
+# Pre-registered brain readouts and the bridge constants. Ported from synaptera@c94796d:flight/readouts.py and
+# flight/vnc_bridge.py. Fixed from anatomy and literature before any behaviour was seen; never changed afterwards.
+groups:
+  - origin: P
+    source: "readout cell types of v1 (SPEC_BRAIN_CONTROL R2): steering DNa02 / DNp15 (DNa02: ipsilateral turning in walking, Rayshubskiy et al.; DNp15: HS/H2 one hop), proboscis MN9, looming DNp01/02/04/11/06, landing DNp07/10, contralateral looming DNa01/DNb01, optic flow DNp20/DNb06, DNa03. The v1 post-hoc choice of DNp15 as the only yaw drive is NOT inherited: a drive type must pass the symmetry gate"
+    values:
+      readout_types: [DNa02, DNp15, MN9, DNa01, DNa03, DNb01, DNb06, DNp20, DNp01, DNp02, DNp04, DNp11, DNp06, DNp07, DNp10]
+      steer_types: [DNa02, DNp15]
+  - origin: E
+    unit: s
+    source: "readout low-pass time constant (v1 VARSAYIM): one DN at 10 Hz gives 0.25 spikes per 25 ms step, so without a filter the decision flickers from single spikes; ~ the duration of a flight saccade / proboscis extension onset; not fitted"
+    values:
+      readout_tau: 0.05
+  - origin: F
+    fitted_to: "the MN9 mean rate at the upper end of the GRN transition of the open-loop R0 curve (v783, Shiu protocol: sugar GRN 20 Hz -> 0/0, 50 Hz -> 11.2/8.2, 100 Hz -> 59.6/46.8 Hz): (11.2 + 8.2)/2 = 9.7 -> 10 Hz; open-loop physiology only"
+    source: "proboscis-extension threshold of the MN9 decision (FlyGym has no proboscis joint; the extension is recorded, it has no physical effect)"
+    unit: Hz
+    values:
+      mn9_threshold_hz: 10.0
+  - origin: E
+    source: "yaw readout gain (v1 VARSAYIM, unchanged): a normalised excess of one reference mean on the left gives delta Phi = 10 deg, steady yaw ~5 rad/s; sign: a DN more active on the left turns the fly to the LEFT (ipsilateral), as DNa02 in walking"
+    values:
+      k_steer: 1.0
+      turn_bias_max: 2.5

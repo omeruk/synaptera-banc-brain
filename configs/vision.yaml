@@ -1,0 +1,33 @@
+# FlyVis -> connectome visual input. Ported from synaptera@c94796d:flight/visual_input.py.
+groups:
+  - origin: E
+    source: "FlyVis network used for the visual input (Lappalainen et al. 2024), checkpoint best; extent = hex radius of the FlyVis lattice"
+    values:
+      flyvis_model: "flow/0000/000"
+      flyvis_extent: 15
+      grey_s: 1.0
+  - origin: F
+    fitted_to: "synapse-weighted input offsets (Mi4, Mi9, Tm9, ... -> T4/T5 subtype) of the FlyWire and FlyVis connectomes (visual_input.fit_alignment): the point-group operation with the best weighted dot-product score; anatomy only, no behaviour"
+    source: "FlyWire (p, q) -> FlyVis (u, v) lattice map, the same for both hemispheres"
+    values:
+      align_rot: 1            # rotation by align_rot * 60 deg
+      align_reflect: false
+  - origin: M
+    source: "eye convention measured with FlyVis tuning (T4a 180, T4b 0, T4c 90, T4d 270 deg): the right-eye image has anterior on the left and is mirrored before FlyVis (v1 tests/flight/test_visual_input.py)"
+    values:
+      r_eye_flip: true
+  - origin: E
+    source: "number of FlyGym renders per coupling interval; 2 reproduces v1 (FlyVis dt 12.5 ms at 25 ms). Review H4: near obstacles the motion signal aliases, a larger value is a model variant to be set per pre-registration"
+    values:
+      subframes: 2
+  - origin: E
+    source: "transduction scaling (v1 VARSAYIM): the standard-grating reference response a_ref maps to R_MAX Hz per neuron; 50 Hz gave clean lateral DN codes in the v1 R3 open-loop diagnosis; fixed before any closed-loop run"
+    values:
+      r_max: 50.0
+      r_clip: 150.0
+  - origin: E
+    source: "standard grating of the transduction calibration (FlyGym image px; 157 deg / 512 px ~ 0.31 deg/px)"
+    values:
+      grating_period_px: 64.0
+      grating_tf_hz: 2.0
+      grating_contrast: 0.8

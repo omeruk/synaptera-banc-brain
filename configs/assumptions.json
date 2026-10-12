@@ -196,6 +196,812 @@
       "used_in": [
         "connectome/sign_rules.py:BANC_PRED_SIGN"
       ]
+    },
+    "connectome.symmetry_threshold": {
+      "value": 0.5,
+      "unit": "|log2(R/L)|",
+      "origin": "E",
+      "source": "CLAUDE.md rule 5 (pre-registered gate, review H2): a lateral readout or path needs |log2(R/L)| < 0.5 of the input-synapse ratio, for total and excitatory input",
+      "used_in": [
+        "connectome/qa.py:SYMMETRY_THRESHOLD"
+      ]
+    },
+    "arena_x20.scale": {
+      "value": 20.0,
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.tower1": {
+      "value": [
+        [
+          160.0,
+          200.0
+        ],
+        [
+          -100.0,
+          160.0
+        ],
+        [
+          0.0,
+          200.0
+        ]
+      ],
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.tower2": {
+      "value": [
+        [
+          280.0,
+          320.0
+        ],
+        [
+          60.0,
+          300.0
+        ],
+        [
+          0.0,
+          200.0
+        ]
+      ],
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.takeoff_pedestal": {
+      "value": [
+        0.0,
+        0.0,
+        5.0,
+        19.5
+      ],
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.food_platform": {
+      "value": [
+        440.0,
+        80.0,
+        10.0,
+        169.5
+      ],
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.food_pos": {
+      "value": [
+        440.0,
+        80.0,
+        170.0
+      ],
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.food_drop_radius": {
+      "value": 0.5,
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.start_pos": {
+      "value": [
+        0.0,
+        0.0,
+        20.0
+      ],
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.arena_half_size": {
+      "value": [
+        700.0,
+        600.0
+      ],
+      "origin": "E",
+      "source": "arena design: spec x SCALE (v1 docs/UCUS_PROMPTU.md); axis-aligned boxes ((x0,x1),(y0,y1),(z0,z1)), cylinders (cx,cy,r,z_top)",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.odor_grid_bounds": {
+      "value": [
+        [
+          -60.0,
+          500.0
+        ],
+        [
+          -160.0,
+          360.0
+        ],
+        [
+          0.0,
+          300.0
+        ]
+      ],
+      "origin": "E",
+      "source": "3D odour field grid (Dijkstra path distance around obstacles); towers are 8 voxels thick",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.odor_grid_res": {
+      "value": 5.0,
+      "origin": "E",
+      "source": "3D odour field grid (Dijkstra path distance around obstacles); towers are 8 voxels thick",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.odor_d0": {
+      "value": 20.0,
+      "origin": "E",
+      "source": "3D odour field grid (Dijkstra path distance around obstacles); towers are 8 voxels thick",
+      "unit": "mm",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.physics_dt": {
+      "value": 0.0001,
+      "origin": "E",
+      "source": "MuJoCo physics step of the flight body (v1 PHYSICS_DT); the coupling interval is configured elsewhere",
+      "unit": "s",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.obstacle_solimp": {
+      "value": "0.9 0.999 0.001 0.5 2",
+      "origin": "E",
+      "source": "contact softening of the obstacle geoms (CLAUDE.md of v1); fly-arena pairs keep FlyGym defaults",
+      "unit": "",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.obstacle_solref": {
+      "value": "0.02 1",
+      "origin": "E",
+      "source": "contact softening of the obstacle geoms (CLAUDE.md of v1); fly-arena pairs keep FlyGym defaults",
+      "unit": "",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.texture_rgb": {
+      "value": [
+        [
+          0.2,
+          0.2,
+          0.2
+        ],
+        [
+          0.8,
+          0.8,
+          0.8
+        ]
+      ],
+      "origin": "E",
+      "source": "arena texture (v1 brain-control Step 0, R4): high-contrast checkers so T4/T5 motion exists away from edges; periods keep >= ~10 deg at typical viewing distances",
+      "unit": "",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.obstacle_tex_period": {
+      "value": 20.0,
+      "origin": "E",
+      "source": "arena texture (v1 brain-control Step 0, R4): high-contrast checkers so T4/T5 motion exists away from edges; periods keep >= ~10 deg at typical viewing distances",
+      "unit": "",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.ground_tex_period": {
+      "value": 40.0,
+      "origin": "E",
+      "source": "arena texture (v1 brain-control Step 0, R4): high-contrast checkers so T4/T5 motion exists away from edges; periods keep >= ~10 deg at typical viewing distances",
+      "unit": "",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "arena_x20.platform_dark_rgba": {
+      "value": [
+        0.03,
+        0.03,
+        0.03,
+        1.0
+      ],
+      "origin": "E",
+      "source": "arena texture (v1 brain-control Step 0, R4): high-contrast checkers so T4/T5 motion exists away from edges; periods keep >= ~10 deg at typical viewing distances",
+      "unit": "",
+      "config_file": "configs/arena_x20.yaml",
+      "used_in": []
+    },
+    "body_flight.phi0_deg": {
+      "value": 140.0,
+      "origin": "P",
+      "source": "Drosophila hover stroke amplitude (Fry et al. 2003, order of magnitude) and wing-beat frequency",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.f0_hz": {
+      "value": 218.0,
+      "origin": "P",
+      "source": "Drosophila hover stroke amplitude (Fry et al. 2003, order of magnitude) and wing-beat frequency",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.rot_damp_tau": {
+      "value": 0.05,
+      "origin": "P",
+      "source": "flapping counter-torque time constant (Hedrick et al. 2009, order of magnitude)",
+      "unit": "s",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.terminal_speed_ref": {
+      "value": 300.0,
+      "origin": "E",
+      "source": "engineering scaffold of the stroke-averaged model (v1 Stage 3 calibration targets, hand-set): terminal speed at the cruise tilt sets the translational counter-force; arm and turn gains set the wing torques",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.cruise_pitch_deg": {
+      "value": 12.0,
+      "origin": "E",
+      "source": "engineering scaffold of the stroke-averaged model (v1 Stage 3 calibration targets, hand-set): terminal speed at the cruise tilt sets the translational counter-force; arm and turn gains set the wing torques",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.wing_arm_lat": {
+      "value": 1.5,
+      "origin": "E",
+      "source": "engineering scaffold of the stroke-averaged model (v1 Stage 3 calibration targets, hand-set): terminal speed at the cruise tilt sets the translational counter-force; arm and turn gains set the wing torques",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.turn_dphi_deg": {
+      "value": 5.0,
+      "origin": "E",
+      "source": "engineering scaffold of the stroke-averaged model (v1 Stage 3 calibration targets, hand-set): terminal speed at the cruise tilt sets the translational counter-force; arm and turn gains set the wing torques",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.yaw_rate_per_turn": {
+      "value": 5.0,
+      "origin": "E",
+      "source": "engineering scaffold of the stroke-averaged model (v1 Stage 3 calibration targets, hand-set): terminal speed at the cruise tilt sets the translational counter-force; arm and turn gains set the wing torques",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.yaw_damping_tau": {
+      "value": 0.02,
+      "origin": "E",
+      "source": "engineering scaffold of the stroke-averaged model (v1 Stage 3 calibration targets, hand-set): terminal speed at the cruise tilt sets the translational counter-force; arm and turn gains set the wing torques",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.phi_max_deg": {
+      "value": 180.0,
+      "origin": "E",
+      "source": "review H5: the stroke amplitude has a geometric limit near 180 deg (Drosophila approaches it in manoeuvres); amplitudes above it are clipped and the clip events recorded. v1 had no limit (193.8 / 206.3 deg reachable)",
+      "unit": "deg",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.stroke_plane_deg": {
+      "value": 0.0,
+      "origin": "E",
+      "source": "review M9 options, default OFF so the reference is the v1 model: stroke-plane angle about body y (deg) and the factor on the translational counter-force along body z (anisotropic damping)",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.damp_axial_ratio": {
+      "value": 1.0,
+      "origin": "E",
+      "source": "review M9 options, default OFF so the reference is the v1 model: stroke-plane angle about body y (deg) and the factor on the translational counter-force along body z (anisotropic damping)",
+      "unit": "",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.tuck_pose_offsets": {
+      "value": {
+        "FFemur": -40,
+        "MFemur": -40,
+        "HFemur": -40,
+        "FTibia": 75,
+        "MTibia": 55,
+        "HTibia": 60,
+        "FCoxa_roll": -25,
+        "MCoxa_roll": -25,
+        "HCoxa_roll": -25
+      },
+      "origin": "E",
+      "source": "leg poses: offsets from the walking standing pose (HAND, v1 VARSAYIM; checked by rendering, never tuned on behaviour); R-side roll/yaw mirrored",
+      "unit": "deg",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.flight_pose_offsets": {
+      "value": {
+        "FCoxa": -35,
+        "FFemur": -45,
+        "FTibia": 75,
+        "FCoxa_roll": -25,
+        "MCoxa": 30,
+        "MFemur": 15,
+        "MTibia": -25,
+        "MCoxa_roll": -35,
+        "HCoxa": 30,
+        "HFemur": 15,
+        "HTibia": -25,
+        "HCoxa_roll": -30
+      },
+      "origin": "E",
+      "source": "leg poses: offsets from the walking standing pose (HAND, v1 VARSAYIM; checked by rendering, never tuned on behaviour); R-side roll/yaw mirrored",
+      "unit": "deg",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.feed_pose_offsets": {
+      "value": {
+        "FFemur": -15,
+        "FTibia": 30,
+        "HFemur": 15,
+        "HTibia": -20
+      },
+      "origin": "E",
+      "source": "leg poses: offsets from the walking standing pose (HAND, v1 VARSAYIM; checked by rendering, never tuned on behaviour); R-side roll/yaw mirrored",
+      "unit": "deg",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.leg_tuck_ramp_s": {
+      "value": 0.075,
+      "origin": "P",
+      "source": "leg transition durations: mid-points of literature ranges (tuck 50-100 ms, Fraenkel 1932; extend 100-200 ms, Tammero & Dickinson 2002, van Breugel & Dickinson 2012); v1 notes they were not yet checked against the papers. Feed ramp 0.3 s is a v1 assumption",
+      "unit": "s",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.leg_extend_ramp_s": {
+      "value": 0.15,
+      "origin": "P",
+      "source": "leg transition durations: mid-points of literature ranges (tuck 50-100 ms, Fraenkel 1932; extend 100-200 ms, Tammero & Dickinson 2002, van Breugel & Dickinson 2012); v1 notes they were not yet checked against the papers. Feed ramp 0.3 s is a v1 assumption",
+      "unit": "s",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "body_flight.leg_feed_ramp_s": {
+      "value": 0.3,
+      "origin": "P",
+      "source": "leg transition durations: mid-points of literature ranges (tuck 50-100 ms, Fraenkel 1932; extend 100-200 ms, Tammero & Dickinson 2002, van Breugel & Dickinson 2012); v1 notes they were not yet checked against the papers. Feed ramp 0.3 s is a v1 assumption",
+      "unit": "s",
+      "config_file": "configs/body_flight.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.approach_clear": {
+      "value": 8.0,
+      "origin": "E",
+      "source": "HAND constants set from geometry and the cruise calibration in brain-free runs (v1 scripts/diag/hyb_landing.py), not fitted to success. approach_clear: thorax target above the platform top (tarsi hang <= 3 mm lower); r_approach clear of tower 2 (its nearest edge is 120 mm from the platform centre); r_descend / v_descend: platform radius 10 mm",
+      "unit": "mm",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.r_approach": {
+      "value": 100.0,
+      "origin": "E",
+      "source": "HAND constants set from geometry and the cruise calibration in brain-free runs (v1 scripts/diag/hyb_landing.py), not fitted to success. approach_clear: thorax target above the platform top (tarsi hang <= 3 mm lower); r_approach clear of tower 2 (its nearest edge is 120 mm from the platform centre); r_descend / v_descend: platform radius 10 mm",
+      "unit": "mm",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.r_descend": {
+      "value": 4.0,
+      "origin": "E",
+      "source": "HAND constants set from geometry and the cruise calibration in brain-free runs (v1 scripts/diag/hyb_landing.py), not fitted to success. approach_clear: thorax target above the platform top (tarsi hang <= 3 mm lower); r_approach clear of tower 2 (its nearest edge is 120 mm from the platform centre); r_descend / v_descend: platform radius 10 mm",
+      "unit": "mm",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.v_descend": {
+      "value": 40.0,
+      "origin": "E",
+      "source": "HAND constants set from geometry and the cruise calibration in brain-free runs (v1 scripts/diag/hyb_landing.py), not fitted to success. approach_clear: thorax target above the platform top (tarsi hang <= 3 mm lower); r_approach clear of tower 2 (its nearest edge is 120 mm from the platform centre); r_descend / v_descend: platform radius 10 mm",
+      "unit": "mm",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.z_gain": {
+      "value": 2.0,
+      "origin": "E",
+      "source": "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.vz_max": {
+      "value": 150.0,
+      "origin": "E",
+      "source": "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.land_vz": {
+      "value": 30.0,
+      "origin": "E",
+      "source": "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.v_gain": {
+      "value": 3.0,
+      "origin": "E",
+      "source": "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.tilt_max_deg": {
+      "value": 20.0,
+      "origin": "E",
+      "source": "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.brake_deg_per_100": {
+      "value": 20.0,
+      "origin": "E",
+      "source": "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.vz_damp_ref": {
+      "value": 400.0,
+      "origin": "E",
+      "source": "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.lift_frac_range": {
+      "value": [
+        0.3,
+        1.8
+      ],
+      "origin": "E",
+      "source": "HAND gains and limits of the vertical / horizontal position controllers (v1 hybrid.py)",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.takeoff_s": {
+      "value": 0.25,
+      "origin": "E",
+      "source": "take-off and touchdown logic (v1 config): 10 steps of 25 ms take-off, lift boost 0.10, touchdown = 2 tarsus contacts for 2 consecutive steps; step counts are in intervals of 25 ms in v1 and are converted to seconds here",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.takeoff_lift": {
+      "value": 0.1,
+      "origin": "E",
+      "source": "take-off and touchdown logic (v1 config): 10 steps of 25 ms take-off, lift boost 0.10, touchdown = 2 tarsus contacts for 2 consecutive steps; step counts are in intervals of 25 ms in v1 and are converted to seconds here",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.touchdown_legs": {
+      "value": 2,
+      "origin": "E",
+      "source": "take-off and touchdown logic (v1 config): 10 steps of 25 ms take-off, lift boost 0.10, touchdown = 2 tarsus contacts for 2 consecutive steps; step counts are in intervals of 25 ms in v1 and are converted to seconds here",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.touchdown_s": {
+      "value": 0.05,
+      "origin": "E",
+      "source": "take-off and touchdown logic (v1 config): 10 steps of 25 ms take-off, lift boost 0.10, touchdown = 2 tarsus contacts for 2 consecutive steps; step counts are in intervals of 25 ms in v1 and are converted to seconds here",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "hand_scaffold.calib_s": {
+      "value": 0.25,
+      "origin": "E",
+      "source": "take-off and touchdown logic (v1 config): 10 steps of 25 ms take-off, lift boost 0.10, touchdown = 2 tarsus contacts for 2 consecutive steps; step counts are in intervals of 25 ms in v1 and are converted to seconds here",
+      "unit": "",
+      "config_file": "configs/hand_scaffold.yaml",
+      "used_in": []
+    },
+    "noise.gust_force_sigma": {
+      "value": 0.0,
+      "origin": "E",
+      "source": "engineering scaffold for seed-dependent physics: Ornstein-Uhlenbeck gust force (uN) and torque (uN*mm) on the thorax; amplitudes are experiment-design choices set per pre-registration, never tuned on behaviour",
+      "unit": "",
+      "config_file": "configs/noise.yaml",
+      "used_in": []
+    },
+    "noise.gust_torque_sigma": {
+      "value": 0.0,
+      "origin": "E",
+      "source": "engineering scaffold for seed-dependent physics: Ornstein-Uhlenbeck gust force (uN) and torque (uN*mm) on the thorax; amplitudes are experiment-design choices set per pre-registration, never tuned on behaviour",
+      "unit": "",
+      "config_file": "configs/noise.yaml",
+      "used_in": []
+    },
+    "noise.gust_tau": {
+      "value": 0.05,
+      "origin": "E",
+      "source": "engineering scaffold for seed-dependent physics: Ornstein-Uhlenbeck gust force (uN) and torque (uN*mm) on the thorax; amplitudes are experiment-design choices set per pre-registration, never tuned on behaviour",
+      "unit": "",
+      "config_file": "configs/noise.yaml",
+      "used_in": []
+    },
+    "readouts.readout_types": {
+      "value": [
+        "DNa02",
+        "DNp15",
+        "MN9",
+        "DNa01",
+        "DNa03",
+        "DNb01",
+        "DNb06",
+        "DNp20",
+        "DNp01",
+        "DNp02",
+        "DNp04",
+        "DNp11",
+        "DNp06",
+        "DNp07",
+        "DNp10"
+      ],
+      "origin": "P",
+      "source": "readout cell types of v1 (SPEC_BRAIN_CONTROL R2): steering DNa02 / DNp15 (DNa02: ipsilateral turning in walking, Rayshubskiy et al.; DNp15: HS/H2 one hop), proboscis MN9, looming DNp01/02/04/11/06, landing DNp07/10, contralateral looming DNa01/DNb01, optic flow DNp20/DNb06, DNa03. The v1 post-hoc choice of DNp15 as the only yaw drive is NOT inherited: a drive type must pass the symmetry gate",
+      "unit": "",
+      "config_file": "configs/readouts.yaml",
+      "used_in": []
+    },
+    "readouts.steer_types": {
+      "value": [
+        "DNa02",
+        "DNp15"
+      ],
+      "origin": "P",
+      "source": "readout cell types of v1 (SPEC_BRAIN_CONTROL R2): steering DNa02 / DNp15 (DNa02: ipsilateral turning in walking, Rayshubskiy et al.; DNp15: HS/H2 one hop), proboscis MN9, looming DNp01/02/04/11/06, landing DNp07/10, contralateral looming DNa01/DNb01, optic flow DNp20/DNb06, DNa03. The v1 post-hoc choice of DNp15 as the only yaw drive is NOT inherited: a drive type must pass the symmetry gate",
+      "unit": "",
+      "config_file": "configs/readouts.yaml",
+      "used_in": []
+    },
+    "readouts.readout_tau": {
+      "value": 0.05,
+      "origin": "E",
+      "source": "readout low-pass time constant (v1 VARSAYIM): one DN at 10 Hz gives 0.25 spikes per 25 ms step, so without a filter the decision flickers from single spikes; ~ the duration of a flight saccade / proboscis extension onset; not fitted",
+      "unit": "s",
+      "config_file": "configs/readouts.yaml",
+      "used_in": []
+    },
+    "readouts.mn9_threshold_hz": {
+      "value": 10.0,
+      "origin": "F",
+      "source": "proboscis-extension threshold of the MN9 decision (FlyGym has no proboscis joint; the extension is recorded, it has no physical effect)",
+      "unit": "Hz",
+      "fitted_to": "the MN9 mean rate at the upper end of the GRN transition of the open-loop R0 curve (v783, Shiu protocol: sugar GRN 20 Hz -> 0/0, 50 Hz -> 11.2/8.2, 100 Hz -> 59.6/46.8 Hz): (11.2 + 8.2)/2 = 9.7 -> 10 Hz; open-loop physiology only",
+      "config_file": "configs/readouts.yaml",
+      "used_in": []
+    },
+    "readouts.k_steer": {
+      "value": 1.0,
+      "origin": "E",
+      "source": "yaw readout gain (v1 VARSAYIM, unchanged): a normalised excess of one reference mean on the left gives delta Phi = 10 deg, steady yaw ~5 rad/s; sign: a DN more active on the left turns the fly to the LEFT (ipsilateral), as DNa02 in walking",
+      "unit": "",
+      "config_file": "configs/readouts.yaml",
+      "used_in": []
+    },
+    "readouts.turn_bias_max": {
+      "value": 2.5,
+      "origin": "E",
+      "source": "yaw readout gain (v1 VARSAYIM, unchanged): a normalised excess of one reference mean on the left gives delta Phi = 10 deg, steady yaw ~5 rad/s; sign: a DN more active on the left turns the fly to the LEFT (ipsilateral), as DNa02 in walking",
+      "unit": "",
+      "config_file": "configs/readouts.yaml",
+      "used_in": []
+    },
+    "reflex.haltere_omega_n": {
+      "value": 200.0,
+      "origin": "P",
+      "source": "haltere attitude loop: flies correct roll perturbations within ~30 ms (Beatus et al. 2015) -> critically damped settling 5.8/omega_n ~ 30 ms",
+      "unit": "",
+      "config_file": "configs/reflex.yaml",
+      "used_in": []
+    },
+    "reflex.haltere_zeta": {
+      "value": 1.0,
+      "origin": "P",
+      "source": "haltere attitude loop: flies correct roll perturbations within ~30 ms (Beatus et al. 2015) -> critically damped settling 5.8/omega_n ~ 30 ms",
+      "unit": "",
+      "config_file": "configs/reflex.yaml",
+      "used_in": []
+    },
+    "reflex.head_gain": {
+      "value": [
+        0.6,
+        0.5,
+        0.5
+      ],
+      "origin": "E",
+      "source": "head (gaze) stabilisation reflex, hand-set and motivated by the gaze-stabilisation literature (Davis & Mongeau 2023; Cellini, Salem & Mongeau 2022); not traced to a specific source (v1 VARSAYIM)",
+      "unit": "",
+      "config_file": "configs/reflex.yaml",
+      "used_in": []
+    },
+    "reflex.head_theta_max_deg": {
+      "value": 15.0,
+      "origin": "E",
+      "source": "head (gaze) stabilisation reflex, hand-set and motivated by the gaze-stabilisation literature (Davis & Mongeau 2023; Cellini, Salem & Mongeau 2022); not traced to a specific source (v1 VARSAYIM)",
+      "unit": "",
+      "config_file": "configs/reflex.yaml",
+      "used_in": []
+    },
+    "reflex.head_yaw_reset_deg": {
+      "value": 9.0,
+      "origin": "E",
+      "source": "head (gaze) stabilisation reflex, hand-set and motivated by the gaze-stabilisation literature (Davis & Mongeau 2023; Cellini, Salem & Mongeau 2022); not traced to a specific source (v1 VARSAYIM)",
+      "unit": "",
+      "config_file": "configs/reflex.yaml",
+      "used_in": []
+    },
+    "reflex.head_tau_rc": {
+      "value": 0.2,
+      "origin": "E",
+      "source": "head (gaze) stabilisation reflex, hand-set and motivated by the gaze-stabilisation literature (Davis & Mongeau 2023; Cellini, Salem & Mongeau 2022); not traced to a specific source (v1 VARSAYIM)",
+      "unit": "",
+      "config_file": "configs/reflex.yaml",
+      "used_in": []
+    },
+    "reflex.head_kp": {
+      "value": 190.0,
+      "origin": "E",
+      "source": "head (gaze) stabilisation reflex, hand-set and motivated by the gaze-stabilisation literature (Davis & Mongeau 2023; Cellini, Salem & Mongeau 2022); not traced to a specific source (v1 VARSAYIM)",
+      "unit": "",
+      "config_file": "configs/reflex.yaml",
+      "used_in": []
+    },
+    "reflex.head_turn_rate": {
+      "value": 1.0,
+      "origin": "E",
+      "source": "head (gaze) stabilisation reflex, hand-set and motivated by the gaze-stabilisation literature (Davis & Mongeau 2023; Cellini, Salem & Mongeau 2022); not traced to a specific source (v1 VARSAYIM)",
+      "unit": "",
+      "config_file": "configs/reflex.yaml",
+      "used_in": []
+    },
+    "vision.flyvis_model": {
+      "value": "flow/0000/000",
+      "origin": "E",
+      "source": "FlyVis network used for the visual input (Lappalainen et al. 2024), checkpoint best; extent = hex radius of the FlyVis lattice",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.flyvis_extent": {
+      "value": 15,
+      "origin": "E",
+      "source": "FlyVis network used for the visual input (Lappalainen et al. 2024), checkpoint best; extent = hex radius of the FlyVis lattice",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.grey_s": {
+      "value": 1.0,
+      "origin": "E",
+      "source": "FlyVis network used for the visual input (Lappalainen et al. 2024), checkpoint best; extent = hex radius of the FlyVis lattice",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.align_rot": {
+      "value": 1,
+      "origin": "F",
+      "source": "FlyWire (p, q) -> FlyVis (u, v) lattice map, the same for both hemispheres",
+      "unit": "",
+      "fitted_to": "synapse-weighted input offsets (Mi4, Mi9, Tm9, ... -> T4/T5 subtype) of the FlyWire and FlyVis connectomes (visual_input.fit_alignment): the point-group operation with the best weighted dot-product score; anatomy only, no behaviour",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.align_reflect": {
+      "value": false,
+      "origin": "F",
+      "source": "FlyWire (p, q) -> FlyVis (u, v) lattice map, the same for both hemispheres",
+      "unit": "",
+      "fitted_to": "synapse-weighted input offsets (Mi4, Mi9, Tm9, ... -> T4/T5 subtype) of the FlyWire and FlyVis connectomes (visual_input.fit_alignment): the point-group operation with the best weighted dot-product score; anatomy only, no behaviour",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.r_eye_flip": {
+      "value": true,
+      "origin": "M",
+      "source": "eye convention measured with FlyVis tuning (T4a 180, T4b 0, T4c 90, T4d 270 deg): the right-eye image has anterior on the left and is mirrored before FlyVis (v1 tests/flight/test_visual_input.py)",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.subframes": {
+      "value": 2,
+      "origin": "E",
+      "source": "number of FlyGym renders per coupling interval; 2 reproduces v1 (FlyVis dt 12.5 ms at 25 ms). Review H4: near obstacles the motion signal aliases, a larger value is a model variant to be set per pre-registration",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.r_max": {
+      "value": 50.0,
+      "origin": "E",
+      "source": "transduction scaling (v1 VARSAYIM): the standard-grating reference response a_ref maps to R_MAX Hz per neuron; 50 Hz gave clean lateral DN codes in the v1 R3 open-loop diagnosis; fixed before any closed-loop run",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.r_clip": {
+      "value": 150.0,
+      "origin": "E",
+      "source": "transduction scaling (v1 VARSAYIM): the standard-grating reference response a_ref maps to R_MAX Hz per neuron; 50 Hz gave clean lateral DN codes in the v1 R3 open-loop diagnosis; fixed before any closed-loop run",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.grating_period_px": {
+      "value": 64.0,
+      "origin": "E",
+      "source": "standard grating of the transduction calibration (FlyGym image px; 157 deg / 512 px ~ 0.31 deg/px)",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.grating_tf_hz": {
+      "value": 2.0,
+      "origin": "E",
+      "source": "standard grating of the transduction calibration (FlyGym image px; 157 deg / 512 px ~ 0.31 deg/px)",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
+    },
+    "vision.grating_contrast": {
+      "value": 0.8,
+      "origin": "E",
+      "source": "standard grating of the transduction calibration (FlyGym image px; 157 deg / 512 px ~ 0.31 deg/px)",
+      "unit": "",
+      "config_file": "configs/vision.yaml",
+      "used_in": []
     }
   }
 }
