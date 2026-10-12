@@ -1,0 +1,38 @@
+{
+ "f0_lat0": {
+  "S1": true,
+  "S2": true,
+  "first_feed": 122,
+  "feeding_steps": 115,
+  "pos_max_mm": 0.272,
+  "mn9_landed": 18.4,
+  "feed_frac": 0.639,
+  "net_mean": 10.83,
+  "persist": 2.4201,
+  "leg_diff": 65
+ },
+ "f0_lat0_seed4": {
+  "S1": true,
+  "S2": true,
+  "first_feed": 120,
+  "feeding_steps": 180,
+  "pos_max_mm": 0.0,
+  "mn9_landed": 53.9,
+  "feed_frac": 1.0,
+  "net_mean": 7.41,
+  "persist": 0.0,
+  "leg_diff": 0
+ },
+ "f0_lat0_seed0": {
+  "S1": true,
+  "S2": true,
+  "first_feed": 121,
+  "feeding_steps": 179,
+  "pos_max_mm": 0.037,
+  "mn9_landed": 54.6,
+  "feed_frac": 0.994,
+  "net_mean": 7.43,
+  "persist": 0.0,
+  "leg_diff": 1
+ }
+}

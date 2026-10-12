@@ -132,20 +132,24 @@ def build(args, log=print):
     groups_in = {"sugar": cx.index.group(sugar_ids), "vbnd_L": vgroups["vbnd_L"], "vbnd_R": vgroups["vbnd_R"]}
     out = Path(args.out_dir) / f"{args.name}_data.h5"
     n_pre = args.calib_steps + args.persist_steps
-    rec = Recorder(out, FLIGHT_FIELDS,
+    import dataclasses
+    fields = tuple(dataclasses.replace(f, label="REPLAY") if f.name in RecordedTerms.FIELDS else f
+                   for f in FLIGHT_FIELDS)
+    rec = Recorder(out, fields,
                    meta=dict(experiment="F0 acceptance (v1 n1 configuration)", name=args.name, seed=args.seed,
                              interval_ms=args.interval_ms, latency_intervals=args.latency,
                              n_steps=args.n_steps, calib_steps=args.calib_steps, persist_steps=args.persist_steps,
                              dataset="flywire783", sign_rule="shiu_v1", sha256=cx.meta.get("sha256"),
                              readouts=readouts.record(), arena=arena.geometry_record(),
-                             replayed_terms="turn_hand, turn_flyvis, thrust_hand, pitch_hand, roll_hand from the v1 "
-                                            "record (NeuroFly-adapted terms are not carried as code)",
+                             replayed_terms="REPLAY: turn_hand, turn_flyvis, thrust_hand, pitch_hand, roll_hand from the v1 "
+                                            "record (NeuroFly-adapted terms are not carried as code); a port "
+                                            "regression test, not a result",
                              v1_record=str(V1_RECORD)),
                    n_intervals=args.n_steps, overwrite=False,
                    input_groups={k: len(v) for k, v in groups_in.items()})
     ro_groups = readouts.group_names()
     engine = Brian2LIFEngine(cx, input_groups=groups_in, groups=ro_groups, seed=args.seed,
-                             spike_sink=rec.spike_sink)
+                             spike_sink=rec.spike_sink, poisson_delay_v1=getattr(args, 'poisson_delay_v1', False))
     log(f"engine: {engine.n_neurons:,} neurons, {len(engine.syn):,} synapses (setup {time.time() - t0:.0f} s, "
         f"{free_gb():.1f} GB free)")
     body = FlightBody(arena=arena, enable_vision=True, textured=True, platform="dark", neck_actuators=True,
@@ -273,11 +277,15 @@ class F0Decider:
         self.record = None
         self.acc = None            # perch calibration accumulator
         self.collect = False
+        self.active = False        # the bridge filter runs in the flight loop only (as in v1)
 
     def decide(self, k, engine):
         hz = self.ro.hz(engine, self.interval_ms)
         if self.collect:
             self.acc.append(hz)
+        if not self.active:
+            self.record = dict(net_rate=float(engine.rates(["all"], self.interval_ms)["all"].mean()))
+            return self.neutral
         _, used = self.bridge.update_hz(hz)
         out = dict(feed=self.bridge.proboscis(used), steer=self.bridge.steer(used), used=used)
         self.record = dict(net_rate=float(engine.rates(["all"], self.interval_ms)["all"].mean()))
@@ -313,6 +321,7 @@ def run(args, log=print) -> dict:
 
     # closed loop
     plant.stage = "flight"
+    dec.active = True
     state = {"k": 0}
 
     def on_interval(k, r):
@@ -383,6 +392,8 @@ def parse_args(argv=None):
     ap.add_argument("--calib-steps", type=int, default=10)
     ap.add_argument("--persist-steps", type=int, default=8)
     ap.add_argument("--no-brain-steer", dest="no_brain_steer", action="store_true", default=True)
+    ap.add_argument("--poisson-delay-v1", dest="poisson_delay_v1", action="store_true",
+                    help="named engine variant poisson_delay_v1 (v1 1.8 ms delay on the Poisson input)")
     ap.add_argument("--waive", nargs="*", default=[], help="readout types allowed to fail the symmetry gate")
     return ap.parse_args(argv)
 

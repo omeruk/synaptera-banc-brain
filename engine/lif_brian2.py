@@ -82,7 +82,8 @@ class Brian2LIFEngine:
 
     def __init__(self, cx: Connectome, *, input_groups=None, groups=None, seed: int = 0,
                  history_ms: float = HISTORY_MS, model_path=DEFAULT_MODEL_PATH, check_model_hash: bool = True,
-                 spike_sink=None, quiet_logging: bool = True, verbose: bool = False):
+                 spike_sink=None, quiet_logging: bool = True, poisson_delay_v1: bool = False,
+                 verbose: bool = False):
         if quiet_logging:
             for h in (BrianLogger.file_handler, BrianLogger.console_handler):
                 if h is not None and h.level < logging.WARNING:
@@ -98,6 +99,7 @@ class Brian2LIFEngine:
         self.meta = dict(cx.meta)
         self.global_index = np.asarray(cx.meta.get("global_index", np.arange(cx.n_neurons)), dtype=np.int64)
         self._sink = spike_sink
+        self.poisson_delay_v1 = bool(poisson_delay_v1)
         self._hist_steps = _steps(history_ms)
         defaultclock.dt = CLOCK_DT_MS * ms
 
@@ -140,7 +142,10 @@ class Brian2LIFEngine:
         for name in self._input_names:
             tgt = self.groups[name]
             pg = PoissonGroup(len(tgt), rates=0 * Hz)
-            s = Synapses(pg, neu, "w : volt", on_pre="v += w")
+            if poisson_delay_v1:      # named variant "poisson_delay_v1": the v1 path (model delay on the input)
+                s = Synapses(pg, neu, "w : volt", on_pre="v += w", delay=p["t_dly"])
+            else:
+                s = Synapses(pg, neu, "w : volt", on_pre="v += w")
             s.connect(i=np.arange(len(tgt)), j=tgt)
             s.w = w_in
             neu.rfc[tgt] = 0 * ms
@@ -294,6 +299,7 @@ class Brian2LIFEngine:
             weight_scale=self._weight_scale, model_sha256=self.model_sha256,
             params={k: float(self.params[k]) for k in _NUMERIC_PARAMS},
             input_rates={k: (v if np.ndim(v) == 0 else np.asarray(v).copy()) for k, v in self._rates.items()},
+            variant=("poisson_delay_v1" if self.poisson_delay_v1 else None),
             spike_total=int(self._total.sum()), dev_subnet=bool(self.meta.get("dev_subnet", False)),
             control=self.meta.get("control"), sign_rules=self.meta.get("sign_rules", []))
         if include_dynamics:
