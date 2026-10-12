@@ -81,3 +81,25 @@ rule: 77 % of the internal LN + PN synapses are excitatory (650,947 / 192,129), 
 excitatory, and the leading eigenvalue (~2,184 synapses) exceeds the ~2.3 Hz self-sustaining threshold. The ignited
 population in seed 3 (KCg-m, KCab, lLN1_bc, lLN2P, DA1 lPN, ORNs) is that mode. It is a property of the Shiu
 sign rule, not of the port; its occurrence in a given realisation is stochastic.
+
+## Baseline of the new stack at the new defaults (5 ms interval, latency 1; seeds 0-4)
+Not a v1 comparison: the baseline of the stack as it will be used. Same F0 flight and REPLAY terms (recorded per
+25 ms block, constant within it), 5 ms coupling intervals inside one `run()`, one FlyVis render per interval
+(`subframes = 1`, FlyVis dt 5 ms). The boundary-layer transduction was recalibrated at dt = 5 ms
+(`scripts/make_transduction.py --kind boundary --interval-ms 5 --subframes 1`; a_ref relative to the 12.5 ms
+calibration: median 1.00, range 0.91-1.03 over 64 types), because a0 / a_ref depend on the FlyVis step. Perch
+calibration, input cut and flight lengths are the v1 ones (10 + 8 + 300 steps of 25 ms = 50 + 40 + 1500 intervals).
+`scripts/f0_table.py --prefix "f0_5ms_seed{seed}" --latencies 1` -> `docs/results/f0_baseline_5ms.{json,md}`.
+
+| seed | latency | S1 | S2 | MN9 after landing (Hz) | feeding fraction | network (Hz) | last cut step (Hz) | ignited | max pos diff to v1 (mm) | wall (s) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | 1 | pass | pass | 51.3 | 0.99 | 7.41 | 0.000 | no | 0.047 | 300 |
+| 1 | 1 | pass | pass | 37.9 | 0.84 | 8.38 | 0.000 | no | 0.162 | 300 |
+| 2 | 1 | pass | pass | 54.5 | 0.99 | 7.40 | 0.000 | no | 0.055 | 298 |
+| 3 | 1 | pass | pass | 52.9 | 1.00 | 7.40 | 0.000 | no | 0.027 | 298 |
+| 4 | 1 | pass | pass | 51.2 | 1.00 | 7.40 | 0.000 | no | 0.030 | 298 |
+
+S1 and S2 pass in 5 / 5; no seed ignites (seed 3, which ignited at 25 ms, does not at 5 ms: different noise
+realisation); trajectory within 0.16 mm of v1. Seed 1 has a lower MN9 rate after landing (37.9 Hz) and feeds in 84 %
+of landed intervals without ignition: within-realisation variability of the single MN9 pair, reported as is. Wall
+time ~300 s per flight (25 ms: ~220 s), i.e. the 5 ms coupling costs ~35 % more wall time at full-brain scale.

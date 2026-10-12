@@ -52,3 +52,16 @@ ablation constant was +0.244, "not brainless"); it is a property of this control
   command is a few DNp15 spikes per interval.
 - v31 should not be used as a reproduction target without fixing the baseline realisation; a better control for
   F2 is a constant zero command (a pre-registration decision for F2, not made here).
+
+## Finding about v1: its steering-ablated control is fragile (decision of the project owner, 2026-10-12)
+The v1 control "ablate the steer readout" replaces the readout by its perch baseline. With one DNp15 neuron per side
+and a 10-interval baseline (one spike = 4 Hz) the constant it produces depends on the noise realisation of the
+perch: DNp15 L/R baseline 12/44 Hz (this port, seed 6) vs 8/52 Hz (v1, seed 6) shifts the constant by 0.28 and
+changes the heading by ~120 deg in 1.5 s (+123.7 deg vs +5.6 deg). A control whose effect size equals the effect
+under test is not a control. For all new experiments the control arm is a constant zero command, named
+**`zero_turn`** (yaw command exactly 0, readouts still recorded). The perch-baseline ablation is kept only to
+reproduce v1.
+
+## Decisions on further runs
+No further v30 seeds: the latency effect is measured in F2 with DNa02 as the drive and >= 10 seeds per latency,
+pre-registered (planned item in docs/05, F2).
