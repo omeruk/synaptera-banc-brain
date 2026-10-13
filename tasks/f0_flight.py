@@ -19,6 +19,7 @@ body / scaffold / coupling reproduction; the brain's contribution is the recorde
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import sys
@@ -141,6 +142,8 @@ def build(args, log=print):
                    meta=dict(experiment="F0 acceptance (v1 n1 configuration)", name=args.name, seed=args.seed,
                              interval_ms=args.interval_ms, latency_intervals=args.latency,
                              n_steps=args.n_steps, calib_steps=args.calib_steps, persist_steps=args.persist_steps,
+                             counts_unit="coupling intervals (n_steps, calib_steps, persist_steps)",
+                             v1_steps=getattr(args, "v1_steps", None), stride=getattr(args, "stride", None),
                              dataset="flywire783", sign_rule="shiu_v1", sha256=cx.meta.get("sha256"),
                              readouts=readouts.record(), arena=arena.geometry_record(),
                              replayed_terms="REPLAY: turn_hand, turn_flyvis, thrust_hand, pitch_hand, roll_hand from the v1 "
@@ -297,14 +300,23 @@ class F0Decider:
         return out
 
 
+def to_intervals(args, stride: int):
+    """Copy of ``args`` with n_steps / calib_steps / persist_steps (given in v1 steps of 25 ms) converted to coupling
+    intervals; the original is not modified and the v1-step values are kept in ``v1_steps`` (run meta)."""
+    a = copy.copy(args)
+    a.v1_steps = dict(n_steps=args.n_steps, calib_steps=args.calib_steps, persist_steps=args.persist_steps)
+    a.stride = stride
+    a.n_steps, a.calib_steps, a.persist_steps = (args.n_steps * stride, args.calib_steps * stride,
+                                                 args.persist_steps * stride)
+    return a
+
+
 def run(args, log=print) -> dict:
     from coupling.scheduler import CoupledLoop, LoopConfig
     stride = int(round(25.0 / args.interval_ms))
     if abs(stride * args.interval_ms - 25.0) > 1e-9:
         raise SystemExit("the interval must divide 25 ms (the unit of the replayed terms)")
-    # n_steps / calib_steps / persist_steps are given in v1 steps of 25 ms and converted to intervals
-    args.n_steps, args.calib_steps, args.persist_steps = (args.n_steps * stride, args.calib_steps * stride,
-                                                          args.persist_steps * stride)
+    args = to_intervals(args, stride)
     terms = RecordedTerms(V1_RECORD)
     if free_gb() < MIN_FREE_GB:
         raise SystemExit(f"only {free_gb():.1f} GB RAM available (< {MIN_FREE_GB}); not starting a full-brain run")

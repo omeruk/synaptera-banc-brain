@@ -35,3 +35,12 @@ sources:
     sha256: fc45837d7122c6ce2a7f3f2f23c515992e4b232aadb919efabb72337fac88e4e
     origin: "philshiu/Drosophila_brain_model@91bdd1e"
     licence: "MIT (Shiu et al.)"
+  visual_transduction_5ms:
+    path: data/visual_transduction_5ms.json
+    sha256: 958e3314238a2caae833912e16f84d88579b8f2a74823ae74f0940b64b4288cc
+    bytes: 1470714
+    made_by: "env -u PYTHONPATH python scripts/make_transduction.py --kind boundary --interval-ms 5 --subframes 1 --out data/visual_transduction_5ms.json"
+    inputs: "FlyVis flow/0000/000 network; the standard stimulus set of sense/vision_boundary.standard_stimuli only (4 grating directions, ON step, OFF step; 1.0 s grey adaptation, 1.0 s stimulus, 0.25 s skipped)"
+    uses_behaviour: false
+    origin: "constants a0 (grey steady state) and a_ref (largest mean positive response per FlyVis type, central columns): origin class E, open loop; recalibrated at the 5 ms FlyVis step because a0 / a_ref depend on it"
+    licence: "derived from the FlyVis model; no FlyWire or BANC data"

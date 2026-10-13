@@ -4,7 +4,8 @@ A **v1 reproduction only, not a new result.** Hover at (440, -170, 160) mm, yaw 
 brain-only path (yaw command = hand-made bridge `turn_dn`, no HAND odour / FlyVis terms), sB vision, no olfaction,
 seed 6, 60 steps of 25 ms. The v1 drive is DNp15, which fails the symmetry gate (R/L 1.66x): run with
 `--waive DNp15` as a labelled exception (recorded in the run meta). The DNa02 version is a new experiment for F2
-and was not run. Code `tasks/hover_yaw.py`; records `runs/hover_yaw/`; numbers `docs/results/f0_latency_hover_yaw.json`.
+and was not run. Since 2026-10-13 `--waive` defaults to none (CLAUDE.md rule 5): the v1 reproduction
+commands in this report need `--waive DNp15` explicitly; the records here were run with it. Code `tasks/hover_yaw.py`; records `runs/hover_yaw/`; numbers `docs/results/f0_latency_hover_yaw.json`.
 Latency 0 = v1 same-interval coupling (labelled ACAUSAL), latency 1 = causal.
 
 ## v30 (steering on)

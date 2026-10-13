@@ -1,0 +1,302 @@
+{
+ "flywire_reference": {
+  "labellar": {
+   "n_driven": 36,
+   "network_rate_hz": 0.0917082013959516,
+   "nondriven_per_driven_grn": 0.0018362463962487048,
+   "mn9_rate_hz": 59.666666666666664
+  },
+  "leg": {
+   "n_driven": 12,
+   "network_rate_hz": 0.018150255940488125,
+   "nondriven_per_driven_grn": 0.0007940973499630904,
+   "mn9_rate_hz": 1.0
+  }
+ },
+ "variants": {
+  "R": {
+   "gate1_pass": true,
+   "gate2_ignited": 0,
+   "gate2_ci": [
+    0.0,
+    0.16843347098308528
+   ],
+   "last_cut_step_mean_hz": 0.0,
+   "gate3_labellar": {
+    "G": 0.00010682229659039715,
+    "G_ratio": 0.058174271605720244,
+    "network_rate_hz": 0.0662340507091616,
+    "literal_ratio": 0.7222260354141615,
+    "pass_": false
+   },
+   "gate3_leg": {
+    "G": 6.799329068662715e-05,
+    "G_ratio": 0.08562336933851684,
+    "network_rate_hz": 0.2062718782777925,
+    "literal_ratio": 11.364681520421861,
+    "pass_": false
+   },
+   "gate3_pass": false,
+   "used": false,
+   "mn9_by_condition": {
+    "labellar": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.0662340507091616
+    },
+    "leg": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.2062718782777925
+    },
+    "labellar_left": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.026812079547417152
+    },
+    "labellar_right": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.0387606205743219
+    }
+   }
+  },
+  "A_wsyn_struct": {
+   "gate1_pass": true,
+   "gate2_ignited": 20,
+   "gate2_ci": [
+    0.8315665290169146,
+    1.0
+   ],
+   "last_cut_step_mean_hz": 1.9136747924328013,
+   "gate3_labellar": {
+    "G": 0.019462919409812665,
+    "G_ratio": 10.599296178102108,
+    "network_rate_hz": 1.8072921274005551,
+    "literal_ratio": 19.70698476134695,
+    "pass_": false
+   },
+   "gate3_leg": {
+    "G": 0.006066662769196641,
+    "G_ratio": 7.639696530253651,
+    "network_rate_hz": 1.9905367892060843,
+    "literal_ratio": 109.66990194147927,
+    "pass_": false
+   },
+   "gate3_pass": false,
+   "used": false,
+   "mn9_by_condition": {
+    "labellar": {
+     "per_neuron": [
+      32.0,
+      11.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.8072921274005551
+    },
+    "leg": {
+     "per_neuron": [
+      8.0,
+      4.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.9905367892060843
+    },
+    "labellar_left": {
+     "per_neuron": [
+      6.0,
+      4.666666666666667
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.518058662218347
+    },
+    "labellar_right": {
+     "per_neuron": [
+      35.0,
+      10.333333333333334
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.7442131823600526
+    }
+   }
+  },
+  "A2_wsyn_struct_class": {
+   "gate1_pass": true,
+   "gate2_ignited": 19,
+   "gate2_ci": [
+    0.7512672372279722,
+    0.9987349105020502
+   ],
+   "last_cut_step_mean_hz": 1.7337453084126317,
+   "gate3_labellar": {
+    "G": 0.01918790233978763,
+    "G_ratio": 10.4495248453513,
+    "network_rate_hz": 1.7825546667340655,
+    "literal_ratio": 19.437243775372476,
+    "pass_": false
+   },
+   "gate3_leg": {
+    "G": 0.005370747686004633,
+    "G_ratio": 6.763336618935027,
+    "network_rate_hz": 1.7835193118583952,
+    "literal_ratio": 98.26414116177085,
+    "pass_": false
+   },
+   "gate3_pass": false,
+   "used": false,
+   "mn9_by_condition": {
+    "labellar": {
+     "per_neuron": [
+      37.0,
+      15.333333333333334
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.7825546667340655
+    },
+    "leg": {
+     "per_neuron": [
+      6.0,
+      6.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.7835193118583952
+    },
+    "labellar_left": {
+     "per_neuron": [
+      2.3333333333333335,
+      2.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.9468118268019698
+    },
+    "labellar_right": {
+     "per_neuron": [
+      39.666666666666664,
+      14.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.724261035498098
+    }
+   }
+  },
+  "B_wsyn_fit_mn9": {
+   "gate1_pass": true,
+   "gate2_ignited": 18,
+   "gate2_ci": [
+    0.6830172859809177,
+    0.9876514728297052
+   ],
+   "last_cut_step_mean_hz": 1.4155893391970278,
+   "gate3_labellar": {
+    "G": 0.014608171507622739,
+    "G_ratio": 7.95545278534841,
+    "network_rate_hz": 1.3706132868281709,
+    "literal_ratio": 14.945373106932133,
+    "pass_": false
+   },
+   "gate3_leg": {
+    "G": 0.0042082762662713,
+    "G_ratio": 5.299446303991444,
+    "network_rate_hz": 1.4377656459963015,
+    "literal_ratio": 79.21462103402355,
+    "pass_": false
+   },
+   "gate3_pass": false,
+   "used": false,
+   "mn9_by_condition": {
+    "labellar": {
+     "per_neuron": [
+      31.0,
+      8.666666666666666
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.3706132868281709
+    },
+    "leg": {
+     "per_neuron": [
+      0.6666666666666666,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.4377656459963015
+    },
+    "labellar_left": {
+     "per_neuron": [
+      0.3333333333333333,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.1483173471837838
+    },
+    "labellar_right": {
+     "per_neuron": [
+      33.333333333333336,
+      7.666666666666667
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 1.2347204845972712
+    }
+   }
+  }
+ }
+}

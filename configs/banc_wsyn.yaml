@@ -1,0 +1,25 @@
+# BANC w_syn variants (prereg/03_banc_wsyn.md). Structural k = FlyWire / BANC mean input synapses per
+# neuron on matched cell types; computed from data only by scripts/f2_wsyn_k.py (no simulation).
+groups:
+  - origin: P
+    source: "structural prior: docs/results/f2_wsyn_k.json, FlyWire v783 (Shiu graph, all pairs) / BANC export (pairs >= 3), mean input synapses per postsynaptic neuron, matched cell types, as the engine runs them"
+    unit: "ratio"
+    values:
+      wsyn_struct_k_global: 2.70709218358805
+  - origin: P
+    source: "structural prior, per postsynaptic super class: as above, BANC input counted in brain and SEZ neuropils only (FlyWire is brain only); neurons of other classes use wsyn_struct_k_global"
+    unit: "ratio"
+    values:
+      wsyn_struct_class_k_sensory: 1.899132141560128
+      wsyn_struct_class_k_central: 2.801518836455231
+      wsyn_struct_class_k_optic: 3.6017016923347396
+      wsyn_struct_class_k_visual_projection: 4.5662119815626365
+      wsyn_struct_class_k_descending: 1.8372947271328797
+      wsyn_struct_class_k_ascending: 1.6842895938059743
+      wsyn_struct_class_k_motor: 3.4968697205406167
+  - origin: F
+    source: "variant B (wsyn_fit_mn9), calibration run of 2026-10-13, runs/f2/banc_v2.json; the FlyWire validation of the operational definition FAILED (docs/results/f2_wsyn_calibration.md), so B is reported and not used"
+    fitted_to: "Shiu et al. criterion, operational definition of prereg/03 section 4: labellar sugar GRNs at 100 Hz give 0.80 of the maximal (max over 20-200 Hz) MN9 rate; open-loop physiology, seeds 1000-1001"
+    unit: "scale of the recurrent synaptic weights"
+    values:
+      wsyn_fit_mn9_scale: 2.395519204141844

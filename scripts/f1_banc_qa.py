@@ -112,6 +112,9 @@ def main(argv=None):
                                "HSN", "HSE", "HSS"])]
     R["symmetry"]["critical_types"] = crit_t.drop(columns=["super_class"]).to_dict("records")
     R["symmetry"]["types_without_input_on_one_side"] = int((~np.isfinite(t["log2_total"])).sum())
+    vp = t[(t["super_class"] == "visual_projection") & np.isfinite(t["log2_total"])].sort_values("type")
+    R["symmetry"]["visual_projection_types"] = vp[["type", "n_left", "n_right", "log2_total", "log2_exc",
+                                                   "pass"]].to_dict("records")
     t = t[np.isfinite(t["log2_total"])].reset_index(drop=True)
     big = t[(t["n_left"] >= 10) & (t["n_right"] >= 10)].sort_values("log2_total")
     R["symmetry"]["largest_asymmetric_types_ge10_per_side"] = big.reindex(
@@ -131,7 +134,10 @@ def main(argv=None):
         flywire_by_super_class_ge5=Q.sparseness(fx, fx.neurons["super_class"].to_numpy(object), min_syn=5),
         banc_by_super_class_brain=Q.sparseness(cx, np.where(brain_like, bsc.to_numpy(object), None)),
         banc_by_super_class_brain_ge5=Q.sparseness(cx, np.where(brain_like, bsc.to_numpy(object), None), min_syn=5),
-        note="FlyWire v783 graph = Shiu model (threshold >= 5 synapses per pair); compare the *_ge5 blocks")
+        pair_threshold=dict(banc=Q.pair_threshold_profile(cx), flywire=Q.pair_threshold_profile(fx)),
+        note="The Shiu FlyWire graph keeps every pair (min 1 synapse per pair, 82 % of pairs below 5; the model "
+             "reads all rows of Connectivity_783.parquet); the BANC export keeps pairs with >= 3 synapses. The *_ge5 "
+             "blocks apply >= 5 to both (a sensitivity view); the unsuffixed blocks are the graphs as they are run.")
 
     # critical types
     R["critical_types"] = critical_types(cx)
@@ -215,15 +221,30 @@ def render(R) -> str:
     for r in s["critical_types"]:
         L.append(f"| {r['type']} | {r['n_left']} / {r['n_right']} | {r['log2_total']:+.2f} | {r['log2_exc']:+.2f} | "
                  f"{'pass' if r['pass'] else 'FAIL'} |")
+    vpt = s["visual_projection_types"]
+    vpp = [r for r in vpt if r["pass"]]
+    L += ["", f"Visual projection neuron (VPN) types with neurons and input on both sides: {len(vpt)}; passing the gate: "
+          f"{len(vpp)}. Passing types (n L / R, log2 total):", "",
+          ", ".join(f"{r['type']} ({r['n_left']}/{r['n_right']}, {r['log2_total']:+.2f})" for r in vpp), ""]
     L += ["", "Most asymmetric types with >= 10 neurons per side:", "", "| type | n L / R | log2 total | log2 exc |",
           "|---|---|---|---|"]
     for r in s["largest_asymmetric_types_ge10_per_side"]:
         L.append(f"| {r['type']} | {r['n_left']} / {r['n_right']} | {r['log2_total']:+.2f} | {r['log2_exc']:+.2f} |")
     sp = R["sparseness"]
     fb = sp["flywire_over_banc"]
+    pt = sp["pair_threshold"]
     L += ["", "## 3. Sparseness (mean per neuron)", "", f"{sp['note']}", "",
+          "| graph | pairs | synapses | min syn per pair | pairs < 5 syn | pairs >= 3 | synapses >= 3 | pairs >= 5 | "
+          "synapses >= 5 |", "|---|---|---|---|---|---|---|---|---|"]
+    for nm in ("flywire", "banc"):
+        v = pt[nm]
+        L.append(f"| {nm} | {v['pairs']:,} | {v['synapses']:,} | {v['min_syn_per_pair']} | "
+                 f"{v['frac_pairs_below_5'] * 100:.0f} % | {v['ge3']['pairs']:,} | {v['ge3']['synapses']:,} | "
+                 f"{v['ge5']['pairs']:,} | {v['ge5']['synapses']:,} |")
+    L += [""]
+    L += [
           f"FlyWire / BANC, all neurons: in-edges {fb['in_edges_all_pairs']:.2f}x and in-synapses "
-          f"{fb['in_syn_all_pairs']:.2f}x with all pairs; in-edges {fb['in_edges_ge5']:.2f}x and in-synapses "
+          f"{fb['in_syn_all_pairs']:.2f}x on the graphs as run (FlyWire all pairs, BANC export); in-edges {fb['in_edges_ge5']:.2f}x and in-synapses "
           f"{fb['in_syn_ge5']:.2f}x at >= 5 synapses per pair.", "",
           "| dataset / group | neurons | in-edges | in-synapses | synapses per edge |", "|---|---|---|---|---|"]
     for blk in ("banc_by_region", "banc_by_region_ge5", "banc_by_super_class_brain", "banc_by_super_class_brain_ge5",

@@ -199,6 +199,24 @@ def test_state_dict_audit_fields():
     assert eng.state_dict()["weights_sha256"] != s["weights_sha256"] and eng.state_dict()["weight_scale"] == 0.5
 
 
+def test_per_post_weight_scale_variant():
+    eng = make_engine()
+    w0 = np.asarray(eng.syn.w_[:]).copy()
+    post = np.asarray(eng.syn.j[:])
+    f = np.where(np.arange(40) % 2 == 0, 2.0, 0.5)
+    with pytest.raises(ValueError):
+        eng.set_weight_scale_per_post(f[:10])
+    eng.set_weight_scale_per_post(f)
+    np.testing.assert_allclose(np.asarray(eng.syn.w_[:]), w0 * f[post])
+    s = eng.state_dict()
+    assert s["post_scale_sha256"] and len(s["post_scale_sha256"]) == 64
+    w_in = [np.asarray(v.w_[:]).copy() for v in eng.poisson_synapses.values()]
+    eng.set_weight_scale(1.0)          # the global scale replaces it; the record forgets the per-post factors
+    assert eng.state_dict()["post_scale_sha256"] is None
+    for v, w in zip(eng.poisson_synapses.values(), w_in):
+        np.testing.assert_array_equal(np.asarray(v.w_[:]), w)
+
+
 def test_model_hash_is_enforced(tmp_path):
     bad = tmp_path / "model.py"
     bad.write_text(MODEL_PY.read_text() + "\n# changed\n")
@@ -278,3 +296,24 @@ def test_full_brain_matches_v1_totals():
     eng.set_inputs({"sugar": 100.0})
     eng.advance(25)
     assert eng.spike_counts()[eng.groups["sugar"]].sum() > 0
+
+
+def test_weight_scale_after_a_run_stores_the_pristine_state():
+    """Regression (found in the F2 calibration): set_weight_scale after a run must not store the dynamic state of
+    that run as the new initial state (silent engine with no input fired after the scale change)."""
+    eng = make_engine()
+    first = next(iter(eng.poisson_synapses))
+    eng.reset(1)
+    eng.set_inputs({first: 300.0})
+    eng.advance(100.0)
+    assert eng.spike_counts().sum() > 0
+    eng.set_weight_scale(2.0)
+    eng.reset(2)
+    eng.advance(100.0)
+    assert eng.spike_counts().sum() == 0 and float(np.abs(np.asarray(eng.neu.g_[:])).max()) == 0.0
+    eng.set_inputs({first: 300.0})
+    eng.advance(50.0)
+    eng.set_weight_scale_per_post(np.full(40, 1.5))
+    eng.reset(3)
+    eng.advance(100.0)
+    assert eng.spike_counts().sum() == 0

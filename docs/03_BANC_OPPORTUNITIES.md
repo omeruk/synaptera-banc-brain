@@ -167,6 +167,18 @@ larger than those of the 626 snapshot.
 3. The sparseness (~2.6×) can produce silent paths with the Shiu weight (w_syn); compensating for it is a **model variant**
    decision (e.g. input normalisation or w_syn scaling) and must be pre-registered.
 
+### Correction note (2026-10-13; numbers from `scripts/f1_banc_qa.py`, `docs/results/f1_banc_qa.md`)
+
+The first-look text above has four errors, corrected here (the text above is left unchanged):
+- **Wing motor neurons: 64, not 62** (all neurons with body part wing; the "62" listed power / steering / tension types only).
+- **Haltere motor neurons: 27, not 25.**
+- **Mean input per neuron: 19.2 unique in-edges, not 25.** The "25" counted neuropil rows (one row per pair and neuropil)
+  instead of unique pairs; the synapse figure (149 per neuron) is unaffected.
+- **DNg02 family: 35 neurons, not 38.**
+- Also: "~2.6x sparser than FlyWire" is the ratio of mean in-synapses per neuron on the graphs *as they are run*; the
+  Shiu FlyWire graph is not thresholded (minimum 1 synapse per pair; 82 % of its pairs have < 5 synapses), while the
+  BANC export keeps pairs with >= 3 synapses. The in-edge ratio is larger (5.7x) than the in-synapse ratio.
+
 ## Sources
 - [Bates et al. 2026, *Nature* 656:957–970](https://www.nature.com/articles/s41586-026-10735-w); [BANC-project repository](https://github.com/htem/BANC-project); Dataverse [10.7910/DVN/7WTH1N](https://doi.org/10.7910/DVN/7WTH1N)
 - [Stürner et al. 2025, *Nature* 643:158–172](https://www.nature.com/articles/s41586-025-08925-z) (DN/AN cross-dataset matching)

@@ -8,7 +8,7 @@ haltere attitude PD. A 0.1 s body-z torque pulse of ``--yaw-perturb DEG`` turns 
 The v1 drive is DNp15, which FAILS the symmetry gate (R/L 1.66x): it is run only as a labelled exception
 (``--waive DNp15``) to reproduce v1. Nothing here is a new result; the DNa02 version is a new experiment (F2).
 
-    nohup env -u PYTHONPATH python scripts/run_hover_yaw.py --name hy_v30_lat1 --latency 1 &
+    nohup env -u PYTHONPATH python scripts/run_hover_yaw.py --name hy_v30_lat1 --v1 v30 --latency 1 --waive DNp15 &
 """
 from __future__ import annotations
 
@@ -221,8 +221,13 @@ def parse_args(argv=None):
     ap.add_argument("--perturb-deg", type=float, default=30.0)
     ap.add_argument("--ablate-steer", action="store_true", help="v1 control: readout replaced by the perch baseline")
     ap.add_argument("--zero-turn", action="store_true", help="control arm zero_turn: yaw command exactly 0")
-    ap.add_argument("--waive", nargs="*", default=["DNp15"])
-    return ap.parse_args(argv)
+    ap.add_argument("--waive", nargs="*", default=[],
+                    help="readout types allowed to fail the symmetry gate (rule 5); none unless named, e.g. DNp15 to "
+                         "reproduce v1")
+    a = ap.parse_args(argv)
+    if a.zero_turn and a.ablate_steer:
+        ap.error("--zero-turn and --ablate-steer are two different control arms and cannot be combined")
+    return a
 
 
 def main(argv=None):

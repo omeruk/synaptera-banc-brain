@@ -1,0 +1,489 @@
+{
+ "definition": "k = mean input synapses per postsynaptic neuron, FlyWire / BANC",
+ "graphs": {
+  "flywire": {
+   "pairs": 15091983,
+   "synapses": 54492922
+  },
+  "banc": {
+   "pairs": 3037361,
+   "synapses": 23556214
+  }
+ },
+ "as_run": {
+  "matched": {
+   "__all__": {
+    "n_flywire": 131788,
+    "n_banc": 90558,
+    "mean_in_syn_flywire": 391.69807569733206,
+    "mean_in_syn_banc": 144.69329048786412,
+    "k": 2.70709218358805
+   },
+   "sensory": {
+    "n_flywire": 15933,
+    "n_banc": 8102,
+    "mean_in_syn_flywire": 25.83072867633214,
+    "mean_in_syn_banc": 13.682670945445569,
+    "k": 1.8878425695774106
+   },
+   "central": {
+    "n_flywire": 29710,
+    "n_banc": 28411,
+    "mean_in_syn_flywire": 708.8830696735106,
+    "mean_in_syn_banc": 253.03526802998837,
+    "k": 2.801518836455231
+   },
+   "optic": {
+    "n_flywire": 76535,
+    "n_banc": 45930,
+    "mean_in_syn_flywire": 287.32726203697655,
+    "mean_in_syn_banc": 79.77541911604615,
+    "k": 3.6017016923347396
+   },
+   "visual_projection": {
+    "n_flywire": 7987,
+    "n_banc": 6734,
+    "mean_in_syn_flywire": 714.8413672217354,
+    "mean_in_syn_banc": 156.55019305019306,
+    "k": 4.5662119815626365
+   },
+   "descending": {
+    "n_flywire": 961,
+    "n_banc": 814,
+    "mean_in_syn_flywire": 1808.2185223725287,
+    "mean_in_syn_banc": 1031.4275184275184,
+    "k": 1.7531222408427507
+   },
+   "ascending": {
+    "n_flywire": 54,
+    "n_banc": 25,
+    "mean_in_syn_flywire": 86.37037037037037,
+    "mean_in_syn_banc": 654.08,
+    "k": 0.1320486337609625
+   },
+   "motor": {
+    "n_flywire": 32,
+    "n_banc": 31,
+    "mean_in_syn_flywire": 1602.46875,
+    "mean_in_syn_banc": 458.258064516129,
+    "k": 3.4968697205406167
+   }
+  },
+  "all": {
+   "__all__": {
+    "n_flywire": 138639,
+    "n_banc": 158262,
+    "mean_in_syn_flywire": 393.05622516030843,
+    "mean_in_syn_banc": 148.8431461753295,
+    "k": 2.640741177946538
+   },
+   "sensory": {
+    "n_flywire": 16353,
+    "n_banc": 16557,
+    "mean_in_syn_flywire": 26.06121201002874,
+    "mean_in_syn_banc": 18.744881319079543,
+    "k": 1.3903108569432363
+   },
+   "central": {
+    "n_flywire": 32380,
+    "n_banc": 31782,
+    "mean_in_syn_flywire": 695.2223903644225,
+    "mean_in_syn_banc": 239.26046189667107,
+    "k": 2.9057136513623667
+   },
+   "optic": {
+    "n_flywire": 77521,
+    "n_banc": 72582,
+    "mean_in_syn_flywire": 287.7925465357774,
+    "mean_in_syn_banc": 69.83475241795486,
+    "k": 4.121050573980191
+   },
+   "visual_projection": {
+    "n_flywire": 8037,
+    "n_banc": 7321,
+    "mean_in_syn_flywire": 728.0811247978102,
+    "mean_in_syn_banc": 158.21404179756863,
+    "k": 4.601874249122425
+   },
+   "descending": {
+    "n_flywire": 1299,
+    "n_banc": 1316,
+    "mean_in_syn_flywire": 1703.888375673595,
+    "mean_in_syn_banc": 870.1998480243161,
+    "k": 1.9580426031354385
+   },
+   "ascending": {
+    "n_flywire": 1736,
+    "n_banc": 1849,
+    "mean_in_syn_flywire": 132.8778801843318,
+    "mean_in_syn_banc": 571.3212547322877,
+    "k": 0.232579969822051
+   },
+   "motor": {
+    "n_flywire": 110,
+    "n_banc": 805,
+    "mean_in_syn_flywire": 2226.6272727272726,
+    "mean_in_syn_banc": 1719.142857142857,
+    "k": 1.2951961865623158
+   }
+  },
+  "n_common_types": 7354
+ },
+ "as_run_brain_neuropils": {
+  "matched": {
+   "__all__": {
+    "n_flywire": 131788,
+    "n_banc": 90558,
+    "mean_in_syn_flywire": 391.69807569733206,
+    "mean_in_syn_banc": 144.08810927803177,
+    "k": 2.7184621802588387
+   },
+   "sensory": {
+    "n_flywire": 15933,
+    "n_banc": 8102,
+    "mean_in_syn_flywire": 25.83072867633214,
+    "mean_in_syn_banc": 13.601333004196494,
+    "k": 1.899132141560128
+   },
+   "central": {
+    "n_flywire": 29710,
+    "n_banc": 28411,
+    "mean_in_syn_flywire": 708.8830696735106,
+    "mean_in_syn_banc": 253.03526802998837,
+    "k": 2.801518836455231
+   },
+   "optic": {
+    "n_flywire": 76535,
+    "n_banc": 45930,
+    "mean_in_syn_flywire": 287.32726203697655,
+    "mean_in_syn_banc": 79.77541911604615,
+    "k": 3.6017016923347396
+   },
+   "visual_projection": {
+    "n_flywire": 7987,
+    "n_banc": 6734,
+    "mean_in_syn_flywire": 714.8413672217354,
+    "mean_in_syn_banc": 156.55019305019306,
+    "k": 4.5662119815626365
+   },
+   "descending": {
+    "n_flywire": 961,
+    "n_banc": 814,
+    "mean_in_syn_flywire": 1808.2185223725287,
+    "mean_in_syn_banc": 984.1744471744472,
+    "k": 1.8372947271328797
+   },
+   "ascending": {
+    "n_flywire": 54,
+    "n_banc": 25,
+    "mean_in_syn_flywire": 86.37037037037037,
+    "mean_in_syn_banc": 51.28,
+    "k": 1.6842895938059743
+   },
+   "motor": {
+    "n_flywire": 32,
+    "n_banc": 31,
+    "mean_in_syn_flywire": 1602.46875,
+    "mean_in_syn_banc": 458.258064516129,
+    "k": 3.4968697205406167
+   }
+  },
+  "all": {
+   "__all__": {
+    "n_flywire": 138639,
+    "n_banc": 158262,
+    "mean_in_syn_flywire": 393.05622516030843,
+    "mean_in_syn_banc": 100.83694127459529,
+    "k": 3.897938792986122
+   },
+   "sensory": {
+    "n_flywire": 16353,
+    "n_banc": 16557,
+    "mean_in_syn_flywire": 26.06121201002874,
+    "mean_in_syn_banc": 7.17974270701214,
+    "k": 3.6298253396428675
+   },
+   "central": {
+    "n_flywire": 32380,
+    "n_banc": 31782,
+    "mean_in_syn_flywire": 695.2223903644225,
+    "mean_in_syn_banc": 239.26046189667107,
+    "k": 2.9057136513623667
+   },
+   "optic": {
+    "n_flywire": 77521,
+    "n_banc": 72582,
+    "mean_in_syn_flywire": 287.7925465357774,
+    "mean_in_syn_banc": 69.83475241795486,
+    "k": 4.121050573980191
+   },
+   "visual_projection": {
+    "n_flywire": 8037,
+    "n_banc": 7321,
+    "mean_in_syn_flywire": 728.0811247978102,
+    "mean_in_syn_banc": 158.21404179756863,
+    "k": 4.601874249122425
+   },
+   "descending": {
+    "n_flywire": 1299,
+    "n_banc": 1316,
+    "mean_in_syn_flywire": 1703.888375673595,
+    "mean_in_syn_banc": 821.5873860182371,
+    "k": 2.0738979257354044
+   },
+   "ascending": {
+    "n_flywire": 1736,
+    "n_banc": 1849,
+    "mean_in_syn_flywire": 132.8778801843318,
+    "mean_in_syn_banc": 49.10816657652785,
+    "k": 2.7058204255551095
+   },
+   "motor": {
+    "n_flywire": 110,
+    "n_banc": 805,
+    "mean_in_syn_flywire": 2226.6272727272726,
+    "mean_in_syn_banc": 112.88944099378882,
+    "k": 19.723964022904337
+   }
+  },
+  "n_common_types": 7354
+ },
+ "both_ge3": {
+  "matched": {
+   "__all__": {
+    "n_flywire": 131788,
+    "n_banc": 90558,
+    "mean_in_syn_flywire": 298.4538804747018,
+    "mean_in_syn_banc": 144.69329048786412,
+    "k": 2.062665652763865
+   },
+   "sensory": {
+    "n_flywire": 15933,
+    "n_banc": 8102,
+    "mean_in_syn_flywire": 17.075001569070483,
+    "mean_in_syn_banc": 13.682670945445569,
+    "k": 1.2479289779861358
+   },
+   "central": {
+    "n_flywire": 29710,
+    "n_banc": 28411,
+    "mean_in_syn_flywire": 566.7306630764052,
+    "mean_in_syn_banc": 253.03526802998837,
+    "k": 2.239729929699916
+   },
+   "optic": {
+    "n_flywire": 76535,
+    "n_banc": 45930,
+    "mean_in_syn_flywire": 210.41425491605148,
+    "mean_in_syn_banc": 79.77541911604615,
+    "k": 2.63758256926197
+   },
+   "visual_projection": {
+    "n_flywire": 7987,
+    "n_banc": 6734,
+    "mean_in_syn_flywire": 504.68861900588456,
+    "mean_in_syn_banc": 156.55019305019306,
+    "k": 3.2238134567107912
+   },
+   "descending": {
+    "n_flywire": 961,
+    "n_banc": 814,
+    "mean_in_syn_flywire": 1613.502601456816,
+    "mean_in_syn_banc": 1031.4275184275184,
+    "k": 1.5643392993011382
+   },
+   "ascending": {
+    "n_flywire": 54,
+    "n_banc": 25,
+    "mean_in_syn_flywire": 50.648148148148145,
+    "mean_in_syn_banc": 654.08,
+    "k": 0.07743417953178226
+   },
+   "motor": {
+    "n_flywire": 32,
+    "n_banc": 31,
+    "mean_in_syn_flywire": 1488.96875,
+    "mean_in_syn_banc": 458.258064516129,
+    "k": 3.2491926826692947
+   }
+  },
+  "all": {
+   "__all__": {
+    "n_flywire": 138639,
+    "n_banc": 158262,
+    "mean_in_syn_flywire": 300.32987831706805,
+    "mean_in_syn_banc": 148.8431461753295,
+    "k": 2.0177608847591477
+   },
+   "sensory": {
+    "n_flywire": 16353,
+    "n_banc": 16557,
+    "mean_in_syn_flywire": 17.35675411239528,
+    "mean_in_syn_banc": 18.744881319079543,
+    "k": 0.9259463325984704
+   },
+   "central": {
+    "n_flywire": 32380,
+    "n_banc": 31782,
+    "mean_in_syn_flywire": 553.9889437924645,
+    "mean_in_syn_banc": 239.26046189667107,
+    "k": 2.3154220275296242
+   },
+   "optic": {
+    "n_flywire": 77521,
+    "n_banc": 72582,
+    "mean_in_syn_flywire": 211.26106474374686,
+    "mean_in_syn_banc": 69.83475241795486,
+    "k": 3.0251566366179397
+   },
+   "visual_projection": {
+    "n_flywire": 8037,
+    "n_banc": 7321,
+    "mean_in_syn_flywire": 516.4677118327734,
+    "mean_in_syn_banc": 158.21404179756863,
+    "k": 3.2643607733223985
+   },
+   "descending": {
+    "n_flywire": 1299,
+    "n_banc": 1316,
+    "mean_in_syn_flywire": 1515.986143187067,
+    "mean_in_syn_banc": 870.1998480243161,
+    "k": 1.742112626920047
+   },
+   "ascending": {
+    "n_flywire": 1736,
+    "n_banc": 1849,
+    "mean_in_syn_flywire": 92.71774193548387,
+    "mean_in_syn_banc": 571.3212547322877,
+    "k": 0.16228652648137512
+   },
+   "motor": {
+    "n_flywire": 110,
+    "n_banc": 805,
+    "mean_in_syn_flywire": 2110.2,
+    "mean_in_syn_banc": 1719.142857142857,
+    "k": 1.2274721622070799
+   }
+  },
+  "n_common_types": 7354
+ },
+ "both_ge5": {
+  "matched": {
+   "__all__": {
+    "n_flywire": 131788,
+    "n_banc": 90558,
+    "mean_in_syn_flywire": 244.02412207484747,
+    "mean_in_syn_banc": 111.65740188608406,
+    "k": 2.1854719700876397
+   },
+   "sensory": {
+    "n_flywire": 15933,
+    "n_banc": 8102,
+    "mean_in_syn_flywire": 13.00376576915835,
+    "mean_in_syn_banc": 9.116761293507777,
+    "k": 1.426358039934487
+   },
+   "central": {
+    "n_flywire": 29710,
+    "n_banc": 28411,
+    "mean_in_syn_flywire": 491.31373274991586,
+    "mean_in_syn_banc": 205.10749357643166,
+    "k": 2.3953963074822116
+   },
+   "optic": {
+    "n_flywire": 76535,
+    "n_banc": 45930,
+    "mean_in_syn_flywire": 163.1322532174822,
+    "mean_in_syn_banc": 56.564249945569344,
+    "k": 2.884016907754653
+   },
+   "visual_projection": {
+    "n_flywire": 7987,
+    "n_banc": 6734,
+    "mean_in_syn_flywire": 372.81945661700263,
+    "mean_in_syn_banc": 99.75348975348976,
+    "k": 3.737407659003328
+   },
+   "descending": {
+    "n_flywire": 961,
+    "n_banc": 814,
+    "mean_in_syn_flywire": 1485.1862643080126,
+    "mean_in_syn_banc": 909.3218673218673,
+    "k": 1.633289946806382
+   },
+   "ascending": {
+    "n_flywire": 54,
+    "n_banc": 25,
+    "mean_in_syn_flywire": 38.629629629629626,
+    "mean_in_syn_banc": 532.84,
+    "k": 0.072497615850217
+   },
+   "motor": {
+    "n_flywire": 32,
+    "n_banc": 31,
+    "mean_in_syn_flywire": 1411.1875,
+    "mean_in_syn_banc": 408.64516129032256,
+    "k": 3.453332215029997
+   }
+  },
+  "all": {
+   "__all__": {
+    "n_flywire": 138639,
+    "n_banc": 158262,
+    "mean_in_syn_flywire": 246.3489061519486,
+    "mean_in_syn_banc": 116.8131705652652,
+    "k": 2.108913789086051
+   },
+   "sensory": {
+    "n_flywire": 16353,
+    "n_banc": 16557,
+    "mean_in_syn_flywire": 13.293646425732282,
+    "mean_in_syn_banc": 13.450021139095247,
+    "k": 0.9883736455321672
+   },
+   "central": {
+    "n_flywire": 32380,
+    "n_banc": 31782,
+    "mean_in_syn_flywire": 479.0053736874614,
+    "mean_in_syn_banc": 193.7709709898685,
+    "k": 2.472018234932139
+   },
+   "optic": {
+    "n_flywire": 77521,
+    "n_banc": 72582,
+    "mean_in_syn_flywire": 164.2298860953806,
+    "mean_in_syn_banc": 48.239522195585685,
+    "k": 3.404467511711984
+   },
+   "visual_projection": {
+    "n_flywire": 8037,
+    "n_banc": 7321,
+    "mean_in_syn_flywire": 383.7517730496454,
+    "mean_in_syn_banc": 101.7182078950963,
+    "k": 3.7726949873656355
+   },
+   "descending": {
+    "n_flywire": 1299,
+    "n_banc": 1316,
+    "mean_in_syn_flywire": 1392.5050038491147,
+    "mean_in_syn_banc": 760.7659574468086,
+    "k": 1.8303986794078864
+   },
+   "ascending": {
+    "n_flywire": 1736,
+    "n_banc": 1849,
+    "mean_in_syn_flywire": 74.8208525345622,
+    "mean_in_syn_banc": 466.4131963223364,
+    "k": 0.16041752918769006
+   },
+   "motor": {
+    "n_flywire": 110,
+    "n_banc": 805,
+    "mean_in_syn_flywire": 2027.7,
+    "mean_in_syn_banc": 1603.9167701863355,
+    "k": 1.2642177185817638
+   }
+  },
+  "n_common_types": 7354
+ }
+}

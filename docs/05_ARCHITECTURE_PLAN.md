@@ -167,6 +167,16 @@ GeNN/PyTorch.
 - **Ignition frequency** of the self-sustaining olfactory mode is reported alongside every F2 result that uses a
   perch + cut protocol (`docs/results/f0_ignition_frequency.md`).
 
+**Findings from the F2 prep calibration (2026-10-13; `docs/results/f2_wsyn_calibration.md`, PR #6; numbers from the records by script):**
+- **Uniform w_syn scaling cannot make BANC MN9 respond without self-sustained activity after the cut.** Ignited after
+  the cut (20 seeds, prereg/02 definition): A `wsyn_struct` 20/20, A2 `wsyn_struct_class` 19/20, B `wsyn_fit_mn9` 18/20;
+  the reference arm R is 0/20 but silent at MN9. The scale at which MN9 responds is already in the self-sustaining
+  regime of the BANC graph. Reported as a negative result; no variant is used for F2.
+- **The BANC sugar -> MN9 path is strongly lateralised.** Under A (labellar drive, 100 Hz, 1 s, 3 seeds) MN9 left 32 Hz
+  / right 11 Hz; right-sided labellar drive gives 35 / 10 Hz, left-sided drive 6 / 5 Hz, so right labellar drive
+  dominates. Any left/right MN9 readout is subject to the symmetry gate (rule 5).
+- Variant B's definition fails its FlyWire validation (it does not reproduce w_syn = 0.275 mV).
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
@@ -220,6 +230,13 @@ above ~2.3 Hz). Options (each labelled as a **model variant**): (i) remove amine
 | Muscle-model parameters uncertain | high | RQ1 | open-loop literature only; sensitivity analysis; origin class `P/F` |
 | Compute cost (5 ms coupling) | medium | schedule | GeNN/PyTorch; DEV subnet for development only |
 | Training shows no "topology advantage" | medium | RQ4 | reported anyway; task choice pre-registered |
+| Visual input on BANC (F1 QA, 2026-10-13): optic-lobe intrinsic types pass the symmetry gate at 16 % (median abs log2 1.40) | high | any visual task | visual input enters **only through visual projection neuron (VPN) types that pass the gate**, never through optic-lobe intrinsic types; 99 of 281 VPN types pass: H2, LC10c, LC11, LC12, LC14b, LC15, LC16, LC19, LC21, LC25, LC31c, LC33, LC4, LC41, LC43, LC9, LCe01a, LCe01b, LLPC2, LLPC3, LMTe01, LPLC2, LPLC4, LPT21, LPT28, LPT31, LPT45_dCal1, LPT48_vCal3, LPT49, LPT50, LPT54, LT1d, LT43, LT51, LT52, LT53, LT55, LT61b, LT62, LT63, LT73, LT82, LT84, LT86, LTe08, LTe12, LTe13, LTe15, LTe16, LTe18, LTe20, LTe24, LTe26, LTe27, LTe33, LTe43, LTe45, LTe51, LTe53, LTe54, LTe58, LTe60, LTe65, LTe69, LTe70, LTe72, MC65, MTe01b, MTe03, MTe06, MTe10, MTe23, MTe29, MTe30, MTe32, MTe34, MTe35, MTe37, MTe39, MTe41, MTe43, MTe46, MTe47, MTe51, MTe53, MeLp1, MeMe_e04, MeMe_e08, MeTu3c, OCG01f, aMe17a2, aMe17c, aMe19a, aMe20, aMe3, aMe4, aMe5, aMe8, s-LNv_a (`docs/results/f1_banc_qa.md` section 2) |
+| HS cells fail the gate on BANC (HSE +0.82, HSS +0.59, HSN +0.54 log2 R/L, exc) | high | optomotor yaw | no HS-based L/R yaw readout under rule 5 unless waived and labelled; report the gate result with the experiment |
+| TTMn fails the gate (log2 R/L +0.64) | medium | GF -> TTMn take-off path (B1-3) | report per side; treat any L/R-difference result on this path as gate-failed; DNp01 (GF) and the wing MNs are the readout alternatives |
+| DNa01 fails the gate (+0.63); DNa02 (+0.14) and DNp15 (+0.23) pass on BANC (DNp15 fails on FlyWire, R/L 1.66x) | n/a | steering readout | DNa02 stays the primary steering drive; DNp15 needs no waiver on BANC (still needs one on FlyWire) |
+| LB3b sugar GRNs are asymmetric (labellar sugar GRNs 41 L / 49 R; LB3b 20 L / 40 R in the neuron table) | high | sugar -> MN9 | sugar -> MN9 results are reported **per side** (drive left only / right only / both), never only pooled |
+| The antennal lobe has the same self-excitatory structure on BANC (internal excitatory fraction 76.6 %) | medium | spontaneous ignition | the pre-registered ignition-frequency check (`prereg/02`) applies to BANC runs too, with its own seeds and the same definition |
+| Structural w_syn scaling puts BANC in the self-sustaining regime (F2 prep calibration, `docs/results/f2_wsyn_calibration.md`) | high (observed) | every BANC closed-loop run | none of A / A2 / B passed the gates (ignition after the cut 18-20 / 20 at scales 2.4-3.0); the reference arm is silent at MN9. A new pre-registration is needed before any F2 test on BANC (e.g. input normalisation, inhibition scale); the reference arm result is reported as is |
 | Licence | low | publication | BANC CC BY 4.0; FlyWire CC BY-NC; derived files in a separate bundle |
 
 ## 9. First concrete steps
