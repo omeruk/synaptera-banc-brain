@@ -121,3 +121,16 @@ def test_bad_config():
         BridgeConfig(families=("DNa04",), window_intervals=0)
     with pytest.raises(ValueError):
         DNBridge(FW, BANC, BridgeConfig(families=("DNa04",))).unit_rates(np.zeros((2, 3)))
+
+
+def test_f3b1_arms():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import f3b1_common as C
+    assert all(t != s for t, s in C.PERMUTATION.items()) and sorted(C.PERMUTATION.values()) == sorted(C.STEER_FAMILIES)
+    assert C.bridge_config("bridge_off") is None
+    assert C.bridge_config("ref").gains == {} and C.bridge_config("ref").latency_intervals == 1
+    sg = C.bridge_config("shuffled_gain")
+    assert sg.gain_by == "source" and sg.gains == C.RATE_GAIN and sg.source == C.PERMUTATION
+    assert len({C.vnc_seed(st, s) for st in C.STIMULI for s in C.SEEDS}) == len(C.STIMULI) * len(C.SEEDS)
