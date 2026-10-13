@@ -267,6 +267,19 @@ Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 
    FlyWire brain sees rotating gratings, and its DN rates drive the BANC VNC subgraph. Arms `ref` (gain 1) and
    `rate_gain` (per-family gain from F3a-3 and C1), with the controls `bridge_off` and `shuffled`.
 
+**Finding from F3b-1, hybrid optomotor test (2026-10-13; `prereg/09_f3b1_optomotor.md`,
+`docs/results/f3b1_optomotor.md`):**
+- **Checks.** The input check and VNC gates 1, 2 and 3' pass.
+- **Brain.** The FlyWire brain's DNa04 and DNa10 are direction-selective under the rotating gratings (Holm over 3
+  families). The left DNa04 fires 5.9 Hz under `rot_left` and 0.9 Hz under `rot_right`. DNp31 (modulator) is also
+  direction-selective (uncorrected).
+- **VNC (primary test).** No arm shows direction-selective steering in the BANC VNC: not `ref` (gain 1), not
+  `rate_gain`, and no control. Both registered outcomes are "not direction-selective".
+- **Post-hoc.** In this open-loop visual protocol, the steering DNs fire below their F0 flight rates. The highest
+  applied rate stays below the F3a-3 lowest steering rate for every family, including with `rate_gain` (DNa04 6.9 vs
+  25 Hz). The brain's direction signal exists but does not reach the VNC's steering range.
+- What follows is the project owner's decision.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.

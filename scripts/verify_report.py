@@ -3,7 +3,9 @@
 and each formatted row must appear verbatim in `docs/results/f3a_banc_vnc.md`; the crosswalk summary numbers are
 checked against `docs/results/f3_dn_crosswalk.json` and its text; F3a-2 (`docs/results/f3a2_checks.md`): C1 rates
 recomputed from the F0 spike records, gates / C2 / C3 statistics from `runs/f3a2/f3a2_v3.json`; F3a-3 (`docs/results/f3a3_vnc_subgraph.md`): subgraph counts against the
-committed JSON, the prereg and the report, gates / R1 / R2 / R3 recomputed from `runs/f3a3/f3a3_v3.json`.
+committed JSON, the prereg and the report, gates / R1 / R2 / R3 recomputed from `runs/f3a3/f3a3_v3.json`; F3b-1 (`docs/results/f3b1_optomotor.md`): gains against
+the prereg and the registry, FlyWire DN rates and brain-side tests from the brain spike records, gates and primary tests
+per arm from `runs/f3b1/f3b1_v3.json`.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
     env -u PYTHONPATH python scripts/verify_report.py --print    # only print the recomputed strings
@@ -251,6 +253,107 @@ def check_f3a3():
     return n, bad
 
 
+F3B1_REC = ROOT / "runs" / "f3b1" / "f3b1_v3.json"
+F3B1_CHK = ROOT / "runs" / "f3b1" / "input_check.json"
+F3B1_BRAIN = ROOT / "runs" / "f3b1" / "brain"
+F3B1_MD = ROOT / "docs" / "results" / "f3b1_optomotor.md"
+PREREG09 = ROOT / "prereg" / "09_f3b1_optomotor.md"
+
+
+def check_f3b1():
+    """F3b-1 (prereg/09). Gains recomputed from the F3a-3 and C1 JSON files (prereg table, registered constants, report);
+    FlyWire DN rates and the brain-side tests recomputed from the brain spike records themselves; gates, primary tests
+    per arm and specificity recomputed from runs/f3b1/f3b1_v3.json; input check from runs/f3b1/input_check.json."""
+    import re
+
+    from scipy.stats import ttest_1samp
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f3b1_common as C
+    md, pre = F3B1_MD.read_text(), PREREG09.read_text()
+    d = json.loads(F3B1_REC.read_text())
+    bad, n = [], 0
+
+    def chk(key, ok, v):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    def pt(x):
+        x = np.asarray(x, float)
+        return 1.0 if not x.any() else 0.0 if np.std(x) == 0 else float(ttest_1samp(x, 0.0).pvalue)
+
+    # gains
+    lo = json.loads((ROOT / "docs" / "results" / "f3a3_vnc_subgraph.json").read_text())["r3"]["lowest_rate"]
+    c1 = json.loads((ROOT / "docs" / "results" / "f3a2_checks.json").read_text())["c1"]["f0"]
+    reg = json.loads((ROOT / "configs" / "assumptions.json").read_text())["constants"]["f3b1.rate_gain"]["value"]
+    for f in C.STEER_FAMILIES:
+        med = c1[f]["flight"]["median"]
+        g = lo[f] / med
+        chk(f"gain:{f}:prereg", f"| {f} | {lo[f]} | {med!r} | {g!r} |" in pre, g)
+        chk(f"gain:{f}:code", C.RATE_GAIN[f] == g and reg[f] == g, g)
+        chk(f"gain:{f}:report", _row(md, f, str(lo[f]), f"{med:.2f}", f"{g:.3f}") is not None, g)
+    # input check
+    ic = json.loads(F3B1_CHK.read_text())
+    for k, v in ic["per_stimulus"].items():
+        chk(f"input:{k}", _row(md, k, f"{v['A_in_T4aT5a']:.4f}", f"{v['A_in_all']:.4f}") is not None, v)
+    y = (ic["per_stimulus"]["rot_left"]["A_in_T4aT5a"], ic["per_stimulus"]["rot_right"]["A_in_T4aT5a"])
+    ok_in = bool(np.sign(y[0]) != np.sign(y[1]) and min(map(abs, y)) >= 0.05)
+    chk("input:pass", f"Input check: **{'passed' if ok_in else 'FAILED'}**" in md, ok_in)
+    # gates
+    g1 = sum(x["spikes"] for x in d["gate1"])
+    ig = sum(x["ignited"] for x in d["gate2_runs"])
+    chk("gate1", f"seeds 0-9): {g1} spikes" in md, g1)
+    chk("gate2", f"{ig} / {len(d['gate2_runs'])} ignited" in md, ig)
+    nets = [np.mean([r["network_rate_hz"] for r in d["replay"] if r["arm"] == a and r["stimulus"] == s])
+            for a in C.ARMS for s in C.STIMULI] + [np.mean([r["network_rate_hz"] for r in d["gate2_runs"]])]
+    chk("gate3", f"maximum {max(nets):.4f} Hz" in md, max(nets))
+    # brain side from the spike records
+    rates = {}
+    for st in C.STIMULI:
+        for s in C.SEEDS:
+            z = np.load(F3B1_BRAIN / f"{st}_s{s}.npz", allow_pickle=True)
+            cnt = z["dn_counts"][C.WINDOW[0]:C.WINDOW[1]].sum(0)
+            fam = np.array([re.sub(r"_[a-z]$", "", t) for t in z["dn_cell_type"]])
+            for f in C.BRAIN_FAMILIES:
+                for sd in ("left", "right"):
+                    m = (fam == f) & (z["dn_side"] == sd)
+                    rates[(st, f, sd, s)] = cnt[m].sum() / m.sum() / 1.0
+    for f in C.BRAIN_FAMILIES:
+        for sd in ("left", "right"):
+            cells = [f"{np.mean(v):.2f} ± {np.std(v, ddof=1):.2f}"
+                     for v in ([rates[(st, f, sd, s)] for s in C.SEEDS] for st in C.STIMULI)]
+            chk(f"brain:{f}:{sd}", _row(md, f, sd, *cells) is not None, cells)
+    dbr = {f: np.array([(rates[("rot_right", f, "right", s)] - rates[("rot_right", f, "left", s)])
+                        - (rates[("rot_left", f, "right", s)] - rates[("rot_left", f, "left", s)]) for s in C.SEEDS])
+           for f in C.BRAIN_FAMILIES}
+    p = [pt(dbr[f]) for f in C.STEER_FAMILIES]
+    for f, pp, ph in zip(C.STEER_FAMILIES, p, _holm(p)):
+        chk(f"brain_test:{f}", _row(md, f, f"{dbr[f].mean():.2f}", f"{np.std(dbr[f], ddof=1):.2f}", f"{pp:.4g}",
+                                    f"{ph:.4g}", "yes" if ph < 0.05 else "no") is not None, (pp, ph))
+    chk("brain_test:DNp31", _row(md, "DNp31", f"{dbr['DNp31'].mean():.2f}") is not None, dbr["DNp31"].mean())
+    # VNC primary tests from the replay record
+    by = {(r["arm"], r["stimulus"], r["seed"]): r["rate_hz"] for r in d["replay"]}
+    sel = {}
+    for a in C.ARMS:
+        D = {m: np.array([(by[(a, "rot_right", s)][f"{m}|right"] - by[(a, "rot_right", s)][f"{m}|left"])
+                          - (by[(a, "rot_left", s)][f"{m}|right"] - by[(a, "rot_left", s)][f"{m}|left"]) for s in C.SEEDS])
+             for m in C.PRIMARY_MN}
+        p = [pt(D[m]) for m in C.PRIMARY_MN]
+        ph = _holm(p)
+        for m, pp, hh in zip(C.PRIMARY_MN, p, ph):
+            chk(f"vnc:{a}:{m}", _row(md, a, m, f"{D[m].mean():.2f}", f"{np.std(D[m], ddof=1):.2f}", f"{pp:.4g}",
+                                     f"{hh:.4g}", "yes" if hh < 0.05 else "no") is not None, (D[m].mean(), pp, hh))
+        sel[a] = bool((ph < 0.05).any())
+        chk(f"vnc:{a}:verdict", _row(md, a, "**yes**" if sel[a] else "no") is not None, sel[a])
+    for a, ctl in C.CONTROLS.items():
+        spec = sel[a] and not any(sel[c] for c in ctl)
+        txt = ("direction-selective and **specific**" if spec else "direction-selective but **not specific**"
+               if sel[a] else "**not direction-selective**")
+        chk(f"spec:{a}", f"- `{a}`: {txt}" in md, txt)
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -307,6 +410,10 @@ def main(argv=None):
         bad += b
     if F3A3_MD.exists():
         k, b = check_f3a3()
+        n += k
+        bad += b
+    if F3B1_MD.exists():
+        k, b = check_f3b1()
         n += k
         bad += b
     if "--print" in argv:
