@@ -15,6 +15,24 @@ sources:
     origin: "FlyWire Codex, BANC connections (princeton), one row per neuron pair and neuropil, download of 2026-10-12"
     rows: 3990039
     licence: "CC BY 4.0 (BANC); derived files carry this licence"
+  banc888_edgelist_v2:
+    path: banc/banc_888_edgelist_simple_v2.feather
+    sha256: 363fdef3813b72a5e45a42f17034cd5a544b654c838929cecf6e1ce5f60625cb
+    md5: 394406f8a9bdf093c895f95aff4f6c49
+    bytes: 305250378
+    origin: "Harvard Dataverse doi:10.7910/DVN/7WTH1N (BANC deposit, version 3.0, released 2026-07-01), compiled_data/banc_888_edgelist_simple_v2.feather, datafile id 13992792; download of 2026-10-13 (MD5 equals the Dataverse checksum)"
+    materialization: "v888; v2 synapse set rolled up at size >= 5 voxels; pair level, no count threshold, autapses excluded at build time"
+    rows: 11752828
+    licence: "CC BY 4.0 (BANC); derived files carry this licence"
+  banc888_meta:
+    path: banc/banc_888_meta.feather
+    sha256: 819bbcff476e52702d6f8d8604ce1f12d1d7b11942281df2f49df2a73a6f15a5
+    md5: 6275eda42f98c49539d1ab513d979d09
+    bytes: 57550610
+    origin: "Harvard Dataverse doi:10.7910/DVN/7WTH1N (BANC deposit, version 3.0, released 2026-07-01), compiled_data/banc_888_meta.feather, datafile id 14033740; download of 2026-10-13 (MD5 equals the Dataverse checksum)"
+    materialization: "v888; one row per segment, 188,508 rows (the Dataverse description says 188,162)"
+    rows: 188508
+    licence: "CC BY 4.0 (BANC); derived files carry this licence"
   flywire783_completeness:
     path: brain_model/Completeness_783.csv
     sha256: bbb847a4cc2caaa7a16349722d220c087317b946d148d4d592d94d250617a311

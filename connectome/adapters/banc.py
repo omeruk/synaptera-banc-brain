@@ -136,3 +136,83 @@ def load_connectome(neurons_path, connections_path, variants=(), hash_files: boo
         meta["sha256"] = {"neurons": file_sha256(neurons_path), "connections": file_sha256(connections_path)}
     unsigned = schema.Connectome("banc", nrn, edges, dict(meta, signed=False))
     return assign_signs(unsigned, variants)
+
+
+# ── full materialization-888 graph (Harvard Dataverse doi:10.7910/DVN/7WTH1N), data source "banc888_full" ──────
+NEURON_SETS = ("codex", "all")
+_META_NT = {"acetylcholine": "ACH", "glutamate": "GLUT", "gaba": "GABA", "dopamine": "DA", "histamine": "HIST",
+            "octopamine": "OCT", "serotonin": "SER", "tyramine": "TYR"}
+
+
+def load_edgelist_888(path, ids: np.ndarray | None = None) -> pd.DataFrame:
+    """``banc_888_edgelist_simple_v2.feather`` as (pre, post, n_syn): one row per directed neuron pair, no count
+    threshold, autapses excluded at build time. Ids are strings in the file (int64 range) and converted. ``ids``:
+    keep only pairs whose both endpoints are in ``ids``."""
+    e = pd.read_feather(path, columns=["pre", "post", "count"])
+    out = pd.DataFrame({"pre": e["pre"].to_numpy().astype(np.int64), "post": e["post"].to_numpy().astype(np.int64),
+                        "n_syn": e["count"].to_numpy(np.int64)})
+    if ids is not None:
+        k = np.isin(out["pre"].to_numpy(), ids) & np.isin(out["post"].to_numpy(), ids)
+        out = out[k].reset_index(drop=True)
+    return out.sort_values(["pre", "post"], kind="stable").reset_index(drop=True)
+
+
+def _neurons_from_meta(meta: pd.DataFrame) -> pd.DataFrame:
+    """Neuron rows of ``banc_888_meta.feather`` on the adapter's columns (used for neurons outside the Codex table)."""
+    n = len(meta)
+    nt = meta["neurotransmitter_predicted"].map(_META_NT)
+    out = pd.DataFrame({"id": meta["banc_888_id"].to_numpy().astype(np.int64),
+                        "cell_type": meta["cell_type"].to_numpy(object),
+                        "cell_type_alt": np.full(n, np.nan, object),
+                        "cell_class": meta["cell_class"].to_numpy(object),
+                        "super_class": meta["super_class"].to_numpy(object),
+                        "side": normalise_side(meta["side"].to_numpy()).to_numpy(),
+                        "region": np.full(n, np.nan, object),
+                        "nt": nt.to_numpy(object),
+                        "nt_conf": pd.to_numeric(meta["neurotransmitter_score"], errors="coerce").to_numpy(float)})
+    for c in ("soma_x", "soma_y", "soma_z"):
+        out[c] = np.nan
+    out["status"] = np.nan
+    out["sub_class"] = meta["cell_sub_class"].to_numpy(object)
+    out["body_part"] = meta["body_part_sensory"].to_numpy(object)
+    out["function"] = meta["cell_function"].to_numpy(object)
+    out["flow"] = meta["flow"].to_numpy(object)
+    out["verified_nt"] = meta["neurotransmitter_verified"].to_numpy(object)
+    out["nerve"] = meta["nerve"].to_numpy(object)
+    out["hemilineage"] = meta["hemilineage"].to_numpy(object)
+    return out[list(NEURON_COLUMNS) + list(_EXTRA.values())]
+
+
+def load_connectome_full(neurons_path, edgelist_path, meta_path, connections_path=None, neuron_set: str = "codex",
+                         variants=(), hash_files: bool = True) -> schema.Connectome:
+    """Signed BANC Connectome from the full v888 pair-level edge list (no synapse threshold; data source
+    ``banc888_full`` in ``configs/data_sources.yaml``).
+
+    ``neuron_set``: "codex" (primary; the 158,262 neurons of the Codex neuron table, edges among them) or "all" (every
+    row of ``banc_888_meta.feather``; the Codex table annotates its neurons, the meta table the rest, NT names mapped
+    by ``_META_NT``). The Codex Root IDs are the v888 ids (all 158,262 are in the meta table). The neuron table
+    order of the Codex table is kept, so engine indices of the Codex neurons are identical in both sets.
+    ``connections_path``: the Codex per-neuropil table, used only for the ``region`` annotation of the Codex neurons."""
+    from connectome.adapters import file_sha256
+    from connectome.sign_rules import assign_signs
+    if neuron_set not in NEURON_SETS:
+        raise ValueError(f"neuron_set must be one of {NEURON_SETS}")
+    nrn = load_neurons(neurons_path)
+    if connections_path is not None:
+        conn = load_connections(connections_path)
+        nrn["region"] = dominant_regions(conn, nrn["id"].to_numpy()).to_numpy(object)
+        del conn
+    meta = pd.read_feather(meta_path)
+    n_meta = len(meta)
+    if neuron_set == "all":
+        extra = meta[~np.isin(meta["banc_888_id"].to_numpy().astype(np.int64), nrn["id"].to_numpy())]
+        nrn = pd.concat([nrn, _neurons_from_meta(extra)], ignore_index=True)
+    edges = load_edgelist_888(edgelist_path, None if neuron_set == "all" else nrn["id"].to_numpy())
+    info = dict(dataset="banc", data_source="banc888_full", neuron_set=neuron_set, neurons=str(neurons_path),
+                edgelist=str(edgelist_path), meta_table=str(meta_path), meta_rows=int(n_meta),
+                min_syn=None, pairs_kept=int(len(edges)), synapses_kept=int(edges["n_syn"].sum()))
+    if hash_files:
+        info["sha256"] = {"neurons": file_sha256(neurons_path), "edgelist": file_sha256(edgelist_path),
+                          "meta": file_sha256(meta_path)}
+    unsigned = schema.Connectome("banc", nrn, edges, dict(info, signed=False))
+    return assign_signs(unsigned, variants)
