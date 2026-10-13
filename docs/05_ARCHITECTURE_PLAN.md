@@ -219,6 +219,17 @@ DProN3a/b). Expectation (d) met: GF drives neither TTMn nor DLM/DVM (17 direct G
 at G100 the network activity (0.18 Hz) does not decay within the 200 ms cut (0.18 Hz), below the 1 Hz ignition threshold;
 its carriers and duration were not recorded. Stopped there; the interface design is `docs/07_HYBRID_INTERFACE.md`.
 
+**Finding from F3a-2, pre-checks for the hybrid (2026-10-13; `prereg/07_f3a2_rate_persistence_steering.md`,
+`docs/results/f3a2_checks.md`):** gates 1, 2 and 3' pass. C1 (existing F0 and v1 screen records, no simulation): DNg02 is
+silent in the FlyWire brain in every F0 window and every v1 visual condition (docs/02 confirmed: 0 spikes in all 25
+neurons); the six steering families fire at 3.4-73.2 Hz per neuron in F0 flight, mostly below the 50-100 Hz range in which F3a
+recruited wing power MNs. C2: after DNg02 drive the activity does not decay within a 1 s cut (about 0.19 Hz network);
+wing power MNs stop within 100-200 ms, neck MNs and right b3/hg4 keep firing; post-hoc, about three quarters of the cut
+spikes are in BANC brain-region neurons. C3 (DNg02 100 Hz baseline labelled HAND, unilateral 100 Hz steering drive):
+DNa04, DNa10 and DNa15 steer by the registered rule (all ipsilateral); DNa02, DNp31 and DNa16 do not. The steering
+effects were tested at 100 Hz only, above the FlyWire rates of DNa04, DNa10 and DNa15. Which families go into F3b is the
+project owner's decision.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
