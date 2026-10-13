@@ -1,7 +1,8 @@
 """Recompute the numbers of the committed result reports from their raw records and check them against the text
 (CLAUDE.md rule 11). Independent of the report scripts: the F3a tables are recomputed here from `runs/f3a/f3a_v3.json`
 and each formatted row must appear verbatim in `docs/results/f3a_banc_vnc.md`; the crosswalk summary numbers are
-checked against `docs/results/f3_dn_crosswalk.json` and its text.
+checked against `docs/results/f3_dn_crosswalk.json` and its text; F3a-2 (`docs/results/f3a2_checks.md`): C1 rates
+recomputed from the F0 spike records, gates / C2 / C3 statistics from `runs/f3a2/f3a2_v3.json`.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
     env -u PYTHONPATH python scripts/verify_report.py --print    # only print the recomputed strings
@@ -17,6 +18,8 @@ F3A_REC = ROOT / "runs" / "f3a" / "f3a_v3.json"
 F3A_MD = ROOT / "docs" / "results" / "f3a_banc_vnc.md"
 XW_JSON = ROOT / "docs" / "results" / "f3_dn_crosswalk.json"
 XW_MD = ROOT / "docs" / "results" / "f3_dn_crosswalk.md"
+F3A2_REC = ROOT / "runs" / "f3a2" / "f3a2_v3.json"
+F3A2_MD = ROOT / "docs" / "results" / "f3a2_checks.md"
 
 
 def f3a_expected():
@@ -47,6 +50,90 @@ def f3a_expected():
     out["gate2_last"] = f"{np.mean([x['last_cut_step_hz'] for x in g2]):.3f} Hz"
     out["gate1"] = None
     return out, d
+
+
+def _row(md, *cells):
+    """The table row of md that starts with the given leading cells, split into cells (None if absent)."""
+    head = "| " + " | ".join(cells) + " |"
+    ln = next((x for x in md.splitlines() if x.startswith(head)), None)
+    return None if ln is None else [c.strip() for c in ln.strip("|").split("|")]
+
+
+def check_f3a2():
+    """F3a-2 (prereg/07). C1 rates recomputed from the F0 spike records themselves (not from c1_rates.json); gates,
+    C2 and C3 statistics recomputed from runs/f3a2/f3a2_v3.json."""
+    import h5py
+    from scipy.stats import ttest_1samp
+    md = F3A2_MD.read_text()
+    bad, n = [], 0
+
+    def chk(key, ok, v):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    # C1: per-neuron F0 rates per family and window
+    c1 = json.loads((ROOT / "runs" / "f3a2" / "c1_rates.json").read_text())
+    neu = c1["neurons"]
+    idx = np.array([x["index"] for x in neu])
+    acc = {w: [] for w in ("perch", "flight", "landing")}
+    for s in range(5):
+        with h5py.File(ROOT / "runs" / "f0" / f"f0_5ms_seed{s}_data.h5", "r") as f:
+            i, t, ph = f["spikes/i"][:], f["spikes/t"][:].astype(float), f["behavior/phase"][:]
+        win = {"perch": (0.0, 0.25)}
+        for w, codes in (("flight", (1, 2, 3, 9)), ("landing", (4, 8))):
+            ks = np.flatnonzero(np.isin(ph, codes))
+            assert np.all(np.diff(ks) == 1), w          # one contiguous span in these records
+            win[w] = (0.45 + ks[0] * 0.005, 0.45 + (ks[-1] + 1) * 0.005)
+        for w, (a, b) in win.items():
+            m = (t >= a) & (t < b)
+            cnt = np.array([np.count_nonzero(i[m] == k) for k in idx])
+            acc[w].append(cnt / (b - a))
+    for fam in c1["families"]:
+        kl = [k for k, x in enumerate(neu) if x["family"] == fam and x["side"] == "left"]
+        kr = [k for k, x in enumerate(neu) if x["family"] == fam and x["side"] == "right"]
+        for w in acc:
+            r = np.mean(acc[w], axis=0)
+            row = _row(md, fam, w)
+            exp = [f"{len(kl)}/{len(kr)}", ", ".join(f"{v:.1f}" for v in r[kl]), ", ".join(f"{v:.1f}" for v in r[kr]),
+                   f"{np.median(r[kl + kr]):.1f}"]
+            chk(f"c1:{fam}:{w}", row is not None and row[2:6] == exp, exp)
+    # gates
+    d = json.loads(F3A2_REC.read_text())
+    g2 = d["gate2_runs"]
+    chk("gate1", f"| 1: no input, seeds 0-4 (spikes) | {sum(r['spikes'] for r in d['gate1'])} |" in md, "gate1")
+    chk("gate2", f"| {sum(r['ignited'] for r in g2)} / {len(g2)} (95 % CI" in md, "gate2")
+    nets = [np.mean([r["network_rate_hz"] for r in d["c2"]["runs"]]), np.mean([r["network_rate_hz"] for r in g2])]
+    nets += [np.mean([x["network_rate_hz"] for x in d["c3"] if x["condition"] == c]) for c in d["c3_conditions"]]
+    chk("gate3", f"max {max(nets):.3f} Hz" in md, f"max {max(nets):.3f} Hz")
+    # C2: last cut step per seed
+    v = ", ".join(f"{r['network_step_hz'][-1]:.4f}" for r in d["c2"]["runs"])
+    chk("c2:last", v in md, v)
+    chk("c2:carriers", f"during the cut in any seed): {len(d['c2']['carriers'])} neurons" in md, len(d["c2"]["carriers"]))
+    # C3: mean d and t-test p per reported row
+    seeds = d["seeds"]["run"]
+    by = {(x["condition"], x["seed"]): x["rate_hz"] for x in d["c3"]}
+
+    def D(c, m):
+        return np.array([by[(c, s)][f"{m}|right"] - by[(c, s)][f"{m}|left"] for s in seeds])
+
+    passed = [m for m in d["steer_mn"] if d["symmetry"].get(m, {}).get("passed")]
+    fams = list(dict.fromkeys(c.rsplit("_", 1)[0] for c in d["c3_conditions"] if c != "B"))
+    for fam in fams:
+        for m in passed:
+            dl, dr = D(f"{fam}_L", m) - D("B", m), D(f"{fam}_R", m) - D("B", m)
+            row = _row(md, fam, m)
+            if not dl.any() and not dr.any():
+                chk(f"c3:{fam}:{m}:omitted", row is None, "row should be omitted")
+                continue
+            p = []
+            for x in (dl, dr):
+                p.append(1.0 if not x.any() else 0.0 if np.std(x) == 0 else float(ttest_1samp(x, 0.0).pvalue))
+            exp = [f"{dl.mean():+.2f}", f"{p[0]:.2g}", f"{dr.mean():+.2f}", f"{p[1]:.2g}"]
+            got = None if row is None or len(row) < 10 else [row[2], row[3], row[6], row[7]]
+            chk(f"c3:{fam}:{m}", got == exp, exp)
+    return n, bad
 
 
 def main(argv=None):
@@ -99,6 +186,10 @@ def main(argv=None):
     n += 1
     if s["n_shared_gate_both"] != len(s["shared_gate_both"]):
         bad.append(("crosswalk", "n_shared_gate_both != len(list)"))
+    if F3A2_MD.exists():
+        k, b = check_f3a2()
+        n += k
+        bad += b
     if "--print" in argv:
         return 0
     print(f"checked {n} items, {len(bad)} mismatches")

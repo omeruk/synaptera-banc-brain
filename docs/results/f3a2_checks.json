@@ -1,0 +1,5469 @@
+{
+ "gates": {
+  "gate1_spikes": 0,
+  "gate1_pass": true,
+  "gate2_ignited": 0,
+  "gate2_n": 50,
+  "gate2_ci": [
+   0.0,
+   0.07112173646419764
+  ],
+  "gate2_pass": true,
+  "gate2_mean_last_cut_step_hz": 0.18210814977695214,
+  "gate3_max_network_hz": 0.27751879794265205,
+  "gate3_max_condition": "gate2",
+  "gate3_pass": true
+ },
+ "c1": {
+  "f0": {
+   "DNg02": {
+    "perch": {
+     "rates_left": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rates_right": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "median": 0.0,
+     "max": 0.0,
+     "peak25": 0.0,
+     "bins": [
+      25,
+      0,
+      0,
+      0
+     ]
+    },
+    "flight": {
+     "rates_left": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rates_right": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "median": 0.0,
+     "max": 0.0,
+     "peak25": 0.0,
+     "bins": [
+      25,
+      0,
+      0,
+      0
+     ]
+    },
+    "landing": {
+     "rates_left": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rates_right": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "median": 0.0,
+     "max": 0.0,
+     "peak25": 0.0,
+     "bins": [
+      25,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "DNa02": {
+    "perch": {
+     "rates_left": [
+      45.6
+     ],
+     "rates_right": [
+      15.2
+     ],
+     "median": 30.4,
+     "max": 45.6,
+     "peak25": 120.0,
+     "bins": [
+      1,
+      1,
+      0,
+      0
+     ]
+    },
+    "flight": {
+     "rates_left": [
+      44.908789386401324
+     ],
+     "rates_right": [
+      10.613598673300165
+     ],
+     "median": 27.761194029850746,
+     "max": 44.908789386401324,
+     "peak25": 120.0,
+     "bins": [
+      1,
+      1,
+      0,
+      0
+     ]
+    },
+    "landing": {
+     "rates_left": [
+      40.133779264214056
+     ],
+     "rates_right": [
+      3.433667781493869
+     ],
+     "median": 21.78372352285396,
+     "max": 40.133779264214056,
+     "peak25": 160.0,
+     "bins": [
+      1,
+      1,
+      0,
+      0
+     ]
+    }
+   },
+   "DNp31": {
+    "perch": {
+     "rates_left": [
+      73.6
+     ],
+     "rates_right": [
+      97.6
+     ],
+     "median": 85.6,
+     "max": 97.6,
+     "peak25": 200.0,
+     "bins": [
+      0,
+      0,
+      2,
+      0
+     ]
+    },
+    "flight": {
+     "rates_left": [
+      40.0
+     ],
+     "rates_right": [
+      73.23383084577115
+     ],
+     "median": 56.616915422885576,
+     "max": 73.23383084577115,
+     "peak25": 120.0,
+     "bins": [
+      0,
+      1,
+      1,
+      0
+     ]
+    },
+    "landing": {
+     "rates_left": [
+      26.800445930880716
+     ],
+     "rates_right": [
+      65.73021181716834
+     ],
+     "median": 46.265328874024526,
+     "max": 65.73021181716834,
+     "peak25": 160.0,
+     "bins": [
+      0,
+      1,
+      1,
+      0
+     ]
+    }
+   },
+   "DNa04": {
+    "perch": {
+     "rates_left": [
+      22.4
+     ],
+     "rates_right": [
+      19.2
+     ],
+     "median": 20.799999999999997,
+     "max": 22.4,
+     "peak25": 80.0,
+     "bins": [
+      1,
+      1,
+      0,
+      0
+     ]
+    },
+    "flight": {
+     "rates_left": [
+      26.13598673300165
+     ],
+     "rates_right": [
+      16.782752902155885
+     ],
+     "median": 21.459369817578768,
+     "max": 26.13598673300165,
+     "peak25": 120.0,
+     "bins": [
+      1,
+      1,
+      0,
+      0
+     ]
+    },
+    "landing": {
+     "rates_left": [
+      16.053511705685622
+     ],
+     "rates_right": [
+      9.72129319955407
+     ],
+     "median": 12.887402452619845,
+     "max": 16.053511705685622,
+     "peak25": 80.0,
+     "bins": [
+      2,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "DNa10": {
+    "perch": {
+     "rates_left": [
+      4.0
+     ],
+     "rates_right": [
+      0.0
+     ],
+     "median": 2.0,
+     "max": 4.0,
+     "peak25": 40.0,
+     "bins": [
+      2,
+      0,
+      0,
+      0
+     ]
+    },
+    "flight": {
+     "rates_left": [
+      23.217247097844115
+     ],
+     "rates_right": [
+      3.3830845771144284
+     ],
+     "median": 13.300165837479272,
+     "max": 23.217247097844115,
+     "peak25": 80.0,
+     "bins": [
+      1,
+      1,
+      0,
+      0
+     ]
+    },
+    "landing": {
+     "rates_left": [
+      24.124860646599778
+     ],
+     "rates_right": [
+      4.1917502787068015
+     ],
+     "median": 14.15830546265329,
+     "max": 24.124860646599778,
+     "peak25": 120.0,
+     "bins": [
+      1,
+      1,
+      0,
+      0
+     ]
+    }
+   },
+   "DNa15": {
+    "perch": {
+     "rates_left": [
+      3.2
+     ],
+     "rates_right": [
+      8.8
+     ],
+     "median": 6.0,
+     "max": 8.8,
+     "peak25": 80.0,
+     "bins": [
+      2,
+      0,
+      0,
+      0
+     ]
+    },
+    "flight": {
+     "rates_left": [
+      7.097844112769485
+     ],
+     "rates_right": [
+      3.714759535655058
+     ],
+     "median": 5.406301824212271,
+     "max": 7.097844112769485,
+     "peak25": 80.0,
+     "bins": [
+      2,
+      0,
+      0,
+      0
+     ]
+    },
+    "landing": {
+     "rates_left": [
+      1.0256410256410258
+     ],
+     "rates_right": [
+      0.17837235228539577
+     ],
+     "median": 0.6020066889632107,
+     "max": 1.0256410256410258,
+     "peak25": 80.0,
+     "bins": [
+      2,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "DNa16": {
+    "perch": {
+     "rates_left": [
+      28.0
+     ],
+     "rates_right": [
+      30.4
+     ],
+     "median": 29.2,
+     "max": 30.4,
+     "peak25": 80.0,
+     "bins": [
+      0,
+      2,
+      0,
+      0
+     ]
+    },
+    "flight": {
+     "rates_left": [
+      24.07960199004975
+     ],
+     "rates_right": [
+      25.737976782752902
+     ],
+     "median": 24.908789386401324,
+     "max": 25.737976782752902,
+     "peak25": 120.0,
+     "bins": [
+      0,
+      2,
+      0,
+      0
+     ]
+    },
+    "landing": {
+     "rates_left": [
+      20.468227424749166
+     ],
+     "rates_right": [
+      20.468227424749166
+     ],
+     "median": 20.468227424749166,
+     "max": 20.468227424749166,
+     "peak25": 120.0,
+     "bins": [
+      0,
+      2,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "vd": {
+   "DNg02": {
+    "per_neuron_min": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "per_neuron_max": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "median": 0.0,
+    "peak25": 0.0,
+    "bins": [
+     250,
+     0,
+     0,
+     0
+    ]
+   },
+   "DNa02": {
+    "per_neuron_min": [
+     0.0,
+     0.0
+    ],
+    "per_neuron_max": [
+     19.5,
+     15.25
+    ],
+    "median": 3.0,
+    "peak25": 120.0,
+    "bins": [
+     20,
+     0,
+     0,
+     0
+    ]
+   },
+   "DNp31": {
+    "per_neuron_min": [
+     0.0,
+     0.0
+    ],
+    "per_neuron_max": [
+     21.25,
+     33.5
+    ],
+    "median": 0.0,
+    "peak25": 120.0,
+    "bins": [
+     17,
+     3,
+     0,
+     0
+    ]
+   },
+   "DNa04": {
+    "per_neuron_min": [
+     0.0,
+     0.0
+    ],
+    "per_neuron_max": [
+     6.25,
+     2.75
+    ],
+    "median": 0.0,
+    "peak25": 80.0,
+    "bins": [
+     20,
+     0,
+     0,
+     0
+    ]
+   },
+   "DNa10": {
+    "per_neuron_min": [
+     0.0,
+     0.0
+    ],
+    "per_neuron_max": [
+     3.5,
+     0.5
+    ],
+    "median": 0.0,
+    "peak25": 40.0,
+    "bins": [
+     20,
+     0,
+     0,
+     0
+    ]
+   },
+   "DNa15": {
+    "per_neuron_min": [
+     0.0,
+     0.0
+    ],
+    "per_neuron_max": [
+     1.25,
+     2.25
+    ],
+    "median": 0.0,
+    "peak25": 80.0,
+    "bins": [
+     20,
+     0,
+     0,
+     0
+    ]
+   },
+   "DNa16": {
+    "per_neuron_min": [
+     0.0,
+     0.0
+    ],
+    "per_neuron_max": [
+     9.5,
+     11.5
+    ],
+    "median": 1.0,
+    "peak25": 120.0,
+    "bins": [
+     20,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "dng02_nearly_silent": {
+   "f0": true,
+   "v1_screen": true
+  }
+ },
+ "c2": {
+  "network_block_hz": [
+   0.03836044028256941,
+   0.06416575046441976,
+   0.11973815571647015,
+   0.14428605729739294,
+   0.17882372268769509,
+   0.22443795731129393,
+   0.21925035700294443,
+   0.2219736891989233,
+   0.22918957172283935,
+   0.2160152152759348,
+   0.17651742047996358,
+   0.17971465038985984,
+   0.18296874802542618,
+   0.18861760877532197,
+   0.1774588972716129,
+   0.18832063287460035,
+   0.18996979691903298,
+   0.17249876786594381,
+   0.18721487154212635,
+   0.18526241296078655
+  ],
+  "last_cut_step_hz": [
+   0.19511948541026905,
+   0.2421301386308779,
+   0.18981183101439383,
+   0.17035043156285146,
+   0.2269654117855202,
+   0.1741416132741909,
+   0.24137190228861002,
+   0.17944926767006608,
+   0.10691132425977176,
+   0.1984051762267632
+  ],
+  "active_ms_after_cut": [
+   1000.0,
+   1000.0,
+   1000.0,
+   1000.0,
+   1000.0,
+   1000.0,
+   1000.0,
+   1000.0,
+   1000.0,
+   1000.0
+  ],
+  "cut_spikes": [
+   29735,
+   29367,
+   29926,
+   27488,
+   29378,
+   29056,
+   28680,
+   29439,
+   26659,
+   29661
+  ],
+  "n_cut_neurons": [
+   1141,
+   1187,
+   1126,
+   1090,
+   1136,
+   1064,
+   1118,
+   1122,
+   1059,
+   1170
+  ],
+  "n_carriers": 1426,
+  "n_carriers_all_seeds": 910,
+  "by_super_class": {
+   "central_brain_intrinsic": {
+    "neurons": 584,
+    "spikes": 167450
+   },
+   "descending": {
+    "neurons": 128,
+    "spikes": 36088
+   },
+   "visual_centrifugal": {
+    "neurons": 45,
+    "spikes": 7468
+   },
+   "ventral_nerve_cord_intrinsic": {
+    "neurons": 386,
+    "spikes": 39588
+   },
+   "ascending": {
+    "neurons": 74,
+    "spikes": 12112
+   },
+   "motor": {
+    "neurons": 119,
+    "spikes": 8018
+   },
+   "optic_lobe_intrinsic": {
+    "neurons": 66,
+    "spikes": 14053
+   },
+   "visual_projection": {
+    "neurons": 16,
+    "spikes": 4097
+   },
+   "nan": {
+    "neurons": 7,
+    "spikes": 514
+   },
+   "visceral_circulatory": {
+    "neurons": 1,
+    "spikes": 1
+   }
+  },
+  "by_cell_class": {
+   "nan": {
+    "neurons": 670,
+    "spikes": 175330
+   },
+   "descending_neuron": {
+    "neurons": 128,
+    "spikes": 36088
+   },
+   "centrifugal_medulla_lobula_lobula_plate": {
+    "neurons": 4,
+    "spikes": 2059
+   },
+   "sequential_leg_neuromeres": {
+    "neurons": 29,
+    "spikes": 4496
+   },
+   "centrifugal_lobula": {
+    "neurons": 8,
+    "spikes": 1526
+   },
+   "central_complex_input_neuron": {
+    "neurons": 27,
+    "spikes": 7167
+   },
+   "single_leg_neuromere": {
+    "neurons": 235,
+    "spikes": 19575
+   },
+   "ascending_neuron": {
+    "neurons": 74,
+    "spikes": 12112
+   },
+   "ventral_nerve_cord_serially_convergent": {
+    "neurons": 11,
+    "spikes": 1572
+   },
+   "ventral_nerve_cord_dorsal": {
+    "neurons": 5,
+    "spikes": 1151
+   },
+   "neck_motor_neuron": {
+    "neurons": 27,
+    "spikes": 6068
+   },
+   "centrifugal_medulla": {
+    "neurons": 10,
+    "spikes": 1375
+   },
+   "distal_medulla": {
+    "neurons": 5,
+    "spikes": 2315
+   },
+   "medulla_medulla": {
+    "neurons": 5,
+    "spikes": 1257
+   },
+   "medulla_tangential": {
+    "neurons": 7,
+    "spikes": 2723
+   },
+   "proximal_medulla": {
+    "neurons": 29,
+    "spikes": 5730
+   },
+   "medulla_lobula_lobula_plate_amacrine": {
+    "neurons": 2,
+    "spikes": 964
+   },
+   "lobula_plate_tangential_cell": {
+    "neurons": 7,
+    "spikes": 987
+   },
+   "lobula_tangential": {
+    "neurons": 7,
+    "spikes": 564
+   },
+   "centrifugal_lobula_plate": {
+    "neurons": 2,
+    "spikes": 491
+   },
+   "lobula_intrinsic": {
+    "neurons": 14,
+    "spikes": 1513
+   },
+   "optic_anterior": {
+    "neurons": 9,
+    "spikes": 714
+   },
+   "wing_motor_neuron": {
+    "neurons": 26,
+    "spikes": 364
+   },
+   "haltere_motor_neuron": {
+    "neurons": 4,
+    "spikes": 285
+   },
+   "lobula_medulla_amacrine": {
+    "neurons": 2,
+    "spikes": 332
+   },
+   "lobula_plate_intrinsic": {
+    "neurons": 1,
+    "spikes": 193
+   },
+   "leg_motor_neuron": {
+    "neurons": 60,
+    "spikes": 1293
+   },
+   "mushroom_body_output_neuron": {
+    "neurons": 8,
+    "spikes": 726
+   },
+   "serpentine_medulla": {
+    "neurons": 3,
+    "spikes": 286
+   },
+   "wedge_projection_neuron": {
+    "neurons": 1,
+    "spikes": 121
+   },
+   "antenna_motor_neuron": {
+    "neurons": 1,
+    "spikes": 5
+   },
+   "eye_motor_neuron": {
+    "neurons": 1,
+    "spikes": 3
+   },
+   "centrifugal_medulla_lobula": {
+    "neurons": 1,
+    "spikes": 1
+   },
+   "ventral_nerve_cord_neurosecretory_cell": {
+    "neurons": 1,
+    "spikes": 1
+   },
+   "mushroom_body_dopaminergic_neuron": {
+    "neurons": 1,
+    "spikes": 1
+   },
+   "lateral_horn_centrifugal_neuron": {
+    "neurons": 1,
+    "spikes": 1
+   }
+  },
+  "top_carriers": [
+   {
+    "index": 127137,
+    "root_id": "720575941607744621",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "CB3916",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1480
+   },
+   {
+    "index": 120481,
+    "root_id": "720575941594459755",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL120b",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1396
+   },
+   {
+    "index": 146834,
+    "root_id": "720575941653644305",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL120b",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1395
+   },
+   {
+    "index": 63395,
+    "root_id": "720575941515976185",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL017",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1394
+   },
+   {
+    "index": 148227,
+    "root_id": "720575941656458964",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL122",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1393
+   },
+   {
+    "index": 131736,
+    "root_id": "720575941615090140",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "PS059",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1359
+   },
+   {
+    "index": 18024,
+    "root_id": "720575941445210794",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL017",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1349
+   },
+   {
+    "index": 42258,
+    "root_id": "720575941485704400",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL122",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1348
+   },
+   {
+    "index": 90839,
+    "root_id": "720575941552142727",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNa03",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1335
+   },
+   {
+    "index": 89330,
+    "root_id": "720575941550158397",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL014",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1319
+   },
+   {
+    "index": 110852,
+    "root_id": "720575941576292751",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "PS059",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1245
+   },
+   {
+    "index": 148994,
+    "root_id": "720575941658917400",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL153",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1216
+   },
+   {
+    "index": 102812,
+    "root_id": "720575941566543714",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNa16",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1207
+   },
+   {
+    "index": 114027,
+    "root_id": "720575941581684601",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNa06",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1200
+   },
+   {
+    "index": 23548,
+    "root_id": "720575941456897005",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNa02",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1195
+   },
+   {
+    "index": 59629,
+    "root_id": "720575941510475536",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNa02",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1180
+   },
+   {
+    "index": 28049,
+    "root_id": "720575941464955405",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL014",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1132
+   },
+   {
+    "index": 48800,
+    "root_id": "720575941496676295",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNa06",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1132
+   },
+   {
+    "index": 42636,
+    "root_id": "720575941486612034",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNa03",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1094
+   },
+   {
+    "index": 77610,
+    "root_id": "720575941535388650",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL103",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1084
+   },
+   {
+    "index": 91286,
+    "root_id": "720575941552837767",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL120a",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1081
+   },
+   {
+    "index": 18261,
+    "root_id": "720575941446234538",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL103",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1046
+   },
+   {
+    "index": 42705,
+    "root_id": "720575941486713229",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "PS013",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1042
+   },
+   {
+    "index": 20267,
+    "root_id": "720575941450793385",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "CB0757",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 1040
+   },
+   {
+    "index": 109906,
+    "root_id": "720575941575606454",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "CB0757",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 991
+   },
+   {
+    "index": 61820,
+    "root_id": "720575941514447097",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNnt018",
+    "side": "right",
+    "region": "SEZ",
+    "n_seeds": 10,
+    "cut_spikes": 987
+   },
+   {
+    "index": 138264,
+    "root_id": "720575941630724768",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "CB0757",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 983
+   },
+   {
+    "index": 121601,
+    "root_id": "720575941595827158",
+    "super_class": "descending",
+    "cell_class": "descending_neuron",
+    "sub_class": "nan",
+    "cell_type": "DNg75",
+    "side": "right",
+    "region": "SEZ",
+    "n_seeds": 10,
+    "cut_spikes": 974
+   },
+   {
+    "index": 10183,
+    "root_id": "720575941432240599",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "CB0172",
+    "side": "left",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 954
+   },
+   {
+    "index": 92965,
+    "root_id": "720575941554701313",
+    "super_class": "central_brain_intrinsic",
+    "cell_class": "nan",
+    "sub_class": "nan",
+    "cell_type": "LAL120a",
+    "side": "right",
+    "region": "brain",
+    "n_seeds": 10,
+    "cut_spikes": 954
+   }
+  ]
+ },
+ "c3": {
+  "gate_passing": [
+   "b2",
+   "b3",
+   "i1",
+   "i2",
+   "iii1",
+   "iii4",
+   "hg1",
+   "hg2",
+   "hg3",
+   "hg4",
+   "tp1",
+   "tp2",
+   "tpn",
+   "ps1",
+   "ps2"
+  ],
+  "gate_failing": [
+   "b1",
+   "iii3"
+  ],
+  "n_tests": 180,
+  "tests": [
+   {
+    "family": "DNa02",
+    "mn": "b2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "b2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "b3",
+    "side": "L",
+    "d": [
+     8.0,
+     2.0,
+     6.0,
+     2.0,
+     6.0,
+     6.0,
+     6.0,
+     -2.0,
+     1.0,
+     18.0
+    ],
+    "mean": 5.3,
+    "p_t": 0.012847342579300739,
+    "p_w": 0.009765625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "b3",
+    "side": "R",
+    "d": [
+     12.0,
+     6.0,
+     9.0,
+     6.0,
+     6.0,
+     3.0,
+     9.0,
+     5.0,
+     8.0,
+     23.0
+    ],
+    "mean": 8.7,
+    "p_t": 0.0008514966542487583,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.12942749144581125,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa02",
+    "mn": "i1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "i1",
+    "side": "R",
+    "d": [
+     0.0,
+     2.0,
+     0.0,
+     2.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.4,
+    "p_t": 0.16785065605707492,
+    "p_w": 0.5,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "i2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "i2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "iii1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "iii1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "iii4",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "iii4",
+    "side": "R",
+    "d": [
+     2.0,
+     2.0,
+     4.0,
+     0.0,
+     1.0,
+     4.0,
+     3.0,
+     1.0,
+     4.0,
+     3.0
+    ],
+    "mean": 2.4,
+    "p_t": 0.000488721763322802,
+    "p_w": 0.00390625,
+    "p_t_holm": 0.07575187331503432,
+    "p_w_holm": 0.59375
+   },
+   {
+    "family": "DNa02",
+    "mn": "hg1",
+    "side": "L",
+    "d": [
+     -2.0,
+     2.0,
+     0.0,
+     -1.0,
+     2.0,
+     2.0,
+     3.0,
+     -3.0,
+     3.0,
+     2.0
+    ],
+    "mean": 0.8,
+    "p_t": 0.26949945378301204,
+    "p_w": 0.34375,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "hg1",
+    "side": "R",
+    "d": [
+     0.0,
+     7.0,
+     8.0,
+     3.0,
+     3.0,
+     3.0,
+     10.0,
+     0.0,
+     10.0,
+     4.0
+    ],
+    "mean": 4.8,
+    "p_t": 0.0028283582155838507,
+    "p_w": 0.0078125,
+    "p_t_holm": 0.4129402994752422,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "hg2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "hg2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "hg3",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "hg3",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "hg4",
+    "side": "L",
+    "d": [
+     0.0,
+     2.0,
+     1.0,
+     -2.0,
+     -2.0,
+     -4.0,
+     3.0,
+     -2.0,
+     -5.0,
+     17.0
+    ],
+    "mean": 0.8,
+    "p_t": 0.6942925780842102,
+    "p_w": 0.765625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "hg4",
+    "side": "R",
+    "d": [
+     11.0,
+     5.0,
+     9.0,
+     6.0,
+     4.0,
+     2.0,
+     7.0,
+     6.0,
+     4.0,
+     21.0
+    ],
+    "mean": 7.5,
+    "p_t": 0.0017416242281296454,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.2595020099913172,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa02",
+    "mn": "tp1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "tp1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "tp2",
+    "side": "L",
+    "d": [
+     0.0,
+     -1.0,
+     0.0,
+     0.0,
+     1.0,
+     -1.0,
+     0.0,
+     1.0,
+     -1.0,
+     0.0
+    ],
+    "mean": -0.1,
+    "p_t": 0.6783097418055797,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "tp2",
+    "side": "R",
+    "d": [
+     -1.0,
+     0.0,
+     2.0,
+     0.0,
+     -1.0,
+     -1.0,
+     0.0,
+     1.0,
+     0.0,
+     -1.0
+    ],
+    "mean": -0.1,
+    "p_t": 0.7577400727729552,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "tpn",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "tpn",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "ps1",
+    "side": "L",
+    "d": [
+     -2.0,
+     6.0,
+     4.0,
+     0.0,
+     1.0,
+     2.0,
+     6.0,
+     -2.0,
+     -2.0,
+     6.0
+    ],
+    "mean": 1.9,
+    "p_t": 0.11228056709328929,
+    "p_w": 0.1640625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "ps1",
+    "side": "R",
+    "d": [
+     -5.0,
+     0.0,
+     6.0,
+     3.0,
+     -4.0,
+     -2.0,
+     0.0,
+     0.0,
+     -4.0,
+     3.0
+    ],
+    "mean": -0.3,
+    "p_t": 0.7959040932616821,
+    "p_w": 0.765625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "ps2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa02",
+    "mn": "ps2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "b2",
+    "side": "L",
+    "d": [
+     -8.0,
+     -11.0,
+     -9.0,
+     -5.0,
+     -8.0,
+     -8.0,
+     -10.0,
+     -9.0,
+     -5.0,
+     -10.0
+    ],
+    "mean": -8.3,
+    "p_t": 3.623119665980443e-07,
+    "p_w": 0.001953125,
+    "p_t_holm": 6.195534628826557e-05,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNp31",
+    "mn": "b2",
+    "side": "R",
+    "d": [
+     -13.0,
+     -9.0,
+     -11.0,
+     -8.0,
+     -11.0,
+     -9.0,
+     -8.0,
+     -8.0,
+     -11.0,
+     -12.0
+    ],
+    "mean": -10.0,
+    "p_t": 3.215869151917011e-08,
+    "p_w": 0.001953125,
+    "p_t_holm": 5.563453632816429e-06,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNp31",
+    "mn": "b3",
+    "side": "L",
+    "d": [
+     2.0,
+     -8.0,
+     -2.0,
+     -4.0,
+     -5.0,
+     -4.0,
+     -7.0,
+     -10.0,
+     -1.0,
+     13.0
+    ],
+    "mean": -2.6,
+    "p_t": 0.23775798566541362,
+    "p_w": 0.138671875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "b3",
+    "side": "R",
+    "d": [
+     7.0,
+     -1.0,
+     2.0,
+     -2.0,
+     4.0,
+     -5.0,
+     0.0,
+     -4.0,
+     -5.0,
+     2.0
+    ],
+    "mean": -0.2,
+    "p_t": 0.8776894228986907,
+    "p_w": 0.859375,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "i1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "i1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "i2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "i2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "iii1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "iii1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "iii4",
+    "side": "L",
+    "d": [
+     -14.0,
+     -13.0,
+     -14.0,
+     -12.0,
+     -14.0,
+     -9.0,
+     -16.0,
+     -13.0,
+     -11.0,
+     -10.0
+    ],
+    "mean": -12.6,
+    "p_t": 1.561376163418823e-08,
+    "p_w": 0.001953125,
+    "p_t_holm": 2.73240828598294e-06,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNp31",
+    "mn": "iii4",
+    "side": "R",
+    "d": [
+     -13.0,
+     -11.0,
+     -14.0,
+     -14.0,
+     -16.0,
+     -9.0,
+     -12.0,
+     -12.0,
+     -14.0,
+     -17.0
+    ],
+    "mean": -13.2,
+    "p_t": 2.555071820847701e-08,
+    "p_w": 0.001953125,
+    "p_t_holm": 4.445824968275e-06,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNp31",
+    "mn": "hg1",
+    "side": "L",
+    "d": [
+     -11.0,
+     -13.0,
+     -13.0,
+     -10.0,
+     -11.0,
+     -9.0,
+     -13.0,
+     -11.0,
+     -4.0,
+     -5.0
+    ],
+    "mean": -10.0,
+    "p_t": 3.920686472486953e-06,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.000662596013850295,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNp31",
+    "mn": "hg1",
+    "side": "R",
+    "d": [
+     -15.0,
+     -7.0,
+     -13.0,
+     -13.0,
+     -12.0,
+     -12.0,
+     -9.0,
+     -13.0,
+     -13.0,
+     -17.0
+    ],
+    "mean": -12.4,
+    "p_t": 2.025340672147967e-07,
+    "p_w": 0.001953125,
+    "p_t_holm": 3.483585956094503e-05,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNp31",
+    "mn": "hg2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "hg2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "hg3",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "hg3",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "hg4",
+    "side": "L",
+    "d": [
+     7.0,
+     0.0,
+     4.0,
+     5.0,
+     -1.0,
+     3.0,
+     -11.0,
+     -14.0,
+     3.0,
+     18.0
+    ],
+    "mean": 1.4,
+    "p_t": 0.63487854102968,
+    "p_w": 0.4765625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "hg4",
+    "side": "R",
+    "d": [
+     2.0,
+     -1.0,
+     2.0,
+     -2.0,
+     0.0,
+     -1.0,
+     0.0,
+     -4.0,
+     -2.0,
+     -13.0
+    ],
+    "mean": -1.9,
+    "p_t": 0.1964142208884767,
+    "p_w": 0.234375,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "tp1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "tp1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "tp2",
+    "side": "L",
+    "d": [
+     -5.0,
+     -4.0,
+     -3.0,
+     -2.0,
+     -2.0,
+     -3.0,
+     -1.0,
+     -4.0,
+     -2.0,
+     -2.0
+    ],
+    "mean": -2.8,
+    "p_t": 5.0670518156188266e-05,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.0082086239413025,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNp31",
+    "mn": "tp2",
+    "side": "R",
+    "d": [
+     -4.0,
+     0.0,
+     -2.0,
+     -1.0,
+     0.0,
+     -3.0,
+     -1.0,
+     -3.0,
+     -2.0,
+     -2.0
+    ],
+    "mean": -1.8,
+    "p_t": 0.0019234117228289654,
+    "p_w": 0.0078125,
+    "p_t_holm": 0.2846649349786869,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "tpn",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "tpn",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "ps1",
+    "side": "L",
+    "d": [
+     -2.0,
+     -7.0,
+     -9.0,
+     -10.0,
+     -9.0,
+     -15.0,
+     -4.0,
+     -10.0,
+     -10.0,
+     -4.0
+    ],
+    "mean": -8.0,
+    "p_t": 9.861715814290853e-05,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.015778745302865365,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNp31",
+    "mn": "ps1",
+    "side": "R",
+    "d": [
+     -3.0,
+     -6.0,
+     -6.0,
+     5.0,
+     -3.0,
+     -8.0,
+     1.0,
+     -1.0,
+     -1.0,
+     1.0
+    ],
+    "mean": -2.1,
+    "p_t": 0.12521175061300557,
+    "p_w": 0.119140625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "ps2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     -1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": -0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNp31",
+    "mn": "ps2",
+    "side": "R",
+    "d": [
+     -2.0,
+     -2.0,
+     -1.0,
+     0.0,
+     -1.0,
+     0.0,
+     0.0,
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "mean": -0.7,
+    "p_t": 0.02484634444065555,
+    "p_w": 0.0625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "b2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "b2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "b3",
+    "side": "L",
+    "d": [
+     -19.0,
+     -25.0,
+     -15.0,
+     -23.0,
+     -15.0,
+     -22.0,
+     -13.0,
+     -28.0,
+     -20.0,
+     -7.0
+    ],
+    "mean": -18.7,
+    "p_t": 5.83156762704758e-06,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.0009738717937169459,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa04",
+    "mn": "b3",
+    "side": "R",
+    "d": [
+     14.0,
+     20.0,
+     6.0,
+     18.0,
+     8.0,
+     20.0,
+     7.0,
+     3.0,
+     20.0,
+     20.0
+    ],
+    "mean": 13.6,
+    "p_t": 0.00015260540875986913,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.02411165458405932,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa04",
+    "mn": "i1",
+    "side": "L",
+    "d": [
+     -24.0,
+     -21.0,
+     -17.0,
+     -19.0,
+     -20.0,
+     -22.0,
+     -19.0,
+     -20.0,
+     -21.0,
+     -18.0
+    ],
+    "mean": -20.1,
+    "p_t": 1.6575982965751114e-10,
+    "p_w": 0.001953125,
+    "p_t_holm": 2.9671009508694495e-08,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa04",
+    "mn": "i1",
+    "side": "R",
+    "d": [
+     9.0,
+     16.0,
+     9.0,
+     16.0,
+     10.0,
+     16.0,
+     9.0,
+     7.0,
+     14.0,
+     8.0
+    ],
+    "mean": 11.4,
+    "p_t": 4.035931799917823e-06,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.0006780365423861944,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa04",
+    "mn": "i2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "i2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "iii1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "iii1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "iii4",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     -1.0,
+     0.0,
+     0.0,
+     0.0,
+     -1.0,
+     0.0,
+     1.0,
+     -1.0
+    ],
+    "mean": -0.2,
+    "p_t": 0.34343639613791355,
+    "p_w": 0.625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "iii4",
+    "side": "R",
+    "d": [
+     0.0,
+     2.0,
+     0.0,
+     2.0,
+     0.0,
+     4.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    "mean": 0.9,
+    "p_t": 0.06760146305705546,
+    "p_w": 0.125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "hg1",
+    "side": "L",
+    "d": [
+     -37.0,
+     -37.0,
+     -32.0,
+     -37.0,
+     -37.0,
+     -38.0,
+     -27.0,
+     -38.0,
+     -32.0,
+     -35.0
+    ],
+    "mean": -35.0,
+    "p_t": 1.9475215301100036e-10,
+    "p_w": 0.001953125,
+    "p_t_holm": 3.466588323595807e-08,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa04",
+    "mn": "hg1",
+    "side": "R",
+    "d": [
+     39.0,
+     41.0,
+     36.0,
+     41.0,
+     34.0,
+     41.0,
+     40.0,
+     34.0,
+     39.0,
+     37.0
+    ],
+    "mean": 38.2,
+    "p_t": 9.067691774793498e-12,
+    "p_w": 0.001953125,
+    "p_t_holm": 1.6321845194628297e-09,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa04",
+    "mn": "hg2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "hg2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "hg3",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "hg3",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "hg4",
+    "side": "L",
+    "d": [
+     -6.0,
+     -4.0,
+     -4.0,
+     -4.0,
+     -9.0,
+     -5.0,
+     1.0,
+     0.0,
+     -3.0,
+     9.0
+    ],
+    "mean": -2.5,
+    "p_t": 0.14307037690189414,
+    "p_w": 0.12890625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "hg4",
+    "side": "R",
+    "d": [
+     -2.0,
+     5.0,
+     -8.0,
+     10.0,
+     -4.0,
+     0.0,
+     -5.0,
+     -8.0,
+     5.0,
+     7.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 0.96875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "tp1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "tp1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "tp2",
+    "side": "L",
+    "d": [
+     -1.0,
+     -1.0,
+     1.0,
+     0.0,
+     1.0,
+     -1.0,
+     0.0,
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "mean": -0.2,
+    "p_t": 0.44333185016966015,
+    "p_w": 0.6875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "tp2",
+    "side": "R",
+    "d": [
+     0.0,
+     -1.0,
+     1.0,
+     0.0,
+     0.0,
+     -1.0,
+     0.0,
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "mean": -0.2,
+    "p_t": 0.34343639613791355,
+    "p_w": 0.625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "tpn",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "tpn",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "ps1",
+    "side": "L",
+    "d": [
+     0.0,
+     -1.0,
+     6.0,
+     0.0,
+     0.0,
+     2.0,
+     -3.0,
+     -2.0,
+     -7.0,
+     2.0
+    ],
+    "mean": -0.3,
+    "p_t": 0.7885558536434354,
+    "p_w": 0.8125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "ps1",
+    "side": "R",
+    "d": [
+     -4.0,
+     4.0,
+     5.0,
+     2.0,
+     -1.0,
+     0.0,
+     -1.0,
+     -3.0,
+     -2.0,
+     2.0
+    ],
+    "mean": 0.2,
+    "p_t": 0.8363274733261832,
+    "p_w": 0.86328125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "ps2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa04",
+    "mn": "ps2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "b2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "b2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "b3",
+    "side": "L",
+    "d": [
+     3.0,
+     -13.0,
+     -2.0,
+     8.0,
+     -3.0,
+     5.0,
+     2.0,
+     -15.0,
+     7.0,
+     18.0
+    ],
+    "mean": 1.0,
+    "p_t": 0.7553450041897014,
+    "p_w": 0.607421875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "b3",
+    "side": "R",
+    "d": [
+     12.0,
+     -2.0,
+     9.0,
+     6.0,
+     3.0,
+     3.0,
+     4.0,
+     4.0,
+     5.0,
+     9.0
+    ],
+    "mean": 5.3,
+    "p_t": 0.002148995192650305,
+    "p_w": 0.00390625,
+    "p_t_holm": 0.3159022933195948,
+    "p_w_holm": 0.59375
+   },
+   {
+    "family": "DNa10",
+    "mn": "i1",
+    "side": "L",
+    "d": [
+     8.0,
+     1.0,
+     3.0,
+     9.0,
+     5.0,
+     10.0,
+     3.0,
+     0.0,
+     6.0,
+     8.0
+    ],
+    "mean": 5.3,
+    "p_t": 0.0009261816644418626,
+    "p_w": 0.00390625,
+    "p_t_holm": 0.13985343133072126,
+    "p_w_holm": 0.59375
+   },
+   {
+    "family": "DNa10",
+    "mn": "i1",
+    "side": "R",
+    "d": [
+     5.0,
+     4.0,
+     8.0,
+     7.0,
+     5.0,
+     5.0,
+     4.0,
+     5.0,
+     5.0,
+     4.0
+    ],
+    "mean": 5.2,
+    "p_t": 5.471657494699962e-07,
+    "p_w": 0.001953125,
+    "p_t_holm": 9.301817740989936e-05,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa10",
+    "mn": "i2",
+    "side": "L",
+    "d": [
+     -20.0,
+     -19.0,
+     -21.0,
+     -16.0,
+     -21.0,
+     -18.0,
+     -19.0,
+     -13.0,
+     -19.0,
+     -19.0
+    ],
+    "mean": -18.5,
+    "p_t": 1.6668692051162932e-09,
+    "p_w": 0.001953125,
+    "p_t_holm": 2.950358493055839e-07,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa10",
+    "mn": "i2",
+    "side": "R",
+    "d": [
+     3.0,
+     4.0,
+     2.0,
+     4.0,
+     3.0,
+     3.0,
+     7.0,
+     4.0,
+     1.0,
+     1.0
+    ],
+    "mean": 3.2,
+    "p_t": 0.00026656071708311223,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.04185003258204862,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa10",
+    "mn": "iii1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "iii1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "iii4",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "iii4",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "hg1",
+    "side": "L",
+    "d": [
+     2.0,
+     -1.0,
+     0.0,
+     1.0,
+     0.0,
+     3.0,
+     0.0,
+     -5.0,
+     4.0,
+     5.0
+    ],
+    "mean": 0.9,
+    "p_t": 0.34343639613791355,
+    "p_w": 0.375,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "hg1",
+    "side": "R",
+    "d": [
+     2.0,
+     1.0,
+     1.0,
+     1.0,
+     4.0,
+     2.0,
+     1.0,
+     -2.0,
+     2.0,
+     3.0
+    ],
+    "mean": 1.5,
+    "p_t": 0.014956363910414203,
+    "p_w": 0.029296875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "hg2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "hg2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "hg3",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "hg3",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "hg4",
+    "side": "L",
+    "d": [
+     0.0,
+     -11.0,
+     0.0,
+     0.0,
+     -4.0,
+     0.0,
+     3.0,
+     -14.0,
+     -1.0,
+     17.0
+    ],
+    "mean": -1.0,
+    "p_t": 0.7124800926164598,
+    "p_w": 0.6875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "hg4",
+    "side": "R",
+    "d": [
+     5.0,
+     0.0,
+     3.0,
+     -1.0,
+     0.0,
+     -3.0,
+     -3.0,
+     -3.0,
+     -4.0,
+     13.0
+    ],
+    "mean": 0.7,
+    "p_t": 0.679554654379271,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "tp1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "tp1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "tp2",
+    "side": "L",
+    "d": [
+     -6.0,
+     0.0,
+     0.0,
+     -2.0,
+     -1.0,
+     -4.0,
+     -1.0,
+     -4.0,
+     -2.0,
+     -5.0
+    ],
+    "mean": -2.5,
+    "p_t": 0.004720894702799959,
+    "p_w": 0.0078125,
+    "p_t_holm": 0.684529731905994,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "tp2",
+    "side": "R",
+    "d": [
+     -4.0,
+     -2.0,
+     -1.0,
+     -2.0,
+     -1.0,
+     -3.0,
+     1.0,
+     -3.0,
+     -2.0,
+     -3.0
+    ],
+    "mean": -2.0,
+    "p_t": 0.00154988591170182,
+    "p_w": 0.0078125,
+    "p_t_holm": 0.23248288675527298,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "tpn",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "tpn",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "ps1",
+    "side": "L",
+    "d": [
+     4.0,
+     11.0,
+     8.0,
+     6.0,
+     4.0,
+     0.0,
+     6.0,
+     7.0,
+     5.0,
+     6.0
+    ],
+    "mean": 5.7,
+    "p_t": 0.0001440608319927951,
+    "p_w": 0.00390625,
+    "p_t_holm": 0.02290567228685442,
+    "p_w_holm": 0.59375
+   },
+   {
+    "family": "DNa10",
+    "mn": "ps1",
+    "side": "R",
+    "d": [
+     0.0,
+     4.0,
+     4.0,
+     3.0,
+     -6.0,
+     3.0,
+     2.0,
+     -1.0,
+     1.0,
+     7.0
+    ],
+    "mean": 1.7,
+    "p_t": 0.16203240232995747,
+    "p_w": 0.14453125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "ps2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     -1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": -0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa10",
+    "mn": "ps2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "b2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "b2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "b3",
+    "side": "L",
+    "d": [
+     -28.0,
+     -36.0,
+     -37.0,
+     -36.0,
+     -38.0,
+     -41.0,
+     -35.0,
+     -36.0,
+     -36.0,
+     -22.0
+    ],
+    "mean": -34.5,
+    "p_t": 9.183701624629642e-09,
+    "p_w": 0.001953125,
+    "p_t_holm": 1.6163314859348172e-06,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa15",
+    "mn": "b3",
+    "side": "R",
+    "d": [
+     11.0,
+     -2.0,
+     5.0,
+     0.0,
+     6.0,
+     3.0,
+     5.0,
+     19.0,
+     2.0,
+     18.0
+    ],
+    "mean": 6.7,
+    "p_t": 0.015875202339776226,
+    "p_w": 0.01171875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "i1",
+    "side": "L",
+    "d": [
+     -12.0,
+     -6.0,
+     -20.0,
+     -7.0,
+     -11.0,
+     -12.0,
+     -11.0,
+     -7.0,
+     -10.0,
+     -9.0
+    ],
+    "mean": -10.5,
+    "p_t": 1.577953387408345e-05,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.0025878435553496858,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa15",
+    "mn": "i1",
+    "side": "R",
+    "d": [
+     9.0,
+     6.0,
+     7.0,
+     5.0,
+     9.0,
+     6.0,
+     6.0,
+     20.0,
+     4.0,
+     4.0
+    ],
+    "mean": 7.6,
+    "p_t": 0.0006290364101563265,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.09687160716407428,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa15",
+    "mn": "i2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "i2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "iii1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "iii1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "iii4",
+    "side": "L",
+    "d": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "iii4",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "hg1",
+    "side": "L",
+    "d": [
+     -9.0,
+     -8.0,
+     -20.0,
+     -10.0,
+     -11.0,
+     -15.0,
+     -11.0,
+     -10.0,
+     -9.0,
+     -7.0
+    ],
+    "mean": -11.0,
+    "p_t": 7.920208577227576e-06,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.0013147546238197775,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa15",
+    "mn": "hg1",
+    "side": "R",
+    "d": [
+     7.0,
+     5.0,
+     7.0,
+     5.0,
+     9.0,
+     6.0,
+     6.0,
+     20.0,
+     7.0,
+     8.0
+    ],
+    "mean": 8.0,
+    "p_t": 0.00027506059899611946,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.042909453443394634,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa15",
+    "mn": "hg2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "hg2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "hg3",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "hg3",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "hg4",
+    "side": "L",
+    "d": [
+     -3.0,
+     -14.0,
+     2.0,
+     -13.0,
+     -15.0,
+     -18.0,
+     -11.0,
+     -14.0,
+     -16.0,
+     6.0
+    ],
+    "mean": -9.6,
+    "p_t": 0.005121072764272635,
+    "p_w": 0.013671875,
+    "p_t_holm": 0.7374344780552594,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "hg4",
+    "side": "R",
+    "d": [
+     -16.0,
+     -21.0,
+     -21.0,
+     -22.0,
+     -20.0,
+     -22.0,
+     -18.0,
+     -4.0,
+     -21.0,
+     -2.0
+    ],
+    "mean": -16.7,
+    "p_t": 5.853613579815192e-05,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.00942431786350246,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa15",
+    "mn": "tp1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "tp1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "tp2",
+    "side": "L",
+    "d": [
+     0.0,
+     1.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    "mean": 0.4,
+    "p_t": 0.03678749787978613,
+    "p_w": 0.125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "tp2",
+    "side": "R",
+    "d": [
+     0.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     0.0,
+     1.0,
+     -1.0,
+     1.0,
+     -1.0
+    ],
+    "mean": 0.4,
+    "p_t": 0.16785065605707486,
+    "p_w": 0.2890625,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "tpn",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "tpn",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "ps1",
+    "side": "L",
+    "d": [
+     -4.0,
+     3.0,
+     3.0,
+     -1.0,
+     0.0,
+     0.0,
+     0.0,
+     -1.0,
+     2.0,
+     2.0
+    ],
+    "mean": 0.4,
+    "p_t": 0.5743560190941981,
+    "p_w": 0.5,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "ps1",
+    "side": "R",
+    "d": [
+     -4.0,
+     0.0,
+     4.0,
+     2.0,
+     -1.0,
+     0.0,
+     0.0,
+     -2.0,
+     -1.0,
+     3.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.89714064388688,
+    "p_w": 0.9375,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "ps2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa15",
+    "mn": "ps2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "b2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "b2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "b3",
+    "side": "L",
+    "d": [
+     11.0,
+     2.0,
+     4.0,
+     -15.0,
+     -9.0,
+     -16.0,
+     -6.0,
+     1.0,
+     3.0,
+     1.0
+    ],
+    "mean": -2.4,
+    "p_t": 0.4093594280609758,
+    "p_w": 0.67578125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "b3",
+    "side": "R",
+    "d": [
+     10.0,
+     2.0,
+     5.0,
+     -1.0,
+     4.0,
+     1.0,
+     4.0,
+     -2.0,
+     -1.0,
+     18.0
+    ],
+    "mean": 4.0,
+    "p_t": 0.06697897008022831,
+    "p_w": 0.060546875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "i1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.1,
+    "p_t": 0.34343639613791355,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "i1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "i2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "i2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "iii1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "iii1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "iii4",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "iii4",
+    "side": "R",
+    "d": [
+     4.0,
+     3.0,
+     4.0,
+     3.0,
+     1.0,
+     4.0,
+     7.0,
+     5.0,
+     3.0,
+     3.0
+    ],
+    "mean": 3.7,
+    "p_t": 3.8243931291209046e-05,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.006233760800467074,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa16",
+    "mn": "hg1",
+    "side": "L",
+    "d": [
+     -1.0,
+     -1.0,
+     -1.0,
+     -4.0,
+     -1.0,
+     -4.0,
+     0.0,
+     -5.0,
+     1.0,
+     0.0
+    ],
+    "mean": -1.6,
+    "p_t": 0.03299072530617582,
+    "p_w": 0.046875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "hg1",
+    "side": "R",
+    "d": [
+     -1.0,
+     1.0,
+     0.0,
+     1.0,
+     4.0,
+     5.0,
+     4.0,
+     0.0,
+     2.0,
+     5.0
+    ],
+    "mean": 2.1,
+    "p_t": 0.01562222768428982,
+    "p_w": 0.03125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "hg2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "hg2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "hg3",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "hg3",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "hg4",
+    "side": "L",
+    "d": [
+     -6.0,
+     -7.0,
+     -9.0,
+     -24.0,
+     -25.0,
+     -33.0,
+     -25.0,
+     -10.0,
+     -12.0,
+     -6.0
+    ],
+    "mean": -15.7,
+    "p_t": 0.0007640583703812145,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.11690093066832581,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa16",
+    "mn": "hg4",
+    "side": "R",
+    "d": [
+     16.0,
+     15.0,
+     18.0,
+     14.0,
+     14.0,
+     15.0,
+     20.0,
+     10.0,
+     10.0,
+     30.0
+    ],
+    "mean": 16.2,
+    "p_t": 9.279095054475313e-06,
+    "p_w": 0.001953125,
+    "p_t_holm": 0.0015310506839884266,
+    "p_w_holm": 0.3515625
+   },
+   {
+    "family": "DNa16",
+    "mn": "tp1",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "tp1",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "tp2",
+    "side": "L",
+    "d": [
+     -2.0,
+     -2.0,
+     -1.0,
+     1.0,
+     1.0,
+     0.0,
+     1.0,
+     -1.0,
+     1.0,
+     0.0
+    ],
+    "mean": -0.2,
+    "p_t": 0.6193005100381608,
+    "p_w": 0.5546875,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "tp2",
+    "side": "R",
+    "d": [
+     -3.0,
+     -1.0,
+     0.0,
+     0.0,
+     -1.0,
+     -3.0,
+     0.0,
+     -1.0,
+     0.0,
+     -1.0
+    ],
+    "mean": -1.0,
+    "p_t": 0.022899494551768276,
+    "p_w": 0.03125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "tpn",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "tpn",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "ps1",
+    "side": "L",
+    "d": [
+     -1.0,
+     7.0,
+     3.0,
+     0.0,
+     -2.0,
+     -3.0,
+     4.0,
+     1.0,
+     -3.0,
+     3.0
+    ],
+    "mean": 0.9,
+    "p_t": 0.41286967995939283,
+    "p_w": 0.4453125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "ps1",
+    "side": "R",
+    "d": [
+     -1.0,
+     1.0,
+     5.0,
+     3.0,
+     -2.0,
+     -2.0,
+     3.0,
+     1.0,
+     -3.0,
+     2.0
+    ],
+    "mean": 0.7,
+    "p_t": 0.4212255090809366,
+    "p_w": 0.5078125,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "ps2",
+    "side": "L",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   },
+   {
+    "family": "DNa16",
+    "mn": "ps2",
+    "side": "R",
+    "d": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mean": 0.0,
+    "p_t": 1.0,
+    "p_w": 1.0,
+    "p_t_holm": 1.0,
+    "p_w_holm": 1.0
+   }
+  ],
+  "families": {
+   "DNa02": {
+    "steers": false,
+    "mn": [],
+    "steers_wilcoxon": false,
+    "mn_wilcoxon": []
+   },
+   "DNp31": {
+    "steers": false,
+    "mn": [],
+    "steers_wilcoxon": false,
+    "mn_wilcoxon": []
+   },
+   "DNa04": {
+    "steers": true,
+    "mn": [
+     {
+      "mn": "b3",
+      "sign": "ipsilateral"
+     },
+     {
+      "mn": "i1",
+      "sign": "ipsilateral"
+     },
+     {
+      "mn": "hg1",
+      "sign": "ipsilateral"
+     }
+    ],
+    "steers_wilcoxon": false,
+    "mn_wilcoxon": []
+   },
+   "DNa10": {
+    "steers": true,
+    "mn": [
+     {
+      "mn": "i2",
+      "sign": "ipsilateral"
+     }
+    ],
+    "steers_wilcoxon": false,
+    "mn_wilcoxon": []
+   },
+   "DNa15": {
+    "steers": true,
+    "mn": [
+     {
+      "mn": "hg1",
+      "sign": "ipsilateral"
+     }
+    ],
+    "steers_wilcoxon": false,
+    "mn_wilcoxon": []
+   },
+   "DNa16": {
+    "steers": false,
+    "mn": [],
+    "steers_wilcoxon": false,
+    "mn_wilcoxon": []
+   }
+  },
+  "baseline_power": {
+   "DLM1-4": [
+    51.8,
+    54.675
+   ],
+   "DLM5": [
+    44.1,
+    49.1
+   ],
+   "DVM1a-c": [
+    21.066666666666663,
+    27.633333333333336
+   ],
+   "DVM2a-b": [
+    0.5,
+    1.4
+   ],
+   "DVM3a-b": [
+    0.45,
+    14.45
+   ],
+   "tp2": [
+    62.6,
+    47.9
+   ],
+   "ps1": [
+    117.4,
+    111.0
+   ]
+  },
+  "network": {
+   "B": 0.16562409169604836,
+   "DNa02_L": 0.22108339336037713,
+   "DNa02_R": 0.2215806700281811,
+   "DNp31_L": 0.19445413301992898,
+   "DNp31_R": 0.19866424031037141,
+   "DNa04_L": 0.18609394548280697,
+   "DNa04_R": 0.11325902617179107,
+   "DNa10_L": 0.1650863757566567,
+   "DNa10_R": 0.18631130656759046,
+   "DNa15_L": 0.06620098317979048,
+   "DNa15_R": 0.06255576196433761,
+   "DNa16_L": 0.1470144444023202,
+   "DNa16_R": 0.219149890687594
+  },
+  "n_pairs_all_zero": 42,
+  "gate_failing_d": {
+   "DNa02|b1": [
+    0.0,
+    0.0
+   ],
+   "DNa02|iii3": [
+    0.0,
+    0.0
+   ],
+   "DNp31|b1": [
+    0.0,
+    0.0
+   ],
+   "DNp31|iii3": [
+    0.0,
+    0.0
+   ],
+   "DNa04|b1": [
+    0.0,
+    0.0
+   ],
+   "DNa04|iii3": [
+    0.0,
+    0.0
+   ],
+   "DNa10|b1": [
+    0.0,
+    0.0
+   ],
+   "DNa10|iii3": [
+    0.0,
+    0.0
+   ],
+   "DNa15|b1": [
+    0.0,
+    0.0
+   ],
+   "DNa15|iii3": [
+    0.0,
+    0.0
+   ],
+   "DNa16|b1": [
+    0.0,
+    0.0
+   ],
+   "DNa16|iii3": [
+    0.0,
+    0.0
+   ]
+  }
+ },
+ "post_hoc": {
+  "c2_region": {
+   "brain": {
+    "neurons": 780,
+    "spikes": 218071
+   },
+   "SEZ": {
+    "neurons": 74,
+    "spikes": 15705
+   },
+   "VNC": {
+    "neurons": 572,
+    "spikes": 55613
+   }
+  },
+  "c2_cut_spikes_total": 289389,
+  "c2_net_last100_drive": 0.2160152152759348,
+  "c2_net_last100_cut": 0.18526241296078655,
+  "f0_flight_range": {
+   "DNg02": [
+    0.0,
+    0.0
+   ],
+   "DNa02": [
+    10.613598673300165,
+    44.908789386401324
+   ],
+   "DNp31": [
+    40.0,
+    73.23383084577115
+   ],
+   "DNa04": [
+    16.782752902155885,
+    26.13598673300165
+   ],
+   "DNa10": [
+    3.3830845771144284,
+    23.217247097844115
+   ],
+   "DNa15": [
+    3.714759535655058,
+    7.097844112769485
+   ],
+   "DNa16": [
+    24.07960199004975,
+    25.737976782752902
+   ]
+  },
+  "c3_steering_dn_own_rate": {
+   "DNa02_L": 177.3,
+   "DNa02_R": 182.4,
+   "DNp31_L": 105.3,
+   "DNp31_R": 103.0,
+   "DNa04_L": 96.8,
+   "DNa04_R": 103.5,
+   "DNa10_L": 99.7,
+   "DNa10_R": 96.4,
+   "DNa15_L": 95.6,
+   "DNa15_R": 95.3,
+   "DNa16_L": 136.4,
+   "DNa16_R": 191.5
+  }
+ }
+}
