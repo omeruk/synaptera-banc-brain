@@ -280,6 +280,19 @@ Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 
   25 Hz). The brain's direction signal exists but does not reach the VNC's steering range.
 - What follows is the project owner's decision.
 
+**Decision after F3b-1 (project owner, 2026-10-13, PR #13 merged):**
+1. The FlyWire brain turns grating direction into DN activity: DNa04 and DNa10 are direction-selective after Holm.
+2. The signal reaches the VNC far below its steering range (DNa04 at most 6.9 Hz against 25 Hz). With three bridged
+   families, the hybrid therefore shows no direction-selective steering.
+3. Three candidate explanations, to be tested in this order:
+   1. too few bridged DNs (in flies, steering is distributed over many DN types);
+   2. no flight-state gain in the model;
+   3. the neuron model (no adaptation or background; the LIF sits far from threshold).
+4. Next step: F3b-2 tests explanation 1 (`prereg/10_f3b2_dn_ensemble.md`). The bridge carries all 112 shared DN families
+   that pass the symmetry gate in both datasets, at gain 1, with the same bridge rules. It reuses the F3b-1 brain
+   records. If the ensemble is not direction-selective either, the work stops there; the next step (neuron model v2)
+   is the owner's decision.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
