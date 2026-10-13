@@ -1,12 +1,14 @@
 """BANC adapter (FlyWire Codex export of the Brain And Nerve Cord connectome): neurons -> the common schema.
 
-New file (no v1 source). Scope of this version: the neuron table and the descending-neuron (DN) list, the
-equivalent of the FlyWire adapter's DN view. Edges and the sign rule (transmitter-to-sign mapping, including
-HIST and neurons without a prediction) are decided in phase F1 and are deliberately not implemented here.
+New file (no v1 source). F1 version: neuron table, DN list, edges (one row per neuron pair, synapse counts of all neuropils summed),
+regions from the neuropil of the synapses, and the sign rule of ``prereg/01_banc_sign_rule.md``: reference =
+the Shiu rule (GABA and glutamate -1, everything else incl. HIST, TYR and a missing prediction +1), variants
+``hist_inhibitory`` / ``nt_impute`` by flag only (``connectome.sign_rules.assign_signs``).
 
 Column mapping (Codex ``neurons-banc.csv.gz``): Root ID -> id, Primary Cell Type -> cell_type, Alternative
 Cell Type(s) -> cell_type_alt, Class -> cell_class, Super Class -> super_class, Soma side -> side,
-Predicted NT type / confidence -> nt / nt_conf. ``region`` is left unassigned (NaN) until F1 defines it.
+Predicted NT type / confidence -> nt / nt_conf. ``region`` = region of the neuron's dominant neuropil
+(synapse-weighted, in + out): see :func:`region_of_neuropil`.
 Extra columns kept for later selections: sub_class, body_part, function, flow, verified_nt, nerve, hemilineage.
 """
 from __future__ import annotations
@@ -66,3 +68,60 @@ def load_connectome_unsigned(neurons_path, connections_path, hash_files: bool = 
     if hash_files:
         meta["sha256"] = {"neurons": file_sha256(neurons_path), "connections": file_sha256(connections_path)}
     return schema.Connectome("banc", load_neurons(neurons_path), load_edges_unsigned(connections_path), meta)
+
+
+# ── regions ──────────────────────────────────────────────────────────────────
+_VNC_NAMES = ("IntTct", "LTct", "ANm", "Tct")
+_SEZ = ("GNG", "PRW", "SAD")
+OPTIC_NEUROPILS = ("ME", "LO", "LOP", "LA", "AME")       # optic lobe: a subset of "brain" (QA reports it separately)
+
+
+def region_of_neuropil(name: str) -> str:
+    """Region (schema REGIONS) of a BANC neuropil name.
+
+    VNC: ``VNC_*``, ``ABDNM_*``, ``LegNp_*``, ``*_UTct_*``, IntTct, LTct, ANm, Tct. SEZ: GNG, PRW, SAD, FLA_*, CAN_*.
+    neck: cervical_connective. brain: everything else (the optic lobes ME / LO / LOP / LA / AME included)."""
+    if name.startswith(("VNC_", "ABDNM_", "LegNp_")) or "_UTct_" in name or name in _VNC_NAMES:
+        return "VNC"
+    if name in _SEZ or name.startswith(("FLA_", "CAN_")):
+        return "SEZ"
+    if name == "cervical_connective":
+        return "neck"
+    return "brain"
+
+
+def is_optic(name: str) -> bool:
+    return name.split("_")[0] in OPTIC_NEUROPILS
+
+
+def load_connections(path) -> pd.DataFrame:
+    """Per-neuropil connection rows (pre_root_id, post_root_id, neuropil, syn_count)."""
+    return pd.read_csv(path, usecols=["pre_root_id", "post_root_id", "neuropil", "syn_count"])
+
+
+def dominant_regions(conn: pd.DataFrame, ids: np.ndarray) -> pd.Series:
+    """Region of the neuropil holding most of each neuron's synapses (in + out); NaN without connections."""
+    reg = conn["neuropil"].map({n: region_of_neuropil(n) for n in conn["neuropil"].unique()})
+    w = conn["syn_count"].to_numpy(np.int64)
+    both = pd.concat([pd.DataFrame({"id": conn["pre_root_id"].to_numpy(), "r": reg.to_numpy(), "w": w}),
+                      pd.DataFrame({"id": conn["post_root_id"].to_numpy(), "r": reg.to_numpy(), "w": w})])
+    g = both.groupby(["id", "r"])["w"].sum().reset_index().sort_values(["id", "w"], ascending=[True, False])
+    top = g.drop_duplicates("id").set_index("id")["r"]
+    return top.reindex(ids)
+
+
+def load_connectome(neurons_path, connections_path, variants=(), hash_files: bool = True) -> schema.Connectome:
+    """Signed BANC Connectome: reference Shiu rule (+ named variants), regions filled from the synapses."""
+    from connectome.adapters import file_sha256
+    from connectome.sign_rules import assign_signs
+    nrn = load_neurons(neurons_path)
+    conn = load_connections(connections_path)
+    nrn["region"] = dominant_regions(conn, nrn["id"].to_numpy()).to_numpy(object)
+    g = conn.groupby(["pre_root_id", "post_root_id"], sort=True)["syn_count"].sum().reset_index()
+    edges = pd.DataFrame({"pre": g["pre_root_id"].to_numpy(np.int64), "post": g["post_root_id"].to_numpy(np.int64),
+                          "n_syn": g["syn_count"].to_numpy(np.int64)})
+    meta = dict(dataset="banc", neurons=str(neurons_path), connections=str(connections_path))
+    if hash_files:
+        meta["sha256"] = {"neurons": file_sha256(neurons_path), "connections": file_sha256(connections_path)}
+    unsigned = schema.Connectome("banc", nrn, edges, dict(meta, signed=False))
+    return assign_signs(unsigned, variants)

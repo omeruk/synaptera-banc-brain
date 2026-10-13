@@ -301,3 +301,15 @@ def test_hist_inhibitory_and_nt_impute_variants_are_named_flags():
         SR.assign_signs(u, ["bogus"])
     with pytest.raises(ValueError, match="already"):
         SR.assign_signs(h)
+
+
+def test_missing_prediction_may_have_nan_or_zero_score_but_not_a_nonzero_one():
+    """FlyWire writes score 0 for a missing prediction, the BANC export leaves it NaN; a non-zero score still raises."""
+    cx = _cx()
+    nan_conf = cx.neurons.assign(nt_conf=lambda d: d["nt_conf"].where(d["nt"].notna(), np.nan))
+    SR.silent_rule(Connectome("n", nan_conf, cx.edges))          # no error
+    SR.impute_table(Connectome("n", nan_conf, cx.edges))
+    bad = nan_conf.copy()
+    bad.loc[3, "nt_conf"] = 0.4
+    with pytest.raises(ValueError, match="non-zero score"):
+        SR.silent_rule(Connectome("b", bad, cx.edges))

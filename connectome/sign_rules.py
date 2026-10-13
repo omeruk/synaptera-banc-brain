@@ -118,7 +118,7 @@ def silent_rule(cx: Connectome, variant: str = "broad", modulatory=NT_MODULATORY
         raise ValueError(variant)
     nt = cx.neurons["nt"]
     missing = nt.isna().to_numpy()
-    conf = cx.neurons["nt_conf"].to_numpy(float)
+    conf = np.nan_to_num(cx.neurons["nt_conf"].to_numpy(float))   # missing prediction: 0 (FlyWire) or NaN (BANC)
     if missing.all():
         raise ValueError("neurons.nt is empty: load the transmitter predictions first")
     if (conf[missing] != 0).any():
@@ -171,7 +171,7 @@ def impute_table(cx: Connectome, pred_sign: dict | None = None) -> pd.DataFrame:
     pred_sign = PRED_SIGN_SHIU if pred_sign is None else pred_sign
     nt = cx.neurons["nt"]
     empty = nt.isna().to_numpy()
-    conf = cx.neurons["nt_conf"].to_numpy(float)
+    conf = np.nan_to_num(cx.neurons["nt_conf"].to_numpy(float))   # missing prediction: 0 (FlyWire) or NaN (BANC)
     if (conf[empty] != 0).any():
         raise ValueError("a missing nt prediction with a non-zero score")
     unknown = sorted(set(nt.dropna().unique()) - set(pred_sign))

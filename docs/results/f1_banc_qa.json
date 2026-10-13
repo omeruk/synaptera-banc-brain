@@ -1,0 +1,1546 @@
+{
+ "inputs": {
+  "sha256": {
+   "neurons": "40a2201554a8c34d2c4b07c8322543a07c1b3faf5acafbac363fd1a3d0fa617f",
+   "connections": "8772298eb69455759c7b4a23ee1d1843f5b389965e312524e652415f8a09b312"
+  }
+ },
+ "counts": {
+  "neurons": 158262,
+  "left": 75760,
+  "right": 82502,
+  "typed": 0.7491627807054125,
+  "pairs": 3037361,
+  "synapses": 23556214,
+  "median_syn_per_pair": 5.0,
+  "super_classes": {
+   "optic_lobe_intrinsic": 72582,
+   "central_brain_intrinsic": 31782,
+   "sensory": 16557,
+   "ventral_nerve_cord_intrinsic": 12851,
+   "NaN": 11499,
+   "visual_projection": 7321,
+   "ascending": 1849,
+   "descending": 1316,
+   "motor": 805,
+   "sensory_ascending": 516,
+   "visual_centrifugal": 472,
+   "glia": 458,
+   "visceral_circulatory": 221,
+   "sensory_descending": 13,
+   "trachea": 8,
+   "not_a_neuron": 7,
+   "ascending_visceral_circulatory": 5
+  },
+  "neuropil_rows": 3990039,
+  "neuropils": 111,
+  "neuropil_rows_per_neuron": 25.21160480721841,
+  "region_of_neurons": {
+   "brain": "124625",
+   "VNC": "24500",
+   "SEZ": "4837",
+   "NaN": "4300"
+  }
+ },
+ "sign_rules": {
+  "reference_shiu": {
+   "edge_signs": {
+    "excitatory": {
+     "neurons": 103402,
+     "synapses": 13999610
+    },
+    "inhibitory": {
+     "neurons": 43251,
+     "synapses": 9556604
+    },
+    "silent": {
+     "neurons": 0,
+     "synapses": 0
+    }
+   },
+   "nt_counts": {
+    "ACH": {
+     "neurons": 85006,
+     "out_synapses": 11804397
+    },
+    "DA": {
+     "neurons": 8072,
+     "out_synapses": 1035171
+    },
+    "GABA": {
+     "neurons": 20604,
+     "out_synapses": 6189788
+    },
+    "GLUT": {
+     "neurons": 24382,
+     "out_synapses": 3366816
+    },
+    "HIST": {
+     "neurons": 7694,
+     "out_synapses": 651706
+    },
+    "OCT": {
+     "neurons": 1903,
+     "out_synapses": 106082
+    },
+    "SER": {
+     "neurons": 1612,
+     "out_synapses": 355392
+    },
+    "TYR": {
+     "neurons": 209,
+     "out_synapses": 39007
+    },
+    "none": {
+     "neurons": 8780,
+     "out_synapses": 7855
+    }
+   },
+   "applied": []
+  },
+  "hist_inhibitory": {
+   "edge_signs": {
+    "excitatory": {
+     "neurons": 95835,
+     "synapses": 13347904
+    },
+    "inhibitory": {
+     "neurons": 50818,
+     "synapses": 10208310
+    },
+    "silent": {
+     "neurons": 0,
+     "synapses": 0
+    }
+   },
+   "nt_counts": {
+    "ACH": {
+     "neurons": 85006,
+     "out_synapses": 11804397
+    },
+    "DA": {
+     "neurons": 8072,
+     "out_synapses": 1035171
+    },
+    "GABA": {
+     "neurons": 20604,
+     "out_synapses": 6189788
+    },
+    "GLUT": {
+     "neurons": 24382,
+     "out_synapses": 3366816
+    },
+    "HIST": {
+     "neurons": 7694,
+     "out_synapses": 651706
+    },
+    "OCT": {
+     "neurons": 1903,
+     "out_synapses": 106082
+    },
+    "SER": {
+     "neurons": 1612,
+     "out_synapses": 355392
+    },
+    "TYR": {
+     "neurons": 209,
+     "out_synapses": 39007
+    },
+    "none": {
+     "neurons": 8780,
+     "out_synapses": 7855
+    }
+   },
+   "applied": [
+    {
+     "name": "hist_inhibitory",
+     "n_neurons": 7694,
+     "n_edges_changed": 89349,
+     "n_neurons_changed": 7567,
+     "syn_exc_to_inh": 651706,
+     "syn_inh_to_exc": 0
+    }
+   ]
+  },
+  "nt_impute": {
+   "edge_signs": {
+    "excitatory": {
+     "neurons": 103230,
+     "synapses": 13998227
+    },
+    "inhibitory": {
+     "neurons": 43423,
+     "synapses": 9557987
+    },
+    "silent": {
+     "neurons": 0,
+     "synapses": 0
+    }
+   },
+   "nt_counts": {
+    "ACH": {
+     "neurons": 85006,
+     "out_synapses": 11804397
+    },
+    "DA": {
+     "neurons": 8072,
+     "out_synapses": 1035171
+    },
+    "GABA": {
+     "neurons": 20604,
+     "out_synapses": 6189788
+    },
+    "GLUT": {
+     "neurons": 24382,
+     "out_synapses": 3366816
+    },
+    "HIST": {
+     "neurons": 7694,
+     "out_synapses": 651706
+    },
+    "OCT": {
+     "neurons": 1903,
+     "out_synapses": 106082
+    },
+    "SER": {
+     "neurons": 1612,
+     "out_synapses": 355392
+    },
+    "TYR": {
+     "neurons": 209,
+     "out_synapses": 39007
+    },
+    "none": {
+     "neurons": 8780,
+     "out_synapses": 7855
+    }
+   },
+   "applied": [
+    {
+     "name": "impute",
+     "n_neurons": 1192,
+     "n_edges_changed": 308,
+     "n_neurons_changed": 172,
+     "syn_exc_to_inh": 1383,
+     "syn_inh_to_exc": 0,
+     "n_imputable": 1192
+    }
+   ]
+  },
+  "hist_inhibitory+nt_impute": {
+   "edge_signs": {
+    "excitatory": {
+     "neurons": 95663,
+     "synapses": 13346521
+    },
+    "inhibitory": {
+     "neurons": 50990,
+     "synapses": 10209693
+    },
+    "silent": {
+     "neurons": 0,
+     "synapses": 0
+    }
+   },
+   "nt_counts": {
+    "ACH": {
+     "neurons": 85006,
+     "out_synapses": 11804397
+    },
+    "DA": {
+     "neurons": 8072,
+     "out_synapses": 1035171
+    },
+    "GABA": {
+     "neurons": 20604,
+     "out_synapses": 6189788
+    },
+    "GLUT": {
+     "neurons": 24382,
+     "out_synapses": 3366816
+    },
+    "HIST": {
+     "neurons": 7694,
+     "out_synapses": 651706
+    },
+    "OCT": {
+     "neurons": 1903,
+     "out_synapses": 106082
+    },
+    "SER": {
+     "neurons": 1612,
+     "out_synapses": 355392
+    },
+    "TYR": {
+     "neurons": 209,
+     "out_synapses": 39007
+    },
+    "none": {
+     "neurons": 8780,
+     "out_synapses": 7855
+    }
+   },
+   "applied": [
+    {
+     "name": "hist_inhibitory",
+     "n_neurons": 7694,
+     "n_edges_changed": 89349,
+     "n_neurons_changed": 7567,
+     "syn_exc_to_inh": 651706,
+     "syn_inh_to_exc": 0
+    },
+    {
+     "name": "impute",
+     "n_neurons": 1192,
+     "n_edges_changed": 308,
+     "n_neurons_changed": 172,
+     "syn_exc_to_inh": 1383,
+     "syn_inh_to_exc": 0,
+     "n_imputable": 1192
+    }
+   ]
+  }
+ },
+ "missing_nt": {
+  "missing": 8780,
+  "with_verified_nt": 2341
+ },
+ "symmetry": {
+  "all": {
+   "n_types": 9167,
+   "pass_fraction": 0.4262026835387804,
+   "median_abs_log2_total": 0.4905661615999231,
+   "frac_abs_log2_gt_0p5": 0.492745718337515,
+   "frac_abs_log2_gt_1": 0.2566815752154467
+  },
+  "n_ge10_per_side": {
+   "n_types": 429,
+   "pass_fraction": 0.337995337995338,
+   "median_abs_log2_total": 0.577251315552489,
+   "frac_abs_log2_gt_0p5": 0.5454545454545454,
+   "frac_abs_log2_gt_1": 0.32167832167832167
+  },
+  "single_pair": {
+   "n_types": 3417,
+   "pass_fraction": 0.5428738659642962,
+   "median_abs_log2_total": 0.3615821562435614,
+   "frac_abs_log2_gt_0p5": 0.37284167398302603,
+   "frac_abs_log2_gt_1": 0.13169446883230904
+  },
+  "by_super_class": {
+   "ascending": {
+    "n_types": 441,
+    "pass_fraction": 0.5736961451247166,
+    "median_abs_log2_total": 0.31702929547452313,
+    "frac_abs_log2_gt_0p5": 0.3287981859410431,
+    "frac_abs_log2_gt_1": 0.16326530612244897
+   },
+   "central_brain_intrinsic": {
+    "n_types": 4833,
+    "pass_fraction": 0.3889923442996069,
+    "median_abs_log2_total": 0.5657020000673794,
+    "frac_abs_log2_gt_0p5": 0.5358990275191392,
+    "frac_abs_log2_gt_1": 0.29650320711773226
+   },
+   "descending": {
+    "n_types": 353,
+    "pass_fraction": 0.5297450424929179,
+    "median_abs_log2_total": 0.37536735384882286,
+    "frac_abs_log2_gt_0p5": 0.39660056657223797,
+    "frac_abs_log2_gt_1": 0.141643059490085
+   },
+   "motor": {
+    "n_types": 145,
+    "pass_fraction": 0.4827586206896552,
+    "median_abs_log2_total": 0.4289371906421744,
+    "frac_abs_log2_gt_0p5": 0.46206896551724136,
+    "frac_abs_log2_gt_1": 0.2206896551724138
+   },
+   "optic_lobe_intrinsic": {
+    "n_types": 204,
+    "pass_fraction": 0.1568627450980392,
+    "median_abs_log2_total": 1.3980309008255234,
+    "frac_abs_log2_gt_0p5": 0.8235294117647058,
+    "frac_abs_log2_gt_1": 0.6519607843137255
+   },
+   "sensory": {
+    "n_types": 315,
+    "pass_fraction": 0.1873015873015873,
+    "median_abs_log2_total": 0.6522613970084182,
+    "frac_abs_log2_gt_0p5": 0.5777777777777777,
+    "frac_abs_log2_gt_1": 0.33650793650793653
+   },
+   "sensory_ascending": {
+    "n_types": 30,
+    "pass_fraction": 0.2,
+    "median_abs_log2_total": 0.7359412254552193,
+    "frac_abs_log2_gt_0p5": 0.5666666666666667,
+    "frac_abs_log2_gt_1": 0.36666666666666664
+   },
+   "ventral_nerve_cord_intrinsic": {
+    "n_types": 2426,
+    "pass_fraction": 0.5181368507831822,
+    "median_abs_log2_total": 0.37438237596497326,
+    "frac_abs_log2_gt_0p5": 0.40560593569661996,
+    "frac_abs_log2_gt_1": 0.17065127782357792
+   },
+   "visceral_circulatory": {
+    "n_types": 33,
+    "pass_fraction": 0.36363636363636365,
+    "median_abs_log2_total": 0.6252741033447529,
+    "frac_abs_log2_gt_0p5": 0.5757575757575758,
+    "frac_abs_log2_gt_1": 0.36363636363636365
+   },
+   "visual_centrifugal": {
+    "n_types": 78,
+    "pass_fraction": 0.5128205128205128,
+    "median_abs_log2_total": 0.3983972751039281,
+    "frac_abs_log2_gt_0p5": 0.38461538461538464,
+    "frac_abs_log2_gt_1": 0.10256410256410256
+   },
+   "visual_projection": {
+    "n_types": 281,
+    "pass_fraction": 0.35231316725978645,
+    "median_abs_log2_total": 0.574694165267329,
+    "frac_abs_log2_gt_0p5": 0.5765124555160143,
+    "frac_abs_log2_gt_1": 0.26334519572953735
+   }
+  },
+  "types_without_input_on_one_side_all": 63,
+  "side_totals": {
+   "ascending": {
+    "n_left": 899,
+    "n_right": 950,
+    "in_left": 529486.0,
+    "in_right": 526887.0,
+    "ratio_in_right_over_left": 0.9950914660633142
+   },
+   "ascending_visceral_circulatory": {
+    "n_left": 2,
+    "n_right": 3,
+    "in_left": 1230.0,
+    "in_right": 1778.0,
+    "ratio_in_right_over_left": 1.4455284552845529
+   },
+   "central_brain_intrinsic": {
+    "n_left": 15709,
+    "n_right": 16073,
+    "in_left": 3594912.0,
+    "in_right": 4009264.0,
+    "ratio_in_right_over_left": 1.1152606795381919
+   },
+   "descending": {
+    "n_left": 651,
+    "n_right": 665,
+    "in_left": 530310.0,
+    "in_right": 614873.0,
+    "ratio_in_right_over_left": 1.1594595613886218
+   },
+   "glia": {
+    "n_left": 226,
+    "n_right": 232,
+    "in_left": 1142.0,
+    "in_right": 1154.0,
+    "ratio_in_right_over_left": 1.010507880910683
+   },
+   "motor": {
+    "n_left": 392,
+    "n_right": 413,
+    "in_left": 665513.0,
+    "in_right": 718397.0,
+    "ratio_in_right_over_left": 1.0794635116068356
+   },
+   "not_a_neuron": {
+    "n_left": 3,
+    "n_right": 4,
+    "in_left": 0.0,
+    "in_right": 6.0,
+    "ratio_in_right_over_left": NaN
+   },
+   "optic_lobe_intrinsic": {
+    "n_left": 31592,
+    "n_right": 40990,
+    "in_left": 1981199.0,
+    "in_right": 3087547.0,
+    "ratio_in_right_over_left": 1.558423459733222
+   },
+   "sensory": {
+    "n_left": 7552,
+    "n_right": 9005,
+    "in_left": 141748.0,
+    "in_right": 168611.0,
+    "ratio_in_right_over_left": 1.1895123740722973
+   },
+   "sensory_ascending": {
+    "n_left": 265,
+    "n_right": 251,
+    "in_left": 10024.0,
+    "in_right": 8427.0,
+    "ratio_in_right_over_left": 0.840682362330407
+   },
+   "sensory_descending": {
+    "n_left": 6,
+    "n_right": 7,
+    "in_left": 436.0,
+    "in_right": 475.0,
+    "ratio_in_right_over_left": 1.0894495412844036
+   },
+   "trachea": {
+    "n_left": 4,
+    "n_right": 4,
+    "in_left": 0.0,
+    "in_right": 0.0,
+    "ratio_in_right_over_left": NaN
+   },
+   "ventral_nerve_cord_intrinsic": {
+    "n_left": 6382,
+    "n_right": 6469,
+    "in_left": 2562546.0,
+    "in_right": 2423068.0,
+    "ratio_in_right_over_left": 0.9455705380508291
+   },
+   "visceral_circulatory": {
+    "n_left": 96,
+    "n_right": 125,
+    "in_left": 24450.0,
+    "in_right": 29886.0,
+    "ratio_in_right_over_left": 1.2223312883435582
+   },
+   "visual_centrifugal": {
+    "n_left": 241,
+    "n_right": 231,
+    "in_left": 111984.0,
+    "in_right": 100498.0,
+    "ratio_in_right_over_left": 0.8974317759679954
+   },
+   "visual_projection": {
+    "n_left": 3521,
+    "n_right": 3800,
+    "in_left": 505767.0,
+    "in_right": 652518.0,
+    "ratio_in_right_over_left": 1.2901553482137031
+   }
+  },
+  "optic_lobe_aggregate": {
+   "neurons_left": 35354,
+   "neurons_right": 45021
+  },
+  "critical_types": [
+   {
+    "type": "DNa01",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 3936.0,
+    "in_right": 6094.0,
+    "exc_left": 2049.0,
+    "exc_right": 3315.0,
+    "log2_total": 0.6306592793472457,
+    "log2_exc": 0.6940888859887034,
+    "pass": false
+   },
+   {
+    "type": "DNa02",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 6437.0,
+    "in_right": 7099.0,
+    "exc_left": 4259.0,
+    "exc_right": 4688.0,
+    "log2_total": 0.1412273449741083,
+    "log2_exc": 0.1384578398719104,
+    "pass": true
+   },
+   {
+    "type": "DNp01",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 3037.0,
+    "in_right": 2792.0,
+    "exc_left": 1541.0,
+    "exc_right": 1481.0,
+    "log2_total": -0.12134796695780757,
+    "log2_exc": -0.05729522122593754,
+    "pass": true
+   },
+   {
+    "type": "DNp03",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 2020.0,
+    "in_right": 2846.0,
+    "exc_left": 1438.0,
+    "exc_right": 1972.0,
+    "log2_total": 0.4945803688873252,
+    "log2_exc": 0.4555958759386138,
+    "pass": true
+   },
+   {
+    "type": "DNp07",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 1769.0,
+    "in_right": 1853.0,
+    "exc_left": 1116.0,
+    "exc_right": 1183.0,
+    "log2_total": 0.0669288333368074,
+    "log2_exc": 0.08411304651060099,
+    "pass": true
+   },
+   {
+    "type": "DNp10",
+    "n_left": 2,
+    "n_right": 1,
+    "in_left": 6039.0,
+    "in_right": 4134.0,
+    "exc_left": 3646.0,
+    "exc_right": 2524.0,
+    "log2_total": -0.5467712842170485,
+    "log2_exc": -0.5306026510565853,
+    "pass": false
+   },
+   {
+    "type": "DNp15",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 1705.0,
+    "in_right": 2000.0,
+    "exc_left": 961.0,
+    "exc_right": 1049.0,
+    "log2_total": 0.2302282607505523,
+    "log2_exc": 0.1264063418035172,
+    "pass": true
+   },
+   {
+    "type": "H2",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 12589.0,
+    "in_right": 13212.0,
+    "exc_left": 10355.0,
+    "exc_right": 10863.0,
+    "log2_total": 0.06968518678154476,
+    "log2_exc": 0.06909502908945961,
+    "pass": true
+   },
+   {
+    "type": "HSE",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 5106.0,
+    "in_right": 9030.0,
+    "exc_left": 4406.0,
+    "exc_right": 7782.0,
+    "log2_total": 0.8225324499611018,
+    "log2_exc": 0.8206714852719725,
+    "pass": false
+   },
+   {
+    "type": "HSN",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 7721.0,
+    "in_right": 10852.0,
+    "exc_left": 6837.0,
+    "exc_right": 9940.0,
+    "log2_total": 0.4911013346328795,
+    "log2_exc": 0.5398824264631952,
+    "pass": false
+   },
+   {
+    "type": "HSS",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 4060.0,
+    "in_right": 6126.0,
+    "exc_left": 3501.0,
+    "exc_right": 5242.0,
+    "log2_total": 0.5934656395264191,
+    "log2_exc": 0.5823502918999132,
+    "pass": false
+   },
+   {
+    "type": "MN9",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 1913.0,
+    "in_right": 2437.0,
+    "exc_left": 775.0,
+    "exc_right": 1055.0,
+    "log2_total": 0.34926937737722835,
+    "log2_exc": 0.4449747834329476,
+    "pass": true
+   },
+   {
+    "type": "TTMn",
+    "n_left": 1,
+    "n_right": 1,
+    "in_left": 915.0,
+    "in_right": 1428.0,
+    "exc_left": 304.0,
+    "exc_right": 444.0,
+    "log2_total": 0.6421523308576949,
+    "log2_exc": 0.5464883529065204,
+    "pass": false
+   }
+  ],
+  "types_without_input_on_one_side": 63,
+  "largest_asymmetric_types_ge10_per_side": [
+   {
+    "type": "Dm12",
+    "n_left": 11,
+    "n_right": 123,
+    "log2_total": 4.245153632487354,
+    "log2_exc": 4.357026719689328
+   },
+   {
+    "type": "TmY4",
+    "n_left": 13,
+    "n_right": 216,
+    "log2_total": 4.189979467271257,
+    "log2_exc": 4.1179835504238875
+   },
+   {
+    "type": "Tm3",
+    "n_left": 108,
+    "n_right": 990,
+    "log2_total": 4.001583745066512,
+    "log2_exc": 3.8334166413072523
+   },
+   {
+    "type": "T2",
+    "n_left": 98,
+    "n_right": 755,
+    "log2_total": 3.954885370169745,
+    "log2_exc": 4.037955374192704
+   },
+   {
+    "type": "unknown_antennal_sensory",
+    "n_left": 28,
+    "n_right": 25,
+    "log2_total": 3.807354922057604,
+    "log2_exc": Infinity
+   },
+   {
+    "type": "TmY10",
+    "n_left": 13,
+    "n_right": 180,
+    "log2_total": 3.7923513338843233,
+    "log2_exc": 3.5868848128521846
+   },
+   {
+    "type": "LB3b",
+    "n_left": 20,
+    "n_right": 40,
+    "log2_total": 3.773266031478323,
+    "log2_exc": 7.007494536546925
+   },
+   {
+    "type": "L3",
+    "n_left": 84,
+    "n_right": 699,
+    "log2_total": 3.729067229595563,
+    "log2_exc": 3.926135979211433
+   },
+   {
+    "type": "L4",
+    "n_left": 57,
+    "n_right": 820,
+    "log2_total": 3.625270489374693,
+    "log2_exc": 1.6828098241193008
+   },
+   {
+    "type": "TmY3",
+    "n_left": 46,
+    "n_right": 374,
+    "log2_total": 3.6185461971432114,
+    "log2_exc": 3.4749064627377555
+   }
+  ]
+ },
+ "sparseness": {
+  "banc_by_region": {
+   "none": {
+    "n": 4300,
+    "in_edges_mean": 0.0,
+    "in_syn_mean": 0.0,
+    "syn_per_edge": 0.0
+   },
+   "brain": {
+    "n": 124625,
+    "in_edges_mean": 16.634214643931795,
+    "in_syn_mean": 117.04011233701104,
+    "syn_per_edge": 7.036106894274541
+   },
+   "VNC": {
+    "n": 24500,
+    "in_edges_mean": 34.19106122448979,
+    "in_syn_mean": 315.4851428571429,
+    "syn_per_edge": 9.227123451528685
+   },
+   "SEZ": {
+    "n": 4837,
+    "in_edges_mean": 26.18172420922059,
+    "in_syn_mean": 256.50279098614845,
+    "syn_per_edge": 9.797016763923216
+   },
+   "__all__": {
+    "n": 158262,
+    "in_edges_mean": 19.191979123226044,
+    "in_syn_mean": 148.8431461753295,
+    "syn_per_edge": 7.755487082371835
+   }
+  },
+  "banc_by_region_ge5": {
+   "none": {
+    "n": 4300,
+    "in_edges_mean": 0.0,
+    "in_syn_mean": 0.0,
+    "syn_per_edge": 0.0
+   },
+   "brain": {
+    "n": 124625,
+    "in_edges_mean": 7.938118355065195,
+    "in_syn_mean": 87.85569508525576,
+    "syn_per_edge": 11.067571829436929
+   },
+   "VNC": {
+    "n": 24500,
+    "in_edges_mean": 19.06273469387755,
+    "in_syn_mean": 264.5040816326531,
+    "syn_per_edge": 13.875453122557742
+   },
+   "SEZ": {
+    "n": 4837,
+    "in_edges_mean": 14.939011784163737,
+    "in_syn_mean": 218.67273103163117,
+    "syn_per_edge": 14.637697204539164
+   },
+   "__all__": {
+    "n": 158262,
+    "in_edges_mean": 9.658572493712956,
+    "in_syn_mean": 116.8131705652652,
+    "syn_per_edge": 12.09424794826588
+   }
+  },
+  "flywire_by_super_class": {
+   "optic": {
+    "n": 77521,
+    "in_edges_mean": 89.19317346267464,
+    "in_syn_mean": 287.7925465357774,
+    "syn_per_edge": 3.226620775593462
+   },
+   "sensory": {
+    "n": 16353,
+    "in_edges_mean": 9.41062801932367,
+    "in_syn_mean": 26.06121201002874,
+    "syn_per_edge": 2.769338237205313
+   },
+   "central": {
+    "n": 32380,
+    "in_edges_mean": 168.02180358245832,
+    "in_syn_mean": 695.2223903644225,
+    "syn_per_edge": 4.137691511109363
+   },
+   "sensory_ascending": {
+    "n": 581,
+    "in_edges_mean": 5.824440619621343,
+    "in_syn_mean": 18.061962134251292,
+    "syn_per_edge": 3.101063829787234
+   },
+   "ascending": {
+    "n": 1736,
+    "in_edges_mean": 43.855990783410135,
+    "in_syn_mean": 132.8778801843318,
+    "syn_per_edge": 3.029868389944046
+   },
+   "visual_projection": {
+    "n": 8037,
+    "in_edges_mean": 243.2332960059724,
+    "in_syn_mean": 728.0811247978102,
+    "syn_per_edge": 2.993344812381002
+   },
+   "descending": {
+    "n": 1299,
+    "in_edges_mean": 255.74518860662047,
+    "in_syn_mean": 1703.888375673595,
+    "syn_per_edge": 6.662445479255779
+   },
+   "visual_centrifugal": {
+    "n": 524,
+    "in_edges_mean": 362.8854961832061,
+    "in_syn_mean": 1274.8358778625955,
+    "syn_per_edge": 3.513052715722159
+   },
+   "endocrine": {
+    "n": 76,
+    "in_edges_mean": 74.61842105263158,
+    "in_syn_mean": 316.38157894736844,
+    "syn_per_edge": 4.23999294657027
+   },
+   "motor": {
+    "n": 110,
+    "in_edges_mean": 180.54545454545453,
+    "in_syn_mean": 2226.6272727272726,
+    "syn_per_edge": 12.332779456193354
+   },
+   "__all__": {
+    "n": 138639,
+    "in_edges_mean": 108.85813515677407,
+    "in_syn_mean": 393.05622516030843,
+    "syn_per_edge": 3.6107198106438365
+   }
+  },
+  "flywire_by_super_class_ge5": {
+   "optic": {
+    "n": 77521,
+    "in_edges_mean": 15.121825053856375,
+    "in_syn_mean": 164.2298860953806,
+    "syn_per_edge": 10.86045404641807
+   },
+   "sensory": {
+    "n": 16353,
+    "in_edges_mean": 1.1899345685806886,
+    "in_syn_mean": 13.293646425732282,
+    "syn_per_edge": 11.171745721773986
+   },
+   "central": {
+    "n": 32380,
+    "in_edges_mean": 32.56667696108709,
+    "in_syn_mean": 479.0053736874614,
+    "syn_per_edge": 14.708451042143784
+   },
+   "sensory_ascending": {
+    "n": 581,
+    "in_edges_mean": 0.9845094664371773,
+    "in_syn_mean": 10.705679862306368,
+    "syn_per_edge": 10.874125874125873
+   },
+   "ascending": {
+    "n": 1736,
+    "in_edges_mean": 5.788018433179723,
+    "in_syn_mean": 74.8208525345622,
+    "syn_per_edge": 12.926851114649681
+   },
+   "visual_projection": {
+    "n": 8037,
+    "in_edges_mean": 39.00647007589897,
+    "in_syn_mean": 383.7517730496454,
+    "syn_per_edge": 9.838156908403644
+   },
+   "descending": {
+    "n": 1299,
+    "in_edges_mean": 72.23941493456505,
+    "in_syn_mean": 1392.5050038491147,
+    "syn_per_edge": 19.276249746906938
+   },
+   "visual_centrifugal": {
+    "n": 524,
+    "in_edges_mean": 53.04961832061068,
+    "in_syn_mean": 811.0209923664122,
+    "syn_per_edge": 15.287970357579683
+   },
+   "endocrine": {
+    "n": 76,
+    "in_edges_mean": 14.93421052631579,
+    "in_syn_mean": 215.92105263157896,
+    "syn_per_edge": 14.458149779735683
+   },
+   "motor": {
+    "n": 110,
+    "in_edges_mean": 66.4090909090909,
+    "in_syn_mean": 2027.7,
+    "syn_per_edge": 30.53347022587269
+   },
+   "__all__": {
+    "n": 138639,
+    "in_edges_mean": 19.4787397485556,
+    "in_syn_mean": 246.3489061519486,
+    "syn_per_edge": 12.647065946359081
+   }
+  },
+  "banc_by_super_class_brain": {
+   "sensory": {
+    "n": 7640,
+    "in_edges_mean": 2.6551047120418847,
+    "in_syn_mean": 15.559554973821989,
+    "syn_per_edge": 5.860241557801331
+   },
+   "central": {
+    "n": 30759,
+    "in_edges_mean": 29.703989076367893,
+    "in_syn_mean": 247.21791995838618,
+    "syn_per_edge": 8.322717845162067
+   },
+   "optic": {
+    "n": 71855,
+    "in_edges_mean": 11.664184816644632,
+    "in_syn_mean": 70.54131236517988,
+    "syn_per_edge": 6.047684726713039
+   },
+   "visual_projection": {
+    "n": 7225,
+    "in_edges_mean": 28.990449826989618,
+    "in_syn_mean": 160.31626297577856,
+    "syn_per_edge": 5.529968107860362
+   },
+   "ascending": {
+    "n": 337,
+    "in_edges_mean": 53.1839762611276,
+    "in_syn_mean": 428.7952522255193,
+    "syn_per_edge": 8.06248953858171
+   },
+   "descending": {
+    "n": 774,
+    "in_edges_mean": 99.75968992248062,
+    "in_syn_mean": 1157.9521963824288,
+    "syn_per_edge": 11.60741575361981
+   },
+   "visual_centrifugal": {
+    "n": 458,
+    "in_edges_mean": 52.430131004366814,
+    "in_syn_mean": 463.9344978165939,
+    "syn_per_edge": 8.848623662182984
+   },
+   "sensory_ascending": {
+    "n": 89,
+    "in_edges_mean": 6.426966292134831,
+    "in_syn_mean": 53.91011235955056,
+    "syn_per_edge": 8.388111888111888
+   },
+   "visceral_circulatory": {
+    "n": 69,
+    "in_edges_mean": 33.18840579710145,
+    "in_syn_mean": 307.6521739130435,
+    "syn_per_edge": 9.269868995633187
+   },
+   "motor": {
+    "n": 106,
+    "in_edges_mean": 58.20754716981132,
+    "in_syn_mean": 856.688679245283,
+    "syn_per_edge": 14.717828200972447
+   },
+   "glia": {
+    "n": 45,
+    "in_edges_mean": 3.2222222222222223,
+    "in_syn_mean": 14.11111111111111,
+    "syn_per_edge": 4.379310344827586
+   },
+   "not_a_neuron": {
+    "n": 1,
+    "in_edges_mean": 1.0,
+    "in_syn_mean": 6.0,
+    "syn_per_edge": 6.0
+   },
+   "sensory_descending": {
+    "n": 1,
+    "in_edges_mean": 2.0,
+    "in_syn_mean": 8.0,
+    "syn_per_edge": 4.0
+   },
+   "__all__": {
+    "n": 158262,
+    "in_edges_mean": 19.191979123226044,
+    "in_syn_mean": 148.8431461753295,
+    "syn_per_edge": 7.755487082371835
+   }
+  },
+  "banc_by_super_class_brain_ge5": {
+   "sensory": {
+    "n": 7640,
+    "in_edges_mean": 1.1507853403141362,
+    "in_syn_mean": 10.528926701570681,
+    "syn_per_edge": 9.149340309372157
+   },
+   "central": {
+    "n": 30759,
+    "in_edges_mean": 15.723885691992587,
+    "in_syn_mean": 200.2155141584577,
+    "syn_per_edge": 12.733208449894656
+   },
+   "optic": {
+    "n": 71855,
+    "in_edges_mean": 5.159599192818871,
+    "in_syn_mean": 48.727590285992626,
+    "syn_per_edge": 9.444065026177164
+   },
+   "visual_projection": {
+    "n": 7225,
+    "in_edges_mean": 11.890795847750866,
+    "in_syn_mean": 103.06975778546713,
+    "syn_per_edge": 8.668028541164693
+   },
+   "ascending": {
+    "n": 337,
+    "in_edges_mean": 29.038575667655785,
+    "in_syn_mean": 347.4985163204748,
+    "syn_per_edge": 11.966789290823625
+   },
+   "descending": {
+    "n": 774,
+    "in_edges_mean": 61.435400516795866,
+    "in_syn_mean": 1028.5568475452196,
+    "syn_per_edge": 16.742087442955984
+   },
+   "visual_centrifugal": {
+    "n": 458,
+    "in_edges_mean": 26.521834061135372,
+    "in_syn_mean": 377.03275109170306,
+    "syn_per_edge": 14.215938091709887
+   },
+   "sensory_ascending": {
+    "n": 89,
+    "in_edges_mean": 3.8764044943820224,
+    "in_syn_mean": 45.235955056179776,
+    "syn_per_edge": 11.669565217391304
+   },
+   "visceral_circulatory": {
+    "n": 69,
+    "in_edges_mean": 19.47826086956522,
+    "in_syn_mean": 261.18840579710144,
+    "syn_per_edge": 13.40922619047619
+   },
+   "motor": {
+    "n": 106,
+    "in_edges_mean": 39.405660377358494,
+    "in_syn_mean": 792.7452830188679,
+    "syn_per_edge": 20.11754847977017
+   },
+   "glia": {
+    "n": 45,
+    "in_edges_mean": 0.6888888888888889,
+    "in_syn_mean": 5.844444444444444,
+    "syn_per_edge": 8.483870967741936
+   },
+   "not_a_neuron": {
+    "n": 1,
+    "in_edges_mean": 1.0,
+    "in_syn_mean": 6.0,
+    "syn_per_edge": 6.0
+   },
+   "sensory_descending": {
+    "n": 1,
+    "in_edges_mean": 1.0,
+    "in_syn_mean": 5.0,
+    "syn_per_edge": 5.0
+   },
+   "__all__": {
+    "n": 158262,
+    "in_edges_mean": 9.658572493712956,
+    "in_syn_mean": 116.8131705652652,
+    "syn_per_edge": 12.09424794826588
+   }
+  },
+  "note": "FlyWire v783 graph = Shiu model (threshold >= 5 synapses per pair); compare the *_ge5 blocks",
+  "flywire_over_banc": {
+   "in_edges_all_pairs": 5.672064066859809,
+   "in_syn_all_pairs": 2.640741177946538,
+   "in_edges_ge5": 2.0167307085218726,
+   "in_syn_ge5": 2.108913789086051
+  }
+ },
+ "critical_types": {
+  "MN9": {
+   "n": 2,
+   "left": 1,
+   "right": 1,
+   "types": {
+    "MN9": 2
+   }
+  },
+  "wing_MN": {
+   "DLM": {
+    "n": 10,
+    "left": 5,
+    "right": 5,
+    "types": {
+     "DLM1-4": 8,
+     "DLM5": 2
+    }
+   },
+   "DVM": {
+    "n": 14,
+    "left": 7,
+    "right": 7,
+    "types": {
+     "DVM1a-c": 6,
+     "DVM3a-b": 4,
+     "DVM2a-b": 4
+    }
+   },
+   "b1": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "b1": 2
+    }
+   },
+   "b2": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "b2": 2
+    }
+   },
+   "b3": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "b3": 2
+    }
+   },
+   "i1": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "i1": 2
+    }
+   },
+   "i2": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "i2": 2
+    }
+   },
+   "iii1": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "iii1": 2
+    }
+   },
+   "iii2": {
+    "n": 0,
+    "left": 0,
+    "right": 0,
+    "types": {}
+   },
+   "iii3": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "iii3": 2
+    }
+   },
+   "iii4": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "iii4": 2
+    }
+   },
+   "hg1": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "hg1": 2
+    }
+   },
+   "hg2": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "hg2": 2
+    }
+   },
+   "hg3": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "hg3": 2
+    }
+   },
+   "hg4": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "hg4": 2
+    }
+   },
+   "tp1": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "tp1": 2
+    }
+   },
+   "tp2": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "tp2": 2
+    }
+   },
+   "tpn": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "tpn": 2
+    }
+   },
+   "ps1": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "ps1": 2
+    }
+   },
+   "ps2": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "ps2": 2
+    }
+   },
+   "PSI": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "PSI": 2
+    }
+   },
+   "PSn": {
+    "n": 2,
+    "left": 1,
+    "right": 1,
+    "types": {
+     "PSn_u": 2
+    }
+   }
+  },
+  "wing_MN_all": {
+   "n": 64
+  },
+  "haltere_MN": {
+   "n": 27,
+   "types": {
+    "hi1": 4,
+    "hi2": 3,
+    "MNxm03": 2,
+    "hiii2": 2,
+    "MNhm03": 2,
+    "MNhl88": 2,
+    "MNhm43": 2,
+    "MNhm42": 2,
+    "hDVM": 2,
+    "MNad29": 2,
+    "MNhl59": 2,
+    "MNhl87": 2
+   }
+  },
+  "neck_MN": {
+   "n": 49
+  },
+  "TTMn": {
+   "n": 2,
+   "left": 1,
+   "right": 1,
+   "types": {
+    "TTMn": 2
+   }
+  },
+  "GF (DNp01)": {
+   "n": 2,
+   "left": 1,
+   "right": 1,
+   "types": {
+    "DNp01": 2
+   }
+  },
+  "GF alt name 'giant_fiber'": {
+   "n": 2,
+   "left": 1,
+   "right": 1,
+   "types": {
+    "DNp01": 2
+   }
+  },
+  "DNg02": {
+   "n": 35,
+   "left": 17,
+   "right": 18,
+   "types": {
+    "DNg02": 32,
+    "DNg02_h": 2,
+    "DNg02_d": 1
+   }
+  },
+  "DNa02": {
+   "n": 2,
+   "left": 1,
+   "right": 1,
+   "types": {
+    "DNa02": 2
+   }
+  },
+  "DNp15": {
+   "n": 2,
+   "left": 1,
+   "right": 1,
+   "types": {
+    "DNp15": 2
+   }
+  },
+  "sugar_GRN_labellar": {
+   "n": 90,
+   "left": 41,
+   "right": 49
+  },
+  "sugar_GRN_leg": {
+   "n": 298,
+   "left": 167,
+   "right": 131,
+   "by_leg": {
+    "front_leg": 127,
+    "hind_leg": 93,
+    "middle_leg": 78
+   }
+  }
+ },
+ "antennal_lobe": {
+  "banc": {
+   "n_alln": 429,
+   "n_alpn": 699,
+   "alln_sign": {
+    "excitatory": 120,
+    "inhibitory": 309
+   },
+   "alpn_sign": {
+    "excitatory": 479,
+    "inhibitory": 203
+   },
+   "internal_syn": {
+    "excitatory": 504330.0,
+    "inhibitory": 154443.0,
+    "excitatory_fraction": 0.7655596085449768
+   },
+   "neurons_with_exc_rec_ge_threshold_at_100Hz": 714,
+   "neurons_with_net_rec_ge_threshold_at_100Hz": 475,
+   "of": 1128,
+   "threshold_syn_hz": 5090.909090909091,
+   "leading_eig_exc_syn": 1929.5773453959162,
+   "leading_eig_signed_syn": 1806.2260886613371,
+   "self_sustaining_mean_rate_hz": 2.8185336945731736
+  },
+  "flywire": {
+   "n_alln": 429,
+   "n_alpn": 685,
+   "alln_sign": {
+    "excitatory": 166,
+    "inhibitory": 263
+   },
+   "alpn_sign": {
+    "excitatory": 474,
+    "inhibitory": 211
+   },
+   "internal_syn": {
+    "excitatory": 650947.0,
+    "inhibitory": 192129.0,
+    "excitatory_fraction": 0.7721095132585911
+   },
+   "neurons_with_exc_rec_ge_threshold_at_100Hz": 913,
+   "neurons_with_net_rec_ge_threshold_at_100Hz": 691,
+   "of": 1114,
+   "threshold_syn_hz": 5090.909090909091,
+   "leading_eig_exc_syn": 2408.4287393071345,
+   "leading_eig_signed_syn": 2184.123113746604,
+   "self_sustaining_mean_rate_hz": 2.330870938028874
+  }
+ },
+ "appendix_A_check": {
+  "neurons": {
+   "appendix_A": 158262,
+   "computed": 158262,
+   "equal": true
+  },
+  "left": {
+   "appendix_A": 75760,
+   "computed": 75760,
+   "equal": true
+  },
+  "right": {
+   "appendix_A": 82502,
+   "computed": 82502,
+   "equal": true
+  },
+  "pairs": {
+   "appendix_A": 3037361,
+   "computed": 3037361,
+   "equal": true
+  },
+  "synapses": {
+   "appendix_A": 23556214,
+   "computed": 23556214,
+   "equal": true
+  },
+  "DN": {
+   "appendix_A": 1316,
+   "computed": 1316,
+   "equal": true
+  },
+  "motor": {
+   "appendix_A": 805,
+   "computed": 805,
+   "equal": true
+  },
+  "wing_MN": {
+   "appendix_A": 62,
+   "computed": 64,
+   "equal": false
+  },
+  "haltere_MN": {
+   "appendix_A": 25,
+   "computed": 27,
+   "equal": false
+  },
+  "neck_MN": {
+   "appendix_A": 49,
+   "computed": 49,
+   "equal": true
+  },
+  "TTMn": {
+   "appendix_A": 2,
+   "computed": 2,
+   "equal": true
+  },
+  "MN9": {
+   "appendix_A": 2,
+   "computed": 2,
+   "equal": true
+  },
+  "mean_in_edges": {
+   "appendix_A": 25,
+   "computed": 19,
+   "equal": false,
+   "note": "appendix A divided neuropil rows by neurons (25.2); unique pairs give 19.2"
+  },
+  "mean_in_syn": {
+   "appendix_A": 149,
+   "computed": 149,
+   "equal": true
+  },
+  "DNg02_family": {
+   "appendix_A": 38,
+   "computed": 35,
+   "equal": false
+  }
+ }
+}
