@@ -230,6 +230,19 @@ DNa04, DNa10 and DNa15 steer by the registered rule (all ipsilateral); DNa02, DN
 effects were tested at 100 Hz only, above the FlyWire rates of DNa04, DNa10 and DNa15. Which families go into F3b is the
 project owner's decision.
 
+**Decision after F3a-2 (project owner, 2026-10-13, PR #11 merged; the joint Holm correction over both drive sides, 180
+tests, is accepted as the stricter reading):**
+1. Wing power in the hybrid comes from a `HAND`-labelled tonic DNg02 baseline. C1 justifies this: DNg02 is silent in the
+   FlyWire brain in every F0 window and every visual condition.
+2. The brain's steering candidates are DNa04, DNa10 and DNa15 (ipsilateral steering in C3). DNa02 is dropped as the
+   planned yaw drive: it does not steer in the BANC VNC and is lateralised in FlyWire (L 45 / R 11 Hz). DNp31 is recorded
+   as a non-lateral modulator.
+3. The hybrid uses a BANC VNC **subgraph**, not the whole BANC graph, because the FlyWire brain replaces the BANC brain.
+   It is defined from data only, before any run: neurons whose region is VNC or neck, plus the motor neurons and the DNs
+   (as input nodes); ascending neurons kept as outputs and recorded, with their inputs from BANC brain neurons removed.
+4. Next step: F3a-3, open loop on that subgraph (`prereg/08_f3a3_vnc_subgraph.md`): recruitment, persistence (registered
+   decay criterion) and steering dose-response at 10-100 Hz.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
