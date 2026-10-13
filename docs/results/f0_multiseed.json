@@ -11,7 +11,9 @@
   "network_rate_hz": 7.429948763815857,
   "last_cut_step_hz": 0.0,
   "ignited": false,
-  "pos_diff_to_v1_max_mm": 0.036592581213172166
+  "pos_diff_to_v1_max_mm": 0.036592581213172166,
+  "wall_s": 214.76009154319763,
+  "interval_ms": 25.0
  },
  {
   "seed": 0,
@@ -25,7 +27,9 @@
   "network_rate_hz": 7.427331895546468,
   "last_cut_step_hz": 0.0,
   "ignited": false,
-  "pos_diff_to_v1_max_mm": 0.07616057039335089
+  "pos_diff_to_v1_max_mm": 0.07616057039335089,
+  "wall_s": 215.6421799659729,
+  "interval_ms": 25.0
  },
  {
   "seed": 1,
@@ -39,7 +43,9 @@
   "network_rate_hz": 7.425629632835398,
   "last_cut_step_hz": 0.0,
   "ignited": false,
-  "pos_diff_to_v1_max_mm": 0.0
+  "pos_diff_to_v1_max_mm": 0.0,
+  "wall_s": 215.46928572654724,
+  "interval_ms": 25.0
  },
  {
   "seed": 1,
@@ -53,7 +59,9 @@
   "network_rate_hz": 7.4262855329308515,
   "last_cut_step_hz": 0.0,
   "ignited": false,
-  "pos_diff_to_v1_max_mm": 0.036592581213172166
+  "pos_diff_to_v1_max_mm": 0.036592581213172166,
+  "wall_s": 214.45760107040405,
+  "interval_ms": 25.0
  },
  {
   "seed": 2,
@@ -67,7 +75,9 @@
   "network_rate_hz": 7.419527453794867,
   "last_cut_step_hz": 0.0,
   "ignited": false,
-  "pos_diff_to_v1_max_mm": 0.004252528552539652
+  "pos_diff_to_v1_max_mm": 0.004252528552539652,
+  "wall_s": 214.7990689277649,
+  "interval_ms": 25.0
  },
  {
   "seed": 2,
@@ -81,7 +91,9 @@
   "network_rate_hz": 7.418362798346785,
   "last_cut_step_hz": 0.0,
   "ignited": false,
-  "pos_diff_to_v1_max_mm": 0.036592581213172166
+  "pos_diff_to_v1_max_mm": 0.036592581213172166,
+  "wall_s": 215.20563769340515,
+  "interval_ms": 25.0
  },
  {
   "seed": 3,
@@ -95,7 +107,9 @@
   "network_rate_hz": 10.826880363149378,
   "last_cut_step_hz": 2.4200982407547658,
   "ignited": true,
-  "pos_diff_to_v1_max_mm": 0.2724780718012116
+  "pos_diff_to_v1_max_mm": 0.2724780718012116,
+  "wall_s": 221.10383105278015,
+  "interval_ms": 25.0
  },
  {
   "seed": 3,
@@ -109,7 +123,9 @@
   "network_rate_hz": 10.831070622263578,
   "last_cut_step_hz": 2.4200982407547658,
   "ignited": true,
-  "pos_diff_to_v1_max_mm": 0.269982492874153
+  "pos_diff_to_v1_max_mm": 0.269982492874153,
+  "wall_s": 217.79277658462524,
+  "interval_ms": 25.0
  },
  {
   "seed": 4,
@@ -123,7 +139,9 @@
   "network_rate_hz": 7.414889990070134,
   "last_cut_step_hz": 0.0,
   "ignited": false,
-  "pos_diff_to_v1_max_mm": 0.0
+  "pos_diff_to_v1_max_mm": 0.0,
+  "wall_s": 214.85652661323547,
+  "interval_ms": 25.0
  },
  {
   "seed": 4,
@@ -137,6 +155,8 @@
   "network_rate_hz": 7.41625372369968,
   "last_cut_step_hz": 0.0,
   "ignited": false,
-  "pos_diff_to_v1_max_mm": 0.036592581213172166
+  "pos_diff_to_v1_max_mm": 0.036592581213172166,
+  "wall_s": 215.29350805282593,
+  "interval_ms": 25.0
  }
 ]

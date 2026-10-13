@@ -76,7 +76,7 @@ def build(args, log=print):
     dt = args.interval_ms * 1e-3
     eyes = VB.BoundaryEyes(table, {"L": cx.index.ids_of(groups_in["vbnd_L"]), "R": cx.index.ids_of(groups_in["vbnd_R"])},
                            tr, columns, cx.index, interval_s=dt, subframes=2, verbose=False)
-    bridge = LB.Bridge(readouts, dt, ablate=("steer",) if args.ablate_steer else (),
+    bridge = LB.Bridge(readouts, dt, ablate=("steer",) if args.ablate_steer else (), zero_turn=args.zero_turn,
                        reference=LB.load_reference(ROOT / "data" / "dn_lr_reference_sB.json"),
                        drive=("DNp15",))
     return dict(arena=arena, cx=cx, readouts=readouts, engine=engine, body=body, eyes=eyes, bridge=bridge,
@@ -219,7 +219,8 @@ def parse_args(argv=None):
     ap.add_argument("--persist-steps", type=int, default=8)
     ap.add_argument("--perturb-t", type=float, default=0.5)
     ap.add_argument("--perturb-deg", type=float, default=30.0)
-    ap.add_argument("--ablate-steer", action="store_true")
+    ap.add_argument("--ablate-steer", action="store_true", help="v1 control: readout replaced by the perch baseline")
+    ap.add_argument("--zero-turn", action="store_true", help="control arm zero_turn: yaw command exactly 0")
     ap.add_argument("--waive", nargs="*", default=["DNp15"])
     return ap.parse_args(argv)
 

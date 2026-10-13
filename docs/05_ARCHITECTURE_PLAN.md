@@ -159,6 +159,14 @@ GeNN/PyTorch.
 | **F5** | TRAINED arm: rate engine, BC + DAgger, tasks: hover → optomotor → obstacle → landing (RQ4) | learning curves, control arms | ≥3 seeds; comparison with controls pre-registered |
 | **F6** | Full task: take-off → towers → landing → feeding; video; paper | final report | — |
 
+**Planned F2 items (added 2026-10-12, after the F0 statistics):**
+- **Latency effect with DNa02:** hover + yaw perturbation (the v1 `flight_v30` protocol) with DNa02 as the yaw drive
+  (it passes the symmetry gate; DNp15 does not), latency 0 (labelled ACAUSAL) vs 1 interval, **>= 10 seeds per
+  latency**, criteria written to `prereg/` before any run. Control arm: `zero_turn` (constant zero yaw command,
+  readouts recorded), not the perch-baseline ablation (fragile: `docs/results/f0_latency_hover_yaw.md`).
+- **Ignition frequency** of the self-sustaining olfactory mode is reported alongside every F2 result that uses a
+  perch + cut protocol (`docs/results/f0_ignition_frequency.md`).
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
