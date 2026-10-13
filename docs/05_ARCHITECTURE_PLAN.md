@@ -243,6 +243,16 @@ tests, is accepted as the stricter reading):**
 4. Next step: F3a-3, open loop on that subgraph (`prereg/08_f3a3_vnc_subgraph.md`): recruitment, persistence (registered
    decay criterion) and steering dose-response at 10-100 Hz.
 
+**Finding from F3a-3, BANC VNC subgraph open loop (2026-10-13; `prereg/08_f3a3_vnc_subgraph.md`,
+`docs/results/f3a3_vnc_subgraph.md`):** the subgraph keeps 25,818 of 158,262 neurons (3,020,333 pairs, 11,585,331
+synapses); no neuron has the neck as its dominant region. Gates 1, 2 and 3' pass. R1: the DNg02 wing power recruitment
+(DLM, DVM1, tp2, ps1) is nearly unchanged against the whole graph; the right-only b3/hg1/hg4 of F3a, the haltere MNs and
+the neck MNs at G100 are gone (post-hoc: they depended on the removed BANC brain/SEZ part or on the synapses onto DNs).
+R2 passes: activity stops within 25 ms of the cut in 10 / 10 seeds (whole graph: no decay within 1 s). R3 (HAND DNg02
+baseline): all three families steer ipsilaterally; lowest steering input rate DNa04 25 Hz, DNa15 50 Hz, DNa10 100 Hz.
+Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 Hz); DNa10 (23.2 / 3.4 Hz) and DNa15
+(7.1 / 3.7 Hz) steer only well above theirs. What follows for F3b is the project owner's decision.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.

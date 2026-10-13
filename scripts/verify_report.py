@@ -2,7 +2,8 @@
 (CLAUDE.md rule 11). Independent of the report scripts: the F3a tables are recomputed here from `runs/f3a/f3a_v3.json`
 and each formatted row must appear verbatim in `docs/results/f3a_banc_vnc.md`; the crosswalk summary numbers are
 checked against `docs/results/f3_dn_crosswalk.json` and its text; F3a-2 (`docs/results/f3a2_checks.md`): C1 rates
-recomputed from the F0 spike records, gates / C2 / C3 statistics from `runs/f3a2/f3a2_v3.json`.
+recomputed from the F0 spike records, gates / C2 / C3 statistics from `runs/f3a2/f3a2_v3.json`; F3a-3 (`docs/results/f3a3_vnc_subgraph.md`): subgraph counts against the
+committed JSON, the prereg and the report, gates / R1 / R2 / R3 recomputed from `runs/f3a3/f3a3_v3.json`.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
     env -u PYTHONPATH python scripts/verify_report.py --print    # only print the recomputed strings
@@ -136,6 +137,120 @@ def check_f3a2():
     return n, bad
 
 
+F3A3_REC = ROOT / "runs" / "f3a3" / "f3a3_v3.json"
+F3A3_MD = ROOT / "docs" / "results" / "f3a3_vnc_subgraph.md"
+F3A3_SUB = ROOT / "docs" / "results" / "f3a3_subgraph.json"
+PREREG08 = ROOT / "prereg" / "08_f3a3_vnc_subgraph.md"
+
+
+def _holm(p):
+    """Holm step-down adjusted p values (independent of the report script)."""
+    p = np.asarray(p, float)
+    adj, run = np.empty(len(p)), 0.0
+    for r, k in enumerate(np.argsort(p)):
+        run = max(run, min(1.0, (len(p) - r) * p[k]))
+        adj[k] = run
+    return adj
+
+
+def check_f3a3():
+    """F3a-3 (prereg/08). Subgraph counts: committed JSON = run record, and the figures of the prereg and the report;
+    gates, R1 cells, R2 per-seed decay, R3 tests and decisions recomputed from runs/f3a3/f3a3_v3.json."""
+    from scipy.stats import ttest_1samp
+    md, pre = F3A3_MD.read_text(), " ".join(PREREG08.read_text().split())   # prereg: line wraps ignored
+    d = json.loads(F3A3_REC.read_text())
+    sg = json.loads(F3A3_SUB.read_text())
+    bad, n = [], 0
+
+    def chk(key, ok, v):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    chk("sub:record", all(sg[k] == d["subgraph"][k] for k in d["subgraph"]), "run subgraph != committed json")
+    chk("sub:check", sg["check_sub"] == {k: sg["kept"][k] for k in ("neurons", "pairs", "synapses")}, sg["check_sub"])
+    k, w, a, r = sg["kept"], sg["whole"], sg["ascending"], sg["removed"]
+    frags = [f"kept {k['neurons']:,} of {w['neurons']:,} neurons, {k['pairs']:,} of {w['pairs']:,} pairs, "
+             f"{k['synapses']:,} of {w['synapses']:,} synapses",
+             "By reason: region {region:,}, motor {motor:,}, descending {descending:,}, ascending {ascending:,}"
+             .format(**sg["kept_by_reason"]),
+             f"({r['edges_onto_dn_from_kept']['pairs']:,} pairs, {r['edges_onto_dn_from_kept']['synapses']:,} synapses)",
+             f"Ascending: {a['neurons']:,} neurons ({a['by_region']['VNC']:,} VNC, {a['by_region']['SEZ']:,} SEZ, "
+             f"{a['by_region']['brain']:,} brain, {a['by_region']['NA']:,} without region)",
+             f"inputs kept {a['inputs_kept']['synapses']:,} synapses, inputs removed {a['inputs_removed']['synapses']:,}",
+             f"outputs kept {a['outputs_kept']['synapses']:,}, outputs removed (to the BANC brain/SEZ) "
+             f"{a['outputs_removed']['synapses']:,}"]
+    chk("prereg08:neck0", sg["kept_by_region"]["neck"] == 0 and "(0)" in pre, "neck count")
+    for i, fr in enumerate(frags):
+        chk(f"prereg08:{i}", fr in pre, fr)
+    chk("report:kept", f"Kept: {k['neurons']:,} neurons, {k['pairs']:,} pairs, {k['synapses']:,} synapses." in md, k)
+    # gates
+    g2 = d["gate2_runs"]
+    chk("gate1", f"(spikes) | {sum(x['spikes'] for x in d['gate1'])} |" in md, "gate1")
+    chk("gate2", f"| {sum(x['ignited'] for x in g2)} / {len(g2)} (95 % CI" in md, "gate2")
+    nets = [np.mean([x["network_rate_hz"] for x in d["r1"] if x["condition"] == c]) for c in d["r1_drives"]]
+    nets += [np.mean([x["network_rate_hz"] for x in d["r2"]["runs"]]), np.mean([x["network_rate_hz"] for x in g2])]
+    nets += [np.mean([x["network_rate_hz"] for x in d["r3"] if x["condition"] == c]) for c in d["r3_conditions"]]
+    chk("gate3", f"max {max(nets):.4f} Hz" in md, f"max {max(nets):.4f} Hz")
+    # R1: every reported cell, subgraph and whole graph
+    wr = json.loads(F3A_REC.read_text())["runs"]
+    drives = list(d["r1_drives"])
+
+    def m_(runs, field, c, key):
+        v = [x["rate_hz"][key] for x in runs if x[field] == c and key in x["rate_hz"]]
+        return f"{np.mean(v):.1f}" if v else "-"
+    for t, info in d["types"].items():
+        row = _row(md, info["category"], t)
+        if row is None:
+            continue
+        exp = [f"{m_(d['r1'], 'condition', c, t + '|left')} / {m_(d['r1'], 'condition', c, t + '|right')} "
+               f"({m_(wr, 'drive', c, t + '|left')} / {m_(wr, 'drive', c, t + '|right')})" for c in drives]
+        chk(f"r1:{t}", row[2:2 + len(drives)] == exp, exp)
+    # R2: per-seed A, B, A/B, decision
+    n_on, ndec = d["n_on"], 0
+    for x in d["r2"]["runs"]:
+        net = x["network_step_hz"]
+        A, B = float(np.mean(net[-4:])), float(np.mean(net[n_on - 4:n_on]))
+        ndec += A < 0.1 * B
+        row = _row(md, str(x["seed"]), f"{A:.4f}", f"{B:.4f}", f"{A / B:.3f}", "yes" if A < 0.1 * B else "no")
+        chk(f"r2:{x['seed']}", row is not None, (A, B))
+    chk("r2:pass", f"**R2: {ndec} / {len(d['r2']['runs'])} seeds decay; {'pass' if ndec >= 9 else 'FAIL'}.**" in md, ndec)
+    # R3: tests per rate, Holm per rate, decisions
+    seeds = d["seeds"]["run"]
+    by = {(x["condition"], x["seed"]): x["rate_hz"] for x in d["r3"]}
+
+    def D(c, m):
+        return np.array([by[(c, s)][f"{m}|right"] - by[(c, s)][f"{m}|left"] for s in seeds])
+    passed = [m for m in d["steer_mn"] if d["symmetry"].get(m, {}).get("passed")]
+    for rate in d["steer_rates"]:
+        keys, ds = [], []
+        for fam in d["steer_families"]:
+            for m in passed:
+                for s in ("L", "R"):
+                    keys.append((fam, m, s))
+                    ds.append(D(f"{fam}_{s}_{rate}", m) - D("B", m))
+        p = np.array([1.0 if not x.any() else 0.0 if np.std(x) == 0 else float(ttest_1samp(x, 0.0).pvalue) for x in ds])
+        ph = dict(zip(keys, _holm(p)))
+        pr, mean = dict(zip(keys, p)), {kk: x.mean() for kk, x in zip(keys, ds)}
+        for fam in d["steer_families"]:
+            hits = [m for m in passed if ph[(fam, m, "L")] < 0.05 and ph[(fam, m, "R")] < 0.05
+                    and mean[(fam, m, "L")] * mean[(fam, m, "R")] < 0]
+            row = _row(md, fam, str(rate))
+            chk(f"r3:{fam}:{rate}:decision", row is not None and row[2] == ("yes" if hits else "no")
+                and all(h in row[3] for h in hits), hits)
+            for m in passed:
+                kl, kr = (fam, m, "L"), (fam, m, "R")
+                row = _row(md, fam, str(rate), m)
+                if not any(dd.any() for kk, dd in zip(keys, ds) if kk in (kl, kr)):
+                    chk(f"r3:{fam}:{rate}:{m}:omitted", row is None, "row should be omitted")
+                    continue
+                exp = [f"{mean[kl]:+.2f}", f"{pr[kl]:.2g}", f"{ph[kl]:.2g}", f"{mean[kr]:+.2f}", f"{pr[kr]:.2g}", f"{ph[kr]:.2g}"]
+                got = None if row is None or len(row) < 11 else [row[3], row[4], row[5], row[7], row[8], row[9]]
+                chk(f"r3:{fam}:{rate}:{m}", got == exp, exp)
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -188,6 +303,10 @@ def main(argv=None):
         bad.append(("crosswalk", "n_shared_gate_both != len(list)"))
     if F3A2_MD.exists():
         k, b = check_f3a2()
+        n += k
+        bad += b
+    if F3A3_MD.exists():
+        k, b = check_f3a3()
         n += k
         bad += b
     if "--print" in argv:
