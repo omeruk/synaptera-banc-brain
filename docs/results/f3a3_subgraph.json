@@ -1,0 +1,146 @@
+{
+ "definition": {
+  "keep_regions": [
+   "VNC",
+   "neck"
+  ],
+  "plus_super_class": [
+   "motor",
+   "descending",
+   "ascending",
+   "ascending_visceral_circulatory",
+   "sensory_ascending"
+  ],
+  "dn_inputs_removed": true
+ },
+ "whole": {
+  "neurons": 158262,
+  "pairs": 13414125,
+  "synapses": 41938506
+ },
+ "kept": {
+  "neurons": 25818,
+  "pairs": 3020333,
+  "synapses": 11585331
+ },
+ "kept_by_reason": {
+  "region": 21327,
+  "motor": 805,
+  "descending": 1316,
+  "ascending": 2370
+ },
+ "kept_by_region": {
+  "VNC": 24500,
+  "neck": 0,
+  "SEZ": 642,
+  "brain": 664,
+  "NA": 12
+ },
+ "kept_by_super_class": {
+  "ventral_nerve_cord_intrinsic": 12827,
+  "sensory": 7436,
+  "ascending": 1849,
+  "descending": 1316,
+  "motor": 805,
+  "NA": 742,
+  "sensory_ascending": 516,
+  "glia": 170,
+  "visceral_circulatory": 141,
+  "sensory_descending": 11,
+  "ascending_visceral_circulatory": 5
+ },
+ "removed": {
+  "neurons": 132444,
+  "by_region": {
+   "VNC": 0,
+   "neck": 0,
+   "SEZ": 4195,
+   "brain": 123961,
+   "NA": 4288
+  },
+  "edges_onto_dn_from_kept": {
+   "pairs": 136202,
+   "synapses": 518030
+  },
+  "edges_removed_into_kept": {
+   "pairs": 300648,
+   "synapses": 1398418
+  },
+  "edges_removed_from_kept": {
+   "pairs": 288369,
+   "synapses": 1073781
+  },
+  "edges_among_removed": {
+   "pairs": 9668573,
+   "synapses": 27362946
+  }
+ },
+ "ascending": {
+  "neurons": 2370,
+  "by_region": {
+   "VNC": 1933,
+   "neck": 0,
+   "SEZ": 200,
+   "brain": 226,
+   "NA": 11
+  },
+  "inputs_kept": {
+   "pairs": 449168,
+   "synapses": 1621235
+  },
+  "inputs_removed": {
+   "pairs": 52459,
+   "synapses": 123808
+  },
+  "outputs_kept": {
+   "pairs": 366098,
+   "synapses": 1277387
+  },
+  "outputs_removed": {
+   "pairs": 166291,
+   "synapses": 715699
+  }
+ },
+ "descending": {
+  "neurons": 1316,
+  "by_region": {
+   "VNC": 541,
+   "neck": 0,
+   "SEZ": 341,
+   "brain": 433,
+   "NA": 1
+  },
+  "outputs_kept": {
+   "pairs": 244282,
+   "synapses": 1117185
+  },
+  "outputs_removed": {
+   "pairs": 116953,
+   "synapses": 346643
+  }
+ },
+ "motor": {
+  "neurons": 805,
+  "by_region": {
+   "VNC": 699,
+   "neck": 0,
+   "SEZ": 101,
+   "brain": 5,
+   "NA": 0
+  },
+  "inputs_kept": {
+   "pairs": 189805,
+   "synapses": 1612319
+  },
+  "inputs_removed": {
+   "pairs": 9539,
+   "synapses": 79002
+  }
+ },
+ "graph": "banc888_full_v3",
+ "check_sub": {
+  "neurons": 25818,
+  "pairs": 3020333,
+  "synapses": 11585331
+ }
+}
