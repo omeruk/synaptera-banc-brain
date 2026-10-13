@@ -124,3 +124,38 @@ def test_data_sources_hashes_match_local_files():
             assert file_sha256(p) == d["sha256"], name
             checked += 1
     assert checked >= 2
+
+
+def test_full_graph_adapter_toy(tmp_path):
+    """banc888_full: string ids to int64, no threshold, neuron set 'codex' keeps edges among the Codex neurons,
+    'all' adds the meta-only neurons (NT names mapped); engine indices of the Codex neurons are the same."""
+    n = pd.DataFrame({"Root ID": [10, 20], "Primary Cell Type": ["A", "B"], "Alternative Cell Type(s)": [np.nan] * 2,
+                      "Class": ["x", "y"], "Super Class": ["central_brain_intrinsic", "descending"],
+                      "Soma side": ["left", "right"], "Predicted NT type": ["ACH", "GABA"],
+                      "Predicted NT confidence": [0.9, 0.8], "Sub Class": [np.nan] * 2, "Body Part": [np.nan] * 2,
+                      "Function": [np.nan] * 2, "Flow": [np.nan] * 2, "Verified NT type": [np.nan] * 2,
+                      "Nerve": [np.nan] * 2, "Hemilineage": [np.nan] * 2})
+    n.to_csv(tmp_path / "n.csv.gz", index=False)
+    big = 720575940000000001                      # beyond float precision
+    e = pd.DataFrame({"pre": [str(big), "20", "30"], "post": ["20", "10", "10"], "count": [1, 7, 2],
+                      "norm": [1.0] * 3, "post_count": [1] * 3, "pre_count": [1] * 3})
+    meta = pd.DataFrame({"banc_888_id": [str(big), "10", "20", "30"], "cell_type": [None, "A", "B", "G"],
+                         "cell_class": ["c"] * 4, "super_class": [None, "central_brain_intrinsic", "descending", "glia"],
+                         "side": ["left", "left", "right", "right"],
+                         "neurotransmitter_predicted": ["glutamate", "acetylcholine", "gaba", None],
+                         "neurotransmitter_score": [0.5, 0.9, 0.8, np.nan], "cell_sub_class": [None] * 4,
+                         "body_part_sensory": [None] * 4, "cell_function": [None] * 4, "flow": [None] * 4,
+                         "neurotransmitter_verified": [None] * 4, "nerve": [None] * 4, "hemilineage": [None] * 4})
+    e.to_feather(tmp_path / "e.feather")
+    meta.to_feather(tmp_path / "m.feather")
+    p = banc.load_connectome_full(tmp_path / "n.csv.gz", tmp_path / "e.feather", tmp_path / "m.feather",
+                                  neuron_set="codex", hash_files=False)
+    assert p.n_neurons == 2 and len(p.edges) == 1 and p.edges["n_syn"].tolist() == [7]
+    a = banc.load_connectome_full(tmp_path / "n.csv.gz", tmp_path / "e.feather", tmp_path / "m.feather",
+                                  neuron_set="all", hash_files=False)
+    assert a.n_neurons == 4 and len(a.edges) == 3 and a.meta["min_syn"] is None
+    assert a.neurons["id"].tolist()[:2] == [10, 20] and big in a.neurons["id"].tolist()
+    assert a.neurons.set_index("id").loc[big, "nt"] == "GLUT"
+    with pytest.raises(ValueError):
+        banc.load_connectome_full(tmp_path / "n.csv.gz", tmp_path / "e.feather", tmp_path / "m.feather",
+                                  neuron_set="x", hash_files=False)

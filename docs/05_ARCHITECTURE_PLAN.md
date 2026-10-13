@@ -177,6 +177,14 @@ GeNN/PyTorch.
   dominates. Any left/right MN9 readout is subject to the symmetry gate (rule 5).
 - Variant B's definition fails its FlyWire validation (it does not reproduce w_syn = 0.275 mV).
 
+**Finding from the full BANC v888 graph (2026-10-13; `prereg/04_banc_full_graph.md`, `docs/results/f2_full_graph.md`,
+`docs/results/f2_full_graph_qa.md`):** the Codex export threshold explains part of the sparseness but not the silence.
+The pair-level v888 edge list (no threshold) among the 158,262 Codex neurons has 11.6 M pairs and 35.4 M synapses (Codex
+export: 3.04 M / 23.6 M; FlyWire 15.1 M / 54.5 M); the FlyWire / BANC in-synapse ratio on matched types falls from 2.71
+to 1.76. On this graph the unmodified reference arm still leaves MN9 silent (0.0 Hz, all four drives, 3 seeds; gates 1
+and 2 pass, gate 3 fails below 0.2; the all-neuron sensitivity set gives the same). Stopped per the registration; the
+next route (per-neuron input normalisation or an E/I-preserving scale) needs its own pre-registration.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
