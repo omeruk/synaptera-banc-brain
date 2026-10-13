@@ -184,9 +184,11 @@ def _neurons_from_meta(meta: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_connectome_full(neurons_path, edgelist_path, meta_path, connections_path=None, neuron_set: str = "codex",
-                         variants=(), hash_files: bool = True) -> schema.Connectome:
+                         variants=(), hash_files: bool = True,
+                         data_source: str = "banc888_full") -> schema.Connectome:
     """Signed BANC Connectome from the full v888 pair-level edge list (no synapse threshold; data source
-    ``banc888_full`` in ``configs/data_sources.yaml``).
+    ``banc888_full`` (v2 edge list) or ``banc888_full_v3`` (v3 edge list) in ``configs/data_sources.yaml``; the
+    label is only recorded in the graph meta).
 
     ``neuron_set``: "codex" (primary; the 158,262 neurons of the Codex neuron table, edges among them) or "all" (every
     row of ``banc_888_meta.feather``; the Codex table annotates its neurons, the meta table the rest, NT names mapped
@@ -208,7 +210,7 @@ def load_connectome_full(neurons_path, edgelist_path, meta_path, connections_pat
         extra = meta[~np.isin(meta["banc_888_id"].to_numpy().astype(np.int64), nrn["id"].to_numpy())]
         nrn = pd.concat([nrn, _neurons_from_meta(extra)], ignore_index=True)
     edges = load_edgelist_888(edgelist_path, None if neuron_set == "all" else nrn["id"].to_numpy())
-    info = dict(dataset="banc", data_source="banc888_full", neuron_set=neuron_set, neurons=str(neurons_path),
+    info = dict(dataset="banc", data_source=data_source, neuron_set=neuron_set, neurons=str(neurons_path),
                 edgelist=str(edgelist_path), meta_table=str(meta_path), meta_rows=int(n_meta),
                 min_syn=None, pairs_kept=int(len(edges)), synapses_kept=int(edges["n_syn"].sum()))
     if hash_files:
