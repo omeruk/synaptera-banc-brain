@@ -5,7 +5,8 @@ checked against `docs/results/f3_dn_crosswalk.json` and its text; F3a-2 (`docs/r
 recomputed from the F0 spike records, gates / C2 / C3 statistics from `runs/f3a2/f3a2_v3.json`; F3a-3 (`docs/results/f3a3_vnc_subgraph.md`): subgraph counts against the
 committed JSON, the prereg and the report, gates / R1 / R2 / R3 recomputed from `runs/f3a3/f3a3_v3.json`; F3b-1 (`docs/results/f3b1_optomotor.md`): gains against
 the prereg and the registry, FlyWire DN rates and brain-side tests from the brain spike records, gates and primary tests
-per arm from `runs/f3b1/f3b1_v3.json`.
+per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_ensemble.md`, `f3b3_specificity.md`): see
+`check_f3b2` and `check_f3b3`.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
     env -u PYTHONPATH python scripts/verify_report.py --print    # only print the recomputed strings
@@ -510,6 +511,212 @@ def check_f3b2():
     return n, bad
 
 
+F3B3_REC = ROOT / "runs" / "f3b3" / "f3b3_v3.json"
+F3B3_CHK = ROOT / "runs" / "f3b3" / "input_check.json"
+F3B3_MD = ROOT / "docs" / "results" / "f3b3_specificity.md"
+PREREG11 = ROOT / "prereg" / "11_f3b3_specificity.md"
+
+
+def check_f3b3():
+    """F3b-3 (prereg/11). Permutation seeds and hash against the prereg text; the 39 derangements redrawn here and
+    checked against the record and the recorded bridge units; SHA-256 of the fresh brain records against the files;
+    the 112-family brain tests and the applied DN rates recomputed from the brain spike records; gates, (a), (b), (c),
+    null distribution, secondary and exploratory tables recomputed from runs/f3b3/f3b3_v3.json."""
+    import hashlib
+    import re
+
+    from scipy.stats import ttest_1samp
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f3b3_common as C
+    md, pre = F3B3_MD.read_text(), PREREG11.read_text()
+    d = json.loads(F3B3_REC.read_text())
+    bad, n = [], 0
+
+    def chk(key, ok, v):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    def pt(x):
+        x = np.asarray(x, float)
+        return 1.0 if not x.any() else 0.0 if np.std(x) == 0 else float(ttest_1samp(x, 0.0).pvalue)
+
+    def section(k):
+        parts = re.split(r"(?m)^## ", md)
+        return next(("## " + p for p in parts if p.startswith(f"{k}.")), "")
+
+    # permutations: prereg seeds and hash, independent redraw, record, bridge units
+    seeds = {a: int(s) for a, s in re.findall(r"(random_\d+) (\d{8})", " ".join(pre.split()))}
+    chk("perm:seeds", list(seeds) == list(C.RANDOM_ARMS) and list(seeds.values()) == list(C.PERM_SEEDS), seeds)
+    chk("perm:sha_prereg", C.PERMUTATIONS_SHA256 in pre and d["constants"]["permutations_sha256"] == C.PERMUTATIONS_SHA256,
+        C.PERMUTATIONS_SHA256)
+    redrawn = {}
+    for a, s in seeds.items():
+        rng = np.random.default_rng(s)
+        while True:
+            p = rng.permutation(len(C.ENSEMBLE))
+            if (p != np.arange(len(p))).all():
+                break
+        redrawn[a] = {C.ENSEMBLE[i]: C.ENSEMBLE[int(j)] for i, j in enumerate(p)}
+    chk("perm:sha_redrawn", hashlib.sha256(json.dumps(redrawn, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        == C.PERMUTATIONS_SHA256, "")
+    chk("perm:record", d["constants"]["permutations"] == redrawn, "")
+    for a in C.RANDOM_ARMS:
+        us = d["bridges"][a]["units"]
+        chk(f"perm:units:{a}", all(redrawn[a][u["target_family"]] == u["source_family"] for u in us)
+            and {u["target_family"] for u in us} == set(C.ENSEMBLE), a)
+    chk("units:ensemble", all(u["source_family"] == u["target_family"] for u in d["bridges"]["ensemble"]["units"]), "")
+    # fresh brain records
+    bdir = ROOT / d["brain_records"]["dir"]
+    for name, h in d["brain_records"]["sha256"].items():
+        chk(f"brain_sha:{name}", hashlib.sha256((bdir / name).read_bytes()).hexdigest() == h, name)
+    names = {f"{st}_s{s}.npz" for st in C.STIMULI for s in range(10, 30)}
+    chk("brain_files", set(d["brain_records"]["sha256"]) == names and not any(f"_s{s}.npz" in x for x in names for s in range(10))
+        and f"{len(names)} records (4 stimuli x seeds 10-29), {d['brain_records']['n_dn']:,} FlyWire DNs" in md, "")
+    ic = json.loads(F3B3_CHK.read_text())
+    chk("input_check", ic["passed"] and "Input check (prereg/09 section 3): passed" in md
+        and f"bit for bit: {'yes' if ic['equals_f3b1_render'] else 'no'}" in md, ic["passed"])
+    # gates
+    g1 = sum(x["spikes"] for x in d["gate1"])
+    ig = sum(x["ignited"] for x in d["gate2_runs"])
+    chk("gate1", f"seeds 10-19): {g1} spikes" in md and [x["seed"] for x in d["gate1"]] == list(range(10, 20)), g1)
+    chk("gate2", f"{ig} / {len(d['gate2_runs'])} ignited" in md and [x["seed"] for x in d["gate2_runs"]] == list(range(250, 300)), ig)
+    nets = [np.mean([r["network_rate_hz"] for r in d["replay"] if r["arm"] == a and r["stimulus"] == s])
+            for a in C.ARMS for s in C.STIMULI] + [np.mean([r["network_rate_hz"] for r in d["gate2_runs"]])]
+    chk("gate3", f"maximum {max(nets):.4f} Hz" in md, max(nets))
+    gates_ok = g1 == 0 and ig == 0 and max(nets) < 5.0
+    chk("replay_count", len(d["replay"]) == len(C.ARMS) * len(C.STIMULI) * 20, len(d["replay"]))
+    # brain side from the spike records
+    lo, hi = C.WINDOW
+    dt = C.INTERVAL_MS * 1e-3
+    seeds_b = list(range(10, 30))
+    rates, counts = {}, {}
+    for st in C.STIMULI:
+        for s in seeds_b:
+            z = np.load(bdir / f"{st}_s{s}.npz", allow_pickle=True)
+            chk(f"brain_seed:{st}:{s}", int(z["seed"]) == s, s)
+            counts[(st, s)] = z["dn_counts"].astype(np.int64)
+            cnt = counts[(st, s)][lo:hi].sum(0)
+            fam = np.array([re.sub(r"_[a-z]$", "", t) for t in z["dn_cell_type"]])
+            for f in C.ENSEMBLE:
+                for sd in ("left", "right"):
+                    m = (fam == f) & (z["dn_side"] == sd)
+                    rates[(st, f, sd, s)] = cnt[m].sum() / m.sum() / ((hi - lo) * dt)
+    dbr = {f: np.array([(rates[("rot_right", f, "right", s)] - rates[("rot_right", f, "left", s)])
+                        - (rates[("rot_left", f, "right", s)] - rates[("rot_left", f, "left", s)]) for s in seeds_b])
+           for f in C.ENSEMBLE}
+    p = [pt(dbr[f]) for f in C.ENSEMBLE]
+    ph = _holm(p)
+    sel = [f for f, h in zip(C.ENSEMBLE, ph) if h < 0.05]
+    b3 = section(3)
+    chk("brain:n_selective", f"Direction-selective after Holm: **{len(sel)}** of {len(C.ENSEMBLE)}" in b3, sel)
+    for f, pp, hh in zip(C.ENSEMBLE, p, ph):
+        if hh < 0.05:
+            rl = "/".join(f"{np.mean([rates[('rot_left', f, sd, s)] for s in seeds_b]):.2f}" for sd in ("left", "right"))
+            rr = "/".join(f"{np.mean([rates[('rot_right', f, sd, s)] for s in seeds_b]):.2f}" for sd in ("left", "right"))
+            chk(f"brain_test:{f}", _row(b3, f, rl, rr, f"{dbr[f].mean():.2f}", f"{np.std(dbr[f], ddof=1):.2f}",
+                                        f"{pp:.4g}", f"{hh:.4g}") is not None, (pp, hh))
+    # VNC: D per arm and type from the replay record
+    by = {(r["arm"], r["stimulus"], r["seed"]): r["rate_hz"] for r in d["replay"]}
+
+    def D(a, m):
+        return np.array([(by[(a, "rot_right", s)][f"{m}|right"] - by[(a, "rot_right", s)][f"{m}|left"])
+                         - (by[(a, "rot_left", s)][f"{m}|right"] - by[(a, "rot_left", s)][f"{m}|left"]) for s in seeds_b])
+
+    def perm(m):
+        te = D("ensemble", m).mean()
+        null = np.array([D(a, m).mean() for a in C.RANDOM_ARMS])
+        ge = int((np.abs(null) >= abs(te)).sum())
+        same = 0 if te == 0 else int(((np.sign(null) == np.sign(te)) & (null != 0)).sum())
+        return te, null, (1 + ge) / (len(null) + 1), len(null) - ge, same / len(null)
+
+    s4 = section(4)
+    sig = {}
+    for a in ("ensemble", "bridge_off"):
+        Ds = {m: D(a, m) for m in C.PRIMARY_MN}
+        pp = [pt(Ds[m]) for m in C.PRIMARY_MN]
+        hh = _holm(pp)
+        sig[a] = [m for m, h in zip(C.PRIMARY_MN, hh) if h < 0.05]
+        for m, p1, h1 in zip(C.PRIMARY_MN, pp, hh):
+            chk(f"primary:{a}:{m}", _row(s4, a, m, f"{Ds[m].mean():+.3f}", f"{np.std(Ds[m], ddof=1):.3f}", f"{p1:.4g}",
+                                         f"{h1:.4g}", "yes" if h1 < 0.05 else "no") is not None, (Ds[m].mean(), p1, h1))
+    b_ok = []
+    s5 = section(5)
+    for m in C.PRIMARY_MN:
+        te, null, pp, nsm, same = perm(m)
+        if m in sig["ensemble"] and pp <= C.PERM_ALPHA:
+            b_ok.append(m)
+        chk(f"perm:{m}", _row(s4, m, f"{te:+.3f}", "yes" if m in sig["ensemble"] else "no", f"{nsm} / {C.N_RANDOM}",
+                              f"{pp:.3f}", "yes" if m in b_ok else "no", f"{same:.3f}") is not None, (te, pp, nsm))
+        q = np.quantile(null, [0, 0.05, 0.25, 0.5, 0.75, 0.95, 1])
+        chk(f"null:{m}", _row(s5, m, *[f"{x:+.3f}" for x in q], f"{te:+.3f}", f"{nsm} / {C.N_RANDOM}") is not None, q)
+    nulls = {m: np.sort(perm(m)[1]) for m in C.PRIMARY_MN}
+    for i in range(C.N_RANDOM):
+        chk(f"null_rank:{i + 1}", _row(s5, str(i + 1), *[f"{nulls[m][i]:+.3f}" for m in C.PRIMARY_MN]) is not None, i)
+    bo_sel = bool(sig["bridge_off"])
+    outcome = ("not replicated" if not sig["ensemble"] else
+               "specific" if b_ok and not bo_sel and gates_ok else "replicated, not specific")
+    chk("outcome", f"**Outcome (prereg/11 section 7): {outcome}**" in md and f"- **Outcome: {outcome}**" in s4, outcome)
+    chk("bridge_off", f"`bridge_off` direction-selective: **{'yes' if bo_sel else 'no'}**" in s4, bo_sel)
+    # secondary set and exploratory signs
+    gate = [m for m in C.STEER_MN if d["symmetry"].get(m, {}).get("passed")]
+    f3a3 = json.loads((ROOT / "docs" / "results" / "f3a3_vnc_subgraph.json").read_text())["r3"]["gate_passing"]
+    s6, s7 = section(6), section(7)
+    chk("secondary:types", sorted(gate) == sorted(f3a3) and f"({len(gate)}): {', '.join(gate)};" in s6, gate)
+    Dg = {m: D("ensemble", m) for m in gate}
+    hh = _holm([pt(Dg[m]) for m in gate])
+    hb = _holm([pt(D("bridge_off", m)) for m in gate])
+    exp_pre = {m: e for m, e in re.findall(r"^\| (\w+) \| [^|]+ \| (\+|-|not fixed[^|]*) \|$", pre, re.M)}
+    for m in ("tp1", "tp2", "tpn", "ps1", "ps2"):
+        exp_pre[m] = "not fixed"
+    for i, m in enumerate(gate):
+        te, _, pp, _, same = perm(m)
+        chk(f"secondary:{m}", _row(s6, m, f"{te:+.3f}", f"{hh[i]:.4g}", "yes" if hh[i] < 0.05 else "no", f"{hb[i]:.4g}",
+                                   f"{pp:.3f}", f"{same:.3f}") is not None, (te, hh[i]))
+        e = exp_pre.get(m)
+        es = "+" if e == "+" else "-" if e == "-" else "not fixed"
+        obs = "+" if te > 0 else "-" if te < 0 else "0"
+        ag = "-" if es == "not fixed" or obs == "0" else ("yes" if es == obs else "no")
+        row = next((ln for ln in s7.splitlines() if ln.startswith(f"| {m} |")), "")
+        cells = [c.strip() for c in row.strip("|").split("|")]
+        chk(f"exploratory:{m}", len(cells) == 6 and cells[2] == es and cells[3] == f"{obs} ({te:+.3f} Hz)"
+            and cells[4] == ("yes" if hh[i] < 0.05 else "no") and cells[5] == ag, (m, cells))
+    # applied rates of the ensemble arm, from the spike records and the recorded unit table
+    units = d["bridges"]["ensemble"]["units"]
+    W, L = C.BRIDGE_WINDOW_INTERVALS, C.BRIDGE_LATENCY_INTERVALS
+    nb = {}
+    for u in units:
+        nb.setdefault(f"{u['target_family']}|{u['side']}", []).append(u)
+    s8 = section(8)
+    for key, us in sorted(nb.items()):
+        cells = []
+        for st in C.STIMULI:
+            vals = []
+            for s in seeds_b:
+                c = counts[(st, s)]
+                tot, nn = 0.0, 0
+                for u in us:
+                    x = c[:, u["fw_pos"]].sum(1)
+                    r = np.mean([x[max(k - L - W + 1, 0):k - L + 1].sum() for k in range(lo, hi)]) / (len(u["fw_pos"]) * W * dt)
+                    tot += r * u["n_banc"]
+                    nn += u["n_banc"]
+                vals.append(tot / nn)
+            cells.append(np.mean(vals))
+        f, sd = key.split("|")
+        row = next((ln for ln in s8.splitlines() if re.match(rf"\| {re.escape(f)}( \*)? \| {sd} \|", ln)), None)
+        if row is None:                    # only families with a zero applied rate on both sides are left out
+            chk(f"applied_zero:{key}", not any(cells), cells)
+            continue
+        # numeric comparison within half a display unit: the mean rates hit exact .x5 ties, which the bridge and
+        # this recomputation can round to different sides
+        rep = [float(cl.split("/")[0]) for cl in row.strip("|").split("|")[3:7]]
+        ok = all(abs(r - c) <= 0.05 + 1e-9 for r, c in zip(rep, cells))
+        chk(f"applied:{key}", ok, (cells, rep))
+        chk(f"applied_star:{key}", (f in sel) == row.startswith(f"| {f} *"), f)
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -574,6 +781,10 @@ def main(argv=None):
         bad += b
     if F3B2_MD.exists():
         k, b = check_f3b2()
+        n += k
+        bad += b
+    if F3B3_MD.exists():
+        k, b = check_f3b3()
         n += k
         bad += b
     if "--print" in argv:
