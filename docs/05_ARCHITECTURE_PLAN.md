@@ -253,6 +253,20 @@ baseline): all three families steer ipsilaterally; lowest steering input rate DN
 Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 Hz); DNa10 (23.2 / 3.4 Hz) and DNa15
 (7.1 / 3.7 Hz) steer only well above theirs. What follows for F3b is the project owner's decision.
 
+**Decision after F3a-3 (project owner, 2026-10-13, PR #12 merged):**
+1. The BANC VNC subgraph of prereg/08 is adopted for the hybrid.
+2. Persistence is solved on the subgraph: activity stops within 25 ms of the cut (R2, 10 / 10 seeds).
+3. DNa04 is the primary steering family: it steers at 25 Hz, inside its FlyWire flight range. DNa15 and DNa10 steer only
+   above their FlyWire ranges.
+4. Open item, for later: the neck and haltere MN responses are lost on the subgraph. The FlyWire brain may drive the neck
+   MNs (through DNs that are not in the current set).
+5. Answers to docs/07 section 5: matching by exact `cell_type` first, then family; per-neuron mean rate; latency one
+   coupling interval (5 ms); Poisson re-synthesis; everything recorded. DN set: DNa04, DNa10, DNa15 driven from the
+   FlyWire brain; DNp31 recorded as a modulator; DNg02 is the `HAND` baseline at 100 Hz.
+6. Next step: F3b-1, the first coupled experiment, open loop and without a body (`prereg/09_f3b1_optomotor.md`): the
+   FlyWire brain sees rotating gratings, and its DN rates drive the BANC VNC subgraph. Arms `ref` (gain 1) and
+   `rate_gain` (per-family gain from F3a-3 and C1), with the controls `bridge_off` and `shuffled`.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.

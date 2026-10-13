@@ -1180,6 +1180,38 @@
       "used_in": [
         "connectome/innorm.py:CLIP"
       ]
+    },
+    "f3b1.rate_gain": {
+      "value": {
+        "DNa04": 1.1649922720247299,
+        "DNa10": 7.5187032418952615,
+        "DNa15": 9.248466257668714
+      },
+      "unit": "ratio",
+      "origin": "F",
+      "fitted_to": "open-loop VNC dose-response (F3a-3) and FlyWire F0 rates (C1)",
+      "source": "prereg/09 section 6: g_f = lowest steering input rate of family f on the BANC VNC subgraph (docs/results/f3a3_vnc_subgraph.json r3.lowest_rate) / median FlyWire F0 flight-window per-neuron rate of f (docs/results/f3a2_checks.json c1.f0.<f>.flight.median); no behaviour used",
+      "used_in": [
+        "scripts/f3b1_common.py:RATE_GAIN"
+      ]
+    },
+    "f3b1.bridge_window_intervals": {
+      "value": 5,
+      "unit": "coupling intervals (5 ms)",
+      "origin": "E",
+      "source": "prereg/09 section 5: trailing window of the per-neuron mean DN rate in coupling/dn_bridge.py; equal to the 25 ms readout bin used since v1",
+      "used_in": [
+        "scripts/f3b1_common.py:BRIDGE_WINDOW_INTERVALS"
+      ]
+    },
+    "f3b1.bridge_latency_intervals": {
+      "value": 1,
+      "unit": "coupling intervals (5 ms)",
+      "origin": "E",
+      "source": "docs/07 section 3 and the owner's answer (docs/05, after PR #12): the FlyWire rate of interval k is applied in interval k+1 (CLAUDE.md rule 4); 0 is the ACAUSAL variant",
+      "used_in": [
+        "scripts/f3b1_common.py:BRIDGE_LATENCY_INTERVALS"
+      ]
     }
   }
 }
