@@ -175,3 +175,37 @@ def test_sattolo_is_single_cycle():
             seen.add(f)
             f = p[f]
         assert len(seen) == len(items)
+
+
+def test_f3b3_arms():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import f3b2_common as C2
+    import f3b3_common as C
+    assert C.ENSEMBLE == C2.ENSEMBLE and len(C.RANDOM_ARMS) == len(C.PERM_SEEDS) == 39
+    assert set(C.SEEDS) == set(range(10, 30)) and not set(C.SEEDS) & set(range(10))
+    assert C.permutations_sha256() == C.PERMUTATIONS_SHA256
+    P = C.permutations()
+    assert list(P) == list(C.RANDOM_ARMS)
+    for m in P.values():
+        assert set(m) == set(m.values()) == set(C.ENSEMBLE) and all(t != s for t, s in m.items())
+    assert len({tuple(sorted(m.items())) for m in P.values()}) == 39 and C2.PERMUTATION not in P.values()
+    assert C.bridge_config("bridge_off") is None and C.bridge_config("ensemble").source == {}
+    for arm in C.RANDOM_ARMS:
+        c = C.bridge_config(arm, P)
+        assert c.source == P[arm] and c.gains == {} and c.latency_intervals == 1 and c.window_intervals == 5
+    vs = {C.vnc_seed(st, s) for st in C.STIMULI for s in C.SEEDS}
+    assert len(vs) == len(C.STIMULI) * len(C.SEEDS) and not vs & (set(C.GATE1_SEEDS) | set(C.GATE2_SEEDS))
+
+
+def test_derangement_has_no_fixed_point():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import f3b3_common as C
+    items = [f"f{i}" for i in range(5)]
+    for seed in range(50):
+        p = C.derangement(items, seed)
+        assert sorted(p.values()) == items and all(t != s for t, s in p.items())
+    assert C.derangement(items, 7) == C.derangement(items, 7)

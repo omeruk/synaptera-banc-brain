@@ -306,6 +306,18 @@ Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 
   direction information reaches the VNC.
 - What follows is the project owner's decision.
 
+**Decision after F3b-2 (project owner, 2026-10-13, PR #14 merged):**
+1. **Outcome.** Under the registered rule, F3b-2 has outcome B. Both `ensemble` and `ensemble_shuffled` are
+   direction-selective, so the result is not specific.
+2. **Post-hoc observation, not a claim.** On b3 and hg1, the two arms have opposite signs. So the family wiring
+   appears to set the sign of the steering response. The single-shuffle control tested the family mapping, not whether
+   direction information reaches the VNC. This is a hypothesis for a confirmatory test.
+3. **Next step: F3b-3** (`prereg/11_f3b3_specificity.md`), a confirmatory specificity test with fresh data.
+   - Fresh brain runs with new seeds 10-29.
+   - Arms: `ensemble` (the true wiring), `bridge_off`, and 39 random family derangements.
+   - A replication test (Holm over b3, i1, i2, hg1, hg4), then a magnitude permutation test of |T_m| against the 39
+     random wirings. Sign agreement is reported as a secondary result.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
