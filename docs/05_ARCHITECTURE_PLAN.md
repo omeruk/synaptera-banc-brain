@@ -293,6 +293,19 @@ Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 
    records. If the ensemble is not direction-selective either, the work stops there; the next step (neuron model v2)
    is the owner's decision.
 
+**Finding from F3b-2, DN ensemble bridge (2026-10-13; `prereg/10_f3b2_dn_ensemble.md`,
+`docs/results/f3b2_dn_ensemble.md`):**
+- **Checks.** Gates 1, 2 (all 305 ensemble neurons and DNg02 at 100 Hz) and 3' pass. The F3b-1 brain records were
+  reused (SHA-256 checked).
+- **Brain.** 19 of the 112 ensemble families are direction-selective after Holm (e.g. DNp20, DNb06, DNg41, DNa11).
+- **VNC (primary test, outcome B).** `ensemble` is direction-selective (b3, i1, hg1, hg4 after Holm), but
+  `ensemble_shuffled` is also direction-selective (b3, hg1). The result is therefore **not specific**, and under the
+  registered rule it does not support explanation 1. `bridge_off` is silent.
+- **Post-hoc.** The two arms that are significant on b3 and hg1 have opposite signs. The shuffled control keeps the
+  direction-selective rate streams and only moves them to other families. So it tests the family wiring, not whether
+  direction information reaches the VNC.
+- What follows is the project owner's decision.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
