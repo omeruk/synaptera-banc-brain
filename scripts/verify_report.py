@@ -354,6 +354,162 @@ def check_f3b1():
     return n, bad
 
 
+F3B2_REC = ROOT / "runs" / "f3b2" / "f3b2_v3.json"
+F3B2_MD = ROOT / "docs" / "results" / "f3b2_dn_ensemble.md"
+PREREG10 = ROOT / "prereg" / "10_f3b2_dn_ensemble.md"
+
+
+def check_f3b2():
+    """F3b-2 (prereg/10). Ensemble and permutation against the prereg text, the crosswalk JSON and the code; SHA-256 of
+    the reused brain records against the files; FlyWire family rates, the 112-family brain tests and the applied DN
+    rates recomputed from the brain spike records and the recorded unit table (not through coupling/dn_bridge.py);
+    gates, primary and secondary tests and specificity recomputed from runs/f3b2/f3b2_v3.json."""
+    import hashlib
+    import re
+
+    from scipy.stats import ttest_1samp
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f3b2_common as C
+    md, pre = F3B2_MD.read_text(), PREREG10.read_text()
+    d = json.loads(F3B2_REC.read_text())
+    bad, n = [], 0
+
+    def chk(key, ok, v):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    def pt(x):
+        x = np.asarray(x, float)
+        return 1.0 if not x.any() else 0.0 if np.std(x) == 0 else float(ttest_1samp(x, 0.0).pvalue)
+
+    def section(k):
+        parts = re.split(r"(?m)^## ", md)
+        return next(("## " + p for p in parts if p.startswith(f"{k}.")), "")
+
+    # ensemble and permutation: crosswalk, prereg, code, record
+    cw = json.loads(XW_JSON.read_text())["summary"]["shared_gate_both"]
+    chk("ens:crosswalk", list(C.ENSEMBLE) == cw and "DNg02" not in cw, len(cw))
+    lst = pre.split("The list, in the order used\n  below:")[1].split("- **DNg02")[0]
+    chk("ens:prereg", re.findall(r"\b(?:DN\w+|MDN|aSP22)\b", lst) == list(C.ENSEMBLE), "list")
+    pairs = dict(re.findall(r"(\w+) <- (\w+)[;.]", pre.split('"BANC target <- FlyWire source":**')[1]
+                            .split("- **Everything")[0]))
+    chk("perm:prereg", pairs == C.PERMUTATION, len(pairs))
+    chk("perm:sattolo", C.sattolo(list(C.ENSEMBLE), C.PERMUTATION_SEED) == C.PERMUTATION, C.PERMUTATION_SEED)
+    chk("perm:record", d["constants"]["permutation"] == C.PERMUTATION and d["constants"]["ensemble"] == list(C.ENSEMBLE), "")
+    # reused brain records
+    bdir = ROOT / d["brain_records"]["dir"]
+    for name, h in d["brain_records"]["sha256"].items():
+        chk(f"brain_sha:{name}", hashlib.sha256((bdir / name).read_bytes()).hexdigest() == h, name)
+    chk("brain_files", len(d["brain_records"]["sha256"]) == len(C.STIMULI) * len(C.SEEDS)
+        and f"{len(d['brain_records']['sha256'])} files, {d['brain_records']['n_dn']:,} FlyWire DNs" in md, "")
+    # gates
+    g1 = sum(x["spikes"] for x in d["gate1"])
+    ig = sum(x["ignited"] for x in d["gate2_runs"])
+    chk("gate1", f"seeds 0-9): {g1} spikes" in md, g1)
+    chk("gate2", f"{ig} / {len(d['gate2_runs'])} ignited" in md, ig)
+    nets = [np.mean([r["network_rate_hz"] for r in d["replay"] if r["arm"] == a and r["stimulus"] == s])
+            for a in C.ARMS for s in C.STIMULI] + [np.mean([r["network_rate_hz"] for r in d["gate2_runs"]])]
+    chk("gate3", f"maximum {max(nets):.4f} Hz" in md, max(nets))
+    # brain side from the spike records
+    lo, hi = C.WINDOW
+    dt = C.INTERVAL_MS * 1e-3
+    rates, counts = {}, {}
+    for st in C.STIMULI:
+        for s in C.SEEDS:
+            z = np.load(bdir / f"{st}_s{s}.npz", allow_pickle=True)
+            counts[(st, s)] = z["dn_counts"].astype(np.int64)
+            cnt = counts[(st, s)][lo:hi].sum(0)
+            fam = np.array([re.sub(r"_[a-z]$", "", t) for t in z["dn_cell_type"]])
+            for f in C.ENSEMBLE:
+                for sd in ("left", "right"):
+                    m = (fam == f) & (z["dn_side"] == sd)
+                    rates[(st, f, sd, s)] = cnt[m].sum() / m.sum() / ((hi - lo) * dt)
+    dbr = {f: np.array([(rates[("rot_right", f, "right", s)] - rates[("rot_right", f, "left", s)])
+                        - (rates[("rot_left", f, "right", s)] - rates[("rot_left", f, "left", s)]) for s in C.SEEDS])
+           for f in C.ENSEMBLE}
+    p = [pt(dbr[f]) for f in C.ENSEMBLE]
+    ph = _holm(p)
+    sel = [f for f, h in zip(C.ENSEMBLE, ph) if h < 0.05]
+    b3 = section(3)
+    chk("brain:n_selective", f"Direction-selective after Holm: **{len(sel)}** of {len(C.ENSEMBLE)}" in b3, sel)
+    for f, pp, hh in zip(C.ENSEMBLE, p, ph):
+        if pp < 0.05:
+            rl = "/".join(f"{np.mean([rates[('rot_left', f, sd, s)] for s in C.SEEDS]):.2f}" for sd in ("left", "right"))
+            rr = "/".join(f"{np.mean([rates[('rot_right', f, sd, s)] for s in C.SEEDS]):.2f}" for sd in ("left", "right"))
+            chk(f"brain_test:{f}", _row(b3, f, rl, rr, f"{dbr[f].mean():.2f}", f"{np.std(dbr[f], ddof=1):.2f}",
+                                        f"{pp:.4g}", f"{hh:.4g}", "yes" if hh < 0.05 else "no") is not None, (pp, hh))
+    # consistency with F3b-1 (same records, same statistic)
+    f3b1 = json.loads((ROOT / "docs" / "results" / "f3b1_optomotor.json").read_text())["brain"]
+    for f in ("DNa04", "DNa10", "DNa15"):
+        chk(f"brain_f3b1:{f}", abs(pt(dbr[f]) - f3b1["tests"][f]["p_t"]) <= 1e-12, f)
+    chk("brain_f3b1:DNp31", abs(pt(dbr["DNp31"]) - f3b1["dnp31"]["p_t"]) <= 1e-12, "DNp31")
+    # VNC tests from the replay record
+    by = {(r["arm"], r["stimulus"], r["seed"]): r["rate_hz"] for r in d["replay"]}
+
+    def vnc(types, sec, tag):
+        sel_ = {}
+        for a in C.ARMS:
+            D = {m: np.array([(by[(a, "rot_right", s)][f"{m}|right"] - by[(a, "rot_right", s)][f"{m}|left"])
+                              - (by[(a, "rot_left", s)][f"{m}|right"] - by[(a, "rot_left", s)][f"{m}|left"])
+                              for s in C.SEEDS]) for m in types}
+            pp = [pt(D[m]) for m in types]
+            hh = _holm(pp)
+            for m, p1, h1 in zip(types, pp, hh):
+                if tag == "primary" or p1 < 0.05:
+                    chk(f"{tag}:{a}:{m}", _row(sec, a, m, f"{D[m].mean():.2f}", f"{np.std(D[m], ddof=1):.2f}",
+                                               f"{p1:.4g}", f"{h1:.4g}", "yes" if h1 < 0.05 else "no") is not None,
+                        (D[m].mean(), p1, h1))
+            sel_[a] = bool((hh < 0.05).any())
+            chk(f"{tag}:{a}:verdict", _row(sec, a, "**yes**" if sel_[a] else "no") is not None, sel_[a])
+        for a, ctl in C.CONTROLS.items():
+            spec = sel_[a] and not any(sel_[c] for c in ctl)
+            txt = ("direction-selective and **specific**" if spec else "direction-selective but **not specific**"
+                   if sel_[a] else "**not direction-selective**")
+            chk(f"{tag}:spec:{a}", f"- `{a}`: {txt}" in sec, txt)
+        return sel_
+    sel_p = vnc(C.PRIMARY_MN, section(4), "primary")
+    gate = [m for m in C.STEER_MN if d["symmetry"].get(m, {}).get("passed")]
+    f3a3 = json.loads((ROOT / "docs" / "results" / "f3a3_vnc_subgraph.json").read_text())["r3"]["gate_passing"]
+    chk("secondary:types", sorted(gate) == sorted(f3a3) and f"({len(gate)}): {', '.join(gate)};" in section(5), gate)
+    vnc(gate, section(5), "secondary")
+    spec = sel_p["ensemble"] and not any(sel_p[c] for c in C.CONTROLS["ensemble"])
+    outcome = "A" if spec else "B" if sel_p["ensemble"] else "C"
+    chk("outcome", f"Primary test, outcome **{outcome}**" in md, outcome)
+    # post-hoc: FlyWire DN spikes under grey, from the records
+    g_spk = int(sum(counts[("grey", s)].sum() for s in C.SEEDS))
+    chk("posthoc:grey_spikes", f"grey 0.0000-0.0000 ({g_spk} DN spikes" in md if g_spk == 0 else
+        "fire no spikes under `grey`" not in md, g_spk)
+    # applied rates of the ensemble arm, from the spike records and the recorded unit table
+    units = d["bridges"]["ensemble"]["units"]
+    W, L = C.BRIDGE_WINDOW_INTERVALS, C.BRIDGE_LATENCY_INTERVALS
+    nb = {}
+    for u in units:
+        nb.setdefault(f"{u['target_family']}|{u['side']}", []).append(u)
+    s6 = section(6)
+    for key, us in sorted(nb.items()):
+        cells = []
+        for st in C.STIMULI:
+            vals = []
+            for s in C.SEEDS:
+                c = counts[(st, s)]
+                tot, nn = 0.0, 0
+                for u in us:
+                    x = c[:, u["fw_pos"]].sum(1)
+                    r = np.mean([x[max(k - L - W + 1, 0):k - L + 1].sum() for k in range(lo, hi)]) / (len(u["fw_pos"]) * W * dt)
+                    tot += r * u["n_banc"]
+                    nn += u["n_banc"]
+                vals.append(tot / nn)
+            cells.append(f"{np.mean(vals):.1f} / ")
+        f, sd = key.split("|")
+        row = next((ln for ln in s6.splitlines() if re.match(rf"\| {re.escape(f)}( \*)? \| {sd} \|", ln)), None)
+        ok = row is not None and all(cl.strip().startswith(c) for c, cl in zip(cells, row.strip("|").split("|")[3:7]))
+        chk(f"applied:{key}", ok, cells)
+        chk(f"applied_star:{key}", row is not None and ((f in sel) == row.startswith(f"| {f} *")), f)
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -414,6 +570,10 @@ def main(argv=None):
         bad += b
     if F3B1_MD.exists():
         k, b = check_f3b1()
+        n += k
+        bad += b
+    if F3B2_MD.exists():
+        k, b = check_f3b2()
         n += k
         bad += b
     if "--print" in argv:

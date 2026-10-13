@@ -134,3 +134,44 @@ def test_f3b1_arms():
     sg = C.bridge_config("shuffled_gain")
     assert sg.gain_by == "source" and sg.gains == C.RATE_GAIN and sg.source == C.PERMUTATION
     assert len({C.vnc_seed(st, s) for st in C.STIMULI for s in C.SEEDS}) == len(C.STIMULI) * len(C.SEEDS)
+
+
+def test_f3b2_arms():
+    import json
+    import sys
+    from pathlib import Path
+    root = Path(__file__).resolve().parent.parent
+    sys.path.insert(0, str(root / "scripts"))
+    import f3b2_common as C
+    cw = json.loads((root / "docs" / "results" / "f3_dn_crosswalk.json").read_text())["summary"]
+    assert list(C.ENSEMBLE) == cw["shared_gate_both"] and len(C.ENSEMBLE) == cw["n_shared_gate_both"] == 112
+    assert not any(f.startswith("DNg02") for f in C.ENSEMBLE)
+    P = C.PERMUTATION
+    assert set(P) == set(P.values()) == set(C.ENSEMBLE) and all(t != s for t, s in P.items())
+    assert P == C.sattolo(list(C.ENSEMBLE), C.PERMUTATION_SEED)
+    f, seen = C.ENSEMBLE[0], set()          # one cycle through all families
+    while f not in seen:
+        seen.add(f)
+        f = P[f]
+    assert len(seen) == len(C.ENSEMBLE)
+    assert C.bridge_config("bridge_off") is None
+    for arm in ("ensemble", "ensemble_shuffled"):
+        c = C.bridge_config(arm)
+        assert c.gains == {} and c.latency_intervals == 1 and c.window_intervals == 5 and c.families == C.ENSEMBLE
+    assert C.bridge_config("ensemble_shuffled").source == P and C.bridge_config("ensemble").source == {}
+    assert set(C.CONTROLS["ensemble"]) == {"bridge_off", "ensemble_shuffled"}
+
+
+def test_sattolo_is_single_cycle():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import f3b2_common as C
+    items = [f"f{i}" for i in range(9)]
+    for seed in range(20):
+        p = C.sattolo(items, seed)
+        f, seen = items[0], set()
+        while f not in seen:
+            seen.add(f)
+            f = p[f]
+        assert len(seen) == len(items)
