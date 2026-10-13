@@ -197,6 +197,17 @@ right-sided labellar drive only. Leg drive: MN9 0.0 Hz in all arms. For arm N th
 VNC-dendrite caveat (ascending neurons sit at the 0.25 clip); R3, without normalisation, shows the same leg result.
 Stopped per the registration; any further route needs a new pre-registration and the project owner's decision.
 
+**Decision after prereg/05 (project owner, 2026-10-13, PR #9 merged):**
+1. The BANC whole-brain track stops here as a reported result. R3 (v3 graph, unchanged Shiu parameters) is the first BANC
+   graph on which MN9 responds (6.8 Hz), but the response is lateralised (left MN9 only, driven by right labellar GRNs),
+   the leg pathway is silent and gate 3 fails. This matches the known proofreading asymmetry (optic lobe R/L 1.56, LB3b
+   20 L / 40 R). It is a data property, not something to tune.
+2. The main track becomes the **hybrid**: FlyWire v783 brain (validated in F0) -> descending neurons matched by type ->
+   BANC v3 VNC (wing, haltere, neck and leg motor neurons). Both datasets are female.
+3. `banc888_full_v3` is the BANC graph from now on.
+4. Next steps: F3a, open loop, BANC VNC only (`prereg/06_banc_vnc_dn_to_mn.md`, PR "F3a: BANC VNC open loop, DN -> motor
+   neurons"); design document `docs/07_HYBRID_INTERFACE.md` (no code) for review before any implementation.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
