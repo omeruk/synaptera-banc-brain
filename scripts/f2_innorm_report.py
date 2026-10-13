@@ -123,6 +123,17 @@ def main(argv=None):
             L.append(f"| {c} | {m[0]:.1f} | {m[1]:.1f} | {np.mean([x['mn9_rate_hz'] for x in r]):.1f} | "
                      f"{sem([x['mn9_rate_hz'] for x in r]):.2f} | {net:.3f} | "
                      f"{np.mean([x['nondriven_rate_hz'] for x in r]):.3f} |")
+        if arm.startswith("N"):
+            ia = qa["innorm"][gname]["by_super_class"]["ascending"]
+            isa = qa["innorm"][gname]["by_super_class"]["sensory_ascending"]
+            lg = o["by_condition"]["leg"]
+            L += ["", f"- **Caveat for the leg-drive rows (VNC-dendrite artefact, flagged in prereg/05 section 2.1).** "
+                  f"Leg sugar signals reach the brain through ascending neurons. In this arm {ia['n_clipped_low']:,} of "
+                  f"{ia['all']['n']:,} ascending neurons sit at the lower clip (median s {ia['all']['q50']:.2f}) and the "
+                  f"sensory_ascending class gets s = {isa['all']['q50']:.2f}, because their VNC input has no FlyWire "
+                  f"counterpart. The leg-drive result of this arm (MN9 {lg['mn9_mean_hz']:.1f} Hz, network "
+                  f"{lg['network_rate_hz']:.3f} Hz) is therefore not an unbiased test of the leg pathway; the leg rows "
+                  "of the arm without normalisation (R3) are the comparison.", ""]
         L += ["", f"- **MN9 responds** (labellar mean {o['mn9_labellar_mean_hz']:.1f} Hz >= "
               f"{out['response_threshold_hz']:.2f} Hz): **{'yes' if o['mn9_responds'] else 'no'}**; gates 1-3 pass: "
               f"**{'yes' if o['gates_pass'] else 'no'}**; candidate: **{'yes' if o['candidate'] else 'no'}**.", ""]
