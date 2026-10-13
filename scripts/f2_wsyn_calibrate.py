@@ -182,7 +182,8 @@ def class_factors(cx, kc, kg):
     return f
 
 
-def variant_report(eng, cx, groups, mn9, label, log=print):
+def variant_report(eng, cx, groups, mn9, label, log=print, gate1_seeds=GATE1_SEEDS, gate2_seeds=GATE2_SEEDS,
+                   run_seeds=RUN_SEEDS):
     sides = cx.neurons["side"].to_numpy()[mn9].tolist()
     allg = np.concatenate(list(groups.values()))
     out = dict(variant=label, state=eng.state_dict()["weight_scale"], post_scale_sha256=eng.state_dict()["post_scale_sha256"],
@@ -190,14 +191,14 @@ def variant_report(eng, cx, groups, mn9, label, log=print):
     t0 = time.time()
     # gate 1: no input
     g1 = []
-    for s in GATE1_SEEDS:
+    for s in gate1_seeds:
         steps, c = run_once(eng, {g: 0.0 for g in groups}, s, n_on=40)
         g1.append(int(c.sum()))
     out["gate1_no_input_spikes_per_seed"] = g1
     out["gate1_pass"] = bool(sum(g1) == 0)
     # gate 2: ignition after the cut, labellar + leg both sides at 100 Hz (prereg section 5)
     g2 = []
-    for s in GATE2_SEEDS:
+    for s in gate2_seeds:
         steps, _ = run_once(eng, {g: 100.0 for g in groups}, s, n_on=10, n_cut=8, n_idle=3)
         g2.append(dict(seed=s, last_cut_step_hz=steps[17], ignited=bool(steps[17] > 1.0), idle_mean_hz=float(np.mean(steps[18:]))))
     out["gate2_runs"] = g2
@@ -210,12 +211,12 @@ def variant_report(eng, cx, groups, mn9, label, log=print):
     for cname, on in conds.items():
         drive = {g: on.get(g, 0.0) for g in groups}
         driven = np.concatenate([groups[g] for g in on])
-        for s in RUN_SEEDS:
+        for s in run_seeds:
             r = drive_phase(eng, drive, s, mn9, driven)
             r["condition"] = cname
             out["runs"].append(r)
     out["wall_s"] = time.time() - t0
-    log(f"{label}: gate1 {out['gate1_pass']} gate2 {out['gate2_ignited']}/20 "
+    log(f"{label}: gate1 {out['gate1_pass']} gate2 {out['gate2_ignited']}/{len(gate2_seeds)} "
         + ", ".join(f"{c} MN9 {np.mean([r['mn9_rate_hz'] for r in out['runs'] if r['condition'] == c]):.1f} Hz"
                     for c in conds) + f" ({out['wall_s']:.0f} s)", flush=True)
     return out
