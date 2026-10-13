@@ -296,3 +296,24 @@ def test_full_brain_matches_v1_totals():
     eng.set_inputs({"sugar": 100.0})
     eng.advance(25)
     assert eng.spike_counts()[eng.groups["sugar"]].sum() > 0
+
+
+def test_weight_scale_after_a_run_stores_the_pristine_state():
+    """Regression (found in the F2 calibration): set_weight_scale after a run must not store the dynamic state of
+    that run as the new initial state (silent engine with no input fired after the scale change)."""
+    eng = make_engine()
+    first = next(iter(eng.poisson_synapses))
+    eng.reset(1)
+    eng.set_inputs({first: 300.0})
+    eng.advance(100.0)
+    assert eng.spike_counts().sum() > 0
+    eng.set_weight_scale(2.0)
+    eng.reset(2)
+    eng.advance(100.0)
+    assert eng.spike_counts().sum() == 0 and float(np.abs(np.asarray(eng.neu.g_[:])).max()) == 0.0
+    eng.set_inputs({first: 300.0})
+    eng.advance(50.0)
+    eng.set_weight_scale_per_post(np.full(40, 1.5))
+    eng.reset(3)
+    eng.advance(100.0)
+    assert eng.spike_counts().sum() == 0

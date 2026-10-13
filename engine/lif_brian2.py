@@ -195,6 +195,7 @@ class Brian2LIFEngine:
         new initial state. Used only by the activity-matched control; the reference arm keeps 1.0."""
         if not scale > 0:
             raise ValueError("scale must be positive")
+        self.net.restore("fresh")          # the stored state must be the pristine one, not the state after a run
         self.syn.w_[:] = self._base_w * float(scale)
         self._weight_scale = float(scale)
         self._post_scale_sha256 = None
@@ -209,6 +210,7 @@ class Brian2LIFEngine:
         if scale.shape != (self.n_neurons,) or not (scale > 0).all():
             raise ValueError("need one positive factor per neuron")
         post = np.asarray(self.syn.j[:], dtype=np.int64)
+        self.net.restore("fresh")          # pristine initial state (see set_weight_scale)
         self.syn.w_[:] = self._base_w * scale[post]
         self._weight_scale = float(np.mean(scale[post]))
         self._post_scale_sha256 = hashlib.sha256(np.ascontiguousarray(scale).tobytes()).hexdigest()
