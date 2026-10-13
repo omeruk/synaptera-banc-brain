@@ -721,6 +721,7 @@ SUMMARY_MD = ROOT / "docs" / "results" / "SUMMARY_F0_F3.md"
 SUMMARY_JSON = ROOT / "docs" / "results" / "summary_f0_f3.json"
 DOC08 = ROOT / "docs" / "08_CLOSED_LOOP_OPTOMOTOR.md"
 F4_JSON = ROOT / "docs" / "results" / "f4_design_numbers.json"
+F4_JSON_V2 = ROOT / "docs" / "results" / "f4_design_numbers_v2.json"
 
 
 def check_summary():
@@ -772,7 +773,8 @@ def check_summary():
 
 
 def check_f4_design():
-    """docs/08 numbers: docs/results/f4_design_numbers.json is rebuilt from the F3b-3 records and compared; the
+    """docs/08 numbers: docs/results/f4_design_numbers.json (v1) and f4_design_numbers_v2.json (Lindsay 2017 signs,
+    section 10) are rebuilt from the F3b-3 records and compared; the
     syndirectional index of `ensemble` and the random-wiring counts are recomputed here with plain loops; the GEN blocks
     of docs/08 are re-rendered and compared with the document."""
     import hashlib
@@ -787,37 +789,48 @@ def check_f4_design():
         if not ok:
             bad.append((key, v))
 
-    stored = json.loads(F4_JSON.read_text())
-    rebuilt = F.build()
-    chk("f4:json_equals_rebuild", json.dumps(stored, sort_keys=True) == json.dumps(rebuilt, sort_keys=True))
-    chk("f4:source_sha", stored["source"]["sha256"] == hashlib.sha256(F.RECORDS.read_bytes()).hexdigest())
-    chk("f4:selfcheck", stored["selfcheck_T_equals_f3b3"] is True)
     rec = json.loads(F3B3_REC.read_text())
     seeds = sorted({r["seed"] for r in rec["replay"]})
     by = {(r["arm"], r["stimulus"], r["seed"]): r["rate_hz"] for r in rec["replay"]}
-    signs = F.SIGNS_LATERAL
-
-    def S(arm, seed):
-        def dA(stim):
-            rr = by[(arm, stim, seed)]
-            return sum(sg * (rr.get(f"{t}|left", 0.0) - rr.get(f"{t}|right", 0.0)) for t, sg in signs.items())
-        return (dA("rot_right") - dA("rot_left")) / 2.0
-
-    ens = [S("ensemble", s) for s in seeds]
-    e = stored["sets"]["lateral"]["arms"]["ensemble"]
-    chk("f4:S_ensemble_mean", abs(np.mean(ens) - e["mean"]) < 1e-9, (np.mean(ens), e["mean"]))
-    chk("f4:S_ensemble_pos", sum(1 for v in ens if v > 0) == e["n_pos"] and sum(1 for v in ens if v < 0) == e["n_neg"])
-    rnd = [np.mean([S(f"random_{k}", s) for s in seeds]) for k in range(1, 40)]
-    r = stored["sets"]["lateral"]["random"]
-    chk("f4:random_counts", (sum(1 for v in rnd if v > 0), sum(1 for v in rnd if v < 0)) ==
-        (r["n_syndirectional"], r["n_anti"]), (r["n_syndirectional"], r["n_anti"]))
-    chk("f4:bridge_off_zero_mean_abs_small", abs(stored["sets"]["lateral"]["arms"]["bridge_off"]["mean"]) < 0.1)
-    # GEN blocks of docs/08
     doc = DOC08.read_text()
-    for k, v in F.blocks(stored).items():
-        m = re.search(rf"<!-- GEN:{k} -->\n(.*?)\n<!-- /GEN:{k} -->", doc, re.S)
-        chk(f"f4:block:{k}", bool(m) and m.group(1) == v, k)
-    chk("f4:no_unknown_blocks", set(re.findall(r"<!-- GEN:(\w+) -->", doc)) == set(F.blocks(stored)))
+    all_blocks = set()
+    for ver, path, signs in (("v1", F4_JSON, F.SIGNS_LATERAL), ("v2", F4_JSON_V2, F.SIGNS_LATERAL_V2)):
+        if not path.exists():
+            chk(f"f4:{ver}:json_exists", False, str(path))
+            continue
+        stored = json.loads(path.read_text())
+        rebuilt = F.build(ver)
+        chk(f"f4:{ver}:json_equals_rebuild", json.dumps(stored, sort_keys=True) == json.dumps(rebuilt, sort_keys=True))
+        chk(f"f4:{ver}:source_sha", stored["source"]["sha256"] == hashlib.sha256(F.RECORDS.read_bytes()).hexdigest())
+        chk(f"f4:{ver}:selfcheck", stored["selfcheck_T_equals_f3b3"] is True)
+
+        def S(arm, seed, signs=signs):
+            def dA(stim):
+                rr = by[(arm, stim, seed)]
+                return sum(sg * (rr.get(f"{t}|left", 0.0) - rr.get(f"{t}|right", 0.0)) for t, sg in signs.items())
+            return (dA("rot_right") - dA("rot_left")) / 2.0
+
+        ens = [S("ensemble", s) for s in seeds]
+        e = stored["sets"]["lateral"]["arms"]["ensemble"]
+        chk(f"f4:{ver}:S_ensemble_mean", abs(np.mean(ens) - e["mean"]) < 1e-9, (np.mean(ens), e["mean"]))
+        chk(f"f4:{ver}:S_ensemble_pos", sum(1 for v in ens if v > 0) == e["n_pos"] and sum(1 for v in ens if v < 0) == e["n_neg"])
+        rnd = [np.mean([S(f"random_{k}", s) for s in seeds]) for k in range(1, 40)]
+        r = stored["sets"]["lateral"]["random"]
+        chk(f"f4:{ver}:random_counts", (sum(1 for v in rnd if v > 0), sum(1 for v in rnd if v < 0)) ==
+            (r["n_syndirectional"], r["n_anti"]), (r["n_syndirectional"], r["n_anti"]))
+        chk(f"f4:{ver}:bridge_off_zero_mean_abs_small", abs(stored["sets"]["lateral"]["arms"]["bridge_off"]["mean"]) < 0.1)
+        # GEN blocks of docs/08
+        B = F.blocks(stored, ver)
+        all_blocks |= set(B)
+        for k, v in B.items():
+            m = re.search(rf"<!-- GEN:{k} -->\n(.*?)\n<!-- /GEN:{k} -->", doc, re.S)
+            chk(f"f4:{ver}:block:{k}", bool(m) and m.group(1) == v, k)
+    if F4_JSON_V2.exists():
+        st2 = json.loads(F4_JSON_V2.read_text())
+        chk("f4:v2:gain_fixed_is_v1_G1", st2["gain_fixed"]["G1_v1_deg_per_hz"] ==
+            json.loads(F4_JSON.read_text())["gain"]["G1_deg_per_hz"])
+        chk("f4:v2:primary_excludes_conflicts", not {"iii1", "iii4"} & set(F.SIGNS_LATERAL_V2))
+    chk("f4:no_unknown_blocks", set(re.findall(r"<!-- GEN:(\w+) -->", doc)) == all_blocks)
     return n, bad
 
 

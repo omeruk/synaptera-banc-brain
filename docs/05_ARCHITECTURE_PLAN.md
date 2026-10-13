@@ -358,6 +358,28 @@ Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 
 - So the closed-loop test is expected to show nothing reliable. The choice of the primary mapping set, the gain
   and the other design questions (section 9 of docs/08) are the project owner's decision.
 
+**Decision after the T2 design (project owner, 2026-10-14, PR #16 merged):**
+1. **Prediction.** The docs/08 open-loop prediction says the closed-loop test would show nothing: S = -1.00 +/- 3.39 Hz
+   for `ensemble` (mapping set `lateral`, 20 seeds). Its sign is set by hg4 and by the inferred mapping. The constant yaw
+   offset (-12 Hz) is larger than the direction term, and the random wirings are split (17 of 39 syndirectional).
+2. **F4-1 (closed-loop optomotor run) is postponed** until the open-loop signal is syndirectional, significant and
+   specific.
+3. **Primary mapping set: `lateral`**, because it does not pick types by outcome. `direct` (b2, b3 only) is a
+   registered secondary set.
+4. **Literature.** Lindsay et al. 2017 (PDF in `literature/`, not committed) is to be read first, and the per-muscle
+   signs and any relative effect sizes are to be updated from it.
+5. **Lindsay rules (fixed before the v2 numbers).** The primary `lateral` set is every muscle whose sign Lindsay states
+   directly and that passes the gate (b2, b3, i1, i2, hg1, hg2, hg3, hg4). iii1 and iii4 (text and Fig. 6 disagree)
+   are sensitivity sets with both signs. Gain G1 is fixed at the v1 value. The closed-loop yaw trim subtracts the
+   per-type (R - L) under grey of the same arm, calibrated on separate seeds (`E`). The other docs/08 questions are
+   answered with the recommendations (docs/08 section 9.1).
+
+**Outcome of the Lindsay update (2026-10-14; docs/08 section 10, `docs/results/f4_design_numbers_v2.json`, design
+analysis, not a test):** every sign that carries weight in v1 is confirmed directly; the paper gives no per-muscle
+effect sizes. The prediction is unchanged: weakly anti-directional, not distinguishable from zero, sign set by hg4,
+and now also by the iii4 conflict. The grey trim removes nothing, because the mapped MNs are silent under grey; the
+offset is evoked by the patterned stimulus. Changing the trim is open for the owner.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.

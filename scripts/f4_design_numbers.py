@@ -2,6 +2,8 @@
 
     env -u PYTHONPATH python scripts/f4_design_numbers.py            # writes docs/results/f4_design_numbers.json
                                                                        # and the GEN blocks of docs/08
+    env -u PYTHONPATH python scripts/f4_design_numbers.py --version v2   # Lindsay 2017 signs (docs/08 section 10):
+                                                                       # f4_design_numbers_v2.json, GEN:v2_* blocks
 Reads the F3b-3 replay records (runs/f3b3/f3b3_v3.json), the F3a-3 report JSON, the F0 latency report JSON, the
 configuration files and the F3b-3 logs. Nothing is simulated.
 
@@ -56,6 +58,30 @@ SETS = {
 }
 PRIMARY_SET = "lateral"
 GATE_FAIL = ("b1", "iii3")
+
+# v2 (docs/08 section 10, owner decision 2026-10-14): signs read from Lindsay, Sustar & Dickinson 2017 (Curr. Biol. 27,
+# 345-358). Primary set = muscles whose sign Lindsay states directly (text p. 349 / 353 and Fig. 6) and that pass the
+# symmetry gate. iii1 and iii4 (text: + ; Fig. 6: -) are left out of the primary set and enter only as sensitivity sets
+# with both signs; this rule was fixed before the v2 numbers were computed.
+SIGNS_LATERAL_V2 = {"b2": +1, "b3": -1, "i1": -1, "i2": -1, "hg1": -1, "hg2": -1, "hg3": -1, "hg4": -1}
+SETS_V2 = {
+    "lateral": SIGNS_LATERAL_V2,
+    "direct": SIGNS_DIRECT,
+    "lateral+iii1(+)": {**SIGNS_LATERAL_V2, "iii1": +1},
+    "lateral+iii1(-)": {**SIGNS_LATERAL_V2, "iii1": -1},
+    "lateral+iii4(+)": {**SIGNS_LATERAL_V2, "iii4": +1},
+    "lateral+iii4(-)": {**SIGNS_LATERAL_V2, "iii4": -1},
+    "lateral+iii1(+),iii4(+) (text)": {**SIGNS_LATERAL_V2, "iii1": +1, "iii4": +1},
+    "lateral+iii1(-),iii4(-) (Fig. 6)": {**SIGNS_LATERAL_V2, "iii1": -1, "iii4": -1},
+    "lateral_no_hg4": {k: v for k, v in SIGNS_LATERAL_V2.items() if k != "hg4"},
+}
+OUT_JSON_V2 = ROOT / "docs" / "results" / "f4_design_numbers_v2.json"
+VERSIONS = {
+    "v1": dict(sets=SETS, out=OUT_JSON, prefix="", blocks=None),
+    "v2": dict(sets=SETS_V2, out=OUT_JSON_V2, prefix="v2_",
+               blocks=("per_stimulus", "ensemble", "contrib", "hg4", "variants", "random", "bias", "gain", "trim")),
+}
+BIN_TYPES = ("b3", "i1", "i2", "hg1", "hg4")     # types with 25 ms bins in the F3b-3 records
 
 
 def sha256(p):
@@ -158,7 +184,10 @@ def g_candidates(signs, const, v1_turn):
     )
 
 
-def build():
+def build(version="v1"):
+    cfg = VERSIONS[version]
+    SETS_, LAT = cfg["sets"], cfg["sets"][PRIMARY_SET]
+    DIR = SETS_["direct"]
     rec = json.load(open(RECORDS))
     rates, seeds = load_rates(rec)
     assert all(len(rates[a]) == 4 for a in rates) and len(rates) == 2 + N_RANDOM
@@ -166,7 +195,7 @@ def build():
     primary_types = ["b3", "i1", "i2", "hg1", "hg4"]
     out = dict(source=dict(file=str(RECORDS.relative_to(ROOT)), sha256=sha256(RECORDS), n_seeds=len(seeds),
                            seeds=seeds, n_replays=len(rec["replay"])),
-               constants=const, signs={k: v for k, v in SETS.items()}, primary_set=PRIMARY_SET)
+               constants=const, signs={k: v for k, v in SETS_.items()}, primary_set=PRIMARY_SET)
 
     # self-check against the registered F3b-3 statistic
     t_ens = {t: float(d_per_type(rates, "ensemble", seeds, [t])[t].mean()) for t in primary_types}
@@ -176,7 +205,7 @@ def build():
     out["T_ensemble"] = t_ens
 
     sets = {}
-    for name, signs in SETS.items():
+    for name, signs in SETS_.items():
         res = {}
         for arm in ["ensemble", "bridge_off"] + RANDOM_ARMS:
             res[arm] = summarise(s_index(rates, arm, seeds, signs))
@@ -198,18 +227,18 @@ def build():
     out["sets"] = sets
 
     # per-type contributions c_m = -s_m D_m / 2 (S = sum c_m) for the primary set, ensemble; and the null scale per type
-    types = list(SIGNS_LATERAL)
+    types = list(LAT)
     dens = d_per_type(rates, "ensemble", seeds, types)
     drnd = {a: d_per_type(rates, a, seeds, types) for a in RANDOM_ARMS}
     contrib = {}
     for t in types:
-        c = -SIGNS_LATERAL[t] * dens[t] / 2.0
+        c = -LAT[t] * dens[t] / 2.0
         nullT = np.array([drnd[a][t].mean() for a in RANDOM_ARMS])
-        contrib[t] = dict(s=SIGNS_LATERAL[t], T=float(dens[t].mean()), c_mean=float(c.mean()), c_sd=float(c.std(ddof=1)),
+        contrib[t] = dict(s=LAT[t], T=float(dens[t].mean()), c_mean=float(c.mean()), c_sd=float(c.std(ddof=1)),
                           c_n_syn=int((c > 0).sum()), c_n_anti=int((c < 0).sum()), null_sd_T=float(nullT.std(ddof=1)),
                           null_abs_median_T=float(np.median(np.abs(nullT))),
                           z=float(dens[t].mean() / nullT.std(ddof=1)) if nullT.std(ddof=1) > 0 else None,
-                          direct=t in SIGNS_DIRECT)
+                          direct=t in DIR)
     out["contributions"] = contrib
     absT = {t: abs(contrib[t]["T"]) for t in ("b3", "i1", "hg1", "hg4")}
     out["hg4_over_others"] = {t: absT["hg4"] / absT[t] for t in ("b3", "i1", "hg1")}
@@ -218,7 +247,7 @@ def build():
     zs = []
     for a in ["ensemble"] + RANDOM_ARMS:
         d = d_per_type(rates, a, seeds, types)
-        zs.append(sum(-SIGNS_LATERAL[t] * (d[t].mean() / contrib[t]["null_sd_T"]) / 2.0
+        zs.append(sum(-LAT[t] * (d[t].mean() / contrib[t]["null_sd_T"]) / 2.0
                       for t in types if contrib[t]["null_sd_T"] > 0))
     out["z_variant"] = dict(ensemble=float(zs[0]), random_n_syndirectional=int(sum(1 for z in zs[1:] if z > 0)),
                             random_n_anti=int(sum(1 for z in zs[1:] if z < 0)),
@@ -227,9 +256,9 @@ def build():
     # dA per stimulus for ensemble and the baseline (static) asymmetry
     per_stim = {}
     for arm in ("ensemble", "bridge_off"):
-        per_stim[arm] = {s: summarise(dA_stim(rates, arm, s, seeds, SIGNS_LATERAL)) for s in STIMS}
+        per_stim[arm] = {s: summarise(dA_stim(rates, arm, s, seeds, LAT)) for s in STIMS}
     out["dA_per_stimulus"] = per_stim
-    rnd_static = np.array([np.mean(dA_stim(rates, a, "static", seeds, SIGNS_LATERAL)) for a in RANDOM_ARMS])
+    rnd_static = np.array([np.mean(dA_stim(rates, a, "static", seeds, LAT)) for a in RANDOM_ARMS])
     out["static_bias"] = dict(ensemble=per_stim["ensemble"]["static"]["mean"],
                               random_quantiles=quantiles(rnd_static))
 
@@ -238,7 +267,7 @@ def build():
     for r in rec["replay"]:
         if r["arm"] == "ensemble" and "primary_bin25_hz" in r:
             ens_bins.setdefault(r["stimulus"], {})[r["seed"]] = r["primary_bin25_hz"]
-    prim_signs = {t: SIGNS_LATERAL[t] for t in ("b3", "i1", "hg1", "hg4")}
+    prim_signs = {t: LAT[t] for t in BIN_TYPES if t in LAT}
     def series(stim, seed):
         b = ens_bins[stim][seed]
         return -sum(s * (np.array(b[f"{t}|right"], float) - np.array(b[f"{t}|left"], float)) for t, s in prim_signs.items())
@@ -254,7 +283,7 @@ def build():
 
     # gain candidates and predicted amplitude / yaw rate
     v1 = json.load(open(F0LAT))["turn_dn_absmax"]
-    gc = g_candidates(SIGNS_LATERAL, const, list(v1.values()))
+    gc = g_candidates(LAT, const, list(v1.values()))
     gc["turn_dn_values"] = v1
     out["gain"] = gc
     deg_per_s_per_deg = const["yaw_rate_per_turn"] / (2.0 * const["turn_dphi_deg"]) * 180.0 / np.pi
@@ -287,6 +316,23 @@ def build():
                           vnc_peak_rss_gb=float(rec["peak_rss_gb"]),
                           brain_rss_gb=float(tm["brain_free_gb_start"] - tm["brain_free_gb_after_engine"]),
                           limit_h=5.0)
+    if version != "v1":
+        # owner decision: G fixed to G1 of v1 (deg per Hz); the G1 rule re-applied with the v2 signs is reported only
+        g1 = json.loads(OUT_JSON.read_text())["gain"]["G1_deg_per_hz"]
+        out["gain_fixed"] = dict(G1_v1_deg_per_hz=g1, G1_rule_with_v2_signs_deg_per_hz=gc["G1_deg_per_hz"],
+                                 dA_deg=g1 * S_ens, yaw_deg_per_s=g1 * S_ens * deg_per_s_per_deg,
+                                 gain_vs_drum=g1 * S_ens * deg_per_s_per_deg / drum)
+        # yaw trim (E): subtract the grey-stimulus dA of the same arm, calibrated on other seeds (leave-one-seed-out
+        # here; separate seeds in the closed loop). It cancels in S; it changes only the offset B.
+        trim = {}
+        for name, signs in SETS_.items():
+            grey = dA_stim(rates, "ensemble", "grey", seeds, signs)
+            loo = np.array([(grey.sum() - g) / (len(seeds) - 1) for g in grey])
+            off = (dA_stim(rates, "ensemble", "rot_right", seeds, signs) + dA_stim(rates, "ensemble", "rot_left", seeds, signs)) / 2.0
+            trim[name] = dict(grey=summarise(grey), offset_untrimmed=summarise(off), offset_trimmed=summarise(off - loo),
+                              S_abs_over_offset_trimmed=(abs(sets[name]["arms"]["ensemble"]["mean"]) / abs(float((off - loo).mean()))
+                                                         if (off - loo).mean() != 0 else None))
+        out["trim"] = trim
     return out
 
 
@@ -300,9 +346,10 @@ def _cell(key):
     return f"{fam} at {rate} Hz, {'left' if side == 'L' else 'right'} drive"
 
 
-def blocks(o):
-    """Markdown blocks for docs/08 (name -> text)."""
+def blocks(o, version="v1"):
+    """Markdown blocks for docs/08 (name -> text); v2 blocks carry the prefix v2_."""
     B = {}
+    basis = "lateralisation" if version == "v1" else "Lindsay 2017"
     c = o["constants"]
     B["constants"] = "\n".join([
         "| constant | value | source |", "|---|---|---|",
@@ -337,15 +384,15 @@ def blocks(o):
     rows = ["| MN type | s_m | basis | T (Hz) | contribution to S (Hz) | seeds syn / anti | T relative to the null s.d. (z) |",
             "|---|---|---|---|---|---|---|"]
     for t, v in o["contributions"].items():
-        rows.append(f"| {t} | {v['s']:+d} | {'direct' if v['direct'] else 'lateralisation'} | {v['T']:+.2f} | {v['c_mean']:+.2f} | "
+        rows.append(f"| {t} | {v['s']:+d} | {'direct' if v['direct'] else basis} | {v['T']:+.2f} | {v['c_mean']:+.2f} | "
                     f"{v['c_n_syn']} / {v['c_n_anti']} | {v['z']:+.2f} |" if v["z"] is not None else
-                    f"| {t} | {v['s']:+d} | {'direct' if v['direct'] else 'lateralisation'} | {v['T']:+.2f} | {v['c_mean']:+.2f} | {v['c_n_syn']} / {v['c_n_anti']} | - |")
+                    f"| {t} | {v['s']:+d} | {'direct' if v['direct'] else basis} | {v['T']:+.2f} | {v['c_mean']:+.2f} | {v['c_n_syn']} / {v['c_n_anti']} | - |")
     B["contrib"] = "\n".join(rows)
     h = o["hg4_over_others"]
     B["hg4"] = (f"Ratio of the absolute T of hg4 to that of b3, i1 and hg1: {h['b3']:.1f}, {h['i1']:.1f}, {h['hg1']:.1f} (F3b-3 values).")
     rows = ["| mapping set | types (sign) | S(`ensemble`) Hz | offset B (Hz) | seeds syn / anti | seeds for 80 % power (alpha 0.05) | random wirings syn / anti (of 39) | random significantly syn / anti (p < 0.05) | random wirings below `ensemble` |",
             "|---|---|---|---|---|---|---|---|---|"]
-    for name, signs in SETS.items():
+    for name, signs in o["signs"].items():
         r = o["sets"][name]
         a = r["arms"]["ensemble"]
         t = ", ".join(f"{k}({'+' if v > 0 else '-'})" for k, v in signs.items())
@@ -391,7 +438,24 @@ def blocks(o):
         f"{c['brain_rss_gb']:.1f} GB (free memory before / after the build in the F3b-3 log), VNC engine peak "
         f"{c['vnc_peak_rss_gb']:.1f} GB (F3b-3 record), so one flight needs about {c['brain_rss_gb'] + c['vnc_peak_rss_gb']:.1f} GB "
         "and flights run serially.")
-    return B
+    cfg = VERSIONS[version]
+    if cfg["blocks"] is None:
+        return B
+    gf = o["gain_fixed"]
+    B["gain"] = "\n".join([
+        "| gain | G (deg per Hz) | predicted A_L - A_R for `ensemble` (deg) | predicted steady yaw rate (deg/s) | ratio to the drum speed |",
+        "|---|---|---|---|---|",
+        f"| G1, fixed (v1 value, owner decision) | {gf['G1_v1_deg_per_hz']:.3f} | {gf['dA_deg']:+.2f} | {gf['yaw_deg_per_s']:+.1f} | {gf['gain_vs_drum']:+.2f} |",
+        f"| G1 rule re-applied with the v2 signs (not used) | {gf['G1_rule_with_v2_signs_deg_per_hz']:.3f} | - | - | - |",
+    ])
+    rows = ["| mapping set | A_L - A_R under grey (Hz) | offset B untrimmed (Hz) | offset B after trim (Hz) | abs S / abs B after trim |",
+            "|---|---|---|---|---|"]
+    for name, v in o["trim"].items():
+        r = v["S_abs_over_offset_trimmed"]
+        rows.append(f"| {name} | {v['grey']['mean']:+.2f} | {v['offset_untrimmed']['mean']:+.2f} | {v['offset_trimmed']['mean']:+.2f} | "
+                    f"{'-' if r is None else f'{r:.2f}'} |")
+    B["trim"] = "\n".join(rows)
+    return {cfg["prefix"] + k: B[k] for k in cfg["blocks"]}
 
 
 def inject(doc, B):
@@ -407,19 +471,21 @@ def inject(doc, B):
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--overwrite", action="store_true")
+    ap.add_argument("--version", choices=sorted(VERSIONS), default="v1")
     a = ap.parse_args(argv)
-    if OUT_JSON.exists() and not a.overwrite:
+    out_json = VERSIONS[a.version]["out"]
+    if out_json.exists() and not a.overwrite:
         # the JSON is regenerated deterministically; refuse silent overwrite of a different result
-        old = json.loads(OUT_JSON.read_text())
-        new = build()
+        old = json.loads(out_json.read_text())
+        new = build(a.version)
         if json.dumps(old, sort_keys=True) != json.dumps(new, sort_keys=True):
-            raise SystemExit(f"{OUT_JSON} exists and differs; use --overwrite")
+            raise SystemExit(f"{out_json} exists and differs; use --overwrite")
         out = new
     else:
-        out = build()
-        OUT_JSON.write_text(json.dumps(out, indent=1))
+        out = build(a.version)
+        out_json.write_text(json.dumps(out, indent=1))
     if DOC.exists():
-        inject(DOC, blocks(out))
+        inject(DOC, blocks(out, a.version))
     print("selfcheck T == F3b-3:", out["selfcheck_T_equals_f3b3"])
     return 0
 

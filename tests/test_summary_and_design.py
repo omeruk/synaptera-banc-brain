@@ -42,6 +42,18 @@ def test_mapping_sets_are_consistent():
     assert all(v in (-1, 1) for v in F.SIGNS_LATERAL.values())
 
 
+def test_mapping_v2_follows_the_registered_rule():
+    # primary v2 set: signs stated directly by Lindsay et al. 2017, gate-passing; iii1 / iii4 (text vs Fig. 6) excluded
+    assert set(F.SIGNS_LATERAL_V2) == {"b2", "b3", "i1", "i2", "hg1", "hg2", "hg3", "hg4"}
+    assert not set(F.SIGNS_LATERAL_V2) & set(F.GATE_FAIL)
+    assert all(F.SIGNS_LATERAL_V2[t] == s for t, s in F.SIGNS_DIRECT.items())
+    assert F.SETS_V2["direct"] == F.SIGNS_DIRECT
+    for t in ("iii1", "iii4"):
+        assert {F.SETS_V2[f"lateral+{t}(+)"][t], F.SETS_V2[f"lateral+{t}(-)"][t]} == {1, -1}
+    # v1 is kept unchanged and written to its own file
+    assert F.VERSIONS["v1"]["out"] != F.VERSIONS["v2"]["out"]
+
+
 def _fake(rr_r, rr_l):
     # one type b3 (s = -1): per-neuron rates left / right per stimulus
     def rec(l, r):
