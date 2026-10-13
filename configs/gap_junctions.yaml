@@ -1,0 +1,41 @@
+# Electrical synapses of the named model variant "gap" (engine/model_variants.py; docs/09_NEURON_MODEL_V2.md;
+# prereg/12). Owner rule (2026-10-14): only pairs with published PHYSIOLOGICAL evidence are used; unclear pairs are
+# listed for the project owner and not used. Fixed before any v2 run; not changed afterwards.
+#
+# Junction model: rectifying (current from `pre` to `post` only; Phelan et al. 2008), no delay, an instantaneous
+# jump of the postsynaptic v by GAP_DV_V (engine/model_variants.py) at each presynaptic spike.
+
+pairing:
+  # A `pre` cell is coupled to every `post` cell on which it makes at least this many chemical synapses in the
+  # connectome (the GF-TTMn and GF-PSI synapses are mixed electrochemical; the chemical contact marks the site).
+  # Origin E (engineering rule, fixed from anatomy before any run).
+  min_chemical_synapses: 1
+
+used:
+  - name: GF-TTMn
+    pre: DNp01            # giant fiber (BANC cell_type DNp01, cell_type_alt "DNp01,GF,giant_fiber")
+    post: TTMn            # tergotrochanteral motor neuron (jump muscle)
+    rectifying: true      # ShakB(N+16) presynaptic / ShakB(L) postsynaptic heterotypic junction
+    evidence:
+      - "Phelan et al. 2008, Curr Biol 18:1955-1960, doi 10.1016/j.cub.2008.10.067: GF-TTMn is a heterotypic ShakB junction; rectification in paired-oocyte recordings (Gjmin/Gjmax 0.21, depolarisation passed from the N+16 (GF) side); TTMn response latency < 1 ms in controls, long latency and poor following in shakB2 (Fig. 3K-M)"
+      - "Tanouye & Wyman 1980, J Neurophysiol 44:405-421, doi 10.1152/jn.1980.44.2.405: the GF drives the TTMn monosynaptically (short latency, high following frequency)"
+      - "King & Wyman 1980, J Neurocytol 9:753-770: gap junctions at the GF-TTMn contact (anatomy)"
+  - name: GF-PSI
+    pre: DNp01
+    post: PSI             # peripherally synapsing interneuron (BANC cell_type PSI), drives the DLM motor neurons
+    rectifying: true
+    evidence:
+      - "Phelan et al. 2008 (as above): GF-PSI is a heterotypic ShakB junction like GF-TTMn; shakB2 disrupts it"
+      - "Tanouye & Wyman 1980 (as above): the GF drives the DLMs disynaptically through the PSI"
+
+not_used:   # listed for the project owner; not used in any v2 arm
+  - name: GF-GCI
+    reason: "Phelan et al. 2008 Fig. 3E: homotypic ShakB(N+16) junction (dye coupling). The giant commissural interneurons have no annotation in BANC or FlyWire, so the pair cannot be placed."
+  - name: GF-GFC1..4
+    reason: "BANC types GFC1-GFC4 ('giant fiber coupled'), named after dye coupling in the VNC; no physiological measurement of the junction found."
+  - name: GF-PSI side assignment
+    reason: "The GF makes chemical synapses on both PSIs (BANC: right GF 4 left / 2 right; left GF 3 left / 4 right), so the pairing rule couples each GF to both PSIs. Whether the electrical junction is ipsi- or bilateral is not established by the sources above."
+  - name: antennal lobe PN-eLN coupling
+    reason: "Yaksi & Wilson 2010 (Neuron 67:1034) and Huang et al. 2010 (Neuron 67:1021): electrical coupling between projection neurons and excitatory local neurons (shakB). Evidence is per cell class, not per identified pair; no pair list in FlyWire."
+  - name: lobula plate tangential cells (VS-VS, HS-VS)
+    reason: "Coupling measured in the blowfly (Haag & Borst); evidence in Drosophila is not a pair-level physiological measurement in the sources at hand."

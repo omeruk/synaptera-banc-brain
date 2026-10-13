@@ -380,6 +380,21 @@ effect sizes. The prediction is unchanged: weakly anti-directional, not distingu
 and now also by the iii4 conflict. The grey trim removes nothing, because the mapped MNs are silent under grey; the
 offset is evoked by the patterned stimulus. Changing the trim is open for the owner.
 
+**Trim decision (project owner, 2026-10-14, PR #17 merged):** the closed-loop yaw trim is calibrated under the static
+grating (pattern, no motion). It uses separate seeds and subtracts the per-type (R - L) of the same arm; origin `E`. It
+cancels in D (docs/08 section 10.7).
+
+**Next step (project owner, 2026-10-14): neuron model v2, open loop** (`docs/09_NEURON_MODEL_V2.md`, `prereg/12`).
+Named variants next to the unchanged Shiu reference R: `adapt` (AdEx adaptation), `cond` (conductance synapses) and
+`gap` (electrical synapses, only pairs with physiological evidence). The arms are R, A, AC and ACG, and the same model
+runs on the FlyWire brain and on the BANC VNC subgraph. The tests:
+- (i) FlyWire sugar GRN -> MN9 and ignition;
+- (ii) the BANC VNC F3a-3 protocol;
+- (iii) the hybrid optomotor test (F3b-3 protocol, fresh seeds 30-39, 19 random wirings, primary S under the v2
+  `lateral` mapping);
+- (iv) GF -> TTMn.
+All parameters come from the literature with an origin class and are fixed before any run.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
