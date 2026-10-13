@@ -717,6 +717,111 @@ def check_f3b3():
     return n, bad
 
 
+SUMMARY_MD = ROOT / "docs" / "results" / "SUMMARY_F0_F3.md"
+SUMMARY_JSON = ROOT / "docs" / "results" / "summary_f0_f3.json"
+DOC08 = ROOT / "docs" / "08_CLOSED_LOOP_OPTOMOTOR.md"
+F4_JSON = ROOT / "docs" / "results" / "f4_design_numbers.json"
+
+
+def check_summary():
+    """docs/results/SUMMARY_F0_F3.md: (1) the template carries no number of its own; (2) every fact re-captured from the
+    current report equals the stored one; (3) the template re-rendered from the current reports equals the committed
+    summary; (4) a set of facts is also compared with the JSON of the report they come from."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import summary_f0_f3 as S
+    res = ROOT / "docs" / "results"
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stray = S.stray_numbers(S.TEMPLATE)
+    chk("summary:template_numbers", not stray, stray)
+    stored = json.loads(SUMMARY_JSON.read_text())
+    vals = S.capture()
+    for k in S.FACTS:
+        chk(f"summary:fact:{k}", k in stored and stored[k]["values"] == vals[k] and stored[k]["file"] == S.FACTS[k][0],
+            (vals[k], stored.get(k, {}).get("values")))
+    chk("summary:facts_complete", set(stored) == set(S.FACTS), sorted(set(stored) ^ set(S.FACTS)))
+    chk("summary:render", S.render(S.TEMPLATE, vals) == SUMMARY_MD.read_text(), "md differs from template + reports")
+    # facts against the JSON of their report (independent of the regular expressions)
+    xw = json.loads((res / "f3_dn_crosswalk.json").read_text())["summary"]
+    chk("summary:x_gate", vals["x_gate"][0] == str(xw["n_shared_gate_both"]), vals["x_gate"])
+    chk("summary:x_shared", vals["x_shared"] == [str(xw["shared_families"]), str(xw["shared_neurons_flywire"]),
+                                                  str(xw["shared_neurons_banc"])], vals["x_shared"])
+    ms = json.loads((res / "f0_multiseed.json").read_text())
+    chk("summary:f0_pass", vals["f0_pass"][0] == str(sum(1 for r in ms if r["S1"] and r["S2"])), vals["f0_pass"])
+    chk("summary:f0_n", vals["f0_n"][0] == str(len(ms)), vals["f0_n"])
+    chk("summary:f0_posdiff", abs(float(vals["f0_posdiff"][0]) - max(r["pos_diff_to_v1_max_mm"] for r in ms)) < 0.005,
+        vals["f0_posdiff"])
+    ig = json.loads((res / "f0_ignition_frequency.json").read_text())["arms"]
+    chk("summary:f0_ign100", vals["f0_ign100"][0] == f"{ig['new']['ignited']} / {ig['new']['n']}"
+        and abs(float(vals["f0_ign100"][1]) - 100 * ig["new"]["ci95"][1]) < 0.05, vals["f0_ign100"])
+    c3 = json.loads((res / "f3b3_specificity.json").read_text())
+    for i, t in enumerate(("b3", "i1", "hg1", "hg4")):
+        chk(f"summary:c_T:{t}", vals["c_T"][i] == f"{c3['primary']['tests']['ensemble'][t]['mean']:+.3f}", vals["c_T"][i])
+    chk("summary:c_brain", vals["c_brain"] == [str(len(c3["brain"]["selective"])), "112"], vals["c_brain"])
+    b2 = json.loads((res / "f3b2_dn_ensemble.json").read_text())
+    chk("summary:b2_brain", vals["b2_brain"] == [str(len(b2["brain"]["selective"])), "112"], vals["b2_brain"])
+    a3 = json.loads((res / "f3a3_vnc_subgraph.json").read_text())["subgraph"]["kept"]
+    chk("summary:a3_sub", vals["a3_sub"] == [f"{a3['neurons']:,}", f"{a3['pairs']:,}", f"{a3['synapses']:,}"], vals["a3_sub"])
+    return n, bad
+
+
+def check_f4_design():
+    """docs/08 numbers: docs/results/f4_design_numbers.json is rebuilt from the F3b-3 records and compared; the
+    syndirectional index of `ensemble` and the random-wiring counts are recomputed here with plain loops; the GEN blocks
+    of docs/08 are re-rendered and compared with the document."""
+    import hashlib
+    import re
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f4_design_numbers as F
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F4_JSON.read_text())
+    rebuilt = F.build()
+    chk("f4:json_equals_rebuild", json.dumps(stored, sort_keys=True) == json.dumps(rebuilt, sort_keys=True))
+    chk("f4:source_sha", stored["source"]["sha256"] == hashlib.sha256(F.RECORDS.read_bytes()).hexdigest())
+    chk("f4:selfcheck", stored["selfcheck_T_equals_f3b3"] is True)
+    rec = json.loads(F3B3_REC.read_text())
+    seeds = sorted({r["seed"] for r in rec["replay"]})
+    by = {(r["arm"], r["stimulus"], r["seed"]): r["rate_hz"] for r in rec["replay"]}
+    signs = F.SIGNS_LATERAL
+
+    def S(arm, seed):
+        def dA(stim):
+            rr = by[(arm, stim, seed)]
+            return sum(sg * (rr.get(f"{t}|left", 0.0) - rr.get(f"{t}|right", 0.0)) for t, sg in signs.items())
+        return (dA("rot_right") - dA("rot_left")) / 2.0
+
+    ens = [S("ensemble", s) for s in seeds]
+    e = stored["sets"]["lateral"]["arms"]["ensemble"]
+    chk("f4:S_ensemble_mean", abs(np.mean(ens) - e["mean"]) < 1e-9, (np.mean(ens), e["mean"]))
+    chk("f4:S_ensemble_pos", sum(1 for v in ens if v > 0) == e["n_pos"] and sum(1 for v in ens if v < 0) == e["n_neg"])
+    rnd = [np.mean([S(f"random_{k}", s) for s in seeds]) for k in range(1, 40)]
+    r = stored["sets"]["lateral"]["random"]
+    chk("f4:random_counts", (sum(1 for v in rnd if v > 0), sum(1 for v in rnd if v < 0)) ==
+        (r["n_syndirectional"], r["n_anti"]), (r["n_syndirectional"], r["n_anti"]))
+    chk("f4:bridge_off_zero_mean_abs_small", abs(stored["sets"]["lateral"]["arms"]["bridge_off"]["mean"]) < 0.1)
+    # GEN blocks of docs/08
+    doc = DOC08.read_text()
+    for k, v in F.blocks(stored).items():
+        m = re.search(rf"<!-- GEN:{k} -->\n(.*?)\n<!-- /GEN:{k} -->", doc, re.S)
+        chk(f"f4:block:{k}", bool(m) and m.group(1) == v, k)
+    chk("f4:no_unknown_blocks", set(re.findall(r"<!-- GEN:(\w+) -->", doc)) == set(F.blocks(stored)))
+    return n, bad
+
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -785,6 +890,14 @@ def main(argv=None):
         bad += b
     if F3B3_MD.exists():
         k, b = check_f3b3()
+        n += k
+        bad += b
+    if SUMMARY_MD.exists():
+        k, b = check_summary()
+        n += k
+        bad += b
+    if DOC08.exists() and F4_JSON.exists():
+        k, b = check_f4_design()
         n += k
         bad += b
     if "--print" in argv:

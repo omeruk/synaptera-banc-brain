@@ -336,6 +336,28 @@ Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 
   agree, while hg4 has the opposite sign. 4 of the 6 comparable types agree.
 - What follows is the project owner's decision.
 
+**Decision after F3b-3 (project owner, 2026-10-14, PR #15 merged):**
+1. **Outcome.** F3b-3 is "replicated, not specific" under the registered rule.
+2. **Interpretation.** The BANC VNC subgraph turns a side-wise imbalance of direction-selective DN activity into
+   steering-MN asymmetry, largely independent of which families carry it. The sign is not set by the true wiring: the
+   same-sign fraction across the random wirings is 0.46-0.62.
+3. **Exploratory.** The true wiring matches the literature sign in 3 of 4 significant types (hg4 is reversed).
+4. **Consequence for claims.** Direction information passes through the hybrid reliably. We do not claim that the
+   specific DN wiring steers.
+5. **Next: writing and data-only analysis, no new simulation** (branch `omeruk/summary-and-f4-design`):
+   `docs/results/SUMMARY_F0_F3.md` (every number checked against its report), and `docs/08_CLOSED_LOOP_OPTOMOTOR.md`
+   (design of the first closed-loop test, T2, with a data-only open-loop prediction from the F3b-3 records, labelled a
+   design analysis and not a test).
+
+**Finding from the T2 design analysis (2026-10-14; `docs/08_CLOSED_LOOP_OPTOMOTOR.md` section 8, post-hoc, not a test):**
+- Table 1 of Cheong et al. gives activity by side of a turn and no kinematic effect; only b2 and b3 have a stated
+  relation to stroke amplitude in the sources that could be read. The signs of the other mapped types are inferred.
+- With the lateralisation signs, the open-loop F3b-3 records predict a weakly anti-directional turn for `ensemble` that
+  is not distinguishable from zero over 20 seeds. The sign changes with the mapping of hg4, the random wirings are
+  split between the two directions, and a constant yaw offset exceeds the direction-dependent term.
+- So the closed-loop test is expected to show nothing reliable. The choice of the primary mapping set, the gain
+  and the other design questions (section 9 of docs/08) are the project owner's decision.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
