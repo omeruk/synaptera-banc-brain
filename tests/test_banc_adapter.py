@@ -100,6 +100,17 @@ def test_signed_connectome_reference_variants_and_regions(tmp_path):
     assert h.meta["sign_rules"][0]["name"] == "hist_inhibitory"
 
 
+def test_min_syn_threshold_is_an_explicit_recorded_option(tmp_path):
+    n, c = _toy_files(tmp_path)
+    full = banc.load_connectome(n, c, hash_files=False)
+    assert full.meta["min_syn"] is None and full.meta["pairs_kept"] == full.meta["pairs_before_threshold"] == 5
+    th = banc.load_connectome(n, c, hash_files=False, min_syn=6)
+    assert th.meta["min_syn"] == 6 and th.meta["pairs_before_threshold"] == 5
+    assert th.meta["pairs_kept"] == len(th.edges) < 5 and (th.edges["n_syn"] >= 6).all()
+    assert th.meta["synapses_kept"] == int(th.edges["n_syn"].sum())
+    assert th.n_neurons == full.n_neurons          # neurons are kept; only pairs are dropped
+
+
 @pytest.mark.skipif(not (ROOT / "banc" / "neurons-banc.csv.gz").exists(), reason="needs banc/")
 def test_data_sources_hashes_match_local_files():
     import yaml

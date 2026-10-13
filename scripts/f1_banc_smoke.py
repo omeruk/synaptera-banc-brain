@@ -43,13 +43,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
+    ap.add_argument("--min-syn", type=int, default=None,
+                    help="keep only pairs with >= this many synapses (sensitivity run; default: graph as exported)")
     a = ap.parse_args(argv)
     out = Path(a.out)
     if out.exists():
         raise SystemExit(f"{out} exists")
     t0 = time.time()
     cx = banc.load_connectome(ROOT / "banc" / "neurons-banc.csv.gz", ROOT / "banc" / "connections_princeton-banc.csv.gz",
-                              hash_files=True)
+                              hash_files=True, min_syn=a.min_syn)
     g = groups(cx)
     inp = {"labellar": g["labellar"], "leg": g["leg"]}
     eng = Brian2LIFEngine(cx, input_groups=inp, groups={"mn9": g["mn9"], "dn": g["dn"]}, seed=0)
@@ -86,7 +88,8 @@ def main(argv=None):
                 cut_first_step_hz=cut[0], cut_last_100ms_hz=float(np.mean(cut[-4:])), wall_s=time.time() - t1))
             print(cname, seed, f"MN9 {runs[-1]['mn9_rate_hz']:.1f} Hz, net {runs[-1]['network_rate_hz']:.2f} Hz, "
                   f"cut-last {runs[-1]['cut_last_100ms_hz']:.3f} Hz", flush=True)
-    res = dict(n_neurons=n_all, n_synapses=len(eng.syn), groups={k: len(v) for k, v in g.items()},
+    res = dict(n_neurons=n_all, n_pairs=len(eng.syn), n_synapses=int(cx.edges['n_syn'].sum()),
+               graph={k: cx.meta[k] for k in ('min_syn', 'pairs_before_threshold', 'pairs_kept', 'synapses_kept')}, groups={k: len(v) for k, v in g.items()},
                params=eng.state_dict()["params"], sign_rule=cx.meta["sign_rule"], setup_s=setup_s,
                total_wall_s=time.time() - t0, peak_rss_gb=peak_rss_gb(), model_sha256=eng.model_sha256,
                engine_weights_sha256=eng.state_dict()["weights_sha256"], runs=runs)

@@ -90,7 +90,8 @@ def side_totals(cx: Connectome) -> dict:
 
 def sparseness(cx: Connectome, group, min_syn: int = 0) -> dict:
     """Mean incoming edges / synapses per neuron for the neurons of each group label (``group``: array over the
-    neurons table). ``min_syn``: keep only pairs with >= min_syn synapses (the Shiu graph keeps >= 5)."""
+    neurons table). ``min_syn``: keep only pairs with >= min_syn synapses (the Shiu graph keeps all pairs, min 1;
+    the BANC export has min 3: see :func:`pair_threshold_profile`)."""
     _, post = cx.edge_endpoints()
     w = cx.edges["n_syn"].to_numpy(np.int64)
     keep = w >= min_syn
@@ -104,6 +105,18 @@ def sparseness(cx: Connectome, group, min_syn: int = 0) -> dict:
                              syn_per_edge=float(in_s[m].sum() / max(in_e[m].sum(), 1)))
     out["__all__"] = dict(n=cx.n_neurons, in_edges_mean=float(in_e.mean()), in_syn_mean=float(in_s.mean()),
                           syn_per_edge=float(in_s.sum() / max(in_e.sum(), 1)))
+    return out
+
+
+def pair_threshold_profile(cx: Connectome, thresholds=(1, 3, 5)) -> dict:
+    """Synapses-per-pair profile of the graph as it is: minimum, fraction of pairs below 5, and the pairs / synapses
+    that remain at each threshold (pair level, neuropils summed)."""
+    w = cx.edges["n_syn"].to_numpy(np.int64)
+    out = dict(pairs=int(len(w)), synapses=int(w.sum()), min_syn_per_pair=int(w.min()),
+               frac_pairs_below_5=float((w < 5).mean()))
+    for t in thresholds:
+        k = w >= t
+        out[f"ge{t}"] = dict(pairs=int(k.sum()), synapses=int(w[k].sum()))
     return out
 
 

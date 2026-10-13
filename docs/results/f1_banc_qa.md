@@ -94,6 +94,11 @@ Critical types (types with neurons on both sides):
 | MN9 | 1 / 1 | +0.35 | +0.44 | pass |
 | TTMn | 1 / 1 | +0.64 | +0.55 | FAIL |
 
+Visual projection neuron (VPN) types with neurons and input on both sides: 281; passing the gate: 99. Passing types (n L / R, log2 total):
+
+H2 (1/1, +0.07), LC10c (95/80, +0.12), LC11 (65/76, +0.46), LC12 (221/233, -0.13), LC14b (3/6, +0.17), LC15 (51/61, +0.45), LC16 (86/103, +0.48), LC19 (7/6, +0.43), LC21 (69/51, -0.21), LC25 (18/25, +0.44), LC31c (1/1, +0.22), LC33 (18/13, -0.36), LC4 (51/63, +0.18), LC41 (5/6, +0.36), LC43 (6/6, -0.10), LC9 (83/81, +0.42), LCe01a (2/2, -0.30), LCe01b (10/10, +0.50), LLPC2 (142/102, -0.30), LLPC3 (47/65, +0.38), LMTe01 (2/2, +0.08), LPLC2 (89/92, +0.45), LPLC4 (46/50, +0.37), LPT21 (1/1, +0.30), LPT28 (1/1, -0.13), LPT31 (6/4, -0.31), LPT45_dCal1 (1/1, +0.24), LPT48_vCal3 (1/1, +0.20), LPT49 (1/1, +0.12), LPT50 (1/1, +0.01), LPT54 (1/1, -0.03), LT1d (1/1, -0.30), LT43 (2/2, -0.03), LT51 (11/12, +0.35), LT52 (17/17, -0.06), LT53 (5/4, -0.23), LT55 (1/1, -0.20), LT61b (1/1, +0.12), LT62 (1/1, +0.30), LT63 (2/2, -0.03), LT73 (2/3, +0.22), LT82 (2/1, -0.45), LT84 (1/1, +0.29), LT86 (1/1, +0.20), LTe08 (1/1, -0.32), LTe12 (1/1, +0.29), LTe13 (1/1, -0.47), LTe15 (1/1, +0.19), LTe16 (1/1, -0.09), LTe18 (1/1, +0.23), LTe20 (1/1, +0.37), LTe24 (1/2, +0.37), LTe26 (1/1, -0.13), LTe27 (1/1, -0.13), LTe33 (1/2, +0.03), LTe43 (5/3, -0.50), LTe45 (1/1, -0.34), LTe51 (1/1, +0.17), LTe53 (1/1, +0.30), LTe54 (2/2, -0.30), LTe58 (5/7, +0.43), LTe60 (1/1, +0.04), LTe65 (4/6, +0.26), LTe69 (1/1, +0.03), LTe70 (1/1, -0.30), LTe72 (1/1, +0.13), MC65 (3/3, +0.09), MTe01b (24/24, +0.20), MTe03 (10/13, +0.32), MTe06 (3/3, +0.23), MTe10 (5/5, +0.15), MTe23 (1/1, -0.08), MTe29 (1/1, +0.04), MTe30 (2/1, -0.18), MTe32 (1/1, +0.33), MTe34 (3/1, +0.13), MTe35 (3/1, -0.29), MTe37 (1/1, -0.49), MTe39 (1/1, -0.20), MTe41 (1/1, -0.37), MTe43 (1/1, +0.28), MTe46 (1/1, -0.04), MTe47 (2/2, +0.08), MTe51 (39/48, +0.42), MTe53 (5/4, +0.37), MeLp1 (1/1, -0.01), MeMe_e04 (3/2, -0.23), MeMe_e08 (5/6, -0.36), MeTu3c (28/22, -0.15), OCG01f (1/1, +0.21), aMe17a2 (1/1, -0.14), aMe17c (2/2, +0.21), aMe19a (1/1, +0.26), aMe20 (1/1, -0.10), aMe3 (2/1, -0.07), aMe4 (8/6, -0.22), aMe5 (21/15, +0.47), aMe8 (2/2, +0.10), s-LNv_a (1/1, +0.04)
+
+
 Most asymmetric types with >= 10 neurons per side:
 
 | type | n L / R | log2 total | log2 exc |
@@ -111,9 +116,14 @@ Most asymmetric types with >= 10 neurons per side:
 
 ## 3. Sparseness (mean per neuron)
 
-FlyWire v783 graph = Shiu model (threshold >= 5 synapses per pair); compare the *_ge5 blocks
+The Shiu FlyWire graph keeps every pair (min 1 synapse per pair, 82 % of pairs below 5; the model reads all rows of Connectivity_783.parquet); the BANC export keeps pairs with >= 3 synapses. The *_ge5 blocks apply >= 5 to both (a sensitivity view); the unsuffixed blocks are the graphs as they are run.
 
-FlyWire / BANC, all neurons: in-edges 5.67x and in-synapses 2.64x with all pairs; in-edges 2.02x and in-synapses 2.11x at >= 5 synapses per pair.
+| graph | pairs | synapses | min syn per pair | pairs < 5 syn | pairs >= 3 | synapses >= 3 | pairs >= 5 | synapses >= 5 |
+|---|---|---|---|---|---|---|---|---|
+| flywire | 15,091,983 | 54,492,922 | 1 | 82 % | 4,916,231 | 41,637,434 | 2,700,513 | 34,153,566 |
+| banc | 3,037,361 | 23,556,214 | 3 | 50 % | 3,037,361 | 23,556,214 | 1,528,585 | 18,487,086 |
+
+FlyWire / BANC, all neurons: in-edges 5.67x and in-synapses 2.64x on the graphs as run (FlyWire all pairs, BANC export); in-edges 2.02x and in-synapses 2.11x at >= 5 synapses per pair.
 
 | dataset / group | neurons | in-edges | in-synapses | synapses per edge |
 |---|---|---|---|---|

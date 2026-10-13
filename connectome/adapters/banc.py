@@ -110,8 +110,14 @@ def dominant_regions(conn: pd.DataFrame, ids: np.ndarray) -> pd.Series:
     return top.reindex(ids)
 
 
-def load_connectome(neurons_path, connections_path, variants=(), hash_files: bool = True) -> schema.Connectome:
-    """Signed BANC Connectome: reference Shiu rule (+ named variants), regions filled from the synapses."""
+def load_connectome(neurons_path, connections_path, variants=(), hash_files: bool = True,
+                    min_syn: int | None = None) -> schema.Connectome:
+    """Signed BANC Connectome: reference Shiu rule (+ named variants), regions filled from the synapses.
+
+    ``min_syn``: keep only neuron pairs with >= min_syn synapses (neuropils summed). Default None = the graph as
+    exported (the export keeps pairs with >= 3 synapses). The threshold and the pairs before / after go to the meta.
+    The Shiu FlyWire graph is not thresholded (min 1 synapse per pair), so a threshold is a named sensitivity
+    option, not part of the reference arm."""
     from connectome.adapters import file_sha256
     from connectome.sign_rules import assign_signs
     nrn = load_neurons(neurons_path)
@@ -120,7 +126,12 @@ def load_connectome(neurons_path, connections_path, variants=(), hash_files: boo
     g = conn.groupby(["pre_root_id", "post_root_id"], sort=True)["syn_count"].sum().reset_index()
     edges = pd.DataFrame({"pre": g["pre_root_id"].to_numpy(np.int64), "post": g["post_root_id"].to_numpy(np.int64),
                           "n_syn": g["syn_count"].to_numpy(np.int64)})
-    meta = dict(dataset="banc", neurons=str(neurons_path), connections=str(connections_path))
+    n_pairs_all = len(edges)
+    if min_syn is not None:
+        edges = edges[edges["n_syn"] >= int(min_syn)].reset_index(drop=True)
+    meta = dict(dataset="banc", neurons=str(neurons_path), connections=str(connections_path),
+                min_syn=None if min_syn is None else int(min_syn), pairs_before_threshold=int(n_pairs_all),
+                pairs_kept=int(len(edges)), synapses_kept=int(edges["n_syn"].sum()))
     if hash_files:
         meta["sha256"] = {"neurons": file_sha256(neurons_path), "connections": file_sha256(connections_path)}
     unsigned = schema.Connectome("banc", nrn, edges, dict(meta, signed=False))
