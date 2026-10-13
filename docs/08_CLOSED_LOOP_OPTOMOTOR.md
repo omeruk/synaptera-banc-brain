@@ -60,6 +60,9 @@ eyes(k) -> FlyVis -> FlyWire brain, interval k -> DN spike counts at boundary k+
 
 ### 4.1 What the literature fixes
 
+> **Superseded (2026-10-14):** the signs below are the v1 design. Section 10 replaces them with the signs stated in
+> Lindsay et al. 2017 (read in full); this section is kept as the record of the first design.
+
 Table 1 of Cheong et al. 2024 (eLife, doi 10.7554/eLife.96084) lists, per steering muscle, activity on the inner
 (ipsilateral) and outer (contralateral) side of a turn. It has **no column for the kinematic effect**. A statement that
 relates a muscle's activity to stroke amplitude exists for only some muscles, and the primary sources are not all open
@@ -314,3 +317,164 @@ after seeing the F3b-3 results and is not a registered expectation.
    alpha 0.05: at least 19)?
 10. **Q10. Stop rule.** If `sign_flip` or the offset makes the yaw run away, are runaway flights excluded, or analysed
     with the saturation recorded?
+
+### 9.1 Answers (owner-approved 2026-10-14)
+
+The F4-1 closed-loop run is postponed until the open-loop signal is syndirectional, significant and specific
+(docs/05, decision after the T2 design). These answers fix the design for when it is run.
+
+1. **Q1.** Primary mapping set `lateral`, redefined from Lindsay et al. 2017 in section 10 (v2). `direct` (b2, b3) is a
+   registered secondary set. The iii1 / iii4 sets of section 10 are sensitivity sets.
+2. **Q2.** G1, fixed at the v1 value (section 10.4); it only scales the loop.
+3. **Q3.** At least 10 seeds per cell (section 7), more for `ensemble` and `bridge_off` if the budget allows.
+4. **Q4.** Reference arm: v1's own controller (DNp15, symmetry gate waived, labelled exception), run unmodified
+   (CLAUDE.md rule 8). A new hand-made readout on a gate-passing family would need its own justification and is not
+   added.
+5. **Q5.** One drum speed, the F3b screen speed, where the brain responses are known.
+6. **Q6.** One-degree-of-freedom analytic yaw plant (section 3).
+7. **Q7.** New `E` constants fixed without looking at the response under test: MN rate estimator = 25 ms boxcar (the
+   bin width of the F3b-3 records, registered before them), no further muscle low-pass; amplitude asymmetry limited to
+   the v1 range and yaw rate to the v1 value at `turn_bias_max`. All are registered in `configs/assumptions.json` with
+   origin `E` when the run is implemented.
+8. **Q8.** The criterion is sign, significance and specificity against the random wirings; |g| is reported
+   descriptively, with no minimum effect size.
+9. **Q9.** At least 19 random wirings (the minimum for a permutation test at alpha 0.05); the compute table of section 7
+   is re-estimated for this arm count at pre-registration.
+10. **Q10.** No flight is excluded. Saturation of the amplitude or yaw-rate limit is recorded per interval and analysed.
+11. **Yaw trim (owner decision).** In the closed loop the per-type (R - L) under grey of the same arm is subtracted,
+    calibrated on separate seeds; origin `E`. It cancels in D and S and changes only the offset (section 10.5).
+
+## 10. Addendum (2026-10-14): mapping update from Lindsay et al. 2017 (v2)
+
+Source: Lindsay T, Sustar A, Dickinson MH (2017) The function and organization of the motor system controlling flight
+maneuvers in flies. Curr. Biol. 27, 345-358, doi:10.1016/j.cub.2016.12.018. Read in full from the PDF (not committed).
+The muscles were imaged on the right side; "ipsilateral" is the imaged side. Sections 4.1 and 8 (v1) are kept
+unchanged as the record of the first design; this section supersedes their signs.
+
+### 10.1 What the paper states
+
+| muscle | statement | location | sign (effect on ipsilateral amplitude) |
+|---|---|---|---|
+| b2 | rises in saccades in which the ipsilateral amplitude increases; rises in yaw turns in which it increases; "+" row of the model; b1 and b2 extend the ventral stroke extreme | p. 349; p. 353; Fig. 6; p. 354-355 | + |
+| b3 | falls in saccades with ipsilateral amplitude increase, rises in those with decrease; recruited in yaw turns with decrease; "-" row of the model; antagonist of b1 / b2 | p. 349; p. 353; Fig. 6; Fig. 7 tuning (p. 353) | - |
+| i1 | rises in saccades with ipsilateral amplitude decrease; in yaw it rises for both directions (saccade-linked, slightly directional); "-" row of the model; i1 / i2 depress the stroke plane with a drop in amplitude | p. 349; p. 351, Fig. 5; Fig. 6; p. 355 | - |
+| i2 | tonic; activity correlated with decreases in stroke amplitude (regression); "-" row of the model | p. 349 (Fig. 4); Fig. 6 | - |
+| hg1 | rises in saccades with ipsilateral amplitude decrease; recruited in yaw turns with decrease; "-" row of the model | p. 349; p. 353; Fig. 6 | - |
+| hg2, hg3 | all four hg muscles recruited in yaw turns with ipsilateral amplitude decrease; tuned to yaw toward the ipsilateral side; "-" row of the model | p. 353; Fig. 6; Fig. 7 | - |
+| hg4 | tonic; rises in saccades with ipsilateral amplitude decrease; falls in yaw turns with increase, recruited with decrease; "-" row of the model | p. 349; p. 353; Fig. 6 | - |
+| iii1 | rises in saccades with ipsilateral amplitude increase (p. 349); iii muscles tuned toward the contralateral side and proposed to increase stroke amplitude (p. 353, p. 355); but placed in the "-" row of Fig. 6 | p. 349, 353, 355 vs Fig. 6 | conflict |
+| iii4 | tuned with iii1 and iii3 toward the contralateral side (p. 353), proposed to increase amplitude (p. 355); "-" row of Fig. 6 | p. 353, 355 vs Fig. 6 | conflict |
+| b1, iii3 | + (Fig. 6, text) | | fail the symmetry gate; not used |
+
+- **Changes from v1.** i1, hg1, hg3 and hg4 keep their signs, now stated directly instead of inferred from
+  lateralisation. i2 and hg2 gain a sign (-). iii1 leaves the primary set (conflict). The i1 statement of Ehweiner et
+  al. 2024 (left i1 active in right turns) is not supported by Lindsay; `lateral_i1_flipped` is dropped.
+- **Relative effect sizes: not given.** Fig. 4 reports only the variance explained by muscle combinations, not
+  per-muscle coefficients; Fig. 5 traces are in calcium z-score units; Fig. 6 is a schematic. The per-Hz weights stay
+  equal (s_m = +-1).
+- **Tonic and phasic muscles.** The slow optomotor response is carried mainly by the tonic muscles (b1, b3, i2, iii3,
+  hg4; p. 351-352), the phasic ones (b2, i1, iii1, hg1-hg3) follow saccades. hg4, the type that dominates the v1
+  prediction, is the tonic hg muscle. (The text lists hg4 once among the "phasic" largest muscles, p. 355, which
+  contradicts its tonic classification on p. 347 and in Fig. 6; the classification is not used here.)
+- **Rule fixed before the v2 numbers:** primary `lateral` = muscles with a sign stated directly by Lindsay that pass
+  the gate (b2, b3, i1, i2, hg1, hg2, hg3, hg4). iii1 and iii4 are left out and reported with both signs as
+  sensitivity sets. Numbers: `docs/results/f4_design_numbers_v2.json` (`scripts/f4_design_numbers.py --version v2`);
+  v1 is not overwritten.
+
+### 10.2 `ensemble`, primary mapping set `lateral` (v2)
+
+<!-- GEN:v2_ensemble -->
+S(`ensemble`) = -1.02 Hz (s.d. over seeds 3.38; positive in 5 of 20 seeds, negative in 14; one-sample t-test p = 0.191, descriptive). S(`sign_flip`) = +1.02 Hz by construction; S(`bridge_off`) = -0.03 Hz.
+<!-- /GEN:v2_ensemble -->
+
+<!-- GEN:v2_per_stimulus -->
+| stimulus | A_L - A_R (Hz units, G = 1), mean +- s.d. over seeds | bridge_off |
+|---|---|---|
+| rot_left | -11.00 +- 4.08 | +0.05 +- 0.22 |
+| rot_right | -13.05 +- 5.05 | +0.00 +- 0.00 |
+| static | -5.25 +- 3.54 | +0.05 +- 0.22 |
+| grey | +0.00 +- 0.00 | +0.00 +- 0.00 |
+<!-- /GEN:v2_per_stimulus -->
+
+### 10.3 Contributions, mapping sets, random wirings (v2)
+
+<!-- GEN:v2_contrib -->
+| MN type | s_m | basis | T (Hz) | contribution to S (Hz) | seeds syn / anti | T relative to the null s.d. (z) |
+|---|---|---|---|---|---|---|
+| b2 | +1 | direct | -1.55 | +0.78 | 14 / 5 | -0.83 |
+| b3 | -1 | direct | +2.80 | +1.40 | 18 / 1 | +0.64 |
+| i1 | -1 | Lindsay 2017 | +2.75 | +1.38 | 18 / 1 | +0.98 |
+| i2 | -1 | Lindsay 2017 | -0.05 | -0.03 | 0 / 1 | -0.02 |
+| hg1 | -1 | Lindsay 2017 | +2.75 | +1.38 | 16 / 2 | +0.37 |
+| hg2 | -1 | Lindsay 2017 | +0.00 | +0.00 | 0 / 0 | - |
+| hg3 | -1 | Lindsay 2017 | -0.20 | -0.10 | 1 / 4 | -0.58 |
+| hg4 | -1 | Lindsay 2017 | -11.65 | -5.83 | 0 / 20 | -1.83 |
+<!-- /GEN:v2_contrib -->
+
+<!-- GEN:v2_hg4 -->
+Ratio of the absolute T of hg4 to that of b3, i1 and hg1: 4.2, 4.2, 4.2 (F3b-3 values).
+<!-- /GEN:v2_hg4 -->
+
+<!-- GEN:v2_variants -->
+| mapping set | types (sign) | S(`ensemble`) Hz | offset B (Hz) | seeds syn / anti | seeds for 80 % power (alpha 0.05) | random wirings syn / anti (of 39) | random significantly syn / anti (p < 0.05) | random wirings below `ensemble` |
+|---|---|---|---|---|---|---|---|---|
+| lateral | b2(+), b3(-), i1(-), i2(-), hg1(-), hg2(-), hg3(-), hg4(-) | -1.02 | -12.03 | 5 / 14 | 86 | 19 / 19 | 13 / 13 | 16 |
+| direct | b2(+), b3(-) | +2.17 | +7.53 | 17 / 3 | 7 | 21 / 18 | 14 / 7 | 32 |
+| lateral+iii1(+) | b2(+), b3(-), i1(-), i2(-), hg1(-), hg2(-), hg3(-), hg4(-), iii1(+) | -1.02 | -12.03 | 5 / 14 | 86 | 19 / 19 | 14 / 13 | 16 |
+| lateral+iii1(-) | b2(+), b3(-), i1(-), i2(-), hg1(-), hg2(-), hg3(-), hg4(-), iii1(-) | -1.02 | -12.03 | 5 / 14 | 86 | 19 / 19 | 13 / 13 | 16 |
+| lateral+iii4(+) | b2(+), b3(-), i1(-), i2(-), hg1(-), hg2(-), hg3(-), hg4(-), iii4(+) | +0.10 | -1.45 | 8 / 11 | 10712 | 20 / 19 | 12 / 11 | 19 |
+| lateral+iii4(-) | b2(+), b3(-), i1(-), i2(-), hg1(-), hg2(-), hg3(-), hg4(-), iii4(-) | -2.15 | -22.60 | 4 / 15 | 26 | 21 / 18 | 14 / 14 | 13 |
+| lateral+iii1(+),iii4(+) (text) | b2(+), b3(-), i1(-), i2(-), hg1(-), hg2(-), hg3(-), hg4(-), iii1(+), iii4(+) | +0.10 | -1.45 | 8 / 11 | 10712 | 20 / 19 | 12 / 11 | 19 |
+| lateral+iii1(-),iii4(-) (Fig. 6) | b2(+), b3(-), i1(-), i2(-), hg1(-), hg2(-), hg3(-), hg4(-), iii1(-), iii4(-) | -2.15 | -22.60 | 4 / 15 | 26 | 21 / 18 | 14 / 14 | 13 |
+| lateral_no_hg4 | b2(+), b3(-), i1(-), i2(-), hg1(-), hg2(-), hg3(-) | +4.80 | -0.90 | 19 / 1 | 4 | 26 / 12 | 19 / 7 | 33 |
+| lateral, null-z weights (data-defined, not literature) | as lateral | +0.20 (z units) | - | - | - | 19 / 20 | - | 23 |
+<!-- /GEN:v2_variants -->
+
+<!-- GEN:v2_random -->
+Over the 39 random wirings (set `lateral`): S has quantiles min -15.45, 5 % -11.02, 25 % -2.16, median +0.00, 75 % +1.86, 95 % +9.23, max +23.52 Hz. 19 of 39 are syndirectional (13 significantly, p < 0.05, descriptive), 19 anti-directional (13 significantly) and 1 exactly zero. 16 of 39 random wirings have S below `ensemble`.
+<!-- /GEN:v2_random -->
+
+### 10.4 Gain (v2)
+
+<!-- GEN:v2_gain -->
+| gain | G (deg per Hz) | predicted A_L - A_R for `ensemble` (deg) | predicted steady yaw rate (deg/s) | ratio to the drum speed |
+|---|---|---|---|---|
+| G1, fixed (v1 value, owner decision) | 0.395 | -0.40 | -11.6 | -0.19 |
+| G1 rule re-applied with the v2 signs (not used) | 0.395 | - | - | - |
+<!-- /GEN:v2_gain -->
+
+### 10.5 Offset and yaw trim (v2)
+
+The trim here is calibrated leave-one-seed-out on the F3b-3 `ensemble` seeds, as a stand-in for the separate seeds of
+the closed loop.
+
+<!-- GEN:v2_bias -->
+Under the static grating `ensemble` has A_L - A_R = -5.25 Hz units (a constant turn bias before any drum rotation); random wirings: median +2.60, 5-95 % -9.52 to +27.34.
+<!-- /GEN:v2_bias -->
+
+<!-- GEN:v2_trim -->
+| mapping set | A_L - A_R under grey (Hz) | offset B untrimmed (Hz) | offset B after trim (Hz) | abs S / abs B after trim |
+|---|---|---|---|---|
+| lateral | +0.00 | -12.03 | -12.03 | 0.09 |
+| direct | +0.00 | +7.53 | +7.53 | 0.29 |
+| lateral+iii1(+) | +0.00 | -12.03 | -12.03 | 0.09 |
+| lateral+iii1(-) | +0.00 | -12.03 | -12.03 | 0.09 |
+| lateral+iii4(+) | +0.00 | -1.45 | -1.45 | 0.07 |
+| lateral+iii4(-) | +0.00 | -22.60 | -22.60 | 0.10 |
+| lateral+iii1(+),iii4(+) (text) | +0.00 | -1.45 | -1.45 | 0.07 |
+| lateral+iii1(-),iii4(-) (Fig. 6) | +0.00 | -22.60 | -22.60 | 0.10 |
+| lateral_no_hg4 | +0.00 | -0.90 | -0.90 | 5.33 |
+<!-- /GEN:v2_trim -->
+
+### 10.6 Conclusion (v2)
+
+The Lindsay update leaves the prediction where it was: **nothing reliable.** All signs that carry weight in v1 are
+confirmed, and the types that enter (i2, hg2) or leave (iii1) have T near or at zero in `ensemble`. So S of the primary
+set stays weakly anti-directional and not distinguishable from zero. hg4 still sets the net sign. iii4 is a second
+deciding type: its sign is a conflict inside the paper, and with the text's sign S comes to about zero, with the
+Fig. 6 sign it becomes more anti-directional. The random wirings remain split between the two directions.
+
+**The owner's yaw trim does not remove the offset.** In the F3b-3 records every mapped MN of `ensemble` is silent under
+grey, so A_L - A_R under grey is zero and the trim subtracts nothing. The offset is evoked by the patterned stimulus
+itself (it is already present under the static grating). A trim that removes it would have to be calibrated under a
+patterned stimulus, for example the static grating; that is a design change for the owner, not made here.

@@ -22,3 +22,6 @@ __pycache__/
 /brain_model
 /data
 /runs
+
+# literature PDFs (copyrighted; never committed)
+literature/
