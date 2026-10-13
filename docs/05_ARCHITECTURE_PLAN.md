@@ -167,6 +167,16 @@ GeNN/PyTorch.
 - **Ignition frequency** of the self-sustaining olfactory mode is reported alongside every F2 result that uses a
   perch + cut protocol (`docs/results/f0_ignition_frequency.md`).
 
+**Findings from the F2 prep calibration (2026-10-13; `docs/results/f2_wsyn_calibration.md`, PR #6; numbers from the records by script):**
+- **Uniform w_syn scaling cannot make BANC MN9 respond without self-sustained activity after the cut.** Ignited after
+  the cut (20 seeds, prereg/02 definition): A `wsyn_struct` 20/20, A2 `wsyn_struct_class` 19/20, B `wsyn_fit_mn9` 18/20;
+  the reference arm R is 0/20 but silent at MN9. The scale at which MN9 responds is already in the self-sustaining
+  regime of the BANC graph. Reported as a negative result; no variant is used for F2.
+- **The BANC sugar -> MN9 path is strongly lateralised.** Under A (labellar drive, 100 Hz, 1 s, 3 seeds) MN9 left 32 Hz
+  / right 11 Hz; right-sided labellar drive gives 35 / 10 Hz, left-sided drive 6 / 5 Hz, so right labellar drive
+  dominates. Any left/right MN9 readout is subject to the symmetry gate (rule 5).
+- Variant B's definition fails its FlyWire validation (it does not reproduce w_syn = 0.275 mV).
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
