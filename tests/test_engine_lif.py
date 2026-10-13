@@ -199,6 +199,24 @@ def test_state_dict_audit_fields():
     assert eng.state_dict()["weights_sha256"] != s["weights_sha256"] and eng.state_dict()["weight_scale"] == 0.5
 
 
+def test_per_post_weight_scale_variant():
+    eng = make_engine()
+    w0 = np.asarray(eng.syn.w_[:]).copy()
+    post = np.asarray(eng.syn.j[:])
+    f = np.where(np.arange(40) % 2 == 0, 2.0, 0.5)
+    with pytest.raises(ValueError):
+        eng.set_weight_scale_per_post(f[:10])
+    eng.set_weight_scale_per_post(f)
+    np.testing.assert_allclose(np.asarray(eng.syn.w_[:]), w0 * f[post])
+    s = eng.state_dict()
+    assert s["post_scale_sha256"] and len(s["post_scale_sha256"]) == 64
+    w_in = [np.asarray(v.w_[:]).copy() for v in eng.poisson_synapses.values()]
+    eng.set_weight_scale(1.0)          # the global scale replaces it; the record forgets the per-post factors
+    assert eng.state_dict()["post_scale_sha256"] is None
+    for v, w in zip(eng.poisson_synapses.values(), w_in):
+        np.testing.assert_array_equal(np.asarray(v.w_[:]), w)
+
+
 def test_model_hash_is_enforced(tmp_path):
     bad = tmp_path / "model.py"
     bad.write_text(MODEL_PY.read_text() + "\n# changed\n")

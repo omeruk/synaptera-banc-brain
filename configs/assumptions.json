@@ -434,6 +434,70 @@
       "config_file": "configs/arena_x20.yaml",
       "used_in": []
     },
+    "banc_wsyn.wsyn_struct_k_global": {
+      "value": 2.70709218358805,
+      "origin": "P",
+      "source": "structural prior: docs/results/f2_wsyn_k.json, FlyWire v783 (Shiu graph, all pairs) / BANC export (pairs >= 3), mean input synapses per postsynaptic neuron, matched cell types, as the engine runs them",
+      "unit": "ratio",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
+    "banc_wsyn.wsyn_struct_class_k_sensory": {
+      "value": 1.899132141560128,
+      "origin": "P",
+      "source": "structural prior, per postsynaptic super class: as above, BANC input counted in brain and SEZ neuropils only (FlyWire is brain only); neurons of other classes use wsyn_struct_k_global",
+      "unit": "ratio",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
+    "banc_wsyn.wsyn_struct_class_k_central": {
+      "value": 2.801518836455231,
+      "origin": "P",
+      "source": "structural prior, per postsynaptic super class: as above, BANC input counted in brain and SEZ neuropils only (FlyWire is brain only); neurons of other classes use wsyn_struct_k_global",
+      "unit": "ratio",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
+    "banc_wsyn.wsyn_struct_class_k_optic": {
+      "value": 3.6017016923347396,
+      "origin": "P",
+      "source": "structural prior, per postsynaptic super class: as above, BANC input counted in brain and SEZ neuropils only (FlyWire is brain only); neurons of other classes use wsyn_struct_k_global",
+      "unit": "ratio",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
+    "banc_wsyn.wsyn_struct_class_k_visual_projection": {
+      "value": 4.5662119815626365,
+      "origin": "P",
+      "source": "structural prior, per postsynaptic super class: as above, BANC input counted in brain and SEZ neuropils only (FlyWire is brain only); neurons of other classes use wsyn_struct_k_global",
+      "unit": "ratio",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
+    "banc_wsyn.wsyn_struct_class_k_descending": {
+      "value": 1.8372947271328797,
+      "origin": "P",
+      "source": "structural prior, per postsynaptic super class: as above, BANC input counted in brain and SEZ neuropils only (FlyWire is brain only); neurons of other classes use wsyn_struct_k_global",
+      "unit": "ratio",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
+    "banc_wsyn.wsyn_struct_class_k_ascending": {
+      "value": 1.6842895938059743,
+      "origin": "P",
+      "source": "structural prior, per postsynaptic super class: as above, BANC input counted in brain and SEZ neuropils only (FlyWire is brain only); neurons of other classes use wsyn_struct_k_global",
+      "unit": "ratio",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
+    "banc_wsyn.wsyn_struct_class_k_motor": {
+      "value": 3.4968697205406167,
+      "origin": "P",
+      "source": "structural prior, per postsynaptic super class: as above, BANC input counted in brain and SEZ neuropils only (FlyWire is brain only); neurons of other classes use wsyn_struct_k_global",
+      "unit": "ratio",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
     "body_flight.phi0_deg": {
       "value": 140.0,
       "origin": "P",

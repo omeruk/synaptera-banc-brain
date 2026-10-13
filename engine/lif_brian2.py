@@ -155,6 +155,7 @@ class Brian2LIFEngine:
         self.net = Network(neu, syn, spk, *objs)
         self._base_w = np.array(syn.w_[:])
         self._weight_scale = 1.0
+        self._post_scale_sha256 = None
         self._store()
         self._clear()
         self.seed = None
@@ -196,6 +197,21 @@ class Brian2LIFEngine:
             raise ValueError("scale must be positive")
         self.syn.w_[:] = self._base_w * float(scale)
         self._weight_scale = float(scale)
+        self._post_scale_sha256 = None
+        self._store()
+        self.reset(self.seed if self.seed is not None else 0)
+
+    def set_weight_scale_per_post(self, scale) -> None:
+        """Named model variant ``wsyn_struct_class``: multiply the weight of every synapse by ``scale[post]`` (one
+        positive factor per postsynaptic neuron, length n_neurons). The Poisson input weight is not scaled. Like
+        :meth:`set_weight_scale` this becomes the new initial state; the factors' hash is in ``state_dict``."""
+        scale = np.asarray(scale, dtype=np.float64)
+        if scale.shape != (self.n_neurons,) or not (scale > 0).all():
+            raise ValueError("need one positive factor per neuron")
+        post = np.asarray(self.syn.j[:], dtype=np.int64)
+        self.syn.w_[:] = self._base_w * scale[post]
+        self._weight_scale = float(np.mean(scale[post]))
+        self._post_scale_sha256 = hashlib.sha256(np.ascontiguousarray(scale).tobytes()).hexdigest()
         self._store()
         self.reset(self.seed if self.seed is not None else 0)
 
@@ -296,7 +312,7 @@ class Brian2LIFEngine:
             engine="brian2_lif", dataset=self.name, t_ms=self.t_ms, steps=self._steps_done, seed=self.seed,
             n_neurons=self.n_neurons, n_synapses=int(len(w)), clock_dt_ms=CLOCK_DT_MS,
             weights_sha256=hashlib.sha256(np.ascontiguousarray(w).tobytes()).hexdigest(),
-            weight_scale=self._weight_scale, model_sha256=self.model_sha256,
+            weight_scale=self._weight_scale, post_scale_sha256=self._post_scale_sha256, model_sha256=self.model_sha256,
             params={k: float(self.params[k]) for k in _NUMERIC_PARAMS},
             input_rates={k: (v if np.ndim(v) == 0 else np.asarray(v).copy()) for k, v in self._rates.items()},
             variant=("poisson_delay_v1" if self.poisson_delay_v1 else None),
