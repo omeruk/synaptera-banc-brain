@@ -197,6 +197,28 @@ right-sided labellar drive only. Leg drive: MN9 0.0 Hz in all arms. For arm N th
 VNC-dendrite caveat (ascending neurons sit at the 0.25 clip); R3, without normalisation, shows the same leg result.
 Stopped per the registration; any further route needs a new pre-registration and the project owner's decision.
 
+**Decision after prereg/05 (project owner, 2026-10-13, PR #9 merged):**
+1. The BANC whole-brain track stops here as a reported result. R3 (v3 graph, unchanged Shiu parameters) is the first BANC
+   graph on which MN9 responds (6.8 Hz), but the response is lateralised (left MN9 only, driven by right labellar GRNs),
+   the leg pathway is silent and gate 3 fails. This matches the known proofreading asymmetry (optic lobe R/L 1.56, LB3b
+   20 L / 40 R). It is a data property, not something to tune.
+2. The main track becomes the **hybrid**: FlyWire v783 brain (validated in F0) -> descending neurons matched by type ->
+   BANC v3 VNC (wing, haltere, neck and leg motor neurons). Both datasets are female.
+3. `banc888_full_v3` is the BANC graph from now on.
+4. Next steps: F3a, open loop, BANC VNC only (`prereg/06_banc_vnc_dn_to_mn.md`, PR "F3a: BANC VNC open loop, DN -> motor
+   neurons"); design document `docs/07_HYBRID_INTERFACE.md` (no code) for review before any implementation.
+
+**Finding from F3a, BANC v3 VNC open loop (2026-10-13; `prereg/06_banc_vnc_dn_to_mn.md`,
+`docs/results/f3a_banc_vnc.md`):** gates 1, 2 and 3' pass (0 spikes without input; 0 / 50 ignitions, CI 0-0.071; maximum
+network rate under drive 0.18 Hz) and expectation (a) is a hit, so by the registered rule the BANC v3 VNC is usable for
+the hybrid. Bilateral DNg02 drive at 100 Hz drives DLM1-4 (54 Hz), DLM5 (47 Hz), DVM1a-c (24 Hz), tp2 (55 Hz) and ps1
+(114 Hz), with a steep recruitment between 50 and 100 Hz. Expectation (b) is a miss: DVM3a-b, b3, hg1 and hg4 respond on
+the right side only (10/10 seeds right, 0-3/10 left). Expectation (c) is a miss: unilateral DNa02 drive (one neuron per
+side) leaves the wing steering MNs silent (largest |L - R| 0.2 Hz), while neck MNs respond ipsilaterally (CvN1, CvN11,
+DProN3a/b). Expectation (d) met: GF drives neither TTMn nor DLM/DVM (17 direct GF -> TTMn synapses; 0 to DLM/DVM). Post-hoc:
+at G100 the network activity (0.18 Hz) does not decay within the 200 ms cut (0.18 Hz), below the 1 Hz ignition threshold;
+its carriers and duration were not recorded. Stopped there; the interface design is `docs/07_HYBRID_INTERFACE.md`.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
