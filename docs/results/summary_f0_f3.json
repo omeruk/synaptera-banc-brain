@@ -1,0 +1,353 @@
+{
+ "f0_pass": {
+  "file": "f0_multiseed.md",
+  "regex": "\\| pass \\| pass \\|",
+  "mode": "count",
+  "values": [
+   "10"
+  ]
+ },
+ "f0_n": {
+  "file": "f0_multiseed.md",
+  "regex": "(?m)^\\| \\d \\| \\d \\| (?:pass|FAIL) \\|",
+  "mode": "count",
+  "values": [
+   "10"
+  ]
+ },
+ "f0_posdiff": {
+  "file": "f0_acceptance.md",
+  "regex": "max position difference to v1 \\| ([\\d.]+) mm",
+  "mode": "search",
+  "values": [
+   "0.27"
+  ]
+ },
+ "f0_ign": {
+  "file": "f0_ignition_frequency.md",
+  "regex": "estimated ignition probability of the new engine is\\s+~(\\d+ / \\d+) \\(([\\d.]+) %\\), v1 (\\d+ / \\d+)",
+  "mode": "search",
+  "values": [
+   "2 / 112",
+   "1.8",
+   "0 / 136"
+  ]
+ },
+ "f0_ign100": {
+  "file": "f0_ignition_frequency.md",
+  "regex": "\\*\\*Primary result:\\*\\* (\\d+ / \\d+) ignitions in every arm.*?upper bound is ([\\d.]+) %",
+  "mode": "search",
+  "values": [
+   "0 / 100",
+   "3.6"
+  ]
+ },
+ "f0_lat": {
+  "file": "f0_latency_hover_yaw.md",
+  "regex": "\\(mean ~(\\d+) deg of total heading change, (\\d+)-(\\d+) deg\\s+max difference\\)",
+  "mode": "search",
+  "values": [
+   "12",
+   "15",
+   "28"
+  ]
+ },
+ "f1_counts": {
+  "file": "f1_banc_qa.md",
+  "regex": "neurons ([\\d,]+) \\(left ([\\d,]+), right ([\\d,]+)\\); typed ([\\d.]+)%",
+  "mode": "search",
+  "values": [
+   "158,262",
+   "75,760",
+   "82,502",
+   "74.9"
+  ]
+ },
+ "f1_sym": {
+  "file": "f1_banc_qa.md",
+  "regex": "\\| all \\| (\\d+) \\| ([\\d.]+) \\| ([\\d.]+) \\|",
+  "mode": "search",
+  "values": [
+   "9167",
+   "0.43",
+   "0.49"
+  ]
+ },
+ "f1_smoke": {
+  "file": "f1_banc_smoke.md",
+  "regex": "MN9 is silent \\(([\\d.]+) Hz in every condition",
+  "mode": "search",
+  "values": [
+   "0.00"
+  ]
+ },
+ "f2_ignA": {
+  "file": "f2_wsyn_calibration.md",
+  "regex": "\\| A_wsyn_struct \\| [\\d.]+ \\| \\d+ \\| (\\d+ / \\d+) \\(",
+  "mode": "search",
+  "values": [
+   "20 / 20"
+  ]
+ },
+ "f2_ignA2": {
+  "file": "f2_wsyn_calibration.md",
+  "regex": "\\| A2_wsyn_struct_class \\| [\\d.]+ \\| \\d+ \\| (\\d+ / \\d+) \\(",
+  "mode": "search",
+  "values": [
+   "19 / 20"
+  ]
+ },
+ "f2_ignB": {
+  "file": "f2_wsyn_calibration.md",
+  "regex": "\\| B_wsyn_fit_mn9 \\| [\\d.]+ \\| \\d+ \\| (\\d+ / \\d+) \\(",
+  "mode": "search",
+  "values": [
+   "18 / 20"
+  ]
+ },
+ "f2_ignR": {
+  "file": "f2_wsyn_calibration.md",
+  "regex": "\\| R \\| 1\\.000 \\| \\d+ \\| (\\d+ / \\d+) \\(",
+  "mode": "search",
+  "values": [
+   "0 / 20"
+  ]
+ },
+ "f2_full": {
+  "file": "f2_full_graph.md",
+  "regex": "labellar mean ([\\d.]+) Hz >= 10% of FlyWire's ([\\d.]+) Hz",
+  "mode": "search",
+  "values": [
+   "0.0",
+   "59.7"
+  ]
+ },
+ "f2_r3": {
+  "file": "f2_innorm.md",
+  "regex": "\\| R3 \\| banc888_full_v3 \\| pass \\| [^|]+\\| [^|]+\\| ([\\d.]+) \\| yes \\| no \\|",
+  "mode": "search",
+  "values": [
+   "6.8"
+  ]
+ },
+ "f2_thr": {
+  "file": "f2_innorm.md",
+  "regex": "labellar mean [\\d.]+ Hz >= ([\\d.]+) Hz\\)",
+  "mode": "search",
+  "values": [
+   "5.97"
+  ]
+ },
+ "x_shared": {
+  "file": "f3_dn_crosswalk.md",
+  "regex": "shared by name (\\d+) \\((\\d+) FlyWire and (\\d+) BANC neurons\\)",
+  "mode": "search",
+  "values": [
+   "348",
+   "1064",
+   "927"
+  ]
+ },
+ "x_gate": {
+  "file": "f3_dn_crosswalk.md",
+  "regex": "Shared families passing the symmetry gate in both datasets: (\\d+)",
+  "mode": "search",
+  "values": [
+   "112"
+  ]
+ },
+ "a_gate2": {
+  "file": "f3a_banc_vnc.md",
+  "regex": "\\| 2: ignition after the 200 ms cut, all DN groups 100 Hz, 50 seeds \\| (\\d+ / \\d+)",
+  "mode": "search",
+  "values": [
+   "0 / 50"
+  ]
+ },
+ "a_dlm": {
+  "file": "f3a_banc_vnc.md",
+  "regex": "DLM1-4 [\\d.]+ / [\\d.]+ / ([\\d.]+) Hz; DLM5 [\\d.]+ / [\\d.]+ / ([\\d.]+) Hz",
+  "mode": "search",
+  "values": [
+   "53.8",
+   "46.6"
+  ]
+ },
+ "a2_c2": {
+  "file": "f3a2_checks.md",
+  "regex": "C2: (\\d+) neurons carry activity after the cut; network rate in the last cut step \\(mean over seeds\\) ([\\d.]+) Hz",
+  "mode": "search",
+  "values": [
+   "1426",
+   "0.1925"
+  ]
+ },
+ "a2_dng02": {
+  "file": "f3a2_checks.md",
+  "regex": "\\| DNg02 \\| flight \\| 13/12 \\| ([\\d.]+),",
+  "mode": "search",
+  "values": [
+   "0.0"
+  ]
+ },
+ "a3_sub": {
+  "file": "f3a3_vnc_subgraph.md",
+  "regex": "Kept: ([\\d,]+) neurons, ([\\d,]+) pairs, ([\\d,]+) synapses",
+  "mode": "search",
+  "values": [
+   "25,818",
+   "3,020,333",
+   "11,585,331"
+  ]
+ },
+ "a3_r2": {
+  "file": "f3a3_vnc_subgraph.md",
+  "regex": "\\*\\*R2: (\\d+ / \\d+) seeds decay; pass",
+  "mode": "search",
+  "values": [
+   "10 / 10"
+  ]
+ },
+ "a3_stop": {
+  "file": "f3a3_vnc_subgraph.md",
+  "regex": "Activity after the cut lasts \\(last step with any spike, ms after the cut\\), per seed: (\\d+),",
+  "mode": "search",
+  "values": [
+   "25"
+  ]
+ },
+ "a3_low": {
+  "file": "f3a3_vnc_subgraph.md",
+  "regex": "\\| DNa04 \\| (\\d+) \\| [\\d, ]+ \\| [\\d.]+ / [\\d.]+ \\| ([\\d.]+ / [\\d.]+) \\|",
+  "mode": "search",
+  "values": [
+   "25",
+   "26.1 / 16.8"
+  ]
+ },
+ "a3_low10": {
+  "file": "f3a3_vnc_subgraph.md",
+  "regex": "\\| DNa10 \\| (\\d+) \\| [\\d, ]+ \\| [\\d.]+ / [\\d.]+ \\| ([\\d.]+ / [\\d.]+) \\|",
+  "mode": "search",
+  "values": [
+   "100",
+   "23.2 / 3.4"
+  ]
+ },
+ "b1_sel": {
+  "file": "f3b1_optomotor.md",
+  "regex": "Direction-selective in the brain after Holm: ([A-Za-z0-9, ]+)\\.",
+  "mode": "search",
+  "values": [
+   "DNa04, DNa10"
+  ]
+ },
+ "b1_max": {
+  "file": "f3b1_optomotor.md",
+  "regex": "\\| DNa04 \\| ([\\d.]+) \\| ([\\d.]+) \\| (\\d+) \\| rot_left / left \\|",
+  "mode": "search",
+  "values": [
+   "5.9",
+   "6.9",
+   "25"
+  ]
+ },
+ "b2_brain": {
+  "file": "f3b2_dn_ensemble.md",
+  "regex": "Brain: (\\d+) of (\\d+) ensemble families carry",
+  "mode": "search",
+  "values": [
+   "19",
+   "112"
+  ]
+ },
+ "b2_mean": {
+  "file": "f3b2_dn_ensemble.md",
+  "regex": "`ensemble` b3 ([+-]\\d+\\.\\d+), i1 ([+-]\\d+\\.\\d+), hg1 ([+-]\\d+\\.\\d+), hg4 ([+-]\\d+\\.\\d+); `ensemble_shuffled` b3 ([+-]\\d+\\.\\d+), hg1 ([+-]\\d+\\.\\d+)",
+  "mode": "search",
+  "values": [
+   "+3.00",
+   "+3.10",
+   "+4.40",
+   "-9.00",
+   "-3.50",
+   "-8.70"
+  ]
+ },
+ "c_gate": {
+  "file": "f3b3_specificity.md",
+  "regex": "maximum ([\\d.]+) Hz \\(replays: ([\\d.]+) Hz",
+  "mode": "search",
+  "values": [
+   "2.8256",
+   "0.5225"
+  ]
+ },
+ "c_brain": {
+  "file": "f3b3_specificity.md",
+  "regex": "Direction-selective after Holm: \\*\\*(\\d+)\\*\\* of (\\d+)",
+  "mode": "search",
+  "values": [
+   "25",
+   "112"
+  ]
+ },
+ "c_T": {
+  "file": "f3b3_specificity.md",
+  "regex": "\\| ensemble \\| b3 \\| ([+-][\\d.]+) \\|.*?\\| ensemble \\| i1 \\| ([+-][\\d.]+) \\|.*?\\| ensemble \\| hg1 \\| ([+-][\\d.]+) \\|.*?\\| ensemble \\| hg4 \\| ([+-][\\d.]+) \\|",
+  "mode": "search",
+  "values": [
+   "+2.800",
+   "+2.750",
+   "+2.750",
+   "-11.650"
+  ]
+ },
+ "c_perm": {
+  "file": "f3b3_specificity.md",
+  "regex": "\\| b3 \\| \\+[\\d.]+ \\| yes \\| (\\d+) / 39 \\| ([\\d.]+) \\|.*?\\| i1 \\| [+-][\\d.]+ \\| yes \\| (\\d+) / 39 \\| ([\\d.]+) \\|.*?\\| hg1 \\| [+-][\\d.]+ \\| yes \\| (\\d+) / 39 \\| ([\\d.]+) \\|.*?\\| hg4 \\| [+-][\\d.]+ \\| yes \\| (\\d+) / 39 \\| ([\\d.]+) \\|",
+  "mode": "search",
+  "values": [
+   "30",
+   "0.250",
+   "30",
+   "0.250",
+   "22",
+   "0.450",
+   "36",
+   "0.100"
+  ]
+ },
+ "c_same": {
+  "file": "f3b3_specificity.md",
+  "regex": "b3 ([\\d.]+), i1 ([\\d.]+), i2 ([\\d.]+), hg1 ([\\d.]+), hg4 ([\\d.]+) \\(secondary",
+  "mode": "search",
+  "values": [
+   "0.590",
+   "0.462",
+   "0.154",
+   "0.538",
+   "0.615"
+  ]
+ },
+ "c_expl": {
+  "file": "f3b3_specificity.md",
+  "regex": "Types with a fixed expected sign that pass the gate: (\\d+); observed sign agrees in (\\d+)\\. Among those significant in `ensemble` \\(secondary Holm\\): (\\d+), agreeing (\\d+)\\.",
+  "mode": "search",
+  "values": [
+   "6",
+   "4",
+   "4",
+   "3"
+  ]
+ },
+ "c_checks": {
+  "file": "f3b3_specificity.md",
+  "regex": "Gate 2 \\(DNg02 and all (\\d+) ensemble neurons at 100 Hz, 200 ms cut, seeds [\\d-]+\\): (\\d+ / \\d+) ignited",
+  "mode": "search",
+  "values": [
+   "305",
+   "0 / 50"
+  ]
+ }
+}
