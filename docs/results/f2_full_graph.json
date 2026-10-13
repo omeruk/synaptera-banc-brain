@@ -1,0 +1,210 @@
+{
+ "flywire_reference": {
+  "labellar": {
+   "n_driven": 36,
+   "network": 0.0917082013959516,
+   "G": 0.0018362463962487048,
+   "mn9": 59.666666666666664
+  },
+  "leg": {
+   "n_driven": 12,
+   "network": 0.018150255940488125,
+   "G": 0.0007940973499630904,
+   "mn9": 1.0
+  }
+ },
+ "sets": {
+  "codex": {
+   "neurons": 158262,
+   "pairs": 11582757,
+   "synapses": 35431027,
+   "gate1_pass": true,
+   "gate2_ignited": 0,
+   "gate2_ci": [
+    0.0,
+    0.16843347098308528
+   ],
+   "last_cut_step_mean_hz": 0.0,
+   "peak_rss_gb": 2.438672,
+   "total_wall_s": 235.44509053230286,
+   "mn9_symmetry": [
+    {
+     "type": "MN9",
+     "n_left": 1,
+     "n_right": 1,
+     "in_left": 2023.0,
+     "in_right": 2585.0,
+     "exc_left": 832.0,
+     "exc_right": 1144.0,
+     "log2_total": 0.35366796064401407,
+     "log2_exc": 0.45943161863729726,
+     "pass": true
+    }
+   ],
+   "gate3_labellar": {
+    "G": 0.00012211273053900067,
+    "G_ratio": 0.06650127716436453,
+    "network_rate_hz": 0.06760940718555307,
+    "literal_ratio": 0.7372231289723848,
+    "pass_": false
+   },
+   "gate3_leg": {
+    "G": 7.855838022052088e-05,
+    "G_ratio": 0.0989278962134457,
+    "network_rate_hz": 0.20941434667408054,
+    "literal_ratio": 11.537817833573131,
+    "pass_": false
+   },
+   "gate3_pass": false,
+   "mn9_labellar_mean_hz": 0.0,
+   "mn9_responds": false,
+   "gates_pass": false,
+   "by_condition": {
+    "labellar": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.06760940718555307,
+     "mn9_mean_hz": 0.0
+    },
+    "leg": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.20941434667408054,
+     "mn9_mean_hz": 0.0
+    },
+    "labellar_left": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.027083780903396474,
+     "mn9_mean_hz": 0.0
+    },
+    "labellar_right": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.03920924374349707,
+     "mn9_mean_hz": 0.0
+    }
+   }
+  },
+  "all": {
+   "neurons": 188508,
+   "pairs": 11752828,
+   "synapses": 35733096,
+   "gate1_pass": true,
+   "gate2_ignited": 0,
+   "gate2_ci": [
+    0.0,
+    0.16843347098308528
+   ],
+   "last_cut_step_mean_hz": 0.0,
+   "peak_rss_gb": 2.465424,
+   "total_wall_s": 253.00590634346008,
+   "mn9_symmetry": [
+    {
+     "type": "MN9",
+     "n_left": 1,
+     "n_right": 1,
+     "in_left": 2023.0,
+     "in_right": 2585.0,
+     "exc_left": 832.0,
+     "exc_right": 1144.0,
+     "log2_total": 0.35366796064401407,
+     "log2_exc": 0.45943161863729726,
+     "pass": true
+    }
+   ],
+   "gate3_labellar": {
+    "G": 0.00010251045449381065,
+    "G_ratio": 0.055826088864343475,
+    "network_rate_hz": 0.05676151675260466,
+    "literal_ratio": 0.6189361026451268,
+    "pass_": false
+   },
+   "gate3_leg": {
+    "G": 6.593377595852699e-05,
+    "G_ratio": 0.0830298400587681,
+    "network_rate_hz": 0.17581393539443066,
+    "literal_ratio": 9.6865816091463,
+    "pass_": false
+   },
+   "gate3_pass": false,
+   "mn9_labellar_mean_hz": 0.0,
+   "mn9_responds": false,
+   "gates_pass": false,
+   "by_condition": {
+    "labellar": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.05676151675260466,
+     "mn9_mean_hz": 0.0
+    },
+    "leg": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.17581393539443066,
+     "mn9_mean_hz": 0.0
+    },
+    "labellar_left": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.02273820386049045,
+     "mn9_mean_hz": 0.0
+    },
+    "labellar_right": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.03291814317341086,
+     "mn9_mean_hz": 0.0
+    }
+   }
+  }
+ }
+}
