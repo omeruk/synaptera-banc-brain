@@ -318,6 +318,24 @@ Only DNa04 steers at a rate inside its FlyWire F0 flight range (L 26.1 / R 16.8 
    - A replication test (Holm over b3, i1, i2, hg1, hg4), then a magnitude permutation test of |T_m| against the 39
      random wirings. Sign agreement is reported as a secondary result.
 
+**Finding from F3b-3, confirmatory specificity test (2026-10-13; `prereg/11_f3b3_specificity.md`,
+`docs/results/f3b3_specificity.md`):**
+- **Checks.** Gates 1, 2 and 3' pass. The fresh brain runs (seeds 10-29) pass the input check, and their render equals
+  the F3b-1 render. On the fresh seeds, 25 of the 112 ensemble families are direction-selective in the brain after
+  Holm.
+- **(a) Replication: yes.** In `ensemble`, b3 (+2.80 Hz), i1 (+2.75), hg1 (+2.75) and hg4 (-11.65) are significant
+  after Holm. The signs are the same as in F3b-2. `bridge_off` is not direction-selective.
+- **(b) Magnitude specificity: no.** |T_m(`ensemble`)| exceeds the 39 random wirings in 30 (b3), 30 (i1), 22 (hg1) and
+  36 (hg4) of 39, so p_perm = 0.250, 0.250, 0.450 and 0.100. The criterion is 38 of 39 (p <= 0.05).
+  - **Outcome under the registered rule: replicated, not specific.** The true family wiring gives a reproducible
+    direction-selective response, but its size is typical of random wirings of the same rate streams.
+- **(c) Sign specificity (secondary).** The fraction of random wirings with the same sign as `ensemble` is between
+  0.46 and 0.62 for the four significant types. The F3b-2 hypothesis (the wiring sets the sign) is therefore not
+  supported as a property that distinguishes the true wiring.
+- **Exploratory (not used for decisions).** Literature-expected signs (Cheong et al., eLife, Table 1): b3, i1 and hg1
+  agree, while hg4 has the opposite sign. 4 of the 6 comparable types agree.
+- What follows is the project owner's decision.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
