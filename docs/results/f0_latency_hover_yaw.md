@@ -4,7 +4,8 @@ A **v1 reproduction only, not a new result.** Hover at (440, -170, 160) mm, yaw 
 brain-only path (yaw command = hand-made bridge `turn_dn`, no HAND odour / FlyVis terms), sB vision, no olfaction,
 seed 6, 60 steps of 25 ms. The v1 drive is DNp15, which fails the symmetry gate (R/L 1.66x): run with
 `--waive DNp15` as a labelled exception (recorded in the run meta). The DNa02 version is a new experiment for F2
-and was not run. Code `tasks/hover_yaw.py`; records `runs/hover_yaw/`; numbers `docs/results/f0_latency_hover_yaw.json`.
+and was not run. Since 2026-10-13 `--waive` defaults to none (CLAUDE.md rule 5): the v1 reproduction
+commands in this report need `--waive DNp15` explicitly; the records here were run with it. Code `tasks/hover_yaw.py`; records `runs/hover_yaw/`; numbers `docs/results/f0_latency_hover_yaw.json`.
 Latency 0 = v1 same-interval coupling (labelled ACAUSAL), latency 1 = causal.
 
 ## v30 (steering on)
@@ -52,3 +53,16 @@ ablation constant was +0.244, "not brainless"); it is a property of this control
   command is a few DNp15 spikes per interval.
 - v31 should not be used as a reproduction target without fixing the baseline realisation; a better control for
   F2 is a constant zero command (a pre-registration decision for F2, not made here).
+
+## Finding about v1: its steering-ablated control is fragile (decision of the project owner, 2026-10-12)
+The v1 control "ablate the steer readout" replaces the readout by its perch baseline. With one DNp15 neuron per side
+and a 10-interval baseline (one spike = 4 Hz) the constant it produces depends on the noise realisation of the
+perch: DNp15 L/R baseline 12/44 Hz (this port, seed 6) vs 8/52 Hz (v1, seed 6) shifts the constant by 0.28 and
+changes the heading by ~120 deg in 1.5 s (+123.7 deg vs +5.6 deg). A control whose effect size equals the effect
+under test is not a control. For all new experiments the control arm is a constant zero command, named
+**`zero_turn`** (yaw command exactly 0, readouts still recorded). The perch-baseline ablation is kept only to
+reproduce v1.
+
+## Decisions on further runs
+No further v30 seeds: the latency effect is measured in F2 with DNa02 as the drive and >= 10 seeds per latency,
+pre-registered (planned item in docs/05, F2).

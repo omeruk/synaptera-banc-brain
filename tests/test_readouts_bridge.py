@@ -221,3 +221,33 @@ def test_flywire_gate_matches_review_h2():
     assert r.n.tolist() == [[1, 1]] * NT
     ref = LB.load_reference()
     assert np.all(ref[[r.row(t) for t in ("DNa02", "DNp15")]] > 0)
+
+
+def test_zero_turn_control_arm(ro):
+    """The named control arm of new experiments: yaw command exactly 0, s_hat and the readouts still recorded."""
+    c = _steer_counts(ro, (60, 10), (45, 60))
+    s = _settle(Bridge(ro, DT, reference=_ref(ro)), c)
+    z = _settle(Bridge(ro, DT, reference=_ref(ro), zero_turn=True), c)
+    assert s["turn_dn"] != 0.0 and z["turn_dn"] == 0.0
+    assert z["steer_norm"] == pytest.approx(s["steer_norm"]) and np.allclose(z["steer_raw"], s["steer_raw"])
+
+
+def test_hover_yaw_cli_defaults_and_control_exclusion():
+    """--waive defaults to no waiver (rule 5); the two control arms cannot be combined."""
+    import pytest
+    from tasks import hover_yaw
+    base = ["--name", "x", "--v1", "v30"]
+    assert hover_yaw.parse_args(base).waive == []
+    assert hover_yaw.parse_args(base + ["--waive", "DNp15"]).waive == ["DNp15"]
+    with pytest.raises(SystemExit):
+        hover_yaw.parse_args(base + ["--zero-turn", "--ablate-steer"])
+
+
+def test_to_intervals_does_not_mutate_args():
+    import argparse
+    from tasks.f0_flight import to_intervals
+    a = argparse.Namespace(n_steps=60, calib_steps=10, persist_steps=8)
+    b = to_intervals(a, 5)
+    assert (a.n_steps, a.calib_steps, a.persist_steps) == (60, 10, 8)
+    assert (b.n_steps, b.calib_steps, b.persist_steps) == (300, 50, 40)
+    assert b.v1_steps == dict(n_steps=60, calib_steps=10, persist_steps=8) and b.stride == 5

@@ -9,7 +9,9 @@ filter, the MN9 feeding threshold and the yaw normalisation are unchanged:
            turn_dn = -K_STEER * s_hat, clipped to +-TURN_BIAS_MAX (a DN more active on the left turns the fly
            to the left, ipsilateral). The reference is the mirror-symmetric front-to-back grating response.
   swap     the two side channels of the steer types are exchanged (s_hat -> -s_hat)
-  ablate   the readout is replaced by its perch-calibration baseline (the brain keeps running)
+  ablate   the readout is replaced by its perch-calibration baseline (the brain keeps running); v1 reproduction
+           only: the constant it produces is realisation-dependent (docs/results/f0_latency_hover_yaw.md)
+  zero_turn  control arm for new experiments: the yaw command is exactly 0, s_hat and the readouts are recorded
 
 Changes: the yaw DRIVE types are those of the steer types that pass the symmetry gate (the v1 post-hoc
 "DNp15 only" is not inherited; a waived type is a labelled exception recorded in ``Readouts.record``);
@@ -39,7 +41,8 @@ class BaselineMissing(RuntimeError):
 
 
 class Bridge:
-    def __init__(self, readouts: Readouts, dt: float, ablate=(), swap=(), reference=None, drive=None):
+    def __init__(self, readouts: Readouts, dt: float, ablate=(), swap=(), reference=None, drive=None,
+                 zero_turn: bool = False):
         self.ro = readouts
         self.dt = dt
         self.alpha = 1.0 - np.exp(-dt / READOUT_TAU)
@@ -56,6 +59,7 @@ class Bridge:
         if not drive:
             raise ValueError("no steer type passes the symmetry gate; the yaw drive would be undefined")
         self.drive = tuple(drive)
+        self.zero_turn = bool(zero_turn)      # named control arm: yaw command exactly 0, readouts still recorded
         self.ref = None if reference is None else np.asarray(reference, float)
 
     def set_baseline(self, rates):
@@ -92,6 +96,8 @@ class Bridge:
         norm = steer_norm(u, ref)
         s_hat = float(norm[[STEER_TYPES.index(t) for t in self.drive]].mean()) * (-1.0 if self.swap_steer else 1.0)
         turn = float(np.clip(-K_STEER * s_hat, -TURN_BIAS_MAX, TURN_BIAS_MAX))
+        if self.zero_turn:
+            turn = 0.0
         return dict(steer_raw=u[:, 0] - u[:, 1], steer_norm_t=norm, steer_norm=s_hat, turn_dn=turn)
 
 

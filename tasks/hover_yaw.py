@@ -8,7 +8,7 @@ haltere attitude PD. A 0.1 s body-z torque pulse of ``--yaw-perturb DEG`` turns 
 The v1 drive is DNp15, which FAILS the symmetry gate (R/L 1.66x): it is run only as a labelled exception
 (``--waive DNp15``) to reproduce v1. Nothing here is a new result; the DNa02 version is a new experiment (F2).
 
-    nohup env -u PYTHONPATH python scripts/run_hover_yaw.py --name hy_v30_lat1 --latency 1 &
+    nohup env -u PYTHONPATH python scripts/run_hover_yaw.py --name hy_v30_lat1 --v1 v30 --latency 1 --waive DNp15 &
 """
 from __future__ import annotations
 
@@ -76,7 +76,7 @@ def build(args, log=print):
     dt = args.interval_ms * 1e-3
     eyes = VB.BoundaryEyes(table, {"L": cx.index.ids_of(groups_in["vbnd_L"]), "R": cx.index.ids_of(groups_in["vbnd_R"])},
                            tr, columns, cx.index, interval_s=dt, subframes=2, verbose=False)
-    bridge = LB.Bridge(readouts, dt, ablate=("steer",) if args.ablate_steer else (),
+    bridge = LB.Bridge(readouts, dt, ablate=("steer",) if args.ablate_steer else (), zero_turn=args.zero_turn,
                        reference=LB.load_reference(ROOT / "data" / "dn_lr_reference_sB.json"),
                        drive=("DNp15",))
     return dict(arena=arena, cx=cx, readouts=readouts, engine=engine, body=body, eyes=eyes, bridge=bridge,
@@ -219,9 +219,15 @@ def parse_args(argv=None):
     ap.add_argument("--persist-steps", type=int, default=8)
     ap.add_argument("--perturb-t", type=float, default=0.5)
     ap.add_argument("--perturb-deg", type=float, default=30.0)
-    ap.add_argument("--ablate-steer", action="store_true")
-    ap.add_argument("--waive", nargs="*", default=["DNp15"])
-    return ap.parse_args(argv)
+    ap.add_argument("--ablate-steer", action="store_true", help="v1 control: readout replaced by the perch baseline")
+    ap.add_argument("--zero-turn", action="store_true", help="control arm zero_turn: yaw command exactly 0")
+    ap.add_argument("--waive", nargs="*", default=[],
+                    help="readout types allowed to fail the symmetry gate (rule 5); none unless named, e.g. DNp15 to "
+                         "reproduce v1")
+    a = ap.parse_args(argv)
+    if a.zero_turn and a.ablate_steer:
+        ap.error("--zero-turn and --ablate-steer are two different control arms and cannot be combined")
+    return a
 
 
 def main(argv=None):

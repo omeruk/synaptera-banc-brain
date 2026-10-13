@@ -19,6 +19,7 @@ body / scaffold / coupling reproduction; the brain's contribution is the recorde
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import sys
@@ -80,24 +81,26 @@ def criteria(path) -> dict:
                                                                       if feeding.any() else None))
 
 
-def compare(new_path, v1_path=V1_RECORD) -> dict:
+def compare(new_path, v1_path=V1_RECORD, stride: int = 1) -> dict:
     """Position / phase comparison of a new run with the v1 record (same 300 closed-loop steps)."""
     with h5py.File(new_path, "r") as f, h5py.File(v1_path, "r") as g:
         a, b = f["behavior"], g["behavior"]
-        n = min(len(a["pos"]), len(b["pos"]))
-        pn, pv = a["pos"][:n], b["pos"][:n]
+        sl = slice(stride - 1, None, stride)           # the state at the end of every 25 ms block
+        A = {k: a[k][:][sl] for k in ("pos", "phase", "wings_on", "leg_pose", "heading", "speed")}
+        n = min(len(A["pos"]), len(b["pos"]))
+        pn, pv = A["pos"][:n], b["pos"][:n]
         d = np.linalg.norm(pn - pv, axis=1)
         out = dict(n_steps=int(n), pos_diff_mm=dict(max=float(d.max()), final=float(d[-1]), mean=float(d.mean()),
                                                     rms=float(np.sqrt((d ** 2).mean())),
                                                     first_step_above_1mm=(int(np.flatnonzero(d > 1.0)[0])
                                                                           if (d > 1.0).any() else None)),
-                   phase_identical=bool(np.array_equal(a["phase"][:n], b["phase"][:n])),
-                   phase_steps_differing=int((a["phase"][:n] != b["phase"][:n]).sum()),
-                   wings_on_identical=bool(np.array_equal(a["wings_on"][:n], b["wings_on"][:n])),
-                   leg_pose_steps_differing=int((a["leg_pose"][:n] != b["leg_pose"][:n]).sum()),
+                   phase_identical=bool(np.array_equal(A["phase"][:n], b["phase"][:n])),
+                   phase_steps_differing=int((A["phase"][:n] != b["phase"][:n]).sum()),
+                   wings_on_identical=bool(np.array_equal(A["wings_on"][:n], b["wings_on"][:n])),
+                   leg_pose_steps_differing=int((A["leg_pose"][:n] != b["leg_pose"][:n]).sum()),
                    heading_diff_deg_max=float(np.degrees(np.abs(np.angle(np.exp(
-                       1j * (a["heading"][:n] - b["heading"][:n]))))).max()),
-                   speed_diff_max_mm_s=float(np.abs(a["speed"][:n] - b["speed"][:n]).max()))
+                       1j * (A["heading"][:n] - b["heading"][:n]))))).max()),
+                   speed_diff_max_mm_s=float(np.abs(A["speed"][:n] - b["speed"][:n]).max()))
     return out
 
 
@@ -139,6 +142,8 @@ def build(args, log=print):
                    meta=dict(experiment="F0 acceptance (v1 n1 configuration)", name=args.name, seed=args.seed,
                              interval_ms=args.interval_ms, latency_intervals=args.latency,
                              n_steps=args.n_steps, calib_steps=args.calib_steps, persist_steps=args.persist_steps,
+                             counts_unit="coupling intervals (n_steps, calib_steps, persist_steps)",
+                             v1_steps=getattr(args, "v1_steps", None), stride=getattr(args, "stride", None),
                              dataset="flywire783", sign_rule="shiu_v1", sha256=cx.meta.get("sha256"),
                              readouts=readouts.record(), arena=arena.geometry_record(),
                              replayed_terms="REPLAY: turn_hand, turn_flyvis, thrust_hand, pitch_hand, roll_hand from the v1 "
@@ -155,7 +160,9 @@ def build(args, log=print):
     body = FlightBody(arena=arena, enable_vision=True, textured=True, platform="dark", neck_actuators=True,
                       postures=True)
     columns = V.load_columns(ROOT / "data" / "column_assignment.csv.gz")
-    tr = VB.load_transduction(ROOT / "data" / "visual_transduction.json")
+    tr = VB.load_transduction(args.boundary_transduction)
+    assert abs(tr["dt"] - args.interval_ms * 1e-3 / args.subframes) < 1e-9, \
+        f"transduction calibrated at dt {tr['dt']}, run uses {args.interval_ms * 1e-3 / args.subframes}"
     interval_s = args.interval_ms * 1e-3
     eyes = VB.BoundaryEyes(table, {"L": cx.index.ids_of(groups_in["vbnd_L"]), "R": cx.index.ids_of(groups_in["vbnd_R"])},
                            tr, columns, cx.index, interval_s=interval_s, subframes=args.subframes, verbose=False)
@@ -174,6 +181,7 @@ class F0Plant:
         self.body, self.eyes, self.arena = p["body"], p["eyes"], p["arena"]
         self.RF, self.HS, self.qs = p["RF"], p["HS"], p["qs"]
         self.interval_s = args.interval_ms * 1e-3
+        self.stride = int(round(25.0 / args.interval_ms))
         n = self.arena.physics_steps(self.interval_s)
         self.render_at = tuple(int(round(n * (j + 1) / args.subframes)) for j in range(args.subframes))
         self.halt = self.RF.HaltereReflex(self.body.params)
@@ -226,7 +234,7 @@ class F0Plant:
         feed = command["feed"]
         if pm.landed:
             body.set_legs("feed" if feed["proboscis_extended"] else "stand")
-        terms = self.terms.at(k)
+        terms = self.terms.at(k // self.stride)     # recorded terms are constant per 25 ms block (v1 step)
         t_brain = 0.0 if a.no_brain_steer else command["steer"]["turn_dn"]
         t_tot = self.HS.combine_turn(t_brain, terms["turn_hand"], terms["turn_flyvis"])
         pitch_down, roll_right = terms["pitch_hand"], terms["roll_hand"]
@@ -292,8 +300,23 @@ class F0Decider:
         return out
 
 
+def to_intervals(args, stride: int):
+    """Copy of ``args`` with n_steps / calib_steps / persist_steps (given in v1 steps of 25 ms) converted to coupling
+    intervals; the original is not modified and the v1-step values are kept in ``v1_steps`` (run meta)."""
+    a = copy.copy(args)
+    a.v1_steps = dict(n_steps=args.n_steps, calib_steps=args.calib_steps, persist_steps=args.persist_steps)
+    a.stride = stride
+    a.n_steps, a.calib_steps, a.persist_steps = (args.n_steps * stride, args.calib_steps * stride,
+                                                 args.persist_steps * stride)
+    return a
+
+
 def run(args, log=print) -> dict:
     from coupling.scheduler import CoupledLoop, LoopConfig
+    stride = int(round(25.0 / args.interval_ms))
+    if abs(stride * args.interval_ms - 25.0) > 1e-9:
+        raise SystemExit("the interval must divide 25 ms (the unit of the replayed terms)")
+    args = to_intervals(args, stride)
     terms = RecordedTerms(V1_RECORD)
     if free_gb() < MIN_FREE_GB:
         raise SystemExit(f"only {free_gb():.1f} GB RAM available (< {MIN_FREE_GB}); not starting a full-brain run")
@@ -315,7 +338,7 @@ def run(args, log=print) -> dict:
     p["bridge"].set_baseline(base)
     plant.stage = "cut"
     CoupledLoop(engine, plant, dec, cfg).run(args.persist_steps)
-    persist_rate = float(engine.rates(["all"], args.interval_ms)["all"].mean())
+    persist_rate = float(engine.rates(["all"], 25.0)["all"].mean())      # last 25 ms of the cut (the v1 step)
     p["bridge"].set_baseline(base)          # the filter starts the flight at the perch baseline (as in v1)
     log(f"calibration done ({time.time() - t0:.0f} s); net rate after the input cut {persist_rate:.3f} Hz")
 
@@ -355,7 +378,7 @@ def run(args, log=print) -> dict:
                  seed=args.seed)
     path = rec.close(extra)
     log(f"done in {wall:.0f} s -> {path}")
-    res = dict(path=str(path), criteria=criteria(path), vs_v1=compare(path), wall_s=wall)
+    res = dict(path=str(path), criteria=criteria(path), vs_v1=compare(path, stride=stride), wall_s=wall)
     Path(str(path).replace("_data.h5", "_report.json")).write_text(json.dumps(res, indent=1, default=str))
     return res
 
@@ -387,8 +410,10 @@ def parse_args(argv=None):
     ap.add_argument("--allow-acausal", action="store_true")
     ap.add_argument("--interval-ms", type=float, default=25.0, help="25 ms reproduces v1 (5 ms is the new default)")
     ap.add_argument("--subframes", type=int, default=2)
+    ap.add_argument("--boundary-transduction", default=str(ROOT / "data" / "visual_transduction.json"),
+                    help="must be calibrated at dt = interval / subframes (scripts/make_transduction.py)")
     ap.add_argument("--seed", type=int, default=3)
-    ap.add_argument("--n-steps", type=int, default=300)
+    ap.add_argument("--n-steps", type=int, default=300, help="in v1 steps of 25 ms")
     ap.add_argument("--calib-steps", type=int, default=10)
     ap.add_argument("--persist-steps", type=int, default=8)
     ap.add_argument("--no-brain-steer", dest="no_brain_steer", action="store_true", default=True)
