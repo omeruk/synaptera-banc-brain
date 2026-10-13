@@ -1,0 +1,359 @@
+{
+ "flywire_reference": {
+  "labellar": {
+   "n_driven": 36,
+   "network": 0.0917082013959516,
+   "G": 0.0018362463962487048,
+   "mn9": 59.666666666666664
+  },
+  "leg": {
+   "n_driven": 12,
+   "network": 0.018150255940488125,
+   "G": 0.0007940973499630904,
+   "mn9": 1.0
+  }
+ },
+ "arms": {
+  "R3": {
+   "graph": "banc888_full_v3",
+   "neurons": 158262,
+   "pairs": 13414125,
+   "synapses": 41938506,
+   "gate1_pass": true,
+   "gate2_ignited": 0,
+   "gate2_n": 50,
+   "gate2_ci": [
+    0.0,
+    0.07112173646419764
+   ],
+   "last_cut_step_mean_hz": 0.0,
+   "peak_rss_gb": 2.710592,
+   "total_wall_s": 591.5244598388672,
+   "mn9_symmetry": [
+    {
+     "type": "MN9",
+     "n_left": 1,
+     "n_right": 1,
+     "in_left": 2446.0,
+     "in_right": 3183.0,
+     "exc_left": 1000.0,
+     "exc_right": 1397.0,
+     "log2_total": 0.37996275310853433,
+     "log2_exc": 0.4823320207473761,
+     "pass": true
+    }
+   ],
+   "gate3_labellar": {
+    "G": 0.00019896062514225017,
+    "G_ratio": 0.10835181245213595,
+    "network_rate_hz": 0.074204167772428,
+    "literal_ratio": 0.8091333887582239,
+    "pass_": false,
+    "n_seeds": 10
+   },
+   "gate3_leg": {
+    "G": 0.00014039177051469888,
+    "G_ratio": 0.17679415568031334,
+    "network_rate_hz": 0.22790246553183957,
+    "literal_ratio": 12.55643260784291,
+    "pass_": false,
+    "n_seeds": 10
+   },
+   "gate3_pass": false,
+   "mn9_labellar_mean_hz": 6.8,
+   "mn9_labellar_sem_hz": 0.3,
+   "mn9_responds": true,
+   "gates_pass": false,
+   "candidate": false,
+   "by_condition": {
+    "labellar": {
+     "per_neuron": [
+      13.6,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.074204167772428,
+     "mn9_mean_hz": 6.8,
+     "mn9_sem_hz": 0.3
+    },
+    "leg": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.22790246553183957,
+     "mn9_mean_hz": 0.0,
+     "mn9_sem_hz": 0.0
+    },
+    "labellar_left": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.028977265547004333,
+     "mn9_mean_hz": 0.0,
+     "mn9_sem_hz": 0.0
+    },
+    "labellar_right": {
+     "per_neuron": [
+      13.1,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.04452490174520732,
+     "mn9_mean_hz": 6.55,
+     "mn9_sem_hz": 0.42459130676189993
+    }
+   },
+   "antennal_lobe": {
+    "leading_eig_signed_syn": 2247.806156966073,
+    "leading_eig_exc_syn": 2408.85796856042,
+    "n_alln": 429,
+    "n_alpn": 699
+   }
+  },
+  "N_v2": {
+   "graph": "banc888_full_v2",
+   "neurons": 158262,
+   "pairs": 11582757,
+   "synapses": 35431027,
+   "gate1_pass": true,
+   "gate2_ignited": 0,
+   "gate2_n": 50,
+   "gate2_ci": [
+    0.0,
+    0.07112173646419764
+   ],
+   "last_cut_step_mean_hz": 0.02003765907166597,
+   "peak_rss_gb": 2.474496,
+   "total_wall_s": 586.1370503902435,
+   "mn9_symmetry": [
+    {
+     "type": "MN9",
+     "n_left": 1,
+     "n_right": 1,
+     "in_left": 2023.0,
+     "in_right": 2585.0,
+     "exc_left": 832.0,
+     "exc_right": 1144.0,
+     "log2_total": 0.35366796064401407,
+     "log2_exc": 0.45943161863729726,
+     "pass": true
+    }
+   ],
+   "gate3_labellar": {
+    "G": 0.0007326061362173949,
+    "G_ratio": 0.398969407217924,
+    "network_rate_hz": 0.12220495128331502,
+    "literal_ratio": 1.332541140521263,
+    "pass_": true,
+    "n_seeds": 10
+   },
+   "gate3_leg": {
+    "G": 8.045117407602343e-05,
+    "G_ratio": 0.10131147532448358,
+    "network_rate_hz": 0.21006685117084328,
+    "literal_ratio": 11.573767987604137,
+    "pass_": false,
+    "n_seeds": 10
+   },
+   "gate3_pass": false,
+   "mn9_labellar_mean_hz": 6.8,
+   "mn9_labellar_sem_hz": 0.7608474807008885,
+   "mn9_responds": true,
+   "gates_pass": false,
+   "candidate": false,
+   "by_condition": {
+    "labellar": {
+     "per_neuron": [
+      13.6,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.12220495128331502,
+     "mn9_mean_hz": 6.8,
+     "mn9_sem_hz": 0.7608474807008885
+    },
+    "leg": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.21006685117084328,
+     "mn9_mean_hz": 0.0,
+     "mn9_sem_hz": 0.0
+    },
+    "labellar_left": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.05930419178324551,
+     "mn9_mean_hz": 0.0,
+     "mn9_sem_hz": 0.0
+    },
+    "labellar_right": {
+     "per_neuron": [
+      32.9,
+      1.7
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.09953937142207227,
+     "mn9_mean_hz": 17.3,
+     "mn9_sem_hz": 0.6798692684790381
+    }
+   },
+   "antennal_lobe": {
+    "leading_eig_signed_syn": 1998.6266690969069,
+    "leading_eig_exc_syn": 2176.5973521756364,
+    "n_alln": 429,
+    "n_alpn": 699
+   }
+  },
+  "N_v3": {
+   "graph": "banc888_full_v3",
+   "neurons": 158262,
+   "pairs": 13414125,
+   "synapses": 41938506,
+   "gate1_pass": true,
+   "gate2_ignited": 0,
+   "gate2_n": 50,
+   "gate2_ci": [
+    0.0,
+    0.07112173646419764
+   ],
+   "last_cut_step_mean_hz": 0.008244556494926135,
+   "peak_rss_gb": 2.70944,
+   "total_wall_s": 603.3608961105347,
+   "mn9_symmetry": [
+    {
+     "type": "MN9",
+     "n_left": 1,
+     "n_right": 1,
+     "in_left": 2446.0,
+     "in_right": 3183.0,
+     "exc_left": 1000.0,
+     "exc_right": 1397.0,
+     "log2_total": 0.37996275310853433,
+     "log2_exc": 0.4823320207473761,
+     "pass": true
+    }
+   ],
+   "gate3_labellar": {
+    "G": 0.0006457176013734697,
+    "G_ratio": 0.3516508474530519,
+    "network_rate_hz": 0.11439006204900733,
+    "literal_ratio": 1.2473264147349967,
+    "pass_": true,
+    "n_seeds": 10
+   },
+   "gate3_leg": {
+    "G": 0.00010685469240379126,
+    "G_ratio": 0.1345612000956279,
+    "network_rate_hz": 0.21793039390377983,
+    "literal_ratio": 12.00701492135096,
+    "pass_": false,
+    "n_seeds": 10
+   },
+   "gate3_pass": false,
+   "mn9_labellar_mean_hz": 3.55,
+   "mn9_labellar_sem_hz": 0.45,
+   "mn9_responds": false,
+   "gates_pass": false,
+   "candidate": false,
+   "by_condition": {
+    "labellar": {
+     "per_neuron": [
+      6.4,
+      0.7
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.11439006204900733,
+     "mn9_mean_hz": 3.55,
+     "mn9_sem_hz": 0.45
+    },
+    "leg": {
+     "per_neuron": [
+      0.0,
+      0.0
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.21793039390377983,
+     "mn9_mean_hz": 0.0,
+     "mn9_sem_hz": 0.0
+    },
+    "labellar_left": {
+     "per_neuron": [
+      0.0,
+      2.1
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.05936295509977126,
+     "mn9_mean_hz": 1.05,
+     "mn9_sem_hz": 0.26299556396765833
+    },
+    "labellar_right": {
+     "per_neuron": [
+      26.0,
+      2.2
+     ],
+     "sides": [
+      "left",
+      "right"
+     ],
+     "network_rate_hz": 0.08802049765578598,
+     "mn9_mean_hz": 14.1,
+     "mn9_sem_hz": 0.9712534856222309
+    }
+   },
+   "antennal_lobe": {
+    "leading_eig_signed_syn": 1817.5254268971773,
+    "leading_eig_exc_syn": 2011.0174889032514,
+    "n_alln": 429,
+    "n_alpn": 699
+   }
+  }
+ },
+ "response_threshold_hz": 5.966666666666667,
+ "decision": {
+  "candidates": [],
+  "chosen": null
+ }
+}

@@ -159,3 +159,24 @@ def test_full_graph_adapter_toy(tmp_path):
     with pytest.raises(ValueError):
         banc.load_connectome_full(tmp_path / "n.csv.gz", tmp_path / "e.feather", tmp_path / "m.feather",
                                   neuron_set="x", hash_files=False)
+
+
+def test_full_graph_adapter_data_source_label(tmp_path):
+    n = pd.DataFrame({"Root ID": [10, 20], "Primary Cell Type": ["A", "B"], "Alternative Cell Type(s)": [np.nan] * 2,
+                      "Class": ["x", "y"], "Super Class": ["central_brain_intrinsic"] * 2,
+                      "Soma side": ["left", "right"], "Predicted NT type": ["ACH", "GABA"],
+                      "Predicted NT confidence": [0.9, 0.8], "Sub Class": [np.nan] * 2, "Body Part": [np.nan] * 2,
+                      "Function": [np.nan] * 2, "Flow": [np.nan] * 2, "Verified NT type": [np.nan] * 2,
+                      "Nerve": [np.nan] * 2, "Hemilineage": [np.nan] * 2})
+    n.to_csv(tmp_path / "n.csv.gz", index=False)
+    pd.DataFrame({"pre": ["10"], "post": ["20"], "count": [4], "norm": [1.0], "post_count": [4], "pre_count": [4]}
+                 ).to_feather(tmp_path / "e.feather")
+    pd.DataFrame({"banc_888_id": ["10", "20"], "cell_type": ["A", "B"], "cell_class": ["c"] * 2,
+                  "super_class": ["central_brain_intrinsic"] * 2, "side": ["left", "right"],
+                  "neurotransmitter_predicted": ["acetylcholine", "gaba"], "neurotransmitter_score": [0.9, 0.8],
+                  "cell_sub_class": [None] * 2, "body_part_sensory": [None] * 2, "cell_function": [None] * 2,
+                  "flow": [None] * 2, "neurotransmitter_verified": [None] * 2, "nerve": [None] * 2,
+                  "hemilineage": [None] * 2}).to_feather(tmp_path / "m.feather")
+    cx = banc.load_connectome_full(tmp_path / "n.csv.gz", tmp_path / "e.feather", tmp_path / "m.feather",
+                                   hash_files=False, data_source="banc888_full_v3")
+    assert cx.meta["data_source"] == "banc888_full_v3"

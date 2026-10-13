@@ -1168,6 +1168,18 @@
       "unit": "",
       "config_file": "configs/vision_boundary.yaml",
       "used_in": []
+    },
+    "connectome.innorm_clip": {
+      "value": [
+        0.25,
+        4.0
+      ],
+      "unit": "ratio",
+      "origin": "E",
+      "source": "engineering guard of the per-neuron input normalisation (prereg/05 section 2.1): the factor s = FlyWire / BANC mean input synapses of the neuron's type is clipped to [0.25, 4]; the per-neuron s itself is origin P (computed from data only, not fitted to any rate)",
+      "used_in": [
+        "connectome/innorm.py:CLIP"
+      ]
     }
   }
 }

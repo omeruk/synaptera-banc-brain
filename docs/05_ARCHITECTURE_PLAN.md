@@ -185,6 +185,18 @@ to 1.76. On this graph the unmodified reference arm still leaves MN9 silent (0.0
 and 2 pass, gate 3 fails below 0.2; the all-neuron sensitivity set gives the same). Stopped per the registration; the
 next route (per-neuron input normalisation or an E/I-preserving scale) needs its own pre-registration.
 
+**Finding from the v3 graph and per-neuron input normalisation (2026-10-13; `prereg/05_banc_v3_and_innorm.md`,
+`docs/results/f2_innorm.md`, `docs/results/f2_v3_qa.md`):** no arm qualifies as a candidate BANC reference. The v3 edge
+list (`size >= 10`; 13.4 M pairs, 41.9 M synapses among the Codex neurons) lowers the FlyWire / BANC in-synapse ratio to
+1.47; its antennal-lobe leading eigenvalue (2,248) equals FlyWire's (2,184). Gates 1 and 2 pass in all three arms (0 / 50
+ignitions). Gate 3 fails on the lower bound for the leg drive in every arm (0.10-0.18) and, for the labellar drive, in
+R3 (0.11) but not in N (0.35-0.40). MN9 under labellar drive: R3 6.8 Hz, N on v2 6.8 Hz (just above the 5.97 Hz
+threshold, 11 % of FlyWire), N on v3 3.5 Hz (no); in R3 and N on v2 the response is carried by one MN9 neuron (left,
+13.6 Hz; right 0.0 Hz) although the MN9 input-synapse symmetry gate passes, and the left neuron responds to the
+right-sided labellar drive only. Leg drive: MN9 0.0 Hz in all arms. For arm N the leg results carry the registered
+VNC-dendrite caveat (ascending neurons sit at the 0.25 clip); R3, without normalisation, shows the same leg result.
+Stopped per the registration; any further route needs a new pre-registration and the project owner's decision.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
