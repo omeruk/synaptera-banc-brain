@@ -226,6 +226,7 @@ above ~2.3 Hz). Options (each labelled as a **model variant**): (i) remove amine
 | DNa01 fails the gate (+0.63); DNa02 (+0.14) and DNp15 (+0.23) pass on BANC (DNp15 fails on FlyWire, R/L 1.66x) | n/a | steering readout | DNa02 stays the primary steering drive; DNp15 needs no waiver on BANC (still needs one on FlyWire) |
 | LB3b sugar GRNs are asymmetric (labellar sugar GRNs 41 L / 49 R; LB3b 20 L / 40 R in the neuron table) | high | sugar -> MN9 | sugar -> MN9 results are reported **per side** (drive left only / right only / both), never only pooled |
 | The antennal lobe has the same self-excitatory structure on BANC (internal excitatory fraction 76.6 %) | medium | spontaneous ignition | the pre-registered ignition-frequency check (`prereg/02`) applies to BANC runs too, with its own seeds and the same definition |
+| Structural w_syn scaling puts BANC in the self-sustaining regime (F2 prep calibration, `docs/results/f2_wsyn_calibration.md`) | high (observed) | every BANC closed-loop run | none of A / A2 / B passed the gates (ignition after the cut 18-20 / 20 at scales 2.4-3.0); the reference arm is silent at MN9. A new pre-registration is needed before any F2 test on BANC (e.g. input normalisation, inhibition scale); the reference arm result is reported as is |
 | Licence | low | publication | BANC CC BY 4.0; FlyWire CC BY-NC; derived files in a separate bundle |
 
 ## 9. First concrete steps

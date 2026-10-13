@@ -17,3 +17,9 @@ groups:
       wsyn_struct_class_k_descending: 1.8372947271328797
       wsyn_struct_class_k_ascending: 1.6842895938059743
       wsyn_struct_class_k_motor: 3.4968697205406167
+  - origin: F
+    source: "variant B (wsyn_fit_mn9), calibration run of 2026-10-13, runs/f2/banc_v2.json; the FlyWire validation of the operational definition FAILED (docs/results/f2_wsyn_calibration.md), so B is reported and not used"
+    fitted_to: "Shiu et al. criterion, operational definition of prereg/03 section 4: labellar sugar GRNs at 100 Hz give 0.80 of the maximal (max over 20-200 Hz) MN9 rate; open-loop physiology, seeds 1000-1001"
+    unit: "scale of the recurrent synaptic weights"
+    values:
+      wsyn_fit_mn9_scale: 2.395519204141844

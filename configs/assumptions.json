@@ -498,6 +498,15 @@
       "config_file": "configs/banc_wsyn.yaml",
       "used_in": []
     },
+    "banc_wsyn.wsyn_fit_mn9_scale": {
+      "value": 2.395519204141844,
+      "origin": "F",
+      "source": "variant B (wsyn_fit_mn9), calibration run of 2026-10-13, runs/f2/banc_v2.json; the FlyWire validation of the operational definition FAILED (docs/results/f2_wsyn_calibration.md), so B is reported and not used",
+      "unit": "scale of the recurrent synaptic weights",
+      "fitted_to": "Shiu et al. criterion, operational definition of prereg/03 section 4: labellar sugar GRNs at 100 Hz give 0.80 of the maximal (max over 20-200 Hz) MN9 rate; open-loop physiology, seeds 1000-1001",
+      "config_file": "configs/banc_wsyn.yaml",
+      "used_in": []
+    },
     "body_flight.phi0_deg": {
       "value": 140.0,
       "origin": "P",
