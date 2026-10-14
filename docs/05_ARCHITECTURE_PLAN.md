@@ -416,6 +416,25 @@ All parameters come from the literature with an origin class and are fixed befor
   - Whether to change the refractory handling, the GF input path or the adaptation strength is the owner's decision;
     nothing was changed.
 
+**Record after neuron model v2 (project owner, 2026-10-14, PR #18 merged):**
+- ACG uses a generic (non-*Drosophila*) adaptation. It suppresses activity and gives no optomotor steering.
+- The gap junctions make TTMn follow the GF (following 0.83, capped by the refractory input drop).
+- **Key observation.** On fresh seeds, R is significantly anti-directional (S = -4.10 Hz), and hg4 sets the sign.
+  - b3, i1 and hg1 agree with Lindsay et al. 2017.
+  - In the fly, hg4 co-varies with them.
+  - This points to a possible side-labelling error.
+- The GF-PSI pairing rule and the 68.75 mV gap kick (`E`) stay for now.
+
+**Next step (project owner, 2026-10-14): side-convention audit** (`prereg/13_side_audit.md`). Data and literature only,
+no simulations.
+- **Rule.** A motor neuron's side is the side of its muscle, i.e. the side of the peripheral nerve its axon leaves through
+  (BANC nerve annotation, else cited anatomy).
+- **Scope.** The rule is applied to every MN type, never to hg4 alone.
+- **Chain.** Every link of the left/right chain is unit-checked: rot_right -> eye images -> FlyVis eye -> boundary side
+  -> FlyWire side -> bridge -> BANC DN side -> BANC MN side -> mapping side.
+- **If anything is relabelled.** The docs/08 prediction is recomputed from the existing F3b-3 and mv2 R records into new
+  files labelled "post-audit". Earlier results a swap would touch are listed, not recomputed.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
