@@ -435,6 +435,23 @@ no simulations.
 - **If anything is relabelled.** The docs/08 prediction is recomputed from the existing F3b-3 and mv2 R records into new
   files labelled "post-audit". Earlier results a swap would touch are listed, not recomputed.
 
+**Outcome of the side audit (2026-10-14; `docs/results/side_audit.md`, `docs/results/side_audit_post_audit.md`,
+prereg/13).**
+- **Chain.** All eight links are OK. This covers rot_right -> eyes -> FlyVis -> boundary -> FlyWire -> bridge -> BANC DN
+  -> BANC MN -> mapping.
+- **hg4.** hg4 is not mislabelled. Its soma and its exit nerve (mesothoracic accessory nerve, as in Azevedo et al. 2024)
+  are on the same side on both sides of the fly, and so are those of every other mapping type (b2, b3, i1, i2,
+  hg1-hg3). The anti-directional S of R is therefore not a side-labelling artefact of the MN or chain conventions
+  checked here.
+- **What the rule relabels in the readouts.**
+  - DLM5: contralateral soma, as described for MN5 in the literature.
+  - PSI: its axon leaves through the contralateral PDMN.
+  - Neck types: ADNM2, CvN6 and CvN9 are swapped; ADNM1 and CvN7 are mixed.
+  - No steering MN type changes, so the post-audit S equals the pre-audit S in both records.
+- **Earlier results touched by the relabelled types** (listed, not recomputed): F1 QA, F3a / F3a-2 / F3a-3 power, neck
+  and PSI rows, and the mv2 per-side MN rates.
+- **Relevant to the open GF-PSI question.** By the nerve rule, each PSI's effector side is opposite its soma.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.

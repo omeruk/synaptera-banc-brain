@@ -11,6 +11,7 @@ per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_en
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
     env -u PYTHONPATH python scripts/verify_report.py --print    # only print the recomputed strings
 """
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -904,6 +905,87 @@ def check_mv2():
     return n, bad
 
 
+SIDE_MD = ROOT / "docs" / "results" / "side_audit.md"
+SIDE_JSON = ROOT / "docs" / "results" / "side_audit.json"
+SIDE_POST_MD = ROOT / "docs" / "results" / "side_audit_post_audit.md"
+SIDE_POST_JSON = ROOT / "docs" / "results" / "side_audit_post_audit.json"
+
+
+def check_side_audit():
+    """Side audit (prereg/13). The JSON files are rebuilt from the data and compared, the markdown re-rendered and
+    compared; the relabelled motor neurons are recounted from the two annotation tables with plain loops, and the
+    post-audit S of `ensemble` is recomputed with the relabelled keys."""
+    import csv
+    import gzip
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import pandas as pd
+    import side_audit as A
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(SIDE_JSON.read_text())
+    post = json.loads(SIDE_POST_JSON.read_text()) if SIDE_POST_JSON.exists() else None
+    o, p = A.build()
+    norm = lambda x: json.dumps(json.loads(json.dumps(x)), sort_keys=True)  # noqa: E731
+    chk("side:json_equals_rebuild", norm(stored) == norm(o))
+    chk("side:md_equals_render", SIDE_MD.read_text() == A.render(stored))
+    chk("side:post_presence", (post is None) == (p is None) == (not stored["post_audit_triggered"]))
+    if post is not None:
+        chk("side:post_json_equals_rebuild", norm(post) == norm(p))
+        chk("side:post_md_equals_render", SIDE_POST_MD.read_text() == A.render_post(post))
+    # plain recount: Codex soma side vs the side prefix of the meta nerve, motor neurons only
+    soma = {}
+    with gzip.open(A.CODEX_BANC, "rt") as fh:
+        for r in csv.DictReader(fh):
+            soma[int(r["Root ID"])] = (r["Soma side"].strip().lower(), r["Primary Cell Type"])
+    meta = pd.read_feather(A.META, columns=["banc_888_id", "super_class", "nerve"])
+    relab, per_type = 0, {}
+    for i, sc, nv in zip(meta["banc_888_id"], meta["super_class"], meta["nerve"]):
+        if sc != "motor":
+            continue
+        s, t = soma[int(i)]
+        ns = nv.split("_")[0] if isinstance(nv, str) and nv.split("_")[0] in ("left", "right") else None
+        if ns is not None and ns != s:
+            relab += 1
+            per_type[t] = per_type.get(t, 0) + 1
+    chk("side:n_relabelled", relab == sum(c["n_relabelled"] for c in stored["section1"]["by_class"].values()), relab)
+    for t, r in stored["section1"]["types"].items():
+        chk(f"side:{t}:n_relabelled", per_type.get(t, 0) == r["n_relabelled"], per_type.get(t, 0))
+    chk("side:relabelled_types", sorted(per_type) == stored["section1"]["relabelled_types"], sorted(per_type))
+    # post-audit S with plain loops
+    if post is not None:
+        lat = {"b2": 1, "b3": -1, "i1": -1, "i2": -1, "hg1": -1, "hg2": -1, "hg3": -1, "hg4": -1}
+        swapped = set(post["swapped_types"])
+        for name, x in post["records"].items():
+            d = json.loads((ROOT / x["record"]).read_text())
+            by = {}
+            for r in d["replay"]:
+                rr = {}
+                for k, v in r["rate_hz"].items():
+                    t, _, sd = k.rpartition("|")
+                    rr[f"{t}|{('right' if sd == 'left' else 'left')}" if t in swapped else k] = v
+                by[(r["arm"], r["stimulus"], r["seed"])] = rr
+            seeds = sorted({r["seed"] for r in d["replay"]})
+
+            def S(arm, seed):
+                def dA(st):
+                    rr = by[(arm, st, seed)]
+                    return sum(sg * (rr.get(f"{t}|left", 0.0) - rr.get(f"{t}|right", 0.0)) for t, sg in lat.items())
+                return (dA("rot_right") - dA("rot_left")) / 2.0
+
+            ens = sum(S("ensemble", s) for s in seeds) / len(seeds)
+            chk(f"side:post:{name}:S", abs(ens - x["post_audit"]["S_mean"]) < 1e-9, ens)
+            rnd = [sum(S(a, s) for s in seeds) / len(seeds) for a in d["constants"]["arms"] if a.startswith("random_")]
+            chk(f"side:post:{name}:n_random_ge", sum(1 for v in rnd if abs(v) >= abs(ens)) == x["post_audit"]["n_random_abs_ge"])
+            chk(f"side:post:{name}:sha", hashlib.sha256((ROOT / x["record"]).read_bytes()).hexdigest() == x["sha256"])
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -984,6 +1066,10 @@ def main(argv=None):
         bad += b
     if MV2_MD.exists():
         k, b = check_mv2()
+        n += k
+        bad += b
+    if SIDE_MD.exists():
+        k, b = check_side_audit()
         n += k
         bad += b
     if "--print" in argv:
