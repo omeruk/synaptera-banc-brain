@@ -215,3 +215,17 @@ def test_assumptions_register_the_v2_constants():
     for k in ("model_v2.adapt_a", "model_v2.adapt_b_v", "model_v2.adapt_tau_w_s", "model_v2.e_exc_v",
               "model_v2.e_inh_v", "model_v2.dg_exc", "model_v2.dg_inh", "model_v2.gap_dv_v"):
         assert k in reg
+
+
+@pytest.mark.parametrize("arm", ["R", "ACG"])
+def test_input_during_refractoriness_is_lost(arm):
+    """Post-hoc (prereg/12 test iv): the Shiu engine discards synaptic input that arrives while the target is refractory
+    (Brian2 holds the '(unless refractory)' variables). Documented here as a property of the reference model, not changed."""
+    mv = None if arm == "R" else MV.ModelVariant.arm("ACG", gap_pairs=[(0, 1)])
+    eng = L.Brian2LIFEngine(chain_cx(200, 1), model_variant=mv)
+    eng.neu.v[1] = -40 * mV                         # the target spikes at t = 0 and is refractory for 2.2 ms
+    for k in range(60):
+        if k == 0:
+            eng.neu.v[0] = -40 * mV                 # chemical input arrives at 1.8 ms; the gap kick (ACG) at 0.1 ms
+        eng.advance(0.1)
+    assert int(eng.spike_counts()[1]) == 1           # no second spike: both inputs fell into the refractory period
