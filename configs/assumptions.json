@@ -1212,6 +1212,87 @@
       "used_in": [
         "scripts/f3b1_common.py:BRIDGE_LATENCY_INTERVALS"
       ]
+    },
+    "model_v2.adapt_a": {
+      "value": 0.13333333333333333,
+      "unit": "1 (a / g_L)",
+      "origin": "P",
+      "source": "Brette & Gerstner 2005, J Neurophysiol 94:3637-3642, doi 10.1152/jn.00686.2005, Table 1 (aEIF parameters: g_L 30 nS, a 4 nS, b 0.0805 nA, tau_w 144 ms); general value: no fitted Drosophila AdEx parameters were found (owner rule: cited general value, origin P); converted to the voltage form of the Shiu equation by dividing by g_L",
+      "used_in": [
+        "engine/model_variants.py:ADAPT_A"
+      ]
+    },
+    "model_v2.adapt_b_v": {
+      "value": 0.0026833333333333336,
+      "unit": "V (b / g_L)",
+      "origin": "P",
+      "source": "Brette & Gerstner 2005, J Neurophysiol 94:3637-3642, doi 10.1152/jn.00686.2005, Table 1 (aEIF parameters: g_L 30 nS, a 4 nS, b 0.0805 nA, tau_w 144 ms); general value: no fitted Drosophila AdEx parameters were found (owner rule: cited general value, origin P); spike-triggered jump of the adaptation variable in volts, b / g_L = 2.683 mV",
+      "used_in": [
+        "engine/model_variants.py:ADAPT_B_V"
+      ]
+    },
+    "model_v2.adapt_tau_w_s": {
+      "value": 0.144,
+      "unit": "s",
+      "origin": "P",
+      "source": "Brette & Gerstner 2005, J Neurophysiol 94:3637-3642, doi 10.1152/jn.00686.2005, Table 1 (aEIF parameters: g_L 30 nS, a 4 nS, b 0.0805 nA, tau_w 144 ms); general value: no fitted Drosophila AdEx parameters were found (owner rule: cited general value, origin P)",
+      "used_in": [
+        "engine/model_variants.py:ADAPT_TAU_W_S"
+      ]
+    },
+    "model_v2.e_exc_v": {
+      "value": 0.0,
+      "unit": "V",
+      "origin": "P",
+      "source": "reversal potential of the excitatory (cholinergic, cation) conductance; project owner's value (2026-10-14), the standard value for nicotinic receptors",
+      "used_in": [
+        "engine/model_variants.py:COND_E_EXC_V"
+      ]
+    },
+    "model_v2.e_inh_v": {
+      "value": -0.074,
+      "unit": "V",
+      "origin": "M",
+      "source": "chloride reversal potential of adult Drosophila flight motoneuron MN5, -74 +- 4 mV (sharp electrode, GABA puffs): Ryglewski, Vonhoff, Scheckel & Duch 2017, Neuron 93:632-645, doi 10.1016/j.neuron.2016.12.043, Fig. 4C,E. Used for GABA (Rdl) and glutamate (GluCl) synapses, both chloride channels; measured in one cell type and applied to every neuron",
+      "used_in": [
+        "engine/model_variants.py:COND_E_INH_V"
+      ]
+    },
+    "model_v2.dg_exc": {
+      "value": 0.0052912003,
+      "unit": "1 (conductance / g_L per synapse)",
+      "origin": "F",
+      "fitted_to": "peak PSP of ONE excitatory synapse at rest (v_0 = -52 mV) equals the peak PSP of one Shiu synapse (w_syn 0.275 mV, tau 5 ms, t_mbr 20 ms): 0.04331 mV; owner's criterion (2026-10-14); computed by engine/model_variants.py:calibrate_dg without any network run",
+      "source": "engine/model_variants.py:calibrate_dg (RK4, 1 us step, bisection)",
+      "used_in": [
+        "engine/model_variants.py:COND_DG_EXC"
+      ]
+    },
+    "model_v2.dg_inh": {
+      "value": 0.0125153142,
+      "unit": "1 (conductance / g_L per synapse)",
+      "origin": "F",
+      "fitted_to": "peak PSP of ONE inhibitory synapse at rest (v_0 = -52 mV) equals the peak PSP of one Shiu synapse (w_syn 0.275 mV, tau 5 ms, t_mbr 20 ms): 0.04331 mV; owner's criterion (2026-10-14); computed by engine/model_variants.py:calibrate_dg without any network run",
+      "source": "engine/model_variants.py:calibrate_dg (RK4, 1 us step, bisection)",
+      "used_in": [
+        "engine/model_variants.py:COND_DG_INH"
+      ]
+    },
+    "model_v2.gap_dv_v": {
+      "value": 0.06875,
+      "unit": "V",
+      "origin": "E",
+      "source": "instantaneous jump of the postsynaptic v at each presynaptic spike of a registered electrical synapse; equal to the model's own suprathreshold kick w_syn * f_poi (Shiu: '250 is sufficient to cause spiking'). Engineering realisation of the measured property of the GF-TTMn / GF-PSI junctions: 1:1 transmission with < 1 ms latency, lost in shakB2 (Phelan et al. 2008 Curr Biol 18:1955, Fig. 3K-M; Tanouye & Wyman 1980). The point model has no spike waveform, so a coupling conductance cannot be applied to it",
+      "used_in": [
+        "engine/model_variants.py:GAP_DV_V"
+      ]
+    },
+    "model_v2.gap_min_chemical_synapses": {
+      "value": 1,
+      "unit": "synapses",
+      "origin": "E",
+      "source": "configs/gap_junctions.yaml pairing rule: a registered pre cell is coupled to every post cell of the registered type on which it has >= 1 chemical synapse (mixed electrochemical synapses)",
+      "used_in": []
     }
   }
 }

@@ -45,6 +45,8 @@ GATE2_GROUPS = ("DNg02",) + STEER_FAMILIES
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
+    ap.add_argument("--arm", default="R", choices=("R", "A", "AC", "ACG"),
+                    help="neuron model arm (prereg/12; R = the unmodified reference of prereg/08)")
     a = ap.parse_args(argv)
     out = Path(a.out)
     if out.exists():
@@ -83,8 +85,15 @@ def main(argv=None):
             ii = np.flatnonzero((msk & (n["side"] == s)).to_numpy())
             if len(ii):
                 idx_ts[f"{t}|{s}"] = ii
-    eng = Brian2LIFEngine(cx, input_groups=groups, seed=0)
+    from mv2_common import model_variant
+    mv = model_variant(a.arm, cx)
+    eng = Brian2LIFEngine(cx, input_groups=groups, seed=0, model_variant=mv)
     eng.set_weight_scale(1.0)
+    if a.arm != "R":
+        res["model_arm"] = a.arm
+        res["model_variant"] = mv.record()
+        res["gap_pairs"] = [dict(pre=str(n["cell_type"].iloc[i]), pre_side=str(n["side"].iloc[i]),
+                                 post=str(n["cell_type"].iloc[j]), post_side=str(n["side"].iloc[j])) for i, j in mv.gap_pairs]
     res["model_sha256"] = eng.model_sha256
     res["weights_sha256"] = eng.state_dict()["weights_sha256"]
     dur = N_ON * STEP_MS * 1e-3

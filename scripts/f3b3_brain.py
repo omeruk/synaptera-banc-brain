@@ -28,9 +28,19 @@ F3B1_STIM = ROOT / "runs" / "f3b1" / "stim_rates.npz"
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(ROOT / "runs" / "f3b3"))
+    ap.add_argument("--arm", default="R", choices=("R", "A", "AC", "ACG"),
+                    help="neuron model arm (prereg/12; R = the unmodified reference of prereg/11)")
+    ap.add_argument("--seeds", default=None, help="first-last brain seeds (default: prereg/11 seeds 10-29)")
+    ap.add_argument("--stim-from", default=None,
+                    help="directory with stim_rates.npz + input_check.json of an earlier render to reuse (copied)")
     a = ap.parse_args(argv)
+    seeds = C.SEEDS if a.seeds is None else tuple(range(int(a.seeds.split("-")[0]), int(a.seeds.split("-")[1]) + 1))
     out = Path(a.out)
     (out / "brain").mkdir(parents=True, exist_ok=True)
+    if a.stim_from and not (out / "stim_rates.npz").exists():
+        import shutil
+        for f in ("stim_rates.npz", "input_check.json"):
+            shutil.copyfile(Path(a.stim_from) / f, out / f)
     t0 = time.time()
     print(f"free {free_gb():.1f} GB", flush=True)
     if free_gb() < MIN_FREE_GB:
@@ -64,14 +74,18 @@ def main(argv=None):
     dn_idx = np.flatnonzero((n["super_class"] == "descending").to_numpy())
     dn_tab = dict(index=dn_idx, cell_type=n["cell_type"].astype(str).to_numpy()[dn_idx],
                   side=n["side"].astype(str).to_numpy()[dn_idx])
-    eng = Brian2LIFEngine(cx, input_groups=groups_in, seed=0)
+    from mv2_common import model_variant
+    mv = model_variant(a.arm, cx)
+    eng = Brian2LIFEngine(cx, input_groups=groups_in, seed=0, model_variant=mv)
+    if mv is not None:
+        print(f"model arm {a.arm}: {mv.record()}", flush=True)
     print(f"engine {eng.n_neurons:,} neurons, {len(eng.syn):,} synapses; free {free_gb():.1f} GB "
           f"({time.time() - t0:.0f} s)", flush=True)
     nI = C.N_GREY + C.N_STIM
     lo, hi = C.WINDOW
     for name in C.STIMULI:
         L, R = rates[f"{name}__L"].astype(float), rates[f"{name}__R"].astype(float)
-        for s in C.SEEDS:
+        for s in seeds:
             path = out / "brain" / f"{name}_s{s}.npz"
             if path.exists():
                 continue
@@ -95,6 +109,7 @@ def main(argv=None):
             np.savez_compressed(path, stimulus=name, t0_condition=C.STIMULI[name][0], seed=s, dn_counts=cnt,
                                 net_counts=net, input_mean_L=L.mean(1), input_mean_R=R.mean(1), interval_ms=C.INTERVAL_MS,
                                 weights_sha256=eng.state_dict()["weights_sha256"], model_sha256=eng.model_sha256,
+                                model_arm=a.arm,
                                 **{f"dn_{k}": v for k, v in dn_tab.items()})
             print(f"{name} s{s}: DN spikes {int(cnt.sum())}, net {net[lo:hi].sum() / (eng.n_neurons * 1.0):.2f} Hz "
                   f"({time.time() - t1:.0f} s, free {free_gb():.1f} GB)", flush=True)

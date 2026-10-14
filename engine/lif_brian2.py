@@ -36,7 +36,7 @@ from collections import deque
 from pathlib import Path
 
 import numpy as np
-from brian2 import Hz, Network, NetworkOperation, NeuronGroup, PoissonGroup, SpikeMonitor, Synapses, defaultclock, ms
+from brian2 import Hz, Network, NetworkOperation, NeuronGroup, PoissonGroup, SpikeMonitor, Synapses, defaultclock, ms, volt
 from brian2 import seed as brian_seed
 from brian2.utils.logger import BrianLogger
 
@@ -83,7 +83,7 @@ class Brian2LIFEngine:
     def __init__(self, cx: Connectome, *, input_groups=None, groups=None, seed: int = 0,
                  history_ms: float = HISTORY_MS, model_path=DEFAULT_MODEL_PATH, check_model_hash: bool = True,
                  spike_sink=None, quiet_logging: bool = True, poisson_delay_v1: bool = False,
-                 verbose: bool = False):
+                 model_variant=None, verbose: bool = False):
         if quiet_logging:
             for h in (BrianLogger.file_handler, BrianLogger.console_handler):
                 if h is not None and h.level < logging.WARNING:
@@ -100,6 +100,7 @@ class Brian2LIFEngine:
         self.global_index = np.asarray(cx.meta.get("global_index", np.arange(cx.n_neurons)), dtype=np.int64)
         self._sink = spike_sink
         self.poisson_delay_v1 = bool(poisson_delay_v1)
+        self.model_variant = model_variant         # None = reference arm R; else engine.model_variants.ModelVariant
         self._hist_steps = _steps(history_ms)
         defaultclock.dt = CLOCK_DT_MS * ms
 
@@ -124,14 +125,19 @@ class Brian2LIFEngine:
         p = self.params
         pre, post = cx.edge_endpoints()
         w_counts = cx.signed_weights().astype(np.float64)
-        neu = NeuronGroup(N=self.n_neurons, model=p["eqs"], method="linear", threshold=p["eq_th"],
-                          reset=p["eq_rst"], refractory="rfc", namespace=p)
-        neu.v = p["v_0"]
-        neu.g = 0
-        neu.rfc = p["t_rfc"]
-        syn = Synapses(neu, neu, "w : volt", on_pre="g += w", delay=p["t_dly"])
-        syn.connect(i=pre, j=post)
-        syn.w = w_counts * p["w_syn"]
+        extra = []
+        if model_variant is None:
+            neu = NeuronGroup(N=self.n_neurons, model=p["eqs"], method="linear", threshold=p["eq_th"],
+                              reset=p["eq_rst"], refractory="rfc", namespace=p)
+            neu.v = p["v_0"]
+            neu.g = 0
+            neu.rfc = p["t_rfc"]
+            syn = Synapses(neu, neu, "w : volt", on_pre="g += w", delay=p["t_dly"])
+            syn.connect(i=pre, j=post)
+            syn.w = w_counts * p["w_syn"]
+            self._syns = [syn]
+        else:
+            neu, syn, extra = self._build_variant(model_variant, p, pre, post, w_counts)
         del w_counts
         spk = SpikeMonitor(neu)
         self.neu, self.syn, self.spk_mon = neu, syn, spk
@@ -152,8 +158,8 @@ class Brian2LIFEngine:
             self._poisson[name] = pg
             self.poisson_synapses[name] = s
             objs += [pg, s]
-        self.net = Network(neu, syn, spk, *objs)
-        self._base_w = np.array(syn.w_[:])
+        self.net = Network(neu, *self._syns, *extra, spk, *objs)
+        self._base_w = [np.array(s.w_[:]) for s in self._syns]
         self._weight_scale = 1.0
         self._post_scale_sha256 = None
         self._store()
@@ -161,6 +167,47 @@ class Brian2LIFEngine:
         self.seed = None
         self.reset(seed)
         log(f"  engine: {self.n_neurons:,} neurons, {len(syn):,} synapses, inputs {self._input_names}")
+
+    def _build_variant(self, mv, p, pre, post, w_counts):
+        """Neurons and synapses of a named v2 model variant (engine/model_variants.py). The chemical synapses keep the
+        Shiu delay; ``cond`` splits them into excitatory (g_e) and inhibitory (g_i) conductance synapses; ``gap`` adds
+        the registered rectifying electrical junctions (no delay, not scaled by set_weight_scale)."""
+        from engine import model_variants as MV
+        eqs, reset, method = MV.equations(mv, p)
+        neu = NeuronGroup(N=self.n_neurons, model=eqs, method=method, threshold=p["eq_th"], reset=reset,
+                          refractory="rfc", namespace=p)
+        neu.v = p["v_0"]
+        neu.rfc = p["t_rfc"]
+        if mv.cond:
+            neu.g_e = 0
+            neu.g_i = 0
+            self._syns = []
+            for var, m, dg in (("g_e", w_counts > 0, MV.COND_DG_EXC), ("g_i", w_counts < 0, MV.COND_DG_INH)):
+                if not m.any():                      # Brian2 refuses a Synapses object without synapses
+                    continue
+                s = Synapses(neu, neu, "w : 1", on_pre=f"{var} += w", delay=p["t_dly"], name=f"syn_{var}")
+                s.connect(i=pre[m], j=post[m])
+                s.w = np.abs(w_counts[m]) * dg
+                self._syns.append(s)
+        else:
+            neu.g = 0
+            s = Synapses(neu, neu, "w : volt", on_pre="g += w", delay=p["t_dly"])
+            s.connect(i=pre, j=post)
+            s.w = w_counts * p["w_syn"]
+            self._syns = [s]
+        if mv.adapt:
+            neu.w_ad = 0 * volt
+        extra = []
+        self.gap_synapses = None
+        if mv.gap and mv.gap_pairs:
+            gi, gj = np.array(mv.gap_pairs, dtype=np.int64).T
+            if gi.min() < 0 or max(gi.max(), gj.max()) >= self.n_neurons:
+                raise ValueError("gap pair outside the network")
+            gs = Synapses(neu, neu, on_pre=f"v_post += {MV.GAP_DV_V!r} * volt", name="gap")
+            gs.connect(i=gi, j=gj)
+            self.gap_synapses = gs
+            extra.append(gs)
+        return neu, self._syns[0], extra
 
     # ── warnings (L6) ───────────────────────────────────────────────────────
     @staticmethod
@@ -196,7 +243,8 @@ class Brian2LIFEngine:
         if not scale > 0:
             raise ValueError("scale must be positive")
         self.net.restore("fresh")          # the stored state must be the pristine one, not the state after a run
-        self.syn.w_[:] = self._base_w * float(scale)
+        for s, b in zip(self._syns, self._base_w):
+            s.w_[:] = b * float(scale)
         self._weight_scale = float(scale)
         self._post_scale_sha256 = None
         self._store()
@@ -209,10 +257,13 @@ class Brian2LIFEngine:
         scale = np.asarray(scale, dtype=np.float64)
         if scale.shape != (self.n_neurons,) or not (scale > 0).all():
             raise ValueError("need one positive factor per neuron")
-        post = np.asarray(self.syn.j[:], dtype=np.int64)
         self.net.restore("fresh")          # pristine initial state (see set_weight_scale)
-        self.syn.w_[:] = self._base_w * scale[post]
-        self._weight_scale = float(np.mean(scale[post]))
+        posts = []
+        for s, b in zip(self._syns, self._base_w):
+            post = np.asarray(s.j[:], dtype=np.int64)
+            s.w_[:] = b * scale[post]
+            posts.append(post)
+        self._weight_scale = float(np.mean(scale[np.concatenate(posts)]))
         self._post_scale_sha256 = hashlib.sha256(np.ascontiguousarray(scale).tobytes()).hexdigest()
         self._store()
         self.reset(self.seed if self.seed is not None else 0)
@@ -309,7 +360,7 @@ class Brian2LIFEngine:
         return self._steps_done * CLOCK_DT_MS
 
     def state_dict(self, include_dynamics: bool = False) -> dict:
-        w = np.asarray(self.syn.w_[:])
+        w = np.concatenate([np.asarray(s.w_[:]) for s in self._syns])
         out = dict(
             engine="brian2_lif", dataset=self.name, t_ms=self.t_ms, steps=self._steps_done, seed=self.seed,
             n_neurons=self.n_neurons, n_synapses=int(len(w)), clock_dt_ms=CLOCK_DT_MS,
@@ -318,11 +369,14 @@ class Brian2LIFEngine:
             params={k: float(self.params[k]) for k in _NUMERIC_PARAMS},
             input_rates={k: (v if np.ndim(v) == 0 else np.asarray(v).copy()) for k, v in self._rates.items()},
             variant=("poisson_delay_v1" if self.poisson_delay_v1 else None),
+            model_variant=(self.model_variant.record() if self.model_variant is not None else None),
             spike_total=int(self._total.sum()), dev_subnet=bool(self.meta.get("dev_subnet", False)),
             control=self.meta.get("control"), sign_rules=self.meta.get("sign_rules", []))
         if include_dynamics:
             out["v"] = np.asarray(self.neu.v_[:]).copy()
-            out["g"] = np.asarray(self.neu.g_[:]).copy()
+            for k in ("g", "g_e", "g_i", "w_ad"):
+                if k in self.neu.variables:
+                    out[k] = np.asarray(getattr(self.neu, k + "_")[:]).copy()
         return out
 
 

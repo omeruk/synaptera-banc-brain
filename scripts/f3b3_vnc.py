@@ -41,7 +41,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--brain", default=str(ROOT / "runs" / "f3b3" / "brain"))
     ap.add_argument("--out", required=True)
+    ap.add_argument("--arm", default="R", choices=("R", "A", "AC", "ACG"),
+                    help="neuron model arm (prereg/12; R = the unmodified reference of prereg/11)")
+    ap.add_argument("--seeds", default=None, help="first-last brain seeds (default: prereg/11 seeds 10-29)")
+    ap.add_argument("--n-random", type=int, default=C.N_RANDOM, help="random_1 .. random_n (default: all 39)")
     a = ap.parse_args(argv)
+    seeds = C.SEEDS if a.seeds is None else tuple(range(int(a.seeds.split("-")[0]), int(a.seeds.split("-")[1]) + 1))
+    if not 1 <= a.n_random <= C.N_RANDOM:
+        raise SystemExit("--n-random out of range")
+    arms = ("ensemble", "bridge_off") + C.RANDOM_ARMS[:a.n_random]
     out = Path(a.out)
     if out.exists():
         raise SystemExit(f"{out} exists")
@@ -53,13 +61,13 @@ def main(argv=None):
         raise SystemExit("permutations differ from prereg/11")
     brain, brain_sha = {}, {}
     for name in C.STIMULI:
-        for s in C.SEEDS:
+        for s in seeds:
             p = bdir / f"{name}_s{s}.npz"
             if not p.exists():
                 raise SystemExit(f"missing brain record {p}")
             brain[(name, s)] = dict(np.load(p, allow_pickle=True))          # own records (str object arrays)
             brain_sha[p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
-    z0 = brain[("rot_left", C.SEEDS[0])]
+    z0 = brain[("rot_left", seeds[0])]
     fw_tab = pd.DataFrame(dict(cell_type=z0["dn_cell_type"], side=z0["dn_side"]))
 
     whole = F.load()
@@ -79,7 +87,7 @@ def main(argv=None):
     groups = {"DNg02_L": g_all["DNg02_L"], "DNg02_R": g_all["DNg02_R"], "steer": steer_idx}
     pos_in_steer = {int(i): k for k, i in enumerate(steer_idx)}
     bridges = {arm: (DNBridge(fw_tab, banc_tab[["cell_type", "side", "index"]], C.bridge_config(arm, perms))
-                     if arm != "bridge_off" else None) for arm in C.ARMS}
+                     if arm != "bridge_off" else None) for arm in arms}
     for arm, b in bridges.items():
         if b is not None and sorted(b.target_index.tolist()) != steer_idx.tolist():
             raise SystemExit(f"{arm}: bridge targets differ from the BANC ensemble neurons")
@@ -109,8 +117,8 @@ def main(argv=None):
                               perm_seeds=dict(zip(C.RANDOM_ARMS, C.PERM_SEEDS)),
                               permutations_sha256=C.permutations_sha256(), interval_ms=C.INTERVAL_MS,
                               n_grey=C.N_GREY, n_stim=C.N_STIM, window=list(C.WINDOW), baseline_hz=C.BASELINE_HZ,
-                              baseline_label="HAND", primary_mn=C.PRIMARY_MN, steer_mn=C.STEER_MN, arms=C.ARMS,
-                              stimuli=C.STIMULI, seeds=list(C.SEEDS), gate1_seeds=list(C.GATE1_SEEDS),
+                              baseline_label="HAND", primary_mn=C.PRIMARY_MN, steer_mn=C.STEER_MN, arms=arms,
+                              stimuli=C.STIMULI, seeds=list(seeds), gate1_seeds=list(C.GATE1_SEEDS),
                               gate2_seeds=list(C.GATE2_SEEDS), perm_alpha=C.PERM_ALPHA),
                brain_records=dict(dir=str(bdir.resolve().relative_to(ROOT)) if bdir.resolve().is_relative_to(ROOT)
                                   else str(bdir), sha256=brain_sha, n_dn=int(z0["dn_counts"].shape[1])),
@@ -121,11 +129,18 @@ def main(argv=None):
                            net_rate_hz=float(z["net_counts"][C.WINDOW[0]:C.WINDOW[1]].sum() / FW_N_NEURONS / 1.0),
                            weights_sha256=str(z["weights_sha256"]), model_sha256=str(z["model_sha256"]))
                       for k, z in brain.items()])
-    eng = Brian2LIFEngine(cx, input_groups=groups, seed=0)
+    from mv2_common import model_variant
+    mv = model_variant(a.arm, cx)
+    eng = Brian2LIFEngine(cx, input_groups=groups, seed=0, model_variant=mv)
+    if mv is not None:
+        res["model_arm"] = a.arm
+        res["model_variant"] = mv.record()
+        res["gap_pairs"] = [dict(pre=str(n["cell_type"].iloc[i]), pre_side=str(n["side"].iloc[i]),
+                                 post=str(n["cell_type"].iloc[j]), post_side=str(n["side"].iloc[j])) for i, j in mv.gap_pairs]
     eng.set_weight_scale(1.0)
     res["model_sha256"] = eng.model_sha256
     res["weights_sha256"] = eng.state_dict()["weights_sha256"]
-    print(f"VNC engine {cx.n_neurons:,} neurons, ensemble {len(steer_idx)} BANC DNs, {len(C.ARMS)} arms "
+    print(f"VNC engine {cx.n_neurons:,} neurons, ensemble {len(steer_idx)} BANC DNs, {len(arms)} arms "
           f"({time.time() - t0:.0f} s)", flush=True)
 
     def save():
@@ -145,11 +160,11 @@ def main(argv=None):
     bin_s = BIN * C.INTERVAL_MS * 1e-3
     prim = {f"{m}|{s}": idx_ts[f"{m}|{s}"] for m in C.PRIMARY_MN for s in ("left", "right")}
     res["replay"] = []
-    for arm in C.ARMS:
+    for arm in arms:
         b = bridges[arm]
         full = arm in FULL_ARMS
         for name in C.STIMULI:
-            for s in C.SEEDS:
+            for s in seeds:
                 z = brain[(name, s)]
                 steer = np.zeros((nI, len(steer_idx)))
                 transfer = None

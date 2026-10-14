@@ -834,6 +834,75 @@ def check_f4_design():
     return n, bad
 
 
+MV2_MD = ROOT / "docs" / "results" / "mv2_neuron_model.md"
+MV2_JSON = ROOT / "docs" / "results" / "mv2_neuron_model.json"
+PREREG12 = ROOT / "prereg" / "12_neuron_model_v2.md"
+
+
+def check_mv2():
+    """Neuron model v2 (prereg/12). docs/results/mv2_neuron_model.json is rebuilt from runs/mv2 and compared, the
+    markdown is re-rendered and compared; record hashes against the files; MN9 ratio, ignition counts, the primary S of
+    `ensemble`, the random-wiring count and the GF following are recomputed here with plain loops."""
+    import hashlib
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import mv2_common as M
+    import mv2_report as R
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(MV2_JSON.read_text())
+    rebuilt = R.build()
+    chk("mv2:json_equals_rebuild", json.dumps(stored, sort_keys=True) == json.dumps(json.loads(json.dumps(rebuilt)), sort_keys=True))
+    chk("mv2:md_equals_render", MV2_MD.read_text() == R.render(stored))
+    pre = PREREG12.read_text()
+    chk("mv2:prereg_render_sha", "9b89aa1167ab0b7db79ca43ec549db70fdf243197ae8e8af1678301ced84f6d8" in pre)
+    chk("mv2:arms_reduced", stored["arms_run"] == list(M.REDUCED_ARMS), stored["arms_run"])
+    for t in ("t1", "t2", "t3", "t4"):
+        for a, x in stored[t].items():
+            chk(f"mv2:{t}:{a}:sha", hashlib.sha256((ROOT / x["record"]).read_bytes()).hexdigest() == x["sha256"], x["record"])
+    # (i)
+    t1 = {a: json.loads((ROOT / x["record"]).read_text()) for a, x in stored["t1"].items()}
+    mn9 = {a: sum(sum(r["mn9_hz"]) / 2 for r in d["runs"]) / len(d["runs"]) for a, d in t1.items()}
+    ign = {a: sum(1 for r in d["runs"] if r["network_step_hz"][-1] > 1.0) for a, d in t1.items()}
+    for a in t1:
+        chk(f"mv2:t1:{a}:mn9", abs(mn9[a] - stored["t1"][a]["mn9_mean_hz"]) < 1e-9)
+        chk(f"mv2:t1:{a}:ignited", ign[a] == stored["t1"][a]["n_ignited"])
+        chk(f"mv2:t1:{a}:seeds", t1[a]["seeds"] == list(range(300, 350)))
+        if a != "R":
+            ok = mn9[a] >= 0.1 * mn9["R"] and ign[a] <= ign["R"] and sum(r["spikes"] for r in t1[a]["no_input"]) == 0
+            chk(f"mv2:t1:{a}:pass", ok == stored["t1"][a]["passed"])
+    # (iii) primary S with plain loops
+    lat = {"b2": 1, "b3": -1, "i1": -1, "i2": -1, "hg1": -1, "hg2": -1, "hg3": -1, "hg4": -1}
+    for a, x in stored["t3"].items():
+        d = json.loads((ROOT / x["record"]).read_text())
+        by = {(r["arm"], r["stimulus"], r["seed"]): r["rate_hz"] for r in d["replay"]}
+        seeds = sorted({r["seed"] for r in d["replay"]})
+        chk(f"mv2:t3:{a}:seeds", seeds == list(range(30, 40)), seeds)
+
+        def S(arm, seed):
+            def dA(st):
+                rr = by[(arm, st, seed)]
+                return sum(sg * (rr.get(f"{t}|left", 0.0) - rr.get(f"{t}|right", 0.0)) for t, sg in lat.items())
+            return (dA("rot_right") - dA("rot_left")) / 2.0
+
+        ens = sum(S("ensemble", s) for s in seeds) / len(seeds)
+        chk(f"mv2:t3:{a}:S", abs(ens - x["sets"]["lateral"]["arms"]["ensemble"]["mean"]) < 1e-9, ens)
+        rnd = [sum(S(f"random_{k}", s) for s in seeds) / len(seeds) for k in range(1, 20)]
+        chk(f"mv2:t3:{a}:n_random_ge", sum(1 for v in rnd if abs(v) >= abs(ens)) == x["sets"]["lateral"]["n_random_abs_ge"])
+        chk(f"mv2:t3:{a}:arms", d["constants"]["arms"] == ["ensemble", "bridge_off"] + [f"random_{k}" for k in range(1, 20)])
+    # (iv)
+    for a, x in stored["t4"].items():
+        d = json.loads((ROOT / x["record"]).read_text())
+        for sd in ("left", "right"):
+            fol = [r["per_side"][sd]["ttmn_spikes"] / r["per_side"][sd]["gf_spikes"] for r in d["runs"]]
+            chk(f"mv2:t4:{a}:{sd}:following", abs(sum(fol) / len(fol) - x["per_side"][sd]["following_mean"]) < 1e-12)
+    return n, bad
+
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
@@ -911,6 +980,10 @@ def main(argv=None):
         bad += b
     if DOC08.exists() and F4_JSON.exists():
         k, b = check_f4_design()
+        n += k
+        bad += b
+    if MV2_MD.exists():
+        k, b = check_mv2()
         n += k
         bad += b
     if "--print" in argv:

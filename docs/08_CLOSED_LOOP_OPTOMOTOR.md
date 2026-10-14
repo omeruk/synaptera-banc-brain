@@ -478,3 +478,15 @@ Fig. 6 sign it becomes more anti-directional. The random wirings remain split be
 grey, so A_L - A_R under grey is zero and the trim subtracts nothing. The offset is evoked by the patterned stimulus
 itself (it is already present under the static grating). A trim that removes it would have to be calibrated under a
 patterned stimulus, for example the static grating; that is a design change for the owner, not made here.
+
+### 10.7 Trim decision (project owner, 2026-10-14, after PR #17 was merged)
+
+This replaces item 11 of section 9.1. The closed-loop yaw trim is calibrated under the **static grating** (pattern, no
+motion), not under grey:
+- separate seeds, never the seeds of the closed-loop test;
+- per MN type, the (R - L) of the **same arm** is subtracted;
+- origin class `E`.
+
+The trim cancels in D and S (it is the same for `rot_left` and `rot_right`), so it changes only the offset, never the
+direction term. Section 10.6 gives the reason: under grey every mapped MN is silent, while the offset already appears
+under the static grating.

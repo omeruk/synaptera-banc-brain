@@ -380,6 +380,42 @@ effect sizes. The prediction is unchanged: weakly anti-directional, not distingu
 and now also by the iii4 conflict. The grey trim removes nothing, because the mapped MNs are silent under grey; the
 offset is evoked by the patterned stimulus. Changing the trim is open for the owner.
 
+**Trim decision (project owner, 2026-10-14, PR #17 merged):** the closed-loop yaw trim is calibrated under the static
+grating (pattern, no motion). It uses separate seeds and subtracts the per-type (R - L) of the same arm; origin `E`. It
+cancels in D (docs/08 section 10.7).
+
+**Next step (project owner, 2026-10-14): neuron model v2, open loop** (`docs/09_NEURON_MODEL_V2.md`, `prereg/12`).
+Named variants next to the unchanged Shiu reference R: `adapt` (AdEx adaptation), `cond` (conductance synapses) and
+`gap` (electrical synapses, only pairs with physiological evidence). The arms are R, A, AC and ACG, and the same model
+runs on the FlyWire brain and on the BANC VNC subgraph. The tests:
+- (i) FlyWire sugar GRN -> MN9 and ignition;
+- (ii) the BANC VNC F3a-3 protocol;
+- (iii) the hybrid optomotor test (F3b-3 protocol, fresh seeds 30-39, 19 random wirings, primary S under the v2
+  `lateral` mapping);
+- (iv) GF -> TTMn.
+All parameters come from the literature with an origin class and are fixed before any run.
+
+**Outcome of neuron model v2 (2026-10-14; `docs/results/mv2_neuron_model.md`, prereg/12).**
+- **Arms run.** The run-time projection for all four arms was above 6 h, so only R and ACG ran; A and AC are
+  registered and not run.
+- **(i) FlyWire sugar GRN -> MN9.** ACG passes, but only just: MN9 is barely above 10 % of R, and there is no
+  ignition in either arm.
+- **(ii) BANC VNC (prereg/08).**
+  - The R rerun reproduces the stored record bit for bit.
+  - ACG passes the gates and R2.
+  - Lowest steering rates: DNa04 and DNa15 equal to R, DNa10 lower.
+  - The power MNs fire much less than in R.
+- **(iii) Hybrid optomotor, fresh seeds 30-39, `lateral` v2 mapping.**
+  - R is significantly **anti-directional** (a negative finding on fresh seeds, sign set by hg4).
+  - ACG is **not significant**: its steering MNs barely respond, and S is near zero.
+  - No arm is specific. F4-1 stays postponed.
+- **(iv) GF -> TTMn.** ACG fails the registered following >= 0.9 (sub-ms latency is reached).
+  - Post-hoc: the engine discards synaptic input that arrives while the target is refractory. This is true in every
+    arm, R included, and together with a Poisson GF without a refractory period it caps the following near a
+    dead-time prediction.
+  - Whether to change the refractory handling, the GF input path or the adaptation strength is the owner's decision;
+    nothing was changed.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
