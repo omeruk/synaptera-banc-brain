@@ -1,0 +1,3632 @@
+{
+ "chain": {
+  "L1 rot_right -> eye images": {
+   "body_frame_y_mm": {
+    "LEye": -9.313225746154785e-10,
+    "LEye_cam": 0.37999999906867743,
+    "LFCoxa": 0.1715880036354065,
+    "LHCoxa": 0.08699344843626022,
+    "LMCoxa": 0.12490109354257584,
+    "LWing": 0.3698328882455826,
+    "REye": 9.313225746154785e-10,
+    "REye_cam": -0.37999999906867743,
+    "RFCoxa": -0.1715880036354065,
+    "RHCoxa": -0.08699344843626022,
+    "RMCoxa": -0.12490109354257584,
+    "RWing": -0.3698328882455826
+   },
+   "convention": "body frame x forward, y left, z up; azimuth + = left (tasks/t0_stimuli.py)",
+   "criterion_bodies": [
+    "LEye_cam",
+    "LFCoxa",
+    "LHCoxa",
+    "LMCoxa",
+    "REye_cam",
+    "RFCoxa",
+    "RHCoxa",
+    "RMCoxa"
+   ],
+   "left_named_y_positive": true,
+   "phase_moves_to_negative_azimuth": true,
+   "right_named_y_negative": true,
+   "rot_right_phase_velocity_deg_s": -60.0,
+   "verdict": "OK"
+  },
+  "L2 eye images -> FlyVis eye": {
+   "centre_ray_azimuth_deg": {
+    "eye0": 62.520961470971294,
+    "eye1": -63.62019341269978
+   },
+   "code": "camera_rays iterates ('LEye_cam', 'REye_cam') -> eye 0 = left; FlyVis batch row 0 -> group 'L' (sense/vision_boundary.py BoundaryEyes)",
+   "verdict": "OK"
+  },
+  "L3 FlyVis eye -> boundary side": {
+   "expected_sign": {
+    "rot_left|left": 1,
+    "rot_left|right": -1,
+    "rot_right|left": -1,
+    "rot_right|right": 1
+   },
+   "ftb_minus_btf_hz": {
+    "grey|left": 0.06577719002962112,
+    "grey|right": 0.0664450079202652,
+    "rot_left|left": 26.670183181762695,
+    "rot_left|right": -2.80108642578125,
+    "rot_right|left": -3.190896987915039,
+    "rot_right|right": 27.11864471435547,
+    "static|left": 8.257694244384766,
+    "static|right": 10.559738159179688
+   },
+   "groups_match_hemisphere": true,
+   "n_L": 17185,
+   "n_R": 16936,
+   "note": "(T4a+T5a)-(T4b+T5b) window mean rate per eye; T4a/T5a prefer front-to-back motion",
+   "verdict": "OK",
+   "window": [
+    100,
+    300
+   ]
+  },
+  "L4 boundary side -> FlyWire side": {
+   "annotation_vs_codex": {
+    "agreement": 0.9997055211198816,
+    "crosstab": {
+     "center|center": 173,
+     "center|left": 1,
+     "left|left": 69938,
+     "left|right": 5,
+     "right|left": 5,
+     "right|right": 69077
+    },
+    "file": "classification.csv.gz",
+    "n_shared": 139229,
+    "sha256": "e946b552f4056dfc977707be0674609832c3f64332a22d69dc0d9615e7aae663"
+   },
+   "boundary_hemisphere_equals_annotation_side": 1.0,
+   "boundary_n": 34120,
+   "documentation": "FlyWire Codex FAQ (codex.flywire.ai/faq): neuron side is decided by soma position; neuropil and neuron side annotations are from the fly's perspective; the FAFB images were left/right inverted during acquisition and all annotations and labels in CAVE and Codex were inverted to correct this.",
+   "verdict": "OK"
+  },
+  "L5 FlyWire side -> bridge": {
+   "families": 112,
+   "n_units": 225,
+   "note": "real F3b-3 FlyWire DN table and the BANC Codex DN table; one interval of unit counts on one side",
+   "per_drive": {
+    "left": {
+     "n_driven_other_side": 0,
+     "n_driven_same_side": 152,
+     "n_targets_driven": 152,
+     "n_targets_on_side": 152
+    },
+    "right": {
+     "n_driven_other_side": 0,
+     "n_driven_same_side": 153,
+     "n_targets_driven": 153,
+     "n_targets_on_side": 153
+    }
+   },
+   "verdict": "OK"
+  },
+  "L6 bridge -> BANC DN side": {
+   "criterion_column": "fafb_match",
+   "match": {
+    "fafb_match": {
+     "all": {
+      "agreement": 0.9722222222222222,
+      "n": 1296,
+      "n_same": 1260
+     },
+     "ensemble": {
+      "agreement": 0.9802631578947368,
+      "n": 304,
+      "n_same": 298
+     }
+    },
+    "fafb_nblast_match": {
+     "all": {
+      "agreement": 0.9470774091627172,
+      "n": 1266,
+      "n_same": 1199
+     },
+     "ensemble": {
+      "agreement": 0.9417808219178082,
+      "n": 292,
+      "n_same": 275
+     }
+    }
+   },
+   "n_banc_dn": 1316,
+   "note": "BANC side = Codex Soma side (the side the model uses); FlyWire side = flywire_annotations.tsv side of the first listed match; neurons with a center / unknown side on either side are left out. fafb_nblast_match is reported, not a criterion.",
+   "verdict": "OK"
+  },
+  "L7 BANC DN side -> BANC MN side": {
+   "mapping_types": {
+    "b2": "consistent",
+    "b3": "consistent",
+    "hg1": "consistent",
+    "hg2": "consistent",
+    "hg3": "consistent",
+    "hg4": "consistent",
+    "i1": "consistent",
+    "i2": "consistent"
+   },
+   "note": "DN and MN sides are the same Codex Soma side column of one dataset; the rule of section 1 decides whether an MN's soma side is its muscle side",
+   "verdict": "OK"
+  },
+  "L8 BANC MN side -> mapping side": {
+   "imaged_side_matters": false,
+   "imaged_side_note": "Lindsay imaged the right side; the signs are stated for the ipsilateral wing, so they apply to both sides under mirror symmetry",
+   "lindsay_right_turn_larger_left": true,
+   "mapping": "A_side = A0 + G sum_m s_m r_{m,side}; s_m = effect on the ipsilateral (same-side) amplitude; dA = A_L - A_R > 0 turns right; S > 0 = syndirectional (scripts/f4_design_numbers.py)",
+   "model_right_turn_larger_left": true,
+   "model_turn_convention": "turn_to_amplitudes(turn_bias > 0) -> A_L > A_R, docstring 'turn right'; tests/test_arena_wing.py::test_turn_sign_in_wrench: yaw torque < 0 (right)",
+   "quotes": [
+    {
+     "location": "Fig. 1B legend",
+     "text": "The steering muscles on the right side of the fly are imaged"
+    },
+    {
+     "location": "Results",
+     "text": "Saccades toward the ipsilateral side\u2014when the wing stroke amplitude on the imaged side decreased"
+    }
+   ],
+   "verdict": "OK"
+  }
+ },
+ "chain_verdicts": {
+  "L1 rot_right -> eye images": "OK",
+  "L2 eye images -> FlyVis eye": "OK",
+  "L3 FlyVis eye -> boundary side": "OK",
+  "L4 boundary side -> FlyWire side": "OK",
+  "L5 FlyWire side -> bridge": "OK",
+  "L6 bridge -> BANC DN side": "OK",
+  "L7 BANC DN side -> BANC MN side": "OK",
+  "L8 BANC MN side -> mapping side": "OK"
+ },
+ "earlier_results": {
+  "ADNM1": {
+   "f3a2_checks.md": {
+    "md_mentions": 1
+   },
+   "f3a3_vnc_subgraph.json": {
+    "examples": [
+     "/post_hoc/g100_whole_only[*]",
+     "/r1/active/G100/whole_only[*]"
+    ],
+    "n": 2
+   },
+   "f3a3_vnc_subgraph.md": {
+    "md_mentions": 3
+   },
+   "f3a_banc_vnc.json": {
+    "examples": [
+     "/direct_synapses/DNa02/ADNM1",
+     "/direct_synapses/DNg02/ADNM1",
+     "/direct_synapses/GF/ADNM1",
+     "/rates/ADNM1"
+    ],
+    "n": 4
+   },
+   "f3a_banc_vnc.md": {
+    "md_mentions": 1
+   },
+   "mv2_neuron_model.json": {
+    "examples": [
+     "/t2/ACG/r1_mean_hz/G100/ADNM1|left",
+     "/t2/ACG/r1_mean_hz/G20/ADNM1|left",
+     "/t2/ACG/r1_mean_hz/G50/ADNM1|left",
+     "/t2/ACG/r1_mean_hz/GL100/ADNM1|left"
+    ],
+    "n": 10
+   }
+  },
+  "ADNM2": {
+   "f3a_banc_vnc.json": {
+    "examples": [
+     "/direct_synapses/DNa02/ADNM2",
+     "/direct_synapses/DNg02/ADNM2",
+     "/direct_synapses/GF/ADNM2",
+     "/rates/ADNM2"
+    ],
+    "n": 4
+   },
+   "f3a_banc_vnc.md": {
+    "md_mentions": 1
+   },
+   "mv2_neuron_model.json": {
+    "examples": [
+     "/t2/ACG/r1_mean_hz/G100/ADNM2|left",
+     "/t2/ACG/r1_mean_hz/G100/ADNM2|right",
+     "/t2/ACG/r1_mean_hz/G20/ADNM2|left",
+     "/t2/ACG/r1_mean_hz/G20/ADNM2|right"
+    ],
+    "n": 20
+   }
+  },
+  "CvN6": {
+   "f3a_banc_vnc.json": {
+    "examples": [
+     "/direct_synapses/DNa02/CvN6",
+     "/direct_synapses/DNg02/CvN6",
+     "/direct_synapses/GF/CvN6",
+     "/rates/CvN6"
+    ],
+    "n": 4
+   },
+   "f3a_banc_vnc.md": {
+    "md_mentions": 1
+   },
+   "mv2_neuron_model.json": {
+    "examples": [
+     "/t2/ACG/r1_mean_hz/G100/CvN6|left",
+     "/t2/ACG/r1_mean_hz/G100/CvN6|right",
+     "/t2/ACG/r1_mean_hz/G20/CvN6|left",
+     "/t2/ACG/r1_mean_hz/G20/CvN6|right"
+    ],
+    "n": 20
+   }
+  },
+  "CvN7": {
+   "f3a_banc_vnc.json": {
+    "examples": [
+     "/direct_synapses/DNa02/CvN7",
+     "/direct_synapses/DNg02/CvN7",
+     "/direct_synapses/GF/CvN7",
+     "/rates/CvN7"
+    ],
+    "n": 4
+   },
+   "f3a_banc_vnc.md": {
+    "md_mentions": 1
+   },
+   "mv2_neuron_model.json": {
+    "examples": [
+     "/t2/ACG/r1_mean_hz/G100/CvN7|left",
+     "/t2/ACG/r1_mean_hz/G20/CvN7|left",
+     "/t2/ACG/r1_mean_hz/G50/CvN7|left",
+     "/t2/ACG/r1_mean_hz/GL100/CvN7|left"
+    ],
+    "n": 10
+   }
+  },
+  "CvN9": {
+   "f3a_banc_vnc.json": {
+    "examples": [
+     "/direct_synapses/DNa02/CvN9",
+     "/direct_synapses/DNg02/CvN9",
+     "/direct_synapses/GF/CvN9",
+     "/rates/CvN9"
+    ],
+    "n": 4
+   },
+   "f3a_banc_vnc.md": {
+    "md_mentions": 1
+   },
+   "mv2_neuron_model.json": {
+    "examples": [
+     "/t2/ACG/r1_mean_hz/G100/CvN9|left",
+     "/t2/ACG/r1_mean_hz/G100/CvN9|right",
+     "/t2/ACG/r1_mean_hz/G20/CvN9|left",
+     "/t2/ACG/r1_mean_hz/G20/CvN9|right"
+    ],
+    "n": 20
+   }
+  },
+  "DLM5": {
+   "SUMMARY_F0_F3.md": {
+    "md_mentions": 1
+   },
+   "f1_banc_qa.json": {
+    "examples": [
+     "/critical_types/wing_MN/DLM/types/DLM5"
+    ],
+    "n": 1
+   },
+   "f1_banc_qa.md": {
+    "md_mentions": 1
+   },
+   "f3a2_checks.json": {
+    "examples": [
+     "/c3/baseline_power/DLM5"
+    ],
+    "n": 1
+   },
+   "f3a2_checks.md": {
+    "md_mentions": 3
+   },
+   "f3a3_vnc_subgraph.json": {
+    "examples": [
+     "/r1/active/G100/both[*]",
+     "/r1/active/G50/both[*]",
+     "/r1/active/GL100/both[*]",
+     "/r1/active/GR100/both[*]"
+    ],
+    "n": 11
+   },
+   "f3a3_vnc_subgraph.md": {
+    "md_mentions": 7
+   },
+   "f3a_banc_vnc.json": {
+    "examples": [
+     "/direct_synapses/DNa02/DLM5",
+     "/direct_synapses/DNg02/DLM5",
+     "/direct_synapses/GF/DLM5",
+     "/expectation_a/types[*]/type"
+    ],
+    "n": 7
+   },
+   "f3a_banc_vnc.md": {
+    "md_mentions": 4
+   },
+   "mv2_neuron_model.json": {
+    "examples": [
+     "/t2/ACG/r1_mean_hz/G100/DLM5|left",
+     "/t2/ACG/r1_mean_hz/G100/DLM5|right",
+     "/t2/ACG/r1_mean_hz/G20/DLM5|left",
+     "/t2/ACG/r1_mean_hz/G20/DLM5|right"
+    ],
+    "n": 36
+   },
+   "mv2_neuron_model.md": {
+    "md_mentions": 2
+   }
+  },
+  "EFFabg10": {},
+  "EFFabg12": {},
+  "EFFabg32": {},
+  "MNad01": {},
+  "MNad02": {},
+  "MNad06": {},
+  "MNad14": {},
+  "MNad24": {},
+  "MNad41": {},
+  "MNad43": {},
+  "MNx01": {},
+  "PSI": {
+   "f1_banc_qa.json": {
+    "examples": [
+     "/critical_types/wing_MN/PSI",
+     "/critical_types/wing_MN/PSI/types/PSI"
+    ],
+    "n": 2
+   },
+   "f1_banc_qa.md": {
+    "md_mentions": 2
+   },
+   "f3a_banc_vnc.json": {
+    "examples": [
+     "/direct_synapses/DNa02/PSI",
+     "/direct_synapses/DNg02/PSI",
+     "/direct_synapses/GF/PSI",
+     "/expectation_a/types[*]/type"
+    ],
+    "n": 6
+   },
+   "f3a_banc_vnc.md": {
+    "md_mentions": 1
+   },
+   "mv2_neuron_model.json": {
+    "examples": [
+     "/t2/ACG/r1_mean_hz/G100/PSI|left",
+     "/t2/ACG/r1_mean_hz/G100/PSI|right",
+     "/t2/ACG/r1_mean_hz/G20/PSI|left",
+     "/t2/ACG/r1_mean_hz/G20/PSI|right"
+    ],
+    "n": 40
+   },
+   "mv2_neuron_model.md": {
+    "md_mentions": 2
+   }
+  }
+ },
+ "inputs": {
+  "banc/banc_888_meta.feather": "819bbcff476e52702d6f8d8604ce1f12d1d7b11942281df2f49df2a73a6f15a5",
+  "banc/neurons-banc.csv.gz": "40a2201554a8c34d2c4b07c8322543a07c1b3faf5acafbac363fd1a3d0fa617f",
+  "brain_model/flywire_annotations.tsv": "533db093e12d8de350fd20875a967f8f74acace633ff22118eefff550d5dcbc1",
+  "data/vision_boundary_783.csv": "2749472d4cda5698074802be5dae19cf1fea2aebe1e8a58e48582b3dc29d44b7",
+  "runs/f3b3/stim_rates.npz": "9b89aa1167ab0b7db79ca43ec549db70fdf243197ae8e8af1678301ced84f6d8"
+ },
+ "literature": {
+  "flywire_side": "FlyWire Codex FAQ (codex.flywire.ai/faq): neuron side is decided by soma position; neuropil and neuron side annotations are from the fly's perspective; the FAFB images were left/right inverted during acquisition and all annotations and labels in CAVE and Codex were inverted to correct this.",
+  "mapping": "Lindsay, Sustar & Dickinson 2017, Curr Biol 27:345",
+  "nerve": "Azevedo et al. 2024, Nature 631:360, Supplementary Table 2",
+  "soma": "Ikeda & Koenig 1988 (J Comp Neurol 273:436), as summarised by FlyBase FBbt_00004079"
+ },
+ "post_audit_triggered": true,
+ "prereg": "prereg/13_side_audit.md",
+ "section1": {
+  "by_class": {
+   "abdomen_motor_neuron": {
+    "n": 172,
+    "n_match": 46,
+    "n_relabelled": 11,
+    "n_sided_nerve": 57,
+    "n_undetermined": 115,
+    "relabelled_types": [
+     "EFFabg10",
+     "EFFabg12",
+     "EFFabg32",
+     "MNad01",
+     "MNad02",
+     "MNad06",
+     "MNad14",
+     "MNad24",
+     "MNad41",
+     "MNad43"
+    ],
+    "undetermined_nerves": [
+     "abdominal_nerve_trunk"
+    ]
+   },
+   "antenna_motor_neuron": {
+    "n": 10,
+    "n_match": 10,
+    "n_relabelled": 0,
+    "n_sided_nerve": 10,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "crop_motor_neuron": {
+    "n": 7,
+    "n_match": 7,
+    "n_relabelled": 0,
+    "n_sided_nerve": 7,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "eye_motor_neuron": {
+    "n": 4,
+    "n_match": 4,
+    "n_relabelled": 0,
+    "n_sided_nerve": 4,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "haltere_motor_neuron": {
+    "n": 25,
+    "n_match": 25,
+    "n_relabelled": 0,
+    "n_sided_nerve": 25,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "hind_leg_motor_neuron": {
+    "n": 2,
+    "n_match": 2,
+    "n_relabelled": 0,
+    "n_sided_nerve": 2,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "leg_motor_neuron": {
+    "n": 391,
+    "n_match": 391,
+    "n_relabelled": 0,
+    "n_sided_nerve": 391,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "neck_motor_neuron": {
+    "n": 49,
+    "n_match": 41,
+    "n_relabelled": 8,
+    "n_sided_nerve": 49,
+    "n_undetermined": 0,
+    "relabelled_types": [
+     "ADNM1",
+     "ADNM2",
+     "CvN6",
+     "CvN7",
+     "CvN9"
+    ],
+    "undetermined_nerves": []
+   },
+   "peripheral_intrinsic_neuron": {
+    "n": 2,
+    "n_match": 0,
+    "n_relabelled": 2,
+    "n_sided_nerve": 2,
+    "n_undetermined": 0,
+    "relabelled_types": [
+     "PSI"
+    ],
+    "undetermined_nerves": []
+   },
+   "pharynx_motor_neuron": {
+    "n": 22,
+    "n_match": 21,
+    "n_relabelled": 1,
+    "n_sided_nerve": 22,
+    "n_undetermined": 0,
+    "relabelled_types": [
+     "MNx01"
+    ],
+    "undetermined_nerves": []
+   },
+   "proboscis_motor_neuron": {
+    "n": 35,
+    "n_match": 35,
+    "n_relabelled": 0,
+    "n_sided_nerve": 35,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "salivary_motor_neuron": {
+    "n": 2,
+    "n_match": 2,
+    "n_relabelled": 0,
+    "n_sided_nerve": 2,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "thoracic_abdominal_segmental_motor_neuron": {
+    "n": 15,
+    "n_match": 6,
+    "n_relabelled": 0,
+    "n_sided_nerve": 6,
+    "n_undetermined": 9,
+    "relabelled_types": [],
+    "undetermined_nerves": [
+     "abdominal_nerve_trunk"
+    ]
+   },
+   "unknown_motor_neuron": {
+    "n": 2,
+    "n_match": 2,
+    "n_relabelled": 0,
+    "n_sided_nerve": 2,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "unknown_thoracic_abdominal_motor_neuron": {
+    "n": 3,
+    "n_match": 3,
+    "n_relabelled": 0,
+    "n_sided_nerve": 3,
+    "n_undetermined": 0,
+    "relabelled_types": [],
+    "undetermined_nerves": []
+   },
+   "uterus_motor_neuron": {
+    "n": 2,
+    "n_match": 0,
+    "n_relabelled": 0,
+    "n_sided_nerve": 0,
+    "n_undetermined": 2,
+    "relabelled_types": [],
+    "undetermined_nerves": [
+     "abdominal_nerve_trunk"
+    ]
+   },
+   "wing_motor_neuron": {
+    "n": 62,
+    "n_match": 60,
+    "n_relabelled": 2,
+    "n_sided_nerve": 62,
+    "n_undetermined": 0,
+    "relabelled_types": [
+     "DLM5"
+    ],
+    "undetermined_nerves": []
+   }
+  },
+  "n_codex_meta_nerve_differ": 0,
+  "n_codex_meta_side_differ": 0,
+  "n_motor": 805,
+  "n_not_in_codex": 0,
+  "neurons": [
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941551713415,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "114528, 229232, 6559",
+    "soma_side": "left",
+    "type": "MNad29",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941562430983,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "90656, 235216, 5088",
+    "soma_side": "right",
+    "type": "MNad29",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_metathoracic_leg_nerve",
+    "id": 720575941650258709,
+    "meta_side": "left",
+    "nerve": "left_metathoracic_leg_nerve",
+    "nerve_side": "left",
+    "root_position": "126592, 236352, 5907",
+    "soma_side": "left",
+    "type": "MNhl59",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_metathoracic_leg_nerve",
+    "id": 720575941553011713,
+    "meta_side": "right",
+    "nerve": "right_metathoracic_leg_nerve",
+    "nerve_side": "right",
+    "root_position": "92720, 230624, 3985",
+    "soma_side": "right",
+    "type": "MNhl59",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_metathoracic_leg_nerve",
+    "id": 720575941562029224,
+    "meta_side": "right",
+    "nerve": "right_metathoracic_leg_nerve",
+    "nerve_side": "right",
+    "root_position": "98896, 236864, 4959",
+    "soma_side": "right",
+    "type": "MNhl87",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_metathoracic_leg_nerve",
+    "id": 720575941638038559,
+    "meta_side": "right",
+    "nerve": "right_metathoracic_leg_nerve",
+    "nerve_side": "right",
+    "root_position": "90224, 226688, 4445",
+    "soma_side": "right",
+    "type": "MNhl87",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941486464066,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "127840, 237008, 5098",
+    "soma_side": "left",
+    "type": "MNhm03",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941575048040,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "95392, 231824, 3744",
+    "soma_side": "right",
+    "type": "MNhm03",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941535409178,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "129808, 232256, 5217",
+    "soma_side": "left",
+    "type": "MNhm42",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941565422999,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "95712, 225248, 3963",
+    "soma_side": "right",
+    "type": "MNhm42",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941498915401,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "130416, 231712, 5476",
+    "soma_side": "left",
+    "type": "MNhm43",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941730020395,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "97216, 219408, 4206",
+    "soma_side": "right",
+    "type": "MNhm43",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_dorsal_metathoracic_nerve",
+    "id": 720575941535119809,
+    "meta_side": "left",
+    "nerve": "left_dorsal_metathoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "131584, 197952, 5042",
+    "soma_side": "left",
+    "type": "MNxm03",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_dorsal_metathoracic_nerve",
+    "id": 720575941407469359,
+    "meta_side": "right",
+    "nerve": "right_dorsal_metathoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "106160, 184784, 4743",
+    "soma_side": "right",
+    "type": "MNxm03",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941546998972,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "127824, 235648, 5849",
+    "soma_side": "left",
+    "type": "hDVM",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941572052381,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "94592, 226528, 3910",
+    "soma_side": "right",
+    "type": "hDVM",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941474483249,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "128576, 237104, 5138",
+    "soma_side": "left",
+    "type": "hi1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941488989129,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "126144, 239520, 4996",
+    "soma_side": "left",
+    "type": "hi1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941483849869,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "99056, 234144, 3683",
+    "soma_side": "right",
+    "type": "hi1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941561531181,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "98336, 233536, 3711",
+    "soma_side": "right",
+    "type": "hi1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941463979533,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "127152, 237568, 5004",
+    "soma_side": "left",
+    "type": "hi2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_third_abdominal_nerve",
+    "id": 720575941564037430,
+    "meta_side": "left",
+    "nerve": "left_third_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "129072, 233840, 5252",
+    "soma_side": "left",
+    "type": "hi2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941474504478,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "97824, 230000, 3690",
+    "soma_side": "right",
+    "type": "hi2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "left_first_abdominal_nerve",
+    "id": 720575941434381710,
+    "meta_side": "left",
+    "nerve": "left_first_abdominal_nerve",
+    "nerve_side": "left",
+    "root_position": "129632, 233072, 5351",
+    "soma_side": "left",
+    "type": "hiii2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "haltere_motor_neuron",
+    "codex_nerve": "right_first_abdominal_nerve",
+    "id": 720575941555256833,
+    "meta_side": "right",
+    "nerve": "right_first_abdominal_nerve",
+    "nerve_side": "right",
+    "root_position": "82296, 239616, 5145",
+    "soma_side": "right",
+    "type": "hiii2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "leg_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941476434996,
+    "meta_side": "left",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "152416, 168000, 4769",
+    "soma_side": "left",
+    "type": "TTMn",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "leg_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941500579913,
+    "meta_side": "right",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "109616, 174288, 2887",
+    "soma_side": "right",
+    "type": "TTMn",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941526853030,
+    "meta_side": "left",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "141504, 139120, 3197",
+    "soma_side": "left",
+    "type": "ADNM1",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941534975425,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "131012, 106360, 3243",
+    "soma_side": "left",
+    "type": "ADNM1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941573355592,
+    "meta_side": "left",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "139808, 137536, 3175",
+    "soma_side": "left",
+    "type": "ADNM2",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941573751305,
+    "meta_side": "right",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "120624, 139632, 3178",
+    "soma_side": "right",
+    "type": "ADNM2",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941492017790,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "153264, 57344, 2070",
+    "soma_side": "left",
+    "type": "CvN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941548493857,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "154576, 57104, 1957",
+    "soma_side": "left",
+    "type": "CvN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941507987877,
+    "meta_side": "right",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "90768, 59776, 2300",
+    "soma_side": "right",
+    "type": "CvN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941544483252,
+    "meta_side": "right",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "90576, 58816, 2145",
+    "soma_side": "right",
+    "type": "CvN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941642129528,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "151168, 56608, 2226",
+    "soma_side": "left",
+    "type": "CvN10",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941526954424,
+    "meta_side": "right",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "90176, 60128, 2217",
+    "soma_side": "right",
+    "type": "CvN10",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941564833938,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "152176, 55584, 2118",
+    "soma_side": "left",
+    "type": "CvN11",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941517213177,
+    "meta_side": "right",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "92672, 60512, 1977",
+    "soma_side": "right",
+    "type": "CvN11",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941553264211,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "151584, 56512, 2039",
+    "soma_side": "left",
+    "type": "CvN3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941457562694,
+    "meta_side": "right",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "87744, 59440, 2222",
+    "soma_side": "right",
+    "type": "CvN3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941597457564,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "127264, 71712, 1991",
+    "soma_side": "left",
+    "type": "CvN4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941428762249,
+    "meta_side": "right",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "86144, 58848, 2099",
+    "soma_side": "right",
+    "type": "CvN4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941513990988,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "152080, 58528, 2139",
+    "soma_side": "left",
+    "type": "CvN5",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941508147746,
+    "meta_side": "right",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "91632, 61088, 2433",
+    "soma_side": "right",
+    "type": "CvN5",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941539792220,
+    "meta_side": "left",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "137104, 65136, 2880",
+    "soma_side": "left",
+    "type": "CvN6",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941609437613,
+    "meta_side": "right",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "112608, 66672, 2796",
+    "soma_side": "right",
+    "type": "CvN6",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941459454704,
+    "meta_side": "left",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "139968, 64752, 2791",
+    "soma_side": "left",
+    "type": "CvN7",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941495864905,
+    "meta_side": "left",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "136192, 64528, 2985",
+    "soma_side": "left",
+    "type": "CvN7",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_cervical_nerve",
+    "id": 720575941598584768,
+    "meta_side": "left",
+    "nerve": "right_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "129920, 61664, 3126",
+    "soma_side": "left",
+    "type": "CvN9",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_cervical_nerve",
+    "id": 720575941565285730,
+    "meta_side": "right",
+    "nerve": "left_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "111968, 64064, 2903",
+    "soma_side": "right",
+    "type": "CvN9",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941502691819,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "141296, 140064, 2657",
+    "soma_side": "left",
+    "type": "DProN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941439741119,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "113972, 120824, 3168",
+    "soma_side": "right",
+    "type": "DProN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941489125351,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "137952, 136192, 2455",
+    "soma_side": "left",
+    "type": "DProN2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941512880643,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "125296, 139008, 2184",
+    "soma_side": "right",
+    "type": "DProN2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941448945757,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "137581, 140540, 2587",
+    "soma_side": "left",
+    "type": "DProN3a",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941575975350,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "126464, 137856, 2055",
+    "soma_side": "right",
+    "type": "DProN3a",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941525682253,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "137840, 134032, 2465",
+    "soma_side": "left",
+    "type": "DProN3b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941544264041,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "124464, 136080, 2441",
+    "soma_side": "right",
+    "type": "DProN3b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941492452222,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "138384, 138384, 2477",
+    "soma_side": "left",
+    "type": "DProN4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941489332169,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "112636, 121484, 3214",
+    "soma_side": "right",
+    "type": "DProN4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941504200613,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "138688, 139728, 2465",
+    "soma_side": "left",
+    "type": "DProN5",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941530511747,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "124896, 138064, 2480",
+    "soma_side": "right",
+    "type": "DProN5",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941478578511,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "135680, 136800, 2428",
+    "soma_side": "left",
+    "type": "DProN6",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941731588651,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "137568, 138608, 2596",
+    "soma_side": "left",
+    "type": "DProN7",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941435429676,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "125184, 141168, 2200",
+    "soma_side": "right",
+    "type": "DProN7",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941493508551,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "139904, 138544, 2631",
+    "soma_side": "left",
+    "type": "DProN8",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941577663825,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "122128, 137856, 2598",
+    "soma_side": "right",
+    "type": "DProN8",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_dorsal_prothoracic_nerve",
+    "id": 720575941390352388,
+    "meta_side": "left",
+    "nerve": "left_dorsal_prothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "138496, 141616, 2646",
+    "soma_side": "left",
+    "type": "DProN9",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_dorsal_prothoracic_nerve",
+    "id": 720575941574538504,
+    "meta_side": "right",
+    "nerve": "right_dorsal_prothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "123328, 142224, 2368",
+    "soma_side": "right",
+    "type": "DProN9",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_ventral_cervical_nerve",
+    "id": 720575941526075673,
+    "meta_side": "left",
+    "nerve": "left_ventral_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "125744, 53696, 657",
+    "soma_side": "left",
+    "type": "VCvN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_ventral_cervical_nerve",
+    "id": 720575941564288263,
+    "meta_side": "left",
+    "nerve": "left_ventral_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "126972, 55296, 641",
+    "soma_side": "left",
+    "type": "VCvN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_ventral_cervical_nerve",
+    "id": 720575941508147234,
+    "meta_side": "right",
+    "nerve": "right_ventral_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "105168, 48480, 504",
+    "soma_side": "right",
+    "type": "VCvN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_ventral_cervical_nerve",
+    "id": 720575941577100277,
+    "meta_side": "right",
+    "nerve": "right_ventral_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "112992, 61296, 985",
+    "soma_side": "right",
+    "type": "VCvN1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "left_ventral_cervical_nerve",
+    "id": 720575941514963811,
+    "meta_side": "left",
+    "nerve": "left_ventral_cervical_nerve",
+    "nerve_side": "left",
+    "root_position": "129488, 49248, 438",
+    "soma_side": "left",
+    "type": "VCvN3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "neck_motor_neuron",
+    "codex_nerve": "right_ventral_cervical_nerve",
+    "id": 720575941455715053,
+    "meta_side": "right",
+    "nerve": "right_ventral_cervical_nerve",
+    "nerve_side": "right",
+    "root_position": "112544, 53664, 738",
+    "soma_side": "right",
+    "type": "VCvN3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "peripheral_intrinsic_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941549397247,
+    "meta_side": "left",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "150864, 167952, 5132",
+    "soma_side": "left",
+    "type": "PSI",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "peripheral_intrinsic_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941643797624,
+    "meta_side": "right",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "103760, 163168, 4189",
+    "soma_side": "right",
+    "type": "PSI",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941432491145,
+    "meta_side": "left",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "153984, 162128, 5286",
+    "soma_side": "left",
+    "type": "DLM1-4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941519783640,
+    "meta_side": "left",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "152656, 164080, 4129",
+    "soma_side": "left",
+    "type": "DLM1-4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941640465439,
+    "meta_side": "left",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "154528, 159152, 4430",
+    "soma_side": "left",
+    "type": "DLM1-4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941645403000,
+    "meta_side": "left",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "155072, 160992, 4030",
+    "soma_side": "left",
+    "type": "DLM1-4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941463144336,
+    "meta_side": "right",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "108784, 159120, 3583",
+    "soma_side": "right",
+    "type": "DLM1-4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941479034563,
+    "meta_side": "right",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "107216, 161040, 3344",
+    "soma_side": "right",
+    "type": "DLM1-4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941533190337,
+    "meta_side": "right",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "103616, 163056, 3885",
+    "soma_side": "right",
+    "type": "DLM1-4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941583644382,
+    "meta_side": "right",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "110000, 164544, 3341",
+    "soma_side": "right",
+    "type": "DLM1-4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941596050112,
+    "meta_side": "left",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "144432, 156592, 5188",
+    "soma_side": "left",
+    "type": "DLM5",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941692400603,
+    "meta_side": "right",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "112416, 154656, 4848",
+    "soma_side": "right",
+    "type": "DLM5",
+    "verdict": "relabelled"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941560383347,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "146224, 173104, 3398",
+    "soma_side": "left",
+    "type": "DVM1a-c",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941565105206,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "167505, 145909, 5554",
+    "soma_side": "left",
+    "type": "DVM1a-c",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941566847847,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "150336, 170336, 4387",
+    "soma_side": "left",
+    "type": "DVM1a-c",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941472734048,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "108368, 167744, 3410",
+    "soma_side": "right",
+    "type": "DVM1a-c",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941597489344,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "112032, 168768, 3259",
+    "soma_side": "right",
+    "type": "DVM1a-c",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941603635190,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "112794, 174578, 3118",
+    "soma_side": "right",
+    "type": "DVM1a-c",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941542328837,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "140720, 197872, 4974",
+    "soma_side": "left",
+    "type": "DVM2a-b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941573368719,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "142672, 198928, 4659",
+    "soma_side": "left",
+    "type": "DVM2a-b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941530190027,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "111840, 194944, 4110",
+    "soma_side": "right",
+    "type": "DVM2a-b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941624985226,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "109952, 200464, 3022",
+    "soma_side": "right",
+    "type": "DVM2a-b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941590220684,
+    "meta_side": "left",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "152400, 156320, 4657",
+    "soma_side": "left",
+    "type": "DVM3a-b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941614289683,
+    "meta_side": "left",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "154656, 161264, 5025",
+    "soma_side": "left",
+    "type": "DVM3a-b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941487139138,
+    "meta_side": "right",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "107968, 155808, 4061",
+    "soma_side": "right",
+    "type": "DVM3a-b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941499558369,
+    "meta_side": "right",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "106528, 155616, 4251",
+    "soma_side": "right",
+    "type": "DVM3a-b",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941594743921,
+    "meta_side": "left",
+    "nerve": "left_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "153296, 161408, 4082",
+    "soma_side": "left",
+    "type": "MNxm01",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "id": 720575941535457256,
+    "meta_side": "right",
+    "nerve": "right_posterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "111152, 160880, 3229",
+    "soma_side": "right",
+    "type": "MNxm01",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941569529458,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "136016, 198592, 4808",
+    "soma_side": "left",
+    "type": "PSn_u",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941555120612,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "111504, 195584, 3762",
+    "soma_side": "right",
+    "type": "PSn_u",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941521196211,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "142784, 175088, 3562",
+    "soma_side": "left",
+    "type": "b1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941549822781,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "118192, 170864, 3018",
+    "soma_side": "right",
+    "type": "b1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941624155644,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "151616, 168272, 4017",
+    "soma_side": "left",
+    "type": "b2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941655597785,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "115232, 170112, 3124",
+    "soma_side": "right",
+    "type": "b2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941542412805,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "149136, 168336, 3718",
+    "soma_side": "left",
+    "type": "b3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941474574132,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "111232, 169472, 3340",
+    "soma_side": "right",
+    "type": "b3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941456201887,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "147824, 172080, 3984",
+    "soma_side": "left",
+    "type": "hg1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941580669817,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "113552, 174704, 2834",
+    "soma_side": "right",
+    "type": "hg1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941732789547,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "147312, 172192, 4112",
+    "soma_side": "left",
+    "type": "hg2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941479658831,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "111216, 175488, 2922",
+    "soma_side": "right",
+    "type": "hg2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941483845954,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "150224, 169488, 3733",
+    "soma_side": "left",
+    "type": "hg3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941468288375,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "111680, 170992, 3190",
+    "soma_side": "right",
+    "type": "hg3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941630940642,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "134928, 198464, 5266",
+    "soma_side": "left",
+    "type": "hg4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941513173763,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "109168, 196256, 3296",
+    "soma_side": "right",
+    "type": "hg4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941547315060,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "151120, 167440, 4078",
+    "soma_side": "left",
+    "type": "i1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941468897856,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "110784, 172256, 3220",
+    "soma_side": "right",
+    "type": "i1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941547394081,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "145408, 173408, 3475",
+    "soma_side": "left",
+    "type": "i2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941475745898,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "116832, 173792, 2807",
+    "soma_side": "right",
+    "type": "i2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941489673420,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "136704, 197888, 5158",
+    "soma_side": "left",
+    "type": "iii1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941629172716,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "110144, 195072, 3976",
+    "soma_side": "right",
+    "type": "iii1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941565378919,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "137216, 199076, 5412",
+    "soma_side": "left",
+    "type": "iii3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941458961604,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "108448, 195808, 3610",
+    "soma_side": "right",
+    "type": "iii3",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941459347411,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "141600, 192464, 5660",
+    "soma_side": "left",
+    "type": "iii4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941516770670,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "108368, 195120, 3999",
+    "soma_side": "right",
+    "type": "iii4",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941544439325,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "150480, 173120, 5639",
+    "soma_side": "left",
+    "type": "ps1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941643100754,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "105344, 170816, 3740",
+    "soma_side": "right",
+    "type": "ps1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_mesothoracic_accessory_nerve",
+    "id": 720575941501027819,
+    "meta_side": "left",
+    "nerve": "left_mesothoracic_accessory_nerve",
+    "nerve_side": "left",
+    "root_position": "151408, 172096, 4916",
+    "soma_side": "left",
+    "type": "ps2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_mesothoracic_accessory_nerve",
+    "id": 720575941634053829,
+    "meta_side": "right",
+    "nerve": "right_mesothoracic_accessory_nerve",
+    "nerve_side": "right",
+    "root_position": "103680, 172672, 3515",
+    "soma_side": "right",
+    "type": "ps2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941610087498,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "145488, 172272, 3680",
+    "soma_side": "left",
+    "type": "tp1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941569548402,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "113152, 170016, 3388",
+    "soma_side": "right",
+    "type": "tp1",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941476080948,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "141952, 176000, 3817",
+    "soma_side": "left",
+    "type": "tp2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941669019635,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "114432, 175568, 2886",
+    "soma_side": "right",
+    "type": "tp2",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941474595370,
+    "meta_side": "left",
+    "nerve": "left_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "left",
+    "root_position": "162915, 149541, 5771",
+    "soma_side": "left",
+    "type": "tpn",
+    "verdict": "match"
+   },
+   {
+    "cell_class": "wing_motor_neuron",
+    "codex_nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "id": 720575941597267356,
+    "meta_side": "right",
+    "nerve": "right_anterior_dorsal_mesothoracic_nerve",
+    "nerve_side": "right",
+    "root_position": "112880, 166976, 3315",
+    "soma_side": "right",
+    "type": "tpn",
+    "verdict": "match"
+   }
+  ],
+  "relabelled_readout_types": [
+   "ADNM1",
+   "ADNM2",
+   "CvN6",
+   "CvN7",
+   "CvN9",
+   "DLM5",
+   "PSI"
+  ],
+  "relabelled_types": [
+   "ADNM1",
+   "ADNM2",
+   "CvN6",
+   "CvN7",
+   "CvN9",
+   "DLM5",
+   "EFFabg10",
+   "EFFabg12",
+   "EFFabg32",
+   "MNad01",
+   "MNad02",
+   "MNad06",
+   "MNad14",
+   "MNad24",
+   "MNad41",
+   "MNad43",
+   "MNx01",
+   "PSI"
+  ],
+  "types": {
+   "ADNM1": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 1,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 1,
+    "n_soma_left": 2,
+    "n_soma_right": 0,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "mixed"
+   },
+   "ADNM2": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 0,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 2,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "swapped"
+   },
+   "CvN1": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 4,
+    "n_match": 4,
+    "n_nerve_left": 2,
+    "n_nerve_right": 2,
+    "n_relabelled": 0,
+    "n_soma_left": 2,
+    "n_soma_right": 2,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "CvN10": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "CvN11": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "CvN3": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "CvN4": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "CvN5": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "CvN6": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 0,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 2,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "swapped"
+   },
+   "CvN7": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 1,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 1,
+    "n_soma_left": 2,
+    "n_soma_right": 0,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "mixed"
+   },
+   "CvN9": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 0,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 2,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "swapped"
+   },
+   "DLM1-4": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "PDMN",
+     "agrees": true,
+     "name": "posterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": "ipsilateral",
+    "lit_soma_agrees": true,
+    "n": 8,
+    "n_match": 8,
+    "n_nerve_left": 4,
+    "n_nerve_right": 4,
+    "n_relabelled": 0,
+    "n_soma_left": 4,
+    "n_soma_right": 4,
+    "n_undetermined": 0,
+    "nerves": [
+     "posterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DLM5": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "PDMN",
+     "agrees": true,
+     "name": "posterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": "contralateral",
+    "lit_soma_agrees": true,
+    "n": 2,
+    "n_match": 0,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 2,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "posterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "swapped"
+   },
+   "DProN1": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN2": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN3a": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN3b": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN4": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN5": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN6": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 1,
+    "n_match": 1,
+    "n_nerve_left": 1,
+    "n_nerve_right": 0,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 0,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN7": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN8": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DProN9": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_prothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DVM1a-c": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 6,
+    "n_match": 6,
+    "n_nerve_left": 3,
+    "n_nerve_right": 3,
+    "n_relabelled": 0,
+    "n_soma_left": 3,
+    "n_soma_right": 3,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DVM2a-b": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "mesoAN",
+     "agrees": true,
+     "name": "mesothoracic_accessory_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 4,
+    "n_match": 4,
+    "n_nerve_left": 2,
+    "n_nerve_right": 2,
+    "n_relabelled": 0,
+    "n_soma_left": 2,
+    "n_soma_right": 2,
+    "n_undetermined": 0,
+    "nerves": [
+     "mesothoracic_accessory_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "DVM3a-b": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "PDMN",
+     "agrees": true,
+     "name": "posterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 4,
+    "n_match": 4,
+    "n_nerve_left": 2,
+    "n_nerve_right": 2,
+    "n_relabelled": 0,
+    "n_soma_left": 2,
+    "n_soma_right": 2,
+    "n_undetermined": 0,
+    "nerves": [
+     "posterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "MNad29": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "first_abdominal_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "MNhl59": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "metathoracic_leg_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "MNhl87": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 0,
+    "n_nerve_right": 2,
+    "n_relabelled": 0,
+    "n_soma_left": 0,
+    "n_soma_right": 2,
+    "n_undetermined": 0,
+    "nerves": [
+     "metathoracic_leg_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "MNhm03": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "first_abdominal_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "MNhm42": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "first_abdominal_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "MNhm43": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "first_abdominal_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "MNxm01": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "posterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "MNxm03": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "dorsal_metathoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "PSI": {
+    "cell_class": "peripheral_intrinsic_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 0,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 2,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "posterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "swapped"
+   },
+   "PSn_u": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "mesothoracic_accessory_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "TTMn": {
+    "cell_class": "leg_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "PDMN",
+     "agrees": true,
+     "name": "posterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "posterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "VCvN1": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 4,
+    "n_match": 4,
+    "n_nerve_left": 2,
+    "n_nerve_right": 2,
+    "n_relabelled": 0,
+    "n_soma_left": 2,
+    "n_soma_right": 2,
+    "n_undetermined": 0,
+    "nerves": [
+     "ventral_cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "VCvN3": {
+    "cell_class": "neck_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "ventral_cervical_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "b1": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "b2": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "b3": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "hDVM": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "first_abdominal_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "hg1": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "hg2": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "hg3": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "hg4": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "mesoAN",
+     "agrees": true,
+     "name": "mesothoracic_accessory_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "mesothoracic_accessory_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "hi1": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 4,
+    "n_match": 4,
+    "n_nerve_left": 2,
+    "n_nerve_right": 2,
+    "n_relabelled": 0,
+    "n_soma_left": 2,
+    "n_soma_right": 2,
+    "n_undetermined": 0,
+    "nerves": [
+     "first_abdominal_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "hi2": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 3,
+    "n_match": 3,
+    "n_nerve_left": 2,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 2,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "first_abdominal_nerve",
+     "third_abdominal_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "hiii2": {
+    "cell_class": "haltere_motor_neuron",
+    "lit_nerve": null,
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "first_abdominal_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "i1": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "i2": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "iii1": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "mesoAN",
+     "agrees": true,
+     "name": "mesothoracic_accessory_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "mesothoracic_accessory_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "iii3": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "mesoAN",
+     "agrees": true,
+     "name": "mesothoracic_accessory_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "mesothoracic_accessory_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "iii4": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "mesoAN",
+     "agrees": true,
+     "name": "mesothoracic_accessory_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "mesothoracic_accessory_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "ps1": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "mesoAN",
+     "agrees": true,
+     "name": "mesothoracic_accessory_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "mesothoracic_accessory_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "ps2": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "mesoAN",
+     "agrees": true,
+     "name": "mesothoracic_accessory_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "mesothoracic_accessory_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "tp1": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "tp2": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   },
+   "tpn": {
+    "cell_class": "wing_motor_neuron",
+    "lit_nerve": {
+     "abbrev": "ADMN",
+     "agrees": true,
+     "name": "anterior_dorsal_mesothoracic_nerve"
+    },
+    "lit_soma": null,
+    "lit_soma_agrees": null,
+    "n": 2,
+    "n_match": 2,
+    "n_nerve_left": 1,
+    "n_nerve_right": 1,
+    "n_relabelled": 0,
+    "n_soma_left": 1,
+    "n_soma_right": 1,
+    "n_undetermined": 0,
+    "nerves": [
+     "anterior_dorsal_mesothoracic_nerve"
+    ],
+    "readout": true,
+    "verdict": "consistent"
+   }
+  },
+  "verdict_all_types": {
+   "ADNM1": "mixed",
+   "ADNM2": "swapped",
+   "CMU": "undetermined",
+   "CvN6": "swapped",
+   "CvN7": "mixed",
+   "CvN9": "swapped",
+   "DLM5": "swapped",
+   "EFFabg01": "undetermined",
+   "EFFabg02": "undetermined",
+   "EFFabg03": "undetermined",
+   "EFFabg04": "undetermined",
+   "EFFabg05": "undetermined",
+   "EFFabg06": "undetermined",
+   "EFFabg07": "undetermined",
+   "EFFabg08": "undetermined",
+   "EFFabg10": "mixed",
+   "EFFabg11": "undetermined",
+   "EFFabg12": "mixed",
+   "EFFabg13": "consistent_partial",
+   "EFFabg14": "consistent_partial",
+   "EFFabg15": "undetermined",
+   "EFFabg16": "undetermined",
+   "EFFabg17": "undetermined",
+   "EFFabg18": "consistent_partial",
+   "EFFabg19": "undetermined",
+   "EFFabg20": "undetermined",
+   "EFFabg21": "undetermined",
+   "EFFabg22": "undetermined",
+   "EFFabg32": "swapped",
+   "EFFabg95f": "undetermined",
+   "EFFabg96f": "undetermined",
+   "EFFabg97f": "undetermined",
+   "EFFabg98f": "undetermined",
+   "EFFabg99f": "undetermined",
+   "ENXXX226": "consistent_partial",
+   "INXXX137": "undetermined",
+   "INXXX188": "undetermined",
+   "MNabgxxF": "undetermined",
+   "MNad01": "mixed",
+   "MNad02": "mixed",
+   "MNad04": "undetermined",
+   "MNad05": "undetermined",
+   "MNad06": "mixed",
+   "MNad08": "undetermined",
+   "MNad11": "undetermined",
+   "MNad14": "mixed",
+   "MNad16": "consistent_partial",
+   "MNad19": "undetermined",
+   "MNad24": "mixed",
+   "MNad41": "swapped",
+   "MNad43": "mixed",
+   "MNad53": "undetermined",
+   "MNad57": "undetermined",
+   "MNad58": "undetermined",
+   "MNad65": "undetermined",
+   "MNx01": "mixed",
+   "PSI": "swapped"
+  }
+ }
+}
