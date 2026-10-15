@@ -1293,6 +1293,60 @@
       "origin": "E",
       "source": "configs/gap_junctions.yaml pairing rule: a registered pre cell is coupled to every post cell of the registered type on which it has >= 1 chemical synapse (mixed electrochemical synapses)",
       "used_in": []
+    },
+    "f5.g_max": {
+      "value": 2.0,
+      "unit": "edge gain bound (gain = G_MAX sigmoid(theta), init 1)",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 2 and 12; docs/10_TRAINING.md section 2.1 and 12; bounded edge gain, training can at most double or nearly silence an edge",
+      "used_in": [
+        "engine/rate_torch.py:G_MAX"
+      ]
+    },
+    "f5.lam_min": {
+      "value": 0.05,
+      "unit": "leak per update",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 2 and 12; docs/10_TRAINING.md section 2.1 and 12; leak lower bound as in flyhard",
+      "used_in": [
+        "engine/rate_torch.py:LAM_MIN"
+      ]
+    },
+    "f5.lam_max": {
+      "value": 0.95,
+      "unit": "leak per update",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 2 and 12; docs/10_TRAINING.md section 2.1 and 12; leak upper bound as in flyhard",
+      "used_in": [
+        "engine/rate_torch.py:LAM_MAX"
+      ]
+    },
+    "f5.lam_0": {
+      "value": 0.25,
+      "unit": "leak per update",
+      "origin": "P",
+      "source": "prereg/14_f5_training.md section 2 and 12; docs/10_TRAINING.md section 2.1 and 12; 5 ms update / Shiu et al. membrane time constant 20 ms",
+      "used_in": [
+        "engine/rate_torch.py:LAM_0"
+      ]
+    },
+    "f5.updates_per_interval": {
+      "value": 1,
+      "unit": "rate updates per 5 ms coupling interval",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 2 and 12; docs/10_TRAINING.md section 2.1 and 12; a k-hop path takes k intervals (explicit latency)",
+      "used_in": [
+        "engine/rate_torch.py:UPDATES_PER_INTERVAL"
+      ]
+    },
+    "f5.r_in": {
+      "value": 100.0,
+      "unit": "Hz per unit of state or drive (R_IN = R_OUT)",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 2 and 12; docs/10_TRAINING.md section 2.1 and 12; the scale of the F3a-3 steering dose-responses (10-100 Hz)",
+      "used_in": [
+        "engine/rate_torch.py:R_IN"
+      ]
     }
   }
 }

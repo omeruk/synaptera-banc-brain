@@ -40,6 +40,21 @@ F4_V1 = ROOT / "docs" / "results" / "f4_design_numbers.json"
 RESULTS = ROOT / "docs" / "results"
 OUT = RESULTS / "side_audit"
 OUT_POST = RESULTS / "side_audit_post_audit"
+# The result files that existed when the audit ran (commit 2162baf). Section 4 is frozen to them, so a later report
+# does not change the rebuilt audit (post-hoc fix, F5 step 2a; the audit's own output is unchanged).
+AUDITED_RESULTS = frozenset((
+    "SUMMARY_F0_F3.md", "connectome_stats.json", "f0_acceptance.json", "f0_acceptance.md", "f0_baseline_5ms.json",
+    "f0_baseline_5ms.md", "f0_brain_mismatch.md", "f0_ignition_frequency.json", "f0_ignition_frequency.md",
+    "f0_ignition_sweep.json", "f0_latency_hover_yaw.json", "f0_latency_hover_yaw.md", "f0_multiseed.json",
+    "f0_multiseed.md", "f0_seeds.json", "f1_banc_qa.json", "f1_banc_qa.md", "f1_banc_smoke.md", "f2_full_graph.json",
+    "f2_full_graph.md", "f2_full_graph_qa.json", "f2_full_graph_qa.md", "f2_innorm.json", "f2_innorm.md",
+    "f2_v3_qa.json", "f2_v3_qa.md", "f2_wsyn_calibration.json", "f2_wsyn_calibration.md", "f2_wsyn_k.json",
+    "f3_dn_crosswalk.json", "f3_dn_crosswalk.md", "f3a2_checks.json", "f3a2_checks.md", "f3a3_subgraph.json",
+    "f3a3_vnc_subgraph.json", "f3a3_vnc_subgraph.md", "f3a_banc_vnc.json", "f3a_banc_vnc.md", "f3b1_optomotor.json",
+    "f3b1_optomotor.md", "f3b2_dn_ensemble.json", "f3b2_dn_ensemble.md", "f3b3_specificity.json",
+    "f3b3_specificity.md", "f4_design_numbers.json", "f4_design_numbers_v2.json", "grn_mn9.json",
+    "mv2_neuron_model.json", "mv2_neuron_model.md", "summary_f0_f3.json",
+))
 
 DETAIL_CLASSES = ("wing_motor_neuron", "haltere_motor_neuron", "neck_motor_neuron")
 DETAIL_EXTRA_TYPES = ("TTMn", "PSI")
@@ -454,7 +469,7 @@ def section4(types, own=("side_audit.json", "side_audit_post_audit.json")):
     for t in types:
         files = {}
         for p in sorted(RESULTS.glob("*.json")):
-            if p.name in own:
+            if p.name in own or p.name not in AUDITED_RESULTS:
                 continue
             try:
                 d = json.loads(p.read_text())
@@ -465,7 +480,7 @@ def section4(types, own=("side_audit.json", "side_audit_post_audit.json")):
             if hits:
                 files[p.name] = dict(n=len(hits), examples=sorted(set(re.sub(r"\[\d+\]", "[*]", h) for h in hits))[:4])
         for p in sorted(RESULTS.glob("*.md")):
-            if p.name.startswith("side_audit"):
+            if p.name.startswith("side_audit") or p.name not in AUDITED_RESULTS:
                 continue
             k = len(re.findall(rf"(?<![\w-]){re.escape(t)}(?![\w-])", p.read_text()))
             if k:
