@@ -452,6 +452,18 @@ prereg/13).**
   and PSI rows, and the mv2 per-side MN rates.
 - **Relevant to the open GF-PSI question.** By the nerve rule, each PSI's effector side is opposite its soma.
 
+**Record after the side audit (project owner, 2026-10-15, PR #19 merged):**
+- The side audit found no mislabelling. The anti-directional S of R is a property of the **untrained** hybrid, not of
+  the side conventions.
+- **Decision: move to real training (F5)**, at the scale of flyhard and flybody (docs/04). Run time does not matter;
+  correctness, controls and resumability do.
+- The sign diagnostic (why the untrained hybrid is anti-directional) is postponed.
+- **Next step: F5 step 1, design and pre-registration only, no code** (`docs/10_TRAINING.md`,
+  `prereg/14_f5_training.md`, branch `omeruk/f5-training`). Curriculum: A) BANC VNC subgraph alone, supervised on
+  recorded FlyWire DN rates; B) end to end, FlyVis (frozen) -> FlyWire brain -> DN bridge -> BANC VNC -> steering MNs ->
+  dA; C) closed loop on the docs/08 optomotor task, behaviour cloning + DAgger; D) optional reinforcement fine-tuning.
+  Arms in every stage: true wiring, degree-preserving shuffled wiring, an MLP of similar size, a linear readout.
+
 Task ladder (each with a pre-registered criterion):
 T0 open-loop responses → T1 hover + perturbation → T2 optomotor yaw tracking → T3 GF take-off → T4 landing on the platform
 → T5 orienting to the target (visual target: the dark platform; olfaction only if the AL problem is solved) → T6 full task.
