@@ -186,8 +186,8 @@ positive when the pattern moves to the fly's right):
 - **Sign.** rot_right (the pattern moves to the fly's right) gives dA* > 0. That is a larger left amplitude, which
   turns the fly to the right, i.e. syndirectional (`body/quasi_steady.turn_to_amplitudes`; docs/08 section 6: S > 0
   is syndirectional).
-- **Open loop (stages A, B).** The fly does not turn, so v_slip is the drum speed: dA* = +-3.125, +-6.25 and +-12.5 deg
-  at 30, 60 and 120 deg/s. dA* = 0 under static and grey. During the grey lead-in the target is 0, and at drum onset
+- **Open loop (stages A, B).** The fly does not turn, so v_slip is the drum speed: dA* = +-3.125, +-6.25, +-9.375 and
+  +-12.5 deg at 30, 60, 90 and 120 deg/s. dA* = 0 under static and grey. During the grey lead-in the target is 0, and at drum onset
   it steps to its value.
 - **Closed loop (stage C).** v_slip = drum speed - yaw rate. With the steady plant, the teacher's closed-loop
   optomotor gain is c / (1 + c), where c = K_YAW * K_P = 2.98, so g_teacher = 0.75. The implementation recomputes
@@ -252,10 +252,12 @@ they also set the grating phase.
 - **Sealed test.** The test seeds are listed in a split file with a SHA-256 that is recorded in every training run.
   Test records may be generated early (A), but no training or selection code path reads them. This is checked by a
   test that fails if a test seed reaches a loader in training mode.
-- **Held-out drum speed.** 30 deg/s (temporal frequency 1 Hz) is never used for training or validation in any stage.
-  The training speeds are 60 and 120 deg/s (2 and 4 Hz). The wavelength is always 30 deg (`tasks/t0_stimuli.py`).
-  - So the generalisation test is an extrapolation one octave below the trained range.
-  - It is also the hardest target size (3.125 deg), and the target law predicts it exactly.
+- **Held-out drum speeds.** Two speeds are never used for training or validation in any stage. The training speeds
+  are 60 and 120 deg/s (temporal frequency 2 and 4 Hz). The wavelength is always 30 deg (`tasks/t0_stimuli.py`).
+  - **Primary: 90 deg/s (3 Hz).** An interpolation inside the trained range; target +-9.375 deg.
+  - **Secondary: 30 deg/s (1 Hz).** An extrapolation one octave below the trained range; it has the smallest target
+    (+-3.125 deg).
+  - For both, the target law gives the expected value exactly.
 - **Grating phase.** It is drawn per data seed, uniform over one wavelength. Without it, test trials would differ from
   training trials only in noise.
   - Seeds 0-39 keep phase 0, so that their existing records stay valid (they are all training seeds).
@@ -290,14 +292,15 @@ existing record bit for bit at 60 deg/s and phase 0: `rot_left` seed 10 must equ
 | new runs | seeds | conditions | count |
 |---|---|---|---|
 | new seeds, all conditions | 40-239 (200) | rot_left / rot_right at 30, 60 and 120 deg/s; static; grey | 200 x 8 = 1,600 |
+| primary held-out speed, all seeds | 0-239 (240) | rot_left / rot_right at 90 deg/s | 240 x 2 = 480 |
 | existing seeds, the two new speeds | 0-39 (40) | rot_left / rot_right at 30 and 120 deg/s | 40 x 4 = 160 |
-| **total** | | | **1,760** |
+| **total** | | | **2,240** |
 
-- **Cost.** In F3b-3, 80 runs took 827 s including the engine build (`runs/f3b3/brain/DONE`), so 1,760 runs take
-  about 5 h. One record is about 20 KB, so the whole set is about 40 MB.
-- **After the runs.** Every data seed 0-239 has 8 records. That makes 1,920 records (about 0.58 M labelled intervals
-  at 300 intervals each). The training records are 960: data seeds 0-159 x the 6 training conditions, since 30 deg/s
-  is held out. That is the scale of flyhard's 1,200 demonstrations.
+- **Cost.** In F3b-3, 80 runs took 827 s including the engine build (`runs/f3b3/brain/DONE`), so 2,240 runs take
+  about 6.4 h. One record is about 20 KB, so the whole set is about 50 MB.
+- **After the runs.** Every data seed 0-239 has 10 records. That makes 2,400 records (about 0.72 M labelled intervals
+  at 300 intervals each). The training records are 960: data seeds 0-159 x the 6 training conditions, since 30 and
+  90 deg/s are held out. That is the scale of flyhard's 1,200 demonstrations.
 
 ### 6.4 Data for stages B and C
 
@@ -308,11 +311,12 @@ existing record bit for bit at 60 deg/s and phase 0: `rot_left` seed 10 must equ
 - **Stage C.** Online closed-loop flights.
   - **Plant noise.** Each flight's seed drives an Ornstein-Uhlenbeck yaw-rate disturbance (`body/noise.py`). Its s.d.
     is 6 deg/s (10 % of the 60 deg/s drum) and tau 50 ms (the existing `gust_tau`); origin `E`.
-  - **BC data.** Teacher flights for training data seeds 0-159 x the 6 training conditions (no 30 deg/s) = 960
+  - **BC data.** Teacher flights for training data seeds 0-159 x the 6 training conditions (no 30 or 90 deg/s) = 960
     flights.
   - **DAgger round.** 160 learner flights (one per training data seed; the condition comes from a fixed seeded
     schedule balanced over the 6 training conditions). Plus 40 validation flights (seeds 160-199) for the stopping rule.
-  - **Test.** Seeds 200-239 x 8 conditions = 320 flights per arm and training seed, run once.
+  - **Test.** Seeds 200-239 x 10 conditions (the 6 training conditions + rot_left / rot_right at 90 and 30 deg/s) =
+    400 flights per arm and training seed, run once.
 
 ## 7. Metrics (registered in prereg/14)
 
@@ -324,7 +328,8 @@ trial; in C it is the last 1.9 s of the drum.
 | test turn-sign accuracy | fraction of test rotation trials at training speeds where the window mean of dA has the sign of dA* | A, B |
 | test R2 of dA | 1 - SSE / SST of the window-mean dA against dA* over all test trials at training speeds (rotations, static, grey); **primary** for A and B | A, B |
 | samples to set accuracy | training trials presented until validation turn-sign accuracy first reaches 0.90 (evaluated every 50 optimiser steps); censored at the budget | A, B, C (validation flights) |
-| generalisation | test turn-sign accuracy and R2 on the held-out speed (30 deg/s) | A, B, C |
+| generalisation (primary) | test turn-sign accuracy and R2 (A, B), or g (C), at the held-out 90 deg/s (interpolation) | A, B, C |
+| generalisation (secondary) | the same at the held-out 30 deg/s (extrapolation) | A, B, C |
 | optomotor gain g | `g = (psi_dot(rot_right) - psi_dot(rot_left)) / (2 v_drum)` per test data seed at each training speed, averaged; **primary** for C | C |
 | stability | fraction of test flights that are stable: dA at the +-A_MAX limit in < 10 % of window intervals, **and** s.d. of the yaw rate over the last 1 s < 0.5 x drum speed (static, grey: < 30 deg/s) | C |
 | drift | mean yaw rate under static and grey | C |
@@ -406,8 +411,19 @@ round.
 ## 11. Compute plan (estimates, not benchmarks)
 
 There is no code yet, so these are operation counts, not measurements. A wall-time-only benchmark on a non-registered
-seed runs in the implementation PR, as before prereg/12. The machine is an 8-core Apple M1 Pro (aarch64 Linux) with
-15 GB RAM and no CUDA GPU. Training runs on the CPU in float32.
+seed runs in the implementation PR, as before prereg/12.
+
+**Machine** (checked with `lscpu`, `free -h` and `nvidia-smi` on 2026-10-15):
+- Ubuntu 24.04.5 LTS (Asahi kernel 7.0.0-1001-asahi-arm, aarch64), on Apple M1 Pro silicon.
+- 8 CPU cores: 6 performance (Firestorm, up to 3.04 GHz) and 2 efficiency (Icestorm, up to 2.06 GHz), one thread
+  per core.
+- 15 GiB RAM and 8 GiB swap.
+- No NVIDIA GPU (`nvidia-smi` is not installed, and there is no CUDA device). The Apple GPU is not usable by
+  PyTorch under Linux.
+
+Training therefore runs on the CPU in float32. "All cores" means 8 threads, of which 2 are slower efficiency cores;
+the useful parallel throughput is about that of 6 fast cores. The orders of magnitude below assume this and are
+replaced by the measured benchmark in step 2.
 
 | stage | per optimiser step | budget per run | runs (arms x seeds) | rough serial wall time |
 |---|---|---|---|---|
@@ -434,7 +450,7 @@ seed runs in the implementation PR, as before prereg/12. The machine is an 8-cor
 | R_IN = R_OUT | 100 Hz | E |
 | A_MAX | 12.5 deg | E (v1 range, docs/08) |
 | V_MAX, K_P | 120 deg/s, A_MAX / V_MAX | E |
-| drum speeds (train / held out) | 60, 120 / 30 deg/s | E |
+| drum speeds (train / held out primary / held out secondary) | 60, 120 / 90 / 30 deg/s | E |
 | grating phase rule | 0 for seeds 0-39, else uniform from default_rng(seed) | E |
 | boundary input noise | Poisson s.d. of a 5 ms count | E |
 | stage C plant noise | OU yaw rate, s.d. 6 deg/s, tau 50 ms | E |
@@ -467,7 +483,7 @@ seed runs in the implementation PR, as before prereg/12. The machine is an 8-cor
 1. Rate engine (`engine/rate_torch.py`) with the sparse custom backward, plus checks 3, 4, 6 and 9 of section 9, plus
    the wall-time benchmark.
 2. Graph builders and shuffles (`train/graphs.py`), plus check 5.
-3. New brain runs for A (extended F3b-3 brain script), plus check 7, then the 1,760 runs.
+3. New brain runs for A (extended F3b-3 brain script), plus check 7, then the 2,240 runs.
 4. Stage A: data loader with the sealed split, teacher, trainer, evaluator, report and `verify_report` extension.
    Bypass gate first.
 5. Stage B, then stage C (closed-loop runner on the docs/08 loop, BC, DAgger), each with its report.

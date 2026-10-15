@@ -25,7 +25,7 @@ F3b-3, mv2, docs/08) are known and are the reason for this study; none of them e
 - **Secondary comparisons (descriptive, section 8.3).**
   - `true` against `derange`, `mlp` and `linear`;
   - samples to set accuracy;
-  - generalisation to the held-out drum speed.
+  - generalisation to the held-out drum speeds (90 deg/s primary, 30 deg/s secondary).
 
 ## 2. Model (fixed; docs/10 section 2)
 
@@ -118,15 +118,21 @@ The same arms run in every stage. Training seeds are t = 0-9 for the trained arm
   - Validation: 160-199.
   - Test: 200-239. The test seeds are listed in a split file whose SHA-256 is recorded in every run; no training or
     selection code reads them.
-- **Drum speeds.** Training and validation use 60 and 120 deg/s. **30 deg/s is held out** (never trained or used for
-  selection). The wavelength is 30 deg and the temporal frequency is speed / 30 deg.
+- **Drum speeds.** Training and validation use 60 and 120 deg/s. Two speeds are **held out** (never trained or used
+  for selection):
+  - **90 deg/s, primary** (interpolation inside the trained range);
+  - **30 deg/s, secondary** (extrapolation below it).
+
+  The wavelength is 30 deg and the temporal frequency is speed / 30 deg.
 - **Grating phase.** 0 for data seeds 0-39; uniform over one wavelength from `default_rng(seed)` for seeds 40-239.
-- **Conditions per data seed.** rot_left and rot_right at 30, 60 and 120 deg/s, static, grey (8).
+- **Conditions per data seed.** rot_left and rot_right at 30, 60, 90 and 120 deg/s, static, grey (10).
 - **Stage A records.**
   - **Reused:** `runs/f3b1/brain` (seeds 0-9), `runs/f3b3/brain` (10-29) and `runs/mv2/t3_R/brain` (30-39); 160
     records at 60 deg/s.
-  - **New:** 1,760 runs of the unmodified spiking brain R with the F3b-3 protocol plus a speed and a phase option:
-    seeds 40-239 x 8 conditions, and seeds 0-39 x rot_left / rot_right at 30 and 120 deg/s.
+  - **New:** 2,240 runs of the unmodified spiking brain R with the F3b-3 protocol plus a speed and a phase option:
+    - seeds 40-239 x rot_left / rot_right at 30, 60 and 120 deg/s, static and grey (1,600);
+    - seeds 0-39 x rot_left / rot_right at 30 and 120 deg/s (160);
+    - seeds 0-239 x rot_left / rot_right at 90 deg/s (480).
   - **Not used:** `runs/mv2/t3_ACG`.
 - **Stage B.** FlyVis boundary sequences per (condition, phase), computed once. Per data seed, Gaussian noise with
   s.d. sqrt(rate / 5 ms) is added to every boundary rate, clipped at 0.
@@ -138,7 +144,7 @@ The same arms run in every stage. Training seeds are t = 0-9 for the trained arm
   - Each DAgger round: 160 learner flights, one per training data seed, over the 6 training conditions in a balanced
     schedule from `default_rng(3000 + round)`.
   - Validation: 40 flights per evaluation (seeds 160-199, the same balanced rule).
-  - Test: seeds 200-239 x 8 conditions.
+  - Test: seeds 200-239 x 10 conditions.
 - **Analysis window.** The stimulus intervals after the first 100 ms (A, B: intervals 120-299; C: flight intervals
   120-499, i.e. the drum after its first 100 ms).
 
@@ -153,7 +159,8 @@ The same arms run in every stage. Training seeds are t = 0-9 for the trained arm
 | **g (primary C)** | per test data seed and training speed `(psi_dot(rot_right) - psi_dot(rot_left)) / (2 v_drum)` over the window, averaged over seeds and both speeds | C |
 | stability | fraction of test flights with dA at +-12.5 deg in < 10 % of window intervals **and** yaw-rate s.d. over the last 200 intervals < 0.5 x drum speed (static, grey: < 30 deg/s) | C |
 | samples to set accuracy | training trials (A, B) or flights (C) presented until the validation turn-sign accuracy first reaches 0.90; censored at the budget | A, B, C |
-| generalisation | sign accuracy and R2 (A, B), or g (C), on the 30 deg/s test conditions | A, B, C |
+| generalisation, primary | sign accuracy and R2 (A, B), or g (C), on the 90 deg/s test conditions (interpolation) | A, B, C |
+| generalisation, secondary | the same on the 30 deg/s test conditions (extrapolation) | A, B, C |
 | drift, imitation R2 | mean yaw rate under static and grey; interval-level R2 against the teacher label | C |
 
 ### 8.2 Primary test (H1)
@@ -237,7 +244,8 @@ in this file.
 - **P:** lam init 0.25 (5 ms / Shiu tau 20 ms).
 - **E:**
   - gain bound 2 and init 1; leak bounds 0.05 / 0.95 (flyhard); 1 update per interval; R_IN = R_OUT = 100 Hz;
-  - A_MAX 12.5 deg and V_MAX 120 deg/s (v1 range, docs/08); the drum speeds and the held-out speed; the phase rule;
+  - A_MAX 12.5 deg and V_MAX 120 deg/s (v1 range, docs/08); the drum speeds and the two held-out speeds; the phase
+    rule;
   - boundary noise; plant noise (6 deg/s, 50 ms);
   - filter time constants; projection size and ridge grid;
   - optimiser, batch sizes, steps, learning-rate grid, clip; evaluation period; DAgger rounds and flights;
