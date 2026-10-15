@@ -6,7 +6,7 @@ recomputed from the F0 spike records, gates / C2 / C3 statistics from `runs/f3a2
 committed JSON, the prereg and the report, gates / R1 / R2 / R3 recomputed from `runs/f3a3/f3a3_v3.json`; F3b-1 (`docs/results/f3b1_optomotor.md`): gains against
 the prereg and the registry, FlyWire DN rates and brain-side tests from the brain spike records, gates and primary tests
 per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_ensemble.md`, `f3b3_specificity.md`): see
-`check_f3b2` and `check_f3b3`.
+`check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
     env -u PYTHONPATH python scripts/verify_report.py --print    # only print the recomputed strings
@@ -986,6 +986,63 @@ def check_side_audit():
     return n, bad
 
 
+F5RL_MD = ROOT / "docs" / "results" / "f5_rate_lif.md"
+F5RL_JSON = ROOT / "docs" / "results" / "f5_rate_lif.json"
+
+
+def check_f5_rate_lif():
+    """F5 step 2a (prereg/15). The JSON is rebuilt from runs/f5/rate_lif and compared, the markdown re-rendered and
+    compared; the record hashes are checked; C1 and C2 are recounted here with plain loops from the npz record and the
+    committed F3a-3 LIF results."""
+    import hashlib
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_rate_lif_report as R
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5RL_JSON.read_text())
+    norm = lambda x: json.dumps(json.loads(json.dumps(x)), sort_keys=True)  # noqa: E731
+    chk("f5rl:json_equals_rebuild", norm(stored) == norm(R.build()))
+    chk("f5rl:md_equals_render", F5RL_MD.read_text() == R.render(stored))
+    for f, h in stored["record_sha256"].items():
+        chk(f"f5rl:sha:{f}", hashlib.sha256((R.REC / f).read_bytes()).hexdigest() == h, f)
+    z = np.load(R.REC / "record.npz")
+    keys = [str(k) for k in z["keys"]]
+    conds = [str(c) for c in z["conditions"]]
+    nd = stored["n_intervals"]["drive"]
+    mn = z["mn_state"]
+
+    def resp(cond, key):
+        i, j = conds.index(cond), keys.index(key)
+        return sum(float(mn[i, t, j]) for t in range(nd)) / nd
+
+    c1 = 0
+    for t in R.C1_TYPES:
+        for sd in ("left", "right"):
+            c1 += resp("R1:G100", f"{t}|{sd}") > 0
+    chk("f5rl:c1", c1 == stored["c1"]["n_agree"] and stored["c1"]["n"] == 8, c1)
+    lif = json.loads(R.LIF.read_text())
+    c2, c2n = 0, 0
+    for x in lif["r3"]["tests"]:
+        if x["p_t_holm"] >= 0.05:
+            continue
+        c2n += 1
+        c = f"R3:{x['family']}_{x['side']}_{x['rate']}"
+        t = x["mn"]
+        d = (resp(c, f"{t}|right") - resp(c, f"{t}|left")) - (resp("R3:B", f"{t}|right") - resp("R3:B", f"{t}|left"))
+        c2 += abs(d) >= 1e-6 and (d > 0) == (x["mean"] > 0)
+    chk("f5rl:c2", c2 == stored["c2"]["n_agree"] and c2n == stored["c2"]["n"] == 27, (c2, c2n))
+    chk("f5rl:agreement", stored["agreement"] == (c1 == 8 and c2 == c2n))
+    chk("f5rl:checks", stored["engine_checks"]["forward"]["max_abs_diff"] < 1e-5
+        and max(stored["engine_checks"]["gradient"]["rel_err_theta"], stored["engine_checks"]["gradient"]["rel_err_phi"]) < 1e-6)
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -1070,6 +1127,10 @@ def main(argv=None):
         bad += b
     if SIDE_MD.exists():
         k, b = check_side_audit()
+        n += k
+        bad += b
+    if F5RL_MD.exists():
+        k, b = check_f5_rate_lif()
         n += k
         bad += b
     if "--print" in argv:
