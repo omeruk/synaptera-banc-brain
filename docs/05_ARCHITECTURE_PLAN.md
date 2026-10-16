@@ -507,6 +507,50 @@ above ~2.3 Hz). Options (each labelled as a **model variant**): (i) remove amine
 | Rate-arm training | A6000/A40-class GPU (~$0.5/hour) | flyhard pilot: 600 steps in 186 s, ~3 GB; hours per task |
 | FlyVis + rendering | CPU/GPU | the cost of more sub-frames must be measured |
 
+### 7.1 Machines and environment (record of the machine change, 2026-10-17)
+
+- **Machine 1 (aarch64), all records up to PR #22:** Apple M1 Pro, Ubuntu 24.04 (Asahi), no CUDA.
+- **Machine 2 (x86_64), from this record on:** AMD Ryzen 9 8945HS (16 threads), 23 GB RAM, NVIDIA RTX 4070 Laptop
+  (8 GB), WSL2 Ubuntu 24.04.
+- **Environment.** `neurofly` was rebuilt from the M1 `conda env export --no-builds`. The x86_64 file is `env/`:
+  - `neurofly_x86_64.yml` holds the conda and pip pins.
+  - `neurofly_x86_64_nodeps.txt` holds flybody. flybody pins numpy 1.26.4, so it is installed with `--no-deps`, as on
+    the M1, which also ran it with numpy 2.0.2.
+  - `create_neurofly.sh` rebuilds the environment.
+  - A throwaway environment built from these files has a `pip freeze` equal to the M1 one. Its conda packages equal
+    those of `neurofly`. Against the M1, the only change is `ld_impl_linux-64` for `ld_impl_linux-aarch64` (same
+    version).
+  - torch is the CUDA 13.0 wheel, as on the M1. Here it sees the GPU.
+- **Data.** The transfer archive passed `sha256sum -c` on every file. Every entry of `configs/data_sources.yaml` matches
+  its SHA-256, plus its MD5 and byte count where these are given.
+- **FlyVis on the CPU.** FlyVis 1.2.0 picks CUDA when one is present and makes it torch's default device for the whole
+  process. Its initialisation then fails: "Expected a 'cpu' device type for generator but found 'cuda'".
+  - Every FlyVis record so far was made on the CPU, so FlyVis is now pinned to the CPU in the code.
+    `sense.vision_flyvis.import_flyvis()` hides CUDA only from the first `import flyvis`, and every FlyVis or FlyGym
+    vision import goes through it.
+  - It raises if FlyVis was already imported on another device.
+  - Tests: `tests/test_flyvis_device.py`. Tests that need FlyVis no longer use `pytest.importorskip("flyvis")`, which
+    imports it on CUDA. They use `conftest.require_flyvis()` instead.
+  - torch work outside FlyVis, such as the rate engine, can still use the GPU.
+- **`scripts/verify_report.py`.** Rebuilt result JSON is now compared value by value, with floats equal within a
+  relative 1e-12. Every value that needed the tolerance is printed.
+  - On machine 2 exactly one value needs it: the FlyVis eye1 centre-ray azimuth of the side audit, which differs in
+    its last digit.
+  - With exact comparison this was the only mismatch on machine 2.
+- **Reproduction check (prereg/14 section 9, gate 5).** The F3b-3 brain script (`scripts/f3b3_brain.py`) was rerun for
+  rot_left, brain seed 10 only. Details: `docs/results/machine_x86_repro.md`. Result:
+
+rot_left seed 10 is not bit-identical on x86_64: window DN spikes 2,826 (M1) vs 2,824; 2,108 of 389,700 DN interval counts differ (max |diff| 1); network spikes 893,107 vs 892,689 (-0.047 %); first difference at interval 180 (network) and 201 (DNs). The FlyVis render already differs from interval 0: max |diff| 3.97e-04 Hz, 367 zero/non-zero flips at rates <= 1.31e-04 Hz.
+
+  - The difference starts in the float32 FlyVis render, which is not bit-identical between the two CPU architectures.
+    The tiny rate differences change a Poisson draw some intervals later, and the spiking network then diverges.
+  - Whether the Brian2 engine alone is bit-reproducible across the machines (same render, same seed) was not tested.
+    No other record was to be generated.
+  - Consequence: records made on machine 2 are not bit-identical to M1 records. A bit-for-bit check holds only within
+    one machine. prereg/14 is unchanged (rule 6); the project owner decides how gate 5 is applied across machines.
+- **Tests on machine 2 (GPU visible):** pytest 423 passed, 1 skipped, 0 failed (the earlier 410 plus 13 new tests);
+  `verify_report.py` 0 mismatches. Before the CPU pin, 7 FlyVis tests failed or errored with the GPU visible.
+
 ## 8. Risk register
 
 | risk | likelihood | impact | mitigation |

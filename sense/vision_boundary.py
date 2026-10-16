@@ -234,6 +234,7 @@ def load_types(path):
 # ── transduction (scripts/make_transduction.py) ─────────────────────────────
 def standard_stimuli(dt: float):
     """name -> callable(n) yielding FlyVis-ordered frames (2, 721) (both eyes, canonical frame)."""
+    V.import_flyvis()
     from flygym.examples.vision.vision_network import RetinaMapper
     rm = RetinaMapper()
 
