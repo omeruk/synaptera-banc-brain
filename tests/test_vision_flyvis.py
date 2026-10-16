@@ -7,7 +7,7 @@ os.environ.setdefault("MUJOCO_GL", "egl")
 import numpy as np
 import pytest
 
-from conftest import ROOT
+from conftest import ROOT, require_flyvis
 from sense import vision_flyvis as V
 
 TYPES = list(V.T45_TYPES)
@@ -76,7 +76,7 @@ def group_ids(cx, columns):
 
 @pytest.fixture(scope="module")
 def eyes(columns, group_ids):
-    pytest.importorskip("flyvis")
+    require_flyvis()
     return V.FlyVisEyes(columns, group_ids, V.load_transduction(TRANSDUCTION), interval_s=0.025, subframes=2,
                         verbose=False)
 

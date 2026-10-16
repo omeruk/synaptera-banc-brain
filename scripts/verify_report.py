@@ -7,7 +7,9 @@ committed JSON, the prereg and the report, gates / R1 / R2 / R3 recomputed from 
 the prereg and the registry, FlyWire DN rates and brain-side tests from the brain spike records, gates and primary tests
 per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_ensemble.md`, `f3b3_specificity.md`): see
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
-(`docs/results/f5_reachability.md`): see `check_f5_reachability`.
+(`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
+docs/05 section 7.1): see `check_machine_repro`. Rebuilt JSON is compared value by value with floats within a relative
+JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
     env -u PYTHONPATH python scripts/verify_report.py --print    # only print the recomputed strings
@@ -26,6 +28,41 @@ XW_JSON = ROOT / "docs" / "results" / "f3_dn_crosswalk.json"
 XW_MD = ROOT / "docs" / "results" / "f3_dn_crosswalk.md"
 F3A2_REC = ROOT / "runs" / "f3a2" / "f3a2_v3.json"
 F3A2_MD = ROOT / "docs" / "results" / "f3a2_checks.md"
+
+# Rebuilt JSON is compared with the committed JSON value by value; floats may differ by a relative JSON_REL_TOL
+# (last-digit libm / FMA differences between machines, e.g. aarch64 M1 -> x86_64). Every value that needed the
+# tolerance is listed in the output.
+JSON_REL_TOL = 1e-12
+TOLERATED = []
+
+
+def json_close(key, stored, rebuilt):
+    """True if the two JSON values have the same structure, keys, types and values, floats within JSON_REL_TOL
+    (relative). Appends (key, path, stored, rebuilt, rel) to TOLERATED for every float that is not exactly equal."""
+    a, b = json.loads(json.dumps(stored)), json.loads(json.dumps(rebuilt))
+    used = []
+
+    def same(x, y, path):
+        if type(x) is not type(y):
+            return False
+        if isinstance(x, dict):
+            return x.keys() == y.keys() and all(same(x[k], y[k], f"{path}/{k}") for k in x)
+        if isinstance(x, list):
+            return len(x) == len(y) and all(same(u, v, f"{path}[{i}]") for i, (u, v) in enumerate(zip(x, y)))
+        if isinstance(x, float):
+            if x == y or (x != x and y != y):
+                return True
+            rel = abs(x - y) / max(abs(x), abs(y))
+            if rel <= JSON_REL_TOL:
+                used.append((key, path, x, y, rel))
+                return True
+            return False
+        return x == y
+
+    ok = same(a, b, "")
+    if ok:
+        TOLERATED.extend(used)
+    return ok
 
 
 def f3a_expected():
@@ -802,7 +839,7 @@ def check_f4_design():
             continue
         stored = json.loads(path.read_text())
         rebuilt = F.build(ver)
-        chk(f"f4:{ver}:json_equals_rebuild", json.dumps(stored, sort_keys=True) == json.dumps(rebuilt, sort_keys=True))
+        chk(f"f4:{ver}:json_equals_rebuild", json_close(f"f4:{ver}:json_equals_rebuild", stored, rebuilt))
         chk(f"f4:{ver}:source_sha", stored["source"]["sha256"] == hashlib.sha256(F.RECORDS.read_bytes()).hexdigest())
         chk(f"f4:{ver}:selfcheck", stored["selfcheck_T_equals_f3b3"] is True)
 
@@ -859,7 +896,7 @@ def check_mv2():
 
     stored = json.loads(MV2_JSON.read_text())
     rebuilt = R.build()
-    chk("mv2:json_equals_rebuild", json.dumps(stored, sort_keys=True) == json.dumps(json.loads(json.dumps(rebuilt)), sort_keys=True))
+    chk("mv2:json_equals_rebuild", json_close("mv2:json_equals_rebuild", stored, rebuilt))
     chk("mv2:md_equals_render", MV2_MD.read_text() == R.render(stored))
     pre = PREREG12.read_text()
     chk("mv2:prereg_render_sha", "9b89aa1167ab0b7db79ca43ec549db70fdf243197ae8e8af1678301ced84f6d8" in pre)
@@ -932,12 +969,11 @@ def check_side_audit():
     stored = json.loads(SIDE_JSON.read_text())
     post = json.loads(SIDE_POST_JSON.read_text()) if SIDE_POST_JSON.exists() else None
     o, p = A.build()
-    norm = lambda x: json.dumps(json.loads(json.dumps(x)), sort_keys=True)  # noqa: E731
-    chk("side:json_equals_rebuild", norm(stored) == norm(o))
+    chk("side:json_equals_rebuild", json_close("side:json_equals_rebuild", stored, o))
     chk("side:md_equals_render", SIDE_MD.read_text() == A.render(stored))
     chk("side:post_presence", (post is None) == (p is None) == (not stored["post_audit_triggered"]))
     if post is not None:
-        chk("side:post_json_equals_rebuild", norm(post) == norm(p))
+        chk("side:post_json_equals_rebuild", json_close("side:post_json_equals_rebuild", post, p))
         chk("side:post_md_equals_render", SIDE_POST_MD.read_text() == A.render_post(post))
     # plain recount: Codex soma side vs the side prefix of the meta nerve, motor neurons only
     soma = {}
@@ -1007,8 +1043,7 @@ def check_f5_rate_lif():
             bad.append((key, v))
 
     stored = json.loads(F5RL_JSON.read_text())
-    norm = lambda x: json.dumps(json.loads(json.dumps(x)), sort_keys=True)  # noqa: E731
-    chk("f5rl:json_equals_rebuild", norm(stored) == norm(R.build()))
+    chk("f5rl:json_equals_rebuild", json_close("f5rl:json_equals_rebuild", stored, R.build()))
     chk("f5rl:md_equals_render", F5RL_MD.read_text() == R.render(stored))
     for f, h in stored["record_sha256"].items():
         chk(f"f5rl:sha:{f}", hashlib.sha256((R.REC / f).read_bytes()).hexdigest() == h, f)
@@ -1064,8 +1099,7 @@ def check_f5_reachability():
             bad.append((key, v))
 
     stored = json.loads(F5RE_JSON.read_text())
-    norm = lambda x: json.dumps(json.loads(json.dumps(x)), sort_keys=True)  # noqa: E731
-    chk("f5re:json_equals_rebuild", norm(stored) == norm(R.build()))
+    chk("f5re:json_equals_rebuild", json_close("f5re:json_equals_rebuild", stored, R.build()))
     chk("f5re:md_equals_render", F5RE_MD.read_text() == R.render(stored))
     for f, h in stored["record_sha256"].items():
         chk(f"f5re:sha:{f}", hashlib.sha256((R.REC / f).read_bytes()).hexdigest() == h, f)
@@ -1082,6 +1116,31 @@ def check_f5_reachability():
         chk(f"f5re:{p}:steps", len(d["step_s"]) == 200 and d["lr"] == 0.05)
     sh = stored["shuffle"]["check"]
     chk("f5re:shuffle_check", sh["passed"] and sh["in_degree_equal"] and sh["no_duplicates"] and sh["no_self_loops"])
+    return n, bad
+
+
+MACH_JSON = ROOT / "docs" / "results" / "machine_x86_repro.json"
+MACH_MD = ROOT / "docs" / "results" / "machine_x86_repro.md"
+DOC05 = ROOT / "docs" / "05_ARCHITECTURE_PLAN.md"
+
+
+def check_machine_repro():
+    """Machine change (docs/05 section 7.1): docs/results/machine_x86_repro.json is rebuilt from runs/f3b3 and
+    runs/machine_x86 and compared, the markdown re-rendered and compared, and the summary must appear in docs/05."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import machine_repro_report as R
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(MACH_JSON.read_text())
+    chk("mach:json_equals_rebuild", json_close("mach:json_equals_rebuild", stored, R.build()))
+    chk("mach:md_equals_render", MACH_MD.read_text() == R.render(stored))
+    chk("mach:summary_in_doc05", R.summary(stored) in DOC05.read_text().replace("\n", " "))
     return n, bad
 
 
@@ -1179,9 +1238,17 @@ def main(argv=None):
         k, b = check_f5_reachability()
         n += k
         bad += b
+    if MACH_MD.exists():
+        k, b = check_machine_repro()
+        n += k
+        bad += b
     if "--print" in argv:
         return 0
     print(f"checked {n} items, {len(bad)} mismatches")
+    print(f"{len(TOLERATED)} JSON floats equal only within the relative tolerance {JSON_REL_TOL:g}"
+          + (":" if TOLERATED else ""))
+    for key, path, x, y, rel in TOLERATED:
+        print(f"TOLERATED {key} {path}: committed {x!r}, rebuilt {y!r}, relative difference {rel:.2e}")
     for b in bad:
         print("MISMATCH", b)
     return 1 if bad else 0

@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from conftest import ROOT
+from conftest import ROOT, require_flyvis
 from connectome import geometry
 from connectome.schema import Connectome, IdIndex
 from sense import sensors
@@ -139,7 +139,7 @@ def test_arbor_centroids_and_dominant_neuropil():
 @NEEDS_V1
 @pytest.mark.skipif(not os.path.exists(CODEX_TYPES), reason="needs ~/Downloads/consolidated_cell_types.csv.gz")
 def test_boundary_selection_and_table_reproduce_v1():
-    pytest.importorskip("flyvis")
+    require_flyvis()
     from connectome.adapters import flywire783 as fw
     cx = fw.load_connectome(hash_files=False)
     ct = VB.load_codex_types(cx.index.ids, CODEX_TYPES)
@@ -165,7 +165,7 @@ def test_boundary_selection_and_table_reproduce_v1():
 
 @NEEDS_V1
 def test_boundary_eyes_runtime_on_v1_table():
-    pytest.importorskip("flyvis")
+    require_flyvis()
     from connectome.adapters import flywire783 as fw
     cx = fw.load_connectome(hash_files=False)
     tab = pd.read_csv(DATA / "vision_boundary_783.csv").rename(columns={"root_id": "id"})

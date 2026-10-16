@@ -23,6 +23,7 @@ last sub-frame, and an empty frame list is an error (L1).
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -44,8 +45,33 @@ T45_TYPES = ("T4a", "T4b", "T4c", "T4d", "T5a", "T5b", "T5c", "T5d")
 # Preferred direction of each subtype as a FlyGym image direction (x right, y down) in the FlyVis eye frame
 PD_IMAGE = {"a": (-1, 0), "b": (1, 0), "c": (0, -1), "d": (0, 1)}
 
+# FlyVis always runs on the CPU: every existing FlyVis record was made on a CPU-only machine, and FlyVis 1.2.0 breaks
+# on CUDA (its initialisation draws from a CPU generator while it has made CUDA torch's default device).
+FLYVIS_DEVICE = "cpu"
+
 E1 = np.array([1.0, 0.0])
 E2 = np.array([0.5, np.sqrt(3) / 2])
+
+
+def import_flyvis():
+    """Import FlyVis pinned to FLYVIS_DEVICE and return the module. Call before any flyvis or flygym vision import.
+
+    `import flyvis` picks CUDA when available, makes it torch's process-wide default device and binds it as the default
+    argument of its rendering/dataset functions, so the choice has to be made during the first import: CUDA is hidden
+    from that import only. Raises if flyvis was already imported elsewhere on another device."""
+    import torch
+    if "flyvis" not in sys.modules:
+        is_available = torch.cuda.is_available
+        torch.cuda.is_available = lambda: False
+        try:
+            import flyvis  # noqa: F401
+        finally:
+            torch.cuda.is_available = is_available
+    import flyvis
+    if flyvis.device.type != FLYVIS_DEVICE or torch.get_default_device().type != FLYVIS_DEVICE:
+        raise RuntimeError(f"flyvis was imported on {flyvis.device} (torch default {torch.get_default_device()}); "
+                           f"import it through sense.vision_flyvis.import_flyvis() first")
+    return flyvis
 
 
 def flyvis_dt(interval_s: float, subframes: int = DEFAULT_SUBFRAMES) -> float:
@@ -67,6 +93,7 @@ def lattice_op(rot, reflect):
 
 
 def flyvis_hex(extent=FLYVIS_EXTENT):
+    import_flyvis()
     from flyvis.utils.hex_utils import get_hex_coords
     return get_hex_coords(extent)
 
@@ -141,7 +168,7 @@ def fit_alignment(cx, columns: pd.DataFrame, flyvis_edges=None):
 
 
 def load_flyvis_net():
-    import flyvis
+    flyvis = import_flyvis()
     from flyvis import NetworkView
     net = NetworkView(flyvis.results_dir / FLYVIS_MODEL).init_network(checkpoint="best")
     net.eval()
@@ -163,6 +190,7 @@ class FlyVisEyes:
 
     def _init_flyvis(self, interval_s, subframes):
         import torch  # noqa: F401
+        import_flyvis()
         from flygym.examples.vision.vision_network import RetinaMapper
         from flyvis.datasets.rendering import BoxEye
 
@@ -288,6 +316,7 @@ def calibrate_transduction(net=None, interval_s: float = 0.025, subframes: int =
     preferred direction, with the activity averaged over ``subframes`` frames per interval as at run time
     (canonical eye frame: no right-eye flip, both batch entries)."""
     import torch
+    import_flyvis()
     from flygym.examples.vision.vision_network import RetinaMapper
     dt = flyvis_dt(interval_s, subframes)
     net = net if net is not None else load_flyvis_net()
