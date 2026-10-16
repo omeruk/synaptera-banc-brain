@@ -6,7 +6,8 @@ recomputed from the F0 spike records, gates / C2 / C3 statistics from `runs/f3a2
 committed JSON, the prereg and the report, gates / R1 / R2 / R3 recomputed from `runs/f3a3/f3a3_v3.json`; F3b-1 (`docs/results/f3b1_optomotor.md`): gains against
 the prereg and the registry, FlyWire DN rates and brain-side tests from the brain spike records, gates and primary tests
 per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_ensemble.md`, `f3b3_specificity.md`): see
-`check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`.
+`check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
+(`docs/results/f5_reachability.md`): see `check_f5_reachability`.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
     env -u PYTHONPATH python scripts/verify_report.py --print    # only print the recomputed strings
@@ -1043,6 +1044,47 @@ def check_f5_rate_lif():
     return n, bad
 
 
+F5RE_MD = ROOT / "docs" / "results" / "f5_reachability.md"
+F5RE_JSON = ROOT / "docs" / "results" / "f5_reachability.json"
+
+
+def check_f5_reachability():
+    """F5 step 2a-2 (prereg/16). The JSON is rebuilt from runs/f5/reach and compared, the markdown re-rendered and
+    compared; the record hashes are checked; every reach is recomputed with plain loops from the per-trial D values,
+    and the reachable flags from the reaches."""
+    import hashlib
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_reach_report as R
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5RE_JSON.read_text())
+    norm = lambda x: json.dumps(json.loads(json.dumps(x)), sort_keys=True)  # noqa: E731
+    chk("f5re:json_equals_rebuild", norm(stored) == norm(R.build()))
+    chk("f5re:md_equals_render", F5RE_MD.read_text() == R.render(stored))
+    for f, h in stored["record_sha256"].items():
+        chk(f"f5re:sha:{f}", hashlib.sha256((R.REC / f).read_bytes()).hexdigest() == h, f)
+    for p, x in stored["parts"].items():
+        d = json.loads((R.REC / f"{p}.json").read_text())
+        best = None
+        for P in ("P0", "P1", "P2"):
+            D = d[P]["D"]
+            reach = sum(D) / len(D)
+            chk(f"f5re:{p}:{P}:reach", abs(reach - x[P]["reach"]) < 1e-9, reach)
+            chk(f"f5re:{p}:{P}:frac", abs(sum(1 for v in D if v >= 12.5) / len(D) - x[P]["frac_ge_target"]) < 1e-12)
+            best = reach if best is None else max(best, reach)
+        chk(f"f5re:{p}:reachable", (best >= 12.5) == x["reachable"] and (best >= 6.25) == x["half_reachable"], best)
+        chk(f"f5re:{p}:steps", len(d["step_s"]) == 200 and d["lr"] == 0.05)
+    sh = stored["shuffle"]["check"]
+    chk("f5re:shuffle_check", sh["passed"] and sh["in_degree_equal"] and sh["no_duplicates"] and sh["no_self_loops"])
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -1131,6 +1173,10 @@ def main(argv=None):
         bad += b
     if F5RL_MD.exists():
         k, b = check_f5_rate_lif()
+        n += k
+        bad += b
+    if F5RE_MD.exists():
+        k, b = check_f5_reachability()
         n += k
         bad += b
     if "--print" in argv:
