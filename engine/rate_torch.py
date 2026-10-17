@@ -17,9 +17,15 @@ so a neuron d synapse hops downstream of an input node first responds to the cla
 k + d - 1. The clamp itself must come from earlier intervals (the bridge latency); that is the caller's job (rule 4).
 
 The sparse product has a custom backward (as in flyhard): the gradient with respect to the state uses a stored
-transpose, and the per-edge gradient is computed in chunks of edges so that no E x batch matrix is ever held.
+transpose, and the per-edge gradient is computed in chunks of edges so that no E x batch matrix is ever held
+(``edge_grad="chunked"``, the default and the one of every record so far). ``edge_grad="sddmm"`` computes the same
+per-edge sums with one sampled dense-dense product (``torch.sparse.sampled_addmm``, cuSPARSE on CUDA); it is equal
+within float rounding, not bit for bit, and is used only when chosen explicitly.
 
 The state is kept as (neurons, batch) inside; the public API takes and returns (time, batch, ...).
+
+Device: the network runs where its parameters are (``net.to("cuda")``); the CSR index arrays are non-persistent buffers
+that move with it, and inputs are moved to that device. Checkpoints (state_dict) are the same on every device.
 """
 from __future__ import annotations
 
@@ -38,6 +44,7 @@ LAM_0 = 0.25                   # 5 ms update / Shiu membrane time constant 20 ms
 UPDATES_PER_INTERVAL = 1       # one update per 5 ms coupling interval
 R_IN = 100.0                   # Hz per unit of state or drive; R_OUT = R_IN
 EDGE_CHUNK = 1 << 20           # edges per chunk of the per-edge gradient
+EDGE_GRADS = ("chunked", "sddmm")
 
 warnings.filterwarnings("ignore", message="Sparse CSR tensor support is in beta state")
 
@@ -133,17 +140,27 @@ class RateGraph:
 
 class _Structure:
     """CSR index arrays of W (rows = post) and of its stored transpose (rows = pre)."""
+    NAMES = ("pre", "post", "crow", "perm_t", "col_t", "crow_t")
 
-    def __init__(self, g: RateGraph):
-        n = g.n
+    def __init__(self, n, pre, post, crow, perm_t, col_t, crow_t, edge_grad="chunked"):
+        if edge_grad not in EDGE_GRADS:
+            raise ValueError(f"edge_grad must be one of {EDGE_GRADS}")
         self.n = n
-        self.pre = torch.from_numpy(g.pre)
-        self.post = torch.from_numpy(g.post)
-        self.crow = torch.from_numpy(np.concatenate([[0], np.cumsum(np.bincount(g.post, minlength=n))]))
+        self.edge_grad = edge_grad
+        self.pre, self.post, self.crow = pre, post, crow
+        self.perm_t, self.col_t, self.crow_t = perm_t, col_t, crow_t
+
+    @classmethod
+    def from_graph(cls, g: RateGraph, device=None, edge_grad="chunked") -> "_Structure":
+        return cls(g.n, *(cls.arrays(g)[k].to(device) for k in cls.NAMES), edge_grad=edge_grad)
+
+    @staticmethod
+    def arrays(g: RateGraph) -> dict:
+        n = g.n
         perm = np.argsort(g.pre * n + g.post, kind="stable")
-        self.perm_t = torch.from_numpy(perm)
-        self.col_t = torch.from_numpy(g.post[perm])
-        self.crow_t = torch.from_numpy(np.concatenate([[0], np.cumsum(np.bincount(g.pre, minlength=n))]))
+        a = dict(pre=g.pre, post=g.post, crow=np.concatenate([[0], np.cumsum(np.bincount(g.post, minlength=n))]),
+                 perm_t=perm, col_t=g.post[perm], crow_t=np.concatenate([[0], np.cumsum(np.bincount(g.pre, minlength=n))]))
+        return {k: torch.from_numpy(np.ascontiguousarray(v, np.int64)) for k, v in a.items()}
 
     def matmul(self, vals, s):
         w = torch.sparse_csr_tensor(self.crow, self.pre, vals, (self.n, self.n), check_invariants=False)
@@ -170,10 +187,15 @@ class _SparseMM(torch.autograd.Function):
         gy = gy.contiguous()
         g_vals = g_s = None
         if ctx.needs_input_grad[0]:
-            g_vals = torch.empty_like(vals)
-            for a in range(0, len(vals), EDGE_CHUNK):
-                b = min(a + EDGE_CHUNK, len(vals))
-                g_vals[a:b] = (gy[st.post[a:b]] * s[st.pre[a:b]]).sum(1)
+            if st.edge_grad == "sddmm":            # rows = post, columns = pre: the CSR edge order
+                mask = torch.sparse_csr_tensor(st.crow, st.pre, torch.zeros_like(vals), (st.n, st.n),
+                                               check_invariants=False)
+                g_vals = torch.sparse.sampled_addmm(mask, gy, s.T, beta=0.0, alpha=1.0).values()
+            else:
+                g_vals = torch.empty_like(vals)
+                for a in range(0, len(vals), EDGE_CHUNK):
+                    b = min(a + EDGE_CHUNK, len(vals))
+                    g_vals[a:b] = (gy[st.post[a:b]] * s[st.pre[a:b]]).sum(1)
         if ctx.needs_input_grad[1]:
             g_s = st.matmul_t(vals, gy)
         return g_vals, g_s, None
@@ -183,16 +205,28 @@ class RateNet(nn.Module):
     """The trainable rate network on a fixed :class:`RateGraph`. Parameters: ``theta`` (one per edge, gain) and
     ``phi`` (one per neuron, leak; the entries of input nodes are unused and receive no gradient)."""
 
-    def __init__(self, graph: RateGraph, dtype=torch.float32):
+    def __init__(self, graph: RateGraph, dtype=torch.float32, edge_grad: str = "chunked"):
         super().__init__()
+        if edge_grad not in EDGE_GRADS:
+            raise ValueError(f"edge_grad must be one of {EDGE_GRADS}")
         self.graph = graph
         self.dtype = dtype
-        self._st = _Structure(graph)
+        self.edge_grad = edge_grad
+        for k, v in _Structure.arrays(graph).items():
+            self.register_buffer(f"_st_{k}", v, persistent=False)
         self.theta = nn.Parameter(torch.zeros(graph.n_edges, dtype=dtype))
         self.phi = nn.Parameter(torch.full((graph.n,), phi_0(), dtype=dtype))
         self.register_buffer("w", torch.from_numpy(graph.w).to(dtype))
         self.register_buffer("inputs", torch.from_numpy(graph.inputs))
         self.register_buffer("drives", torch.from_numpy(graph.drives))
+
+    @property
+    def device(self):
+        return self.theta.device
+
+    @property
+    def _st(self):
+        return _Structure(self.graph.n, *(getattr(self, f"_st_{k}") for k in _Structure.NAMES), edge_grad=self.edge_grad)
 
     def gains(self):
         return G_MAX * torch.sigmoid(self.theta)
@@ -201,12 +235,12 @@ class RateNet(nn.Module):
         return LAM_MIN + (LAM_MAX - LAM_MIN) * torch.sigmoid(self.phi)
 
     def initial_state(self, batch: int):
-        return torch.zeros(self.graph.n, batch, dtype=self.dtype)
+        return torch.zeros(self.graph.n, batch, dtype=self.dtype, device=self.device)
 
-    def _step(self, s, vals, lam, x, u):
+    def _step(self, s, vals, lam, x, u, st=None):
         if x is not None and len(self.inputs):
             s = s.index_copy(0, self.inputs, x)
-        h = _SparseMM.apply(vals, s, self._st)
+        h = _SparseMM.apply(vals, s, self._st if st is None else st)
         if u is not None and len(self.drives):
             h = h.index_add(0, self.drives, u)
         s_new = (1.0 - lam) * s + lam * torch.tanh(h)
@@ -216,8 +250,9 @@ class RateNet(nn.Module):
 
     def _segment(self, s, vals, lam, x, u, record):
         out = []
+        st = self._st
         for k in range(len(x) if x is not None else len(u)):
-            s = self._step(s, vals, lam, None if x is None else x[k], None if u is None else u[k])
+            s = self._step(s, vals, lam, None if x is None else x[k], None if u is None else u[k], st)
             out.append(s[record])
         return s, torch.stack(out)
 
@@ -226,7 +261,7 @@ class RateNet(nn.Module):
 
         x: (T, batch, n_inputs) clamp values of the input nodes (in ``graph.inputs`` order), or None.
         u: (T, batch, n_drives) external drive of the drive nodes (in ``graph.drives`` order), or None.
-        s0: (batch, n) start state (default 0). record: neuron indices to return (default all).
+        s0: (batch, n) start state (default 0). record: neuron indices to return (default all; array or tensor).
         checkpoint_every: if > 0, gradient checkpointing per segment of that many intervals.
         Returns (states (T, batch, len(record)), final state (batch, n))."""
         if x is None and u is None:
@@ -236,10 +271,13 @@ class RateNet(nn.Module):
             raise ValueError("x must have one column per input node")
         if u is not None and u.shape[2] != len(self.drives):
             raise ValueError("u must have one column per drive node")
-        xt = None if x is None else x.to(self.dtype).transpose(1, 2)    # (T, n_in, batch)
-        ut = None if u is None else u.to(self.dtype).transpose(1, 2)
-        s = self.initial_state(batch) if s0 is None else s0.to(self.dtype).T.contiguous()
-        rec = torch.arange(self.graph.n) if record is None else torch.as_tensor(np.asarray(record), dtype=torch.int64)
+        dev = self.device
+        xt = None if x is None else x.to(dev, self.dtype).transpose(1, 2)    # (T, n_in, batch)
+        ut = None if u is None else u.to(dev, self.dtype).transpose(1, 2)
+        s = self.initial_state(batch) if s0 is None else s0.to(dev, self.dtype).T.contiguous()
+        rec = (torch.arange(self.graph.n, device=dev) if record is None
+               else record.to(dev) if torch.is_tensor(record)
+               else torch.as_tensor(np.asarray(record), dtype=torch.int64, device=dev))
         vals = self.w * self.gains()
         lam = self.leaks()[:, None]
         seg = checkpoint_every if checkpoint_every > 0 else T
@@ -262,7 +300,7 @@ class RateNet(nn.Module):
                     n_drives=int(len(self.graph.drives)), n_trainable=self.graph.n_trainable,
                     dtype=str(self.dtype).removeprefix("torch."), g_max=G_MAX, lam_min=LAM_MIN, lam_max=LAM_MAX,
                     lam_0=LAM_0, updates_per_interval=UPDATES_PER_INTERVAL, r_in_hz=R_IN,
-                    clamp_latency_intervals=0, hop_latency_intervals=1)
+                    clamp_latency_intervals=0, hop_latency_intervals=1, edge_grad=self.edge_grad)
 
 
 def reference_numpy(graph: RateGraph, gains, leaks, x=None, u=None, dtype=np.float32):

@@ -120,7 +120,7 @@ def test_sparse_backward_matches_dense_float64(graph):
 
 def test_autograd_gradcheck_small():
     g = random_graph(seed=5, n=60, n_in=5, n_drv=3, k_in=4)
-    st = R._Structure(g)
+    st = R._Structure.from_graph(g)
     vals = torch.from_numpy(g.w).clone().requires_grad_(True)
     s = torch.randn(g.n, 3, dtype=torch.float64, requires_grad=True)
     assert torch.autograd.gradcheck(lambda v, z: R._SparseMM.apply(v, z, st), (vals, s))
@@ -288,3 +288,52 @@ def test_checkpoint_keeps_last_three_and_best(tmp_path):
     assert [p.name for p in C.step_checkpoints(tmp_path)] == ["step_00000004.pt", "step_00000005.pt", "step_00000006.pt"]
     assert (tmp_path / "best.pt").exists() and not list(tmp_path.glob("*.tmp"))
     assert torch.load(tmp_path / "best.pt", weights_only=False)["step"] == 2
+
+
+def test_sddmm_edge_gradient_matches_dense_float64(graph):
+    """The opt-in edge_grad="sddmm" passes the gate-3 backward check (dense float64 autograd, relative error < 1e-6)."""
+    T, batch = 40, 2
+    net = R.RateNet(graph, dtype=torch.float64, edge_grad="sddmm")
+    randomise(net)
+    x, u = drive(T, batch, graph, dtype=np.float64)
+    x, u = torch.from_numpy(x), torch.from_numpy(u)
+    coef = torch.from_numpy(np.random.default_rng(3).normal(size=(T, batch, graph.n)))
+    st, _ = net.run(x, u)
+    (st * coef).sum().backward()
+    th = net.theta.detach().clone().requires_grad_(True)
+    ph = net.phi.detach().clone().requires_grad_(True)
+    (R.dense_reference_torch(graph, th, ph, x, u) * coef).sum().backward()
+    assert rel_err(net.theta.grad, th.grad) < 1e-6
+    assert rel_err(net.phi.grad, ph.grad) < 1e-6
+    assert net.record()["edge_grad"] == "sddmm"
+
+
+def test_sddmm_matches_chunked_float32(graph):
+    """The opt-in edge_grad="sddmm" against the registered default "chunked" in float32 over 300 intervals: the forward
+    is the same code (bit-identical), the gradients agree within float32 tolerance (max relative error < 1e-5)."""
+    x, u = drive(300, 4, graph)
+    coef = torch.from_numpy(np.random.default_rng(3).normal(size=(300, 4, graph.n)).astype(np.float32))
+    out = {}
+    for eg in R.EDGE_GRADS:
+        net = R.RateNet(graph, edge_grad=eg)
+        randomise(net)
+        st, last = net.run(torch.from_numpy(x), torch.from_numpy(u))
+        (st * coef).sum().backward()
+        out[eg] = (st.detach(), last.detach(), net.theta.grad, net.phi.grad)
+    c, s = out["chunked"], out["sddmm"]
+    assert torch.equal(c[0], s[0]) and torch.equal(c[1], s[1])
+    assert rel_err(s[2], c[2]) < 1e-5 and rel_err(s[3], c[3]) < 1e-5
+    assert float(c[2].abs().max()) > 0
+
+
+def test_sddmm_gradcheck_small():
+    g = random_graph(seed=5, n=60, n_in=5, n_drv=3, k_in=4)
+    st = R._Structure.from_graph(g, edge_grad="sddmm")
+    vals = torch.from_numpy(g.w).clone().requires_grad_(True)
+    s = torch.randn(g.n, 3, dtype=torch.float64, requires_grad=True)
+    assert torch.autograd.gradcheck(lambda v, z: R._SparseMM.apply(v, z, st), (vals, s))
+
+
+def test_unknown_edge_gradient_is_refused(graph):
+    with pytest.raises(ValueError):
+        R.RateNet(graph, edge_grad="dense")

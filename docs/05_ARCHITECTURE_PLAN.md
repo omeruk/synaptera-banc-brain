@@ -550,6 +550,16 @@ rot_left seed 10 is not bit-identical on x86_64: window DN spikes 2,826 (M1) vs 
     one machine. prereg/14 is unchanged (rule 6); the project owner decides how gate 5 is applied across machines.
 - **Tests on machine 2 (GPU visible):** pytest 423 passed, 1 skipped, 0 failed (the earlier 410 plus 13 new tests);
   `verify_report.py` 0 mismatches. Before the CPU pin, 7 FlyVis tests failed or errored with the GPU visible.
+- **GPU use (F5 step 2b).** Several CUDA processes side by side on this laptop GPU put the NVIDIA driver into an
+  nvlddmkm fault loop and the machine had to be powered off (driver version, event counts and times:
+  `docs/results/f5_benchmark.md` section 1). Since then:
+  - one GPU job at a time, never side by side;
+  - a per-process cap on GPU memory and a systemd memory cap on RAM;
+  - heavy jobs run through `scripts/f5_bench_guard.py`: pre-checks, plus a watchdog that kills the job on overheating,
+    low RAM or a new driver fault.
+  - Benchmark and projection (details in the report):
+
+Serial projection on this machine with the registered chunked edge gradient: stage A 3.6 days, B 8.6 days, C 73.1 days (sddmm, opt-in: 1.0, 2.9, 39.9); stage-A records 0.7 days.
 
 ## 8. Risk register
 
