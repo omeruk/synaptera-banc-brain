@@ -318,6 +318,7 @@ def input_checks(batch, recs):
             for st, p in keys.items():
                 z = np.load(p)
                 rates[f"{st}__L"], rates[f"{st}__R"] = z["L"], z["R"]
+                drop_cache(p)              # ~13 GB read per batch: kept as WSL cache it took Windows below 6 GB
             chk = input_check(rates, tcode, fw_types)
             done[name] = dict(passed=chk["passed"]) if split == "test" else dict(
                 passed=chk["passed"], A_in_T4aT5a={k: chk["per_stimulus"][k]["A_in_T4aT5a"] for k in ("rot_left", "rot_right")})
