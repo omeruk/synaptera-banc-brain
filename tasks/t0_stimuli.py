@@ -1,4 +1,5 @@
-# Ported from synaptera@c94796d:flight/vis_stim.py (decision "take": generic open-loop stimuli, unchanged except the import path).
+# Ported from synaptera@c94796d:flight/vis_stim.py (decision "take": generic open-loop stimuli, unchanged except the import path;
+# F5 adds the tf_hz and phase_deg options of luminance(), defaults unchanged).
 """Body-frame visual stimuli for the open-loop DN screen (SPEC_SENSORY_INPUTS.md §3.5).
 
 The 10 conditions of the pre-registration are defined in body-frame angles (azimuth, + = left) and
@@ -67,15 +68,19 @@ def size_at(cond, t):
     return float(loom_size(t))
 
 
-def luminance(cond, t, rays):
-    """Luminance in [0, 1] of every raw pixel, per eye (2, 512, 450). t = time since onset (s) or None (grey lead-in)."""
+def luminance(cond, t, rays, tf_hz=TF_HZ, phase_deg=0.0):
+    """Luminance in [0, 1] of every raw pixel, per eye (2, 512, 450). t = time since onset (s) or None (grey lead-in).
+
+    Gratings (conditions 1-3), added for F5 (prereg/14 section 7): ``tf_hz`` the drum temporal frequency (drum speed /
+    WAVELENGTH_DEG), ``phase_deg`` a grating phase in degrees of azimuth (the pattern is shifted by it). At the defaults
+    the arithmetic is exactly that of the original (phase 0 adds nothing)."""
     if t is None or cond == 10:
         return np.full(rays.shape[:-1], GREY)
     if cond in (1, 2, 3):
-        az = azimuth(rays) / WAVELENGTH_DEG
+        az = azimuth(rays) / WAVELENGTH_DEG if phase_deg == 0.0 else (azimuth(rays) + phase_deg) / WAVELENGTH_DEG
         tt = 0.0 if cond == 3 else t
         sgn = {1: +1.0, 2: -1.0, 3: 0.0}[cond]
-        return GREY + 0.5 * CONTRAST * np.sin(2 * np.pi * (az + sgn * TF_HZ * tt))
+        return GREY + 0.5 * CONTRAST * np.sin(2 * np.pi * (az + sgn * tf_hz * tt))
     if cond in (4, 5, 6, 7, 8, 11):
         c = {4: 4, 5: 5, 6: 6, 7: 4, 8: 5, 11: 6}[cond]
         a = np.radians(LOOM_AZ[c])

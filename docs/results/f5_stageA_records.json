@@ -1,0 +1,376 @@
+{
+ "prereg": "prereg/14 section 7 and section 9 gate 5, with prereg/17 sections 2-3",
+ "gate5": {
+  "record": "runs/f5/stageA_gate5/brain/rot_left_s10.npz",
+  "reference": "runs/machine_x86/f3b3_rot_left_s10/brain/rot_left_s10.npz",
+  "members_identical": true,
+  "bit_identical": true,
+  "sha256": {
+   "record": "d58341a0b544643c3595e9585605d3dcacc174e26485b30b728ff3bf4e05fdbe",
+   "reference": "d58341a0b544643c3595e9585605d3dcacc174e26485b30b728ff3bf4e05fdbe"
+  },
+  "render_bit_identical": true,
+  "input_check_passed": true
+ },
+ "driver_record_equals_reference": true,
+ "measure": {
+  "render_threads1": {
+   "wall_s": 83.37434887886047,
+   "peak_rss_gb": 2.715595245361328,
+   "rss_after_gb": 2.577556610107422,
+   "equals_machine2_f3b3_render": true,
+   "render_s": 16.9
+  },
+  "brain": {
+   "wall_s": 16.04999852180481,
+   "peak_rss_gb": 2.3307533264160156,
+   "rss_after_gb": 2.1066741943359375,
+   "record_s": 8.7,
+   "equals_machine2_f3b3_record": true
+  }
+ },
+ "plan": {
+  "n_records": 2400,
+  "n_renders": 1810,
+  "per_split": {
+   "train": 1600,
+   "val": 400,
+   "test": 400
+  },
+  "n_batches": 11,
+  "batch_seeds": 20
+ },
+ "input_checks_batch0": {
+  "p0_v030": {
+   "A_in_T4aT5a": {
+    "rot_left": 0.18949049711227417,
+    "rot_right": -0.18220369517803192
+   },
+   "passed": true
+  },
+  "p0_v060": {
+   "A_in_T4aT5a": {
+    "rot_left": 0.22329312562942505,
+    "rot_right": -0.22536581754684448
+   },
+   "passed": true
+  },
+  "p0_v090": {
+   "A_in_T4aT5a": {
+    "rot_left": 0.27214452624320984,
+    "rot_right": -0.2799248993396759
+   },
+   "passed": true
+  },
+  "p0_v120": {
+   "A_in_T4aT5a": {
+    "rot_left": 0.3331727981567383,
+    "rot_right": -0.3413788974285126
+   },
+   "passed": true
+  }
+ },
+ "record_checks": [
+  {
+   "file": "brain/rot_left_v030_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v060_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v090_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v120_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v030_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v060_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v090_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v120_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/static_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/grey_s000.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v030_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v060_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v090_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v120_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v030_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v060_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v090_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v120_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/static_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/grey_s001.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v030_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v060_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v090_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_left_v120_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v030_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v060_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v090_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/rot_right_v120_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/static_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  },
+  {
+   "file": "brain/grey_s039.npz",
+   "sha256_in_manifest": true,
+   "zip_test_ok": true,
+   "members_as_f3b3": true,
+   "stimulus_seed_match": true,
+   "shapes_ok": true,
+   "dn_table_as_f3b3": true,
+   "model_as_f3b3": true
+  }
+ ],
+ "record_checks_all_ok": true
+}
