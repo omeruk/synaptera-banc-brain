@@ -55,9 +55,10 @@ WINDOWS_MIN_FREE_GB = 6.0            # always left free for Windows
 PEAK_GB = {"render": 2.9, "brain": 2.5}          # measured peak RSS per worker (runs/f5/stageA/measure), rounded up
 SPAWN_MARGIN_GB, SPAWN_GAP_S = 1.0, 60           # a worker starts only if Windows keeps 6 + 1 GB after its peak
 DISK = Path("/mnt/c")
-# one thread per worker for every numeric pool: parallel workers with 16-thread OpenBLAS / OpenMP pools ran 10x slower
+# one thread per worker for every numeric pool: parallel workers with the default 16-thread pools (numba, used with
+# parallel=True by the FlyGym retina; OpenBLAS; OpenMP) ran about 10x slower than one worker alone
 WORKER_ENV = dict(CUDA_VISIBLE_DEVICES="", OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", MKL_NUM_THREADS="1",
-                  NUMEXPR_NUM_THREADS="1")
+                  NUMEXPR_NUM_THREADS="1", NUMBA_NUM_THREADS="1")
 COND = {"rot_left": 2, "rot_right": 1, "static": 3, "grey": 10}      # f3b1_common.STIMULI t0 conditions
 
 
