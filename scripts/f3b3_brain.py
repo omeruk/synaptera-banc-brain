@@ -6,6 +6,10 @@ Render, input check and engine are those of `scripts/f3b1_brain.py` (prereg/09 s
 whether it equals runs/f3b1/stim_rates.npz bit for bit is recorded in OUT/input_check.json (descriptive).
 Per (stimulus, seed) a fresh state, per-interval spike counts of all FlyWire DNs -> OUT/brain/<stimulus>_s<seed>.npz
 (existing files are skipped).
+
+F5 options (prereg/14 section 7, prereg/17): --speed (drum speed, deg/s; default 60 = the F3b drum) and --phase (grating
+phase, deg; default 0) change the render only; --stimuli restricts the brain runs. At the defaults the script is the
+F3b-3 script. The record members are the same at every speed and phase (speed and phase belong to the run directory).
 """
 import argparse
 import json
@@ -23,6 +27,41 @@ import f3b3_common as C  # noqa: E402
 from f3b1_brain import MIN_FREE_GB, TRANSDUCTION, build, free_gb, input_check, peak_rss_gb, render  # noqa: E402
 
 F3B1_STIM = ROOT / "runs" / "f3b1" / "stim_rates.npz"
+WAVELENGTH_DEG = 30.0                        # tasks/t0_stimuli.WAVELENGTH_DEG; drum speed = TF x wavelength
+
+
+def dn_table(cx):
+    n = cx.neurons
+    dn_idx = np.flatnonzero((n["super_class"] == "descending").to_numpy())
+    return dn_idx, dict(index=dn_idx, cell_type=n["cell_type"].astype(str).to_numpy()[dn_idx],
+                        side=n["side"].astype(str).to_numpy()[dn_idx])
+
+
+def run_record(eng, name, s, L, R, dn_idx, dn_tab, arm):
+    """One brain run (fresh state, seed s) driven by the boundary rates L, R (float64, 300 intervals): the members of
+    OUT/brain/<stimulus>_s<seed>.npz."""
+    nI = C.N_GREY + C.N_STIM
+    eng.reset(s)
+    cnt = np.zeros((nI, len(dn_idx)), np.int16)
+    net = np.zeros(nI, np.int64)
+    st = {"prev": eng.spike_counts()}
+
+    def on_boundary(j, e):
+        if j > 0:
+            cur = e.spike_counts()
+            d = cur - st["prev"]
+            cnt[j - 1] = d[dn_idx]
+            net[j - 1] = d.sum()
+            st["prev"] = cur
+        if j < nI:
+            e.set_inputs({"sugar": 0.0, "vbnd_L": L[j], "vbnd_R": R[j]})
+
+    eng.run_coupled(nI, C.INTERVAL_MS, on_boundary)
+    return dict(stimulus=name, t0_condition=C.STIMULI[name][0], seed=s, dn_counts=cnt,
+                net_counts=net, input_mean_L=L.mean(1), input_mean_R=R.mean(1), interval_ms=C.INTERVAL_MS,
+                weights_sha256=eng.state_dict()["weights_sha256"], model_sha256=eng.model_sha256,
+                model_arm=arm,
+                **{f"dn_{k}": v for k, v in dn_tab.items()})
 
 
 def main(argv=None):
@@ -33,7 +72,12 @@ def main(argv=None):
     ap.add_argument("--seeds", default=None, help="first-last brain seeds (default: prereg/11 seeds 10-29)")
     ap.add_argument("--stim-from", default=None,
                     help="directory with stim_rates.npz + input_check.json of an earlier render to reuse (copied)")
+    ap.add_argument("--speed", type=float, default=60.0, help="drum speed, deg/s (F5; default the F3b drum)")
+    ap.add_argument("--phase", type=float, default=0.0, help="grating phase, deg (F5; default 0)")
+    ap.add_argument("--stimuli", default=None, help="comma-separated stimuli to run in the brain (default all)")
     a = ap.parse_args(argv)
+    tf_hz = a.speed / WAVELENGTH_DEG
+    names = list(C.STIMULI) if a.stimuli is None else a.stimuli.split(",")
     seeds = C.SEEDS if a.seeds is None else tuple(range(int(a.seeds.split("-")[0]), int(a.seeds.split("-")[1]) + 1))
     out = Path(a.out)
     (out / "brain").mkdir(parents=True, exist_ok=True)
@@ -50,7 +94,7 @@ def main(argv=None):
     if stim_path.exists():
         rates = dict(np.load(stim_path))
     else:
-        rates = render(eyes, print)
+        rates = render(eyes, print, tf_hz=tf_hz, phase_deg=a.phase)
         np.savez_compressed(stim_path, **rates)
         chk = input_check(rates, eyes.tcode, list(eyes.fw_types))
         same = None
@@ -60,6 +104,8 @@ def main(argv=None):
         chk.update(transduction=str(TRANSDUCTION.relative_to(ROOT)), interval_ms=C.INTERVAL_MS, subframes=1,
                    n_grey=C.N_GREY, n_stim=C.N_STIM, stimuli={k: v[0] for k, v in C.STIMULI.items()},
                    equals_f3b1_render=same)
+        if (a.speed, a.phase) != (60.0, 0.0):            # F5 options: recorded only when used (F3b-3 file unchanged)
+            chk.update(speed_deg_s=a.speed, phase_deg=a.phase)
         (out / "input_check.json").write_text(json.dumps(chk, indent=1))
     chk = json.loads((out / "input_check.json").read_text())
     print("input check", "passed" if chk["passed"] else "FAILED",
@@ -70,10 +116,7 @@ def main(argv=None):
     del eyes
 
     from engine.lif_brian2 import Brian2LIFEngine
-    n = cx.neurons
-    dn_idx = np.flatnonzero((n["super_class"] == "descending").to_numpy())
-    dn_tab = dict(index=dn_idx, cell_type=n["cell_type"].astype(str).to_numpy()[dn_idx],
-                  side=n["side"].astype(str).to_numpy()[dn_idx])
+    dn_idx, dn_tab = dn_table(cx)
     from mv2_common import model_variant
     mv = model_variant(a.arm, cx)
     eng = Brian2LIFEngine(cx, input_groups=groups_in, seed=0, model_variant=mv)
@@ -81,37 +124,18 @@ def main(argv=None):
         print(f"model arm {a.arm}: {mv.record()}", flush=True)
     print(f"engine {eng.n_neurons:,} neurons, {len(eng.syn):,} synapses; free {free_gb():.1f} GB "
           f"({time.time() - t0:.0f} s)", flush=True)
-    nI = C.N_GREY + C.N_STIM
     lo, hi = C.WINDOW
-    for name in C.STIMULI:
+    for name in names:
         L, R = rates[f"{name}__L"].astype(float), rates[f"{name}__R"].astype(float)
         for s in seeds:
             path = out / "brain" / f"{name}_s{s}.npz"
             if path.exists():
                 continue
             t1 = time.time()
-            eng.reset(s)
-            cnt = np.zeros((nI, len(dn_idx)), np.int16)
-            net = np.zeros(nI, np.int64)
-            st = {"prev": eng.spike_counts()}
-
-            def on_boundary(j, e):
-                if j > 0:
-                    cur = e.spike_counts()
-                    d = cur - st["prev"]
-                    cnt[j - 1] = d[dn_idx]
-                    net[j - 1] = d.sum()
-                    st["prev"] = cur
-                if j < nI:
-                    e.set_inputs({"sugar": 0.0, "vbnd_L": L[j], "vbnd_R": R[j]})
-
-            eng.run_coupled(nI, C.INTERVAL_MS, on_boundary)
-            np.savez_compressed(path, stimulus=name, t0_condition=C.STIMULI[name][0], seed=s, dn_counts=cnt,
-                                net_counts=net, input_mean_L=L.mean(1), input_mean_R=R.mean(1), interval_ms=C.INTERVAL_MS,
-                                weights_sha256=eng.state_dict()["weights_sha256"], model_sha256=eng.model_sha256,
-                                model_arm=a.arm,
-                                **{f"dn_{k}": v for k, v in dn_tab.items()})
-            print(f"{name} s{s}: DN spikes {int(cnt.sum())}, net {net[lo:hi].sum() / (eng.n_neurons * 1.0):.2f} Hz "
+            rec = run_record(eng, name, s, L, R, dn_idx, dn_tab, a.arm)
+            np.savez_compressed(path, **rec)
+            print(f"{name} s{s}: DN spikes {int(rec['dn_counts'].sum())}, "
+                  f"net {rec['net_counts'][lo:hi].sum() / (eng.n_neurons * 1.0):.2f} Hz "
                   f"({time.time() - t1:.0f} s, free {free_gb():.1f} GB)", flush=True)
     (out / "brain" / "DONE").write_text(json.dumps(dict(wall_s=time.time() - t0, peak_rss_gb=peak_rss_gb())) + "\n")
     print("done", round(time.time() - t0), "s", flush=True)
