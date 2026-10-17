@@ -55,6 +55,9 @@ WINDOWS_MIN_FREE_GB = 6.0            # always left free for Windows
 PEAK_GB = {"render": 2.9, "brain": 2.5}          # measured peak RSS per worker (runs/f5/stageA/measure), rounded up
 SPAWN_MARGIN_GB, SPAWN_GAP_S = 1.0, 60           # a worker starts only if Windows keeps 6 + 1 GB after its peak
 DISK = Path("/mnt/c")
+# one thread per worker for every numeric pool: parallel workers with 16-thread OpenBLAS / OpenMP pools ran 10x slower
+WORKER_ENV = dict(CUDA_VISIBLE_DEVICES="", OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", MKL_NUM_THREADS="1",
+                  NUMEXPR_NUM_THREADS="1")
 COND = {"rot_left": 2, "rot_right": 1, "static": 3, "grey": 10}      # f3b1_common.STIMULI t0 conditions
 
 
@@ -252,7 +255,7 @@ def worker_brain(tasks):
 
 # ── driver ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 def spawn(args, tag):
-    env = dict(os.environ, CUDA_VISIBLE_DEVICES="")
+    env = dict(os.environ, **WORKER_ENV)
     logf = open(OUT / "workers" / f"{tag}.log", "a")
     return subprocess.Popen([sys.executable, __file__] + args, cwd=ROOT, env=env, stdout=logf, stderr=subprocess.STDOUT)
 
@@ -420,7 +423,7 @@ def measure(a):
         TMP.mkdir(parents=True, exist_ok=True)
         t0 = time.time()
         r = subprocess.run([sys.executable, __file__, "worker-render", "--threads", str(threads), "--keys", key],
-                           cwd=ROOT, env=dict(os.environ, CUDA_VISIBLE_DEVICES=""), capture_output=True, text=True)
+                           cwd=ROOT, env=dict(os.environ, **WORKER_ENV), capture_output=True, text=True)
         if r.returncode:
             raise SystemExit(r.stdout[-2000:] + r.stderr[-2000:])
         info = json.loads(r.stdout.strip().splitlines()[-1])
@@ -439,7 +442,7 @@ def measure(a):
     tf.write_text(json.dumps([["rot_left_v060_p0", [rec]]]))
     t0 = time.time()
     r = subprocess.run([sys.executable, __file__, "worker-brain", "--tasks", str(tf)],
-                       cwd=ROOT, env=dict(os.environ, CUDA_VISIBLE_DEVICES=""), capture_output=True, text=True)
+                       cwd=ROOT, env=dict(os.environ, **WORKER_ENV), capture_output=True, text=True)
     if r.returncode:
         raise SystemExit(r.stdout[-2000:] + r.stderr[-2000:])
     info = json.loads(r.stdout.strip().splitlines()[-1])
