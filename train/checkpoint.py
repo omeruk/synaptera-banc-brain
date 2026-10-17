@@ -20,13 +20,19 @@ _STEP_RE = re.compile(r"^step_(\d{8})\.pt$")
 
 
 def rng_state() -> dict:
-    return dict(torch=torch.get_rng_state(), numpy=np.random.get_state(), python=random.getstate())
+    """CPU torch, NumPy and Python RNG states, plus the CUDA RNG states once CUDA is in use."""
+    st = dict(torch=torch.get_rng_state(), numpy=np.random.get_state(), python=random.getstate())
+    if torch.cuda.is_available() and torch.cuda.is_initialized():
+        st["cuda"] = torch.cuda.get_rng_state_all()
+    return st
 
 
 def set_rng_state(st: dict) -> None:
     torch.set_rng_state(st["torch"])
     np.random.set_state(st["numpy"])
     random.setstate(st["python"])
+    if "cuda" in st and torch.cuda.is_available():
+        torch.cuda.set_rng_state_all(st["cuda"])
 
 
 def _atomic_save(obj, path: Path) -> None:
@@ -67,8 +73,9 @@ def latest(run_dir) -> Path | None:
 
 
 def load(path, model: torch.nn.Module, optimiser: torch.optim.Optimizer) -> dict:
-    """Restore model, optimiser and RNG states; returns the checkpoint (``step``, ``extra``)."""
-    obj = torch.load(path, weights_only=False)
+    """Restore model, optimiser and RNG states; returns the checkpoint (``step``, ``extra``). The file is read onto the
+    CPU; model and optimiser copy the tensors to the device of their parameters."""
+    obj = torch.load(path, weights_only=False, map_location="cpu")
     model.load_state_dict(obj["model"])
     optimiser.load_state_dict(obj["optimiser"])
     set_rng_state(obj["rng"])
