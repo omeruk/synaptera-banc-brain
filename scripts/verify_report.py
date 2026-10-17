@@ -8,7 +8,8 @@ the prereg and the registry, FlyWire DN rates and brain-side tests from the brai
 per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_ensemble.md`, `f3b3_specificity.md`): see
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
 (`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
-docs/05 section 7.1): see `check_machine_repro`. Rebuilt JSON is compared value by value with floats within a relative
+docs/05 section 7.1): see `check_machine_repro`; F5 step 2b (`docs/results/f5_benchmark.md`): see
+`check_f5_benchmark`. Rebuilt JSON is compared value by value with floats within a relative
 JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
@@ -1144,6 +1145,51 @@ def check_machine_repro():
     return n, bad
 
 
+F5B_JSON = ROOT / "docs" / "results" / "f5_benchmark.json"
+F5B_MD = ROOT / "docs" / "results" / "f5_benchmark.md"
+
+
+def check_f5_benchmark():
+    """F5 step 2b (prereg/14 section 10). The JSON is rebuilt from runs/f5/bench and compared, the markdown re-rendered
+    and compared; the registered (chunked, 10-seed) projection of each stage is recomputed here from the raw part
+    files with the run counts written out by hand from prereg/14 sections 5-7."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_bench_report as R
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5B_JSON.read_text())
+    chk("f5b:json_equals_rebuild", json_close("f5b:json_equals_rebuild", stored, R.build()))
+    chk("f5b:md_equals_render", F5B_MD.read_text() == R.render(stored))
+    b = R.BENCH
+    a, bb, fv = (json.loads((b / f"{p}.json").read_text()) for p in ("a_gpu", "b_gpu", "flyvis"))
+    graph_runs, ann_runs = 12 + 12 + 12 + 7, 12 + 12            # true, shuffled, derange, bridge_off; mlp, linear
+    sa = min(v["median_step_s"] for k, v in a["configs"].items() if k.startswith("chunked_") and "median_step_s" in v)
+    sb = min(v["median_step_s"] for k, v in bb["configs"].items() if k.startswith("chunked_") and "median_step_s" in v)
+    ea, eb, mlp = a["eval_s_per_trial"], bb["eval_s_per_trial"], a["mlp"]["median_step_s"]
+    scale = bb["n_trainable"] / a["n_trainable"]
+    days_a = (graph_runs * (2000 * sa + (40 * 240 + 400) * ea) + ann_runs * 2000 * mlp + 400 * ea) / 86400
+    days_b = (graph_runs * (1000 * sb + (20 * 240 + 400) * eb) + ann_runs * 1000 * mlp * scale + 400 * eb) / 86400
+    fi = fv["total_s_per_interval"] + bb["forward_s_per_interval_batch1"]
+    flights = 800 + 240 + 400
+    cs = bb["c_shape"]["chunked"]["median_step_s"]
+    days_c = (graph_runs * (3500 * cs + flights * 500 * fi)
+              + ann_runs * (3500 * mlp * scale * 500 / 300 + flights * 500 * fv["total_s_per_interval"])
+              + 400 * 500 * fi + 960 * 500 * fv["total_s_per_interval"]) / 86400
+    reg = stored["projection"]["chunked"]["registered"]
+    for st, d in (("A", days_a), ("B", days_b), ("C", days_c)):
+        chk(f"f5b:days_{st}", abs(reg[st]["days"] - d) <= 1e-9 * d, (reg[st]["days"], d))
+        chk(f"f5b:over_{st}", reg[st]["over_fallback_limit"] == (d > 60))
+    chk("f5b:summary_in_md", R.summary(stored) in F5B_MD.read_text())
+    chk("f5b:summary_in_doc05", R.summary(stored) in DOC05.read_text().replace("\n", " "))
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -1240,6 +1286,10 @@ def main(argv=None):
         bad += b
     if MACH_MD.exists():
         k, b = check_machine_repro()
+        n += k
+        bad += b
+    if F5B_MD.exists():
+        k, b = check_f5_benchmark()
         n += k
         bad += b
     if "--print" in argv:

@@ -1,0 +1,470 @@
+{
+ "prereg": "prereg/14_f5_training.md section 10: wall-time-only benchmark, data seed 9999, synthetic inputs",
+ "machine": {
+  "machine": "x86_64",
+  "cpu": "AMD Ryzen 9 8945HS w/ Radeon 780M Graphics",
+  "cpu_threads": 16,
+  "torch_threads": 8,
+  "torch": "2.14.0+cu130",
+  "python": "3.10.21",
+  "deterministic": true,
+  "peak_rss_gib": 5.588417053222656,
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "gpu_total_gib": 7.99560546875,
+  "gpu_free_gib_at_start": 4.65234375,
+  "cuda": "13.0",
+  "gpu_fraction_cap": 0.7
+ },
+ "policy": {
+  "one_gpu_job_at_a_time": true,
+  "gpu_fraction_cap": 0.7,
+  "gpu_cap_gib": 5.596923828125,
+  "ram_cap": "MemoryMax=14G, no swap (systemd scope)",
+  "kill_temp_c": 87
+ },
+ "incident": {
+  "captured": "2026-10-17T16:37:39",
+  "driver_at_incident": "596.36",
+  "driver_at_incident_source": "nvidia-smi after the reboot, before the update",
+  "driver_now": "617.42",
+  "nvlddmkm_events": 5043,
+  "first_event": "2026-10-17 01:32:15",
+  "last_event": "2026-10-17 09:15:21",
+  "messages": [
+   "Graphics FECS Exception: Logging error 0x2"
+  ],
+  "unexpected_shutdown": "The previous system shutdown at 9:07:10 AM on ?10/?17/?2026 was unexpected.",
+  "bench_log_tail": [
+   "  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass",
+   "a_gpu done 274 s",
+   "chunked k=1: ok=True",
+   "chunked k=2: ok=True",
+   "chunked k=3: ok=True",
+   "chunked k=4: ok=True"
+  ],
+  "a_gpu_finished": "a_gpu done 274 s",
+  "parallel_passed": [
+   "chunked k=1: ok=True",
+   "chunked k=2: ok=True",
+   "chunked k=3: ok=True",
+   "chunked k=4: ok=True"
+  ]
+ },
+ "graphs": {
+  "vnc_neurons": 25818,
+  "vnc_edges": 3020333,
+  "vnc_trainable": 3044835,
+  "hybrid_trainable": 18275457,
+  "bridge_units": 225,
+  "brain_neurons": 138639,
+  "brain_edges": 15091983
+ },
+ "stage_a": {
+  "batch": 16,
+  "intervals": 300,
+  "gpu": {
+   "chunked_ckpt0": {
+    "step_s": 3.5887030439998853,
+    "peak_gib": 1.44921875,
+    "oom": false
+   },
+   "chunked_ckpt50": {
+    "step_s": 3.8752255169993077,
+    "peak_gib": 0.611328125,
+    "oom": false
+   },
+   "sddmm_ckpt0": {
+    "step_s": 0.9533419174995288,
+    "peak_gib": 1.32421875,
+    "oom": false
+   },
+   "sddmm_ckpt50": {
+    "step_s": 1.2594659260003027,
+    "peak_gib": 0.486328125,
+    "oom": false
+   }
+  },
+  "cpu": {
+   "chunked_ckpt0": {
+    "step_s": 34.79786834399988,
+    "peak_gib": null,
+    "oom": false
+   },
+   "chunked_ckpt50": {
+    "step_s": 19.56463097200003,
+    "peak_gib": null,
+    "oom": false
+   },
+   "sddmm_ckpt0": {
+    "step_s": 6.77565043300001,
+    "peak_gib": null,
+    "oom": false
+   },
+   "sddmm_ckpt50": {
+    "step_s": 8.379779570999972,
+    "peak_gib": null,
+    "oom": false
+   }
+  },
+  "eval_s_per_trial": {
+   "gpu": 0.005227277079166015,
+   "cpu": 0.06082875214166658
+  },
+  "mlp": {
+   "width": 1346,
+   "params": 3047360,
+   "step_s": 0.01067250550022436
+  },
+  "deterministic_off": {
+   "chunked": 3.4644607824993727,
+   "sddmm": 0.8045521249996455
+  },
+  "checkpointing_needed": false,
+  "side_by_side_by_memory": 3
+ },
+ "stage_b": {
+  "batch": 8,
+  "intervals": 300,
+  "build_s": 31.966203927993774,
+  "gpu": {
+   "chunked_ckpt0": {
+    "step_s": 16.407599248999986,
+    "peak_gib": 5.314453125,
+    "oom": false
+   },
+   "chunked_ckpt50": {
+    "step_s": 17.73933126099996,
+    "peak_gib": 2.26953125,
+    "oom": false
+   },
+   "chunked_ckpt25": {
+    "step_s": 17.835694921000027,
+    "peak_gib": 1.994140625,
+    "oom": false
+   },
+   "sddmm_ckpt0": {
+    "step_s": 4.810350062999987,
+    "peak_gib": 5.5234375,
+    "oom": false
+   },
+   "sddmm_ckpt50": {
+    "step_s": 6.286733610999818,
+    "peak_gib": 2.466796875,
+    "oom": false
+   },
+   "sddmm_ckpt25": {
+    "step_s": 6.244070803000113,
+    "peak_gib": 2.19140625,
+    "oom": false
+   }
+  },
+  "cpu": {
+   "chunked_ckpt50": {
+    "step_s": 101.47198261499989,
+    "peak_gib": null,
+    "oom": false
+   },
+   "sddmm_ckpt50": {
+    "step_s": 64.64670610000007,
+    "peak_gib": null,
+    "oom": false
+   }
+  },
+  "eval_s_per_trial": {
+   "gpu": 0.1722742911874917,
+   "cpu": 0.8839151811875041
+  },
+  "checkpointing_needed": false,
+  "c_shape": {
+   "chunked": {
+    "ckpt": 50,
+    "step_s": 29.466364847000023,
+    "peak_gib": 2.49609375
+   },
+   "sddmm": {
+    "ckpt": 50,
+    "step_s": 10.369868349499939,
+    "peak_gib": 2.693359375
+   }
+  },
+  "forward_s_per_interval": {
+   "batch1": 0.0020362776750005194,
+   "batch160": 0.024427688750006383
+  },
+  "probes": {
+   "b_gpu_probe_b2_t50_ck0": {
+    "batch": 2,
+    "intervals": 50,
+    "configs": {
+     "chunked_ckpt0": {
+      "step_s": 0.8213784644999862,
+      "peak_gib": 1.416015625,
+      "oom": false
+     }
+    },
+    "peak_rss_gib": 4.28814697265625
+   },
+   "b_gpu_probe_b8_t50_ck0": {
+    "batch": 8,
+    "intervals": 50,
+    "configs": {
+     "chunked_ckpt0": {
+      "step_s": 2.7542465574999824,
+      "peak_gib": 1.96875,
+      "oom": false
+     }
+    },
+    "peak_rss_gib": 4.290149688720703
+   },
+   "b_gpu_probe_b8_t300_ck50": {
+    "batch": 8,
+    "intervals": 300,
+    "configs": {
+     "chunked_ckpt50": {
+      "step_s": 17.909093032999976,
+      "peak_gib": 2.26953125,
+      "oom": false
+     }
+    },
+    "peak_rss_gib": 5.0110015869140625
+   }
+  }
+ },
+ "speedups": {
+  "chunked": {
+   "compile": 0.991048636356006,
+   "compile_identical": false,
+   "compile_max_grad_diff": 7.275957614183426e-11,
+   "cuda_graph": 1.0745730069184591,
+   "cuda_graph_identical": false,
+   "cuda_graph_max_grad_diff": 5.820766091346741e-11
+  },
+  "sddmm": {
+   "compile": 0.9805395729124772,
+   "compile_identical": false,
+   "compile_max_grad_diff": 5.820766091346741e-11,
+   "cuda_graph": 1.2098251709784158,
+   "cuda_graph_identical": false,
+   "cuda_graph_max_grad_diff": 5.820766091346741e-11
+  }
+ },
+ "gpu_over_cpu": {
+  "A": {
+   "chunked": 5.451727471491692,
+   "sddmm": 7.107261632606602
+  },
+  "B": {
+   "chunked": 5.720169555550649,
+   "sddmm": 10.28303569072635
+  }
+ },
+ "flyvis": {
+  "scene_s_per_interval": 0.008993203999921207,
+  "flyvis_s_per_interval": 0.028016439499992885,
+  "total_s_per_interval": 0.03704547599988928,
+  "n_intervals": 200
+ },
+ "datagen": {
+  "times": {
+   "render_s": [
+    20,
+    18,
+    17,
+    16,
+    20,
+    15,
+    16,
+    15
+   ],
+   "build_s": [
+    145,
+    135
+   ],
+   "record_s": [
+    10,
+    9
+   ],
+   "render_mean_s": 17.125,
+   "build_mean_s": 140.0,
+   "record_mean_s": 9.5
+  },
+  "n_records": 2400,
+  "n_renders": 2010,
+  "records_days": 0.2638888888888889,
+  "renders_days": 0.39839409722222224,
+  "stage_a_days": 0.6639033564814815
+ },
+ "costs_s": {
+  "chunked": {
+   "A": {
+    "graph": 7229.678858791431,
+    "ann": 21.34501100044872,
+    "untrained": 2.090910831666406,
+    "shared": 0.0
+   },
+   "B": {
+    "graph": 17303.42556317494,
+    "ann": 64.05763049610695,
+    "untrained": 68.90971647499669,
+    "shared": 0.0
+   },
+   "C": {
+    "graph": 131271.13961042074,
+    "ann": 27046.41223114757,
+    "untrained": 7816.350734977958,
+    "shared": 17781.828479946853
+   },
+   "flight_s": 19.5408768374449,
+   "flights_per_run": 1440
+  },
+  "sddmm": {
+   "A": {
+    "graph": 1958.9566057907177,
+    "ann": 21.34501100044872,
+    "untrained": 2.090910831666406,
+    "shared": 0.0
+   },
+   "B": {
+    "graph": 5706.176377174944,
+    "ann": 64.05763049610695,
+    "untrained": 68.90971647499669,
+    "shared": 0.0
+   },
+   "C": {
+    "graph": 64433.40186917043,
+    "ann": 27046.41223114757,
+    "untrained": 7816.350734977958,
+    "shared": 17781.828479946853
+   },
+   "flight_s": 19.5408768374449,
+   "flights_per_run": 1440
+  }
+ },
+ "projection": {
+  "chunked": {
+   "registered": {
+    "A": {
+     "graph_runs": 43,
+     "ann_runs": 24,
+     "days": 3.604057431746226,
+     "over_fallback_limit": false
+    },
+    "B": {
+     "graph_runs": 43,
+     "ann_runs": 24,
+     "days": 8.63024990815861,
+     "over_fallback_limit": false
+    },
+    "C": {
+     "graph_runs": 43,
+     "ann_runs": 24,
+     "days": 73.14086893530738,
+     "over_fallback_limit": true
+    }
+   },
+   "fallback_1": {
+    "A": {
+     "graph_runs": 40,
+     "ann_runs": 18,
+     "days": 3.351544623385382,
+     "over_fallback_limit": false
+    },
+    "B": {
+     "graph_runs": 40,
+     "ann_runs": 18,
+     "days": 8.02498807398614,
+     "over_fallback_limit": false
+    },
+    "C": {
+     "graph_runs": 40,
+     "ann_runs": 18,
+     "days": 66.70462018278252,
+     "over_fallback_limit": true
+    }
+   },
+   "fallback_2": {
+    "A": {
+     "graph_runs": 34,
+     "ann_runs": 18,
+     "days": 2.8494835915248657,
+     "over_fallback_limit": false
+    },
+    "B": {
+     "graph_runs": 34,
+     "ann_runs": 18,
+     "days": 6.823361298765658,
+     "over_fallback_limit": false
+    },
+    "C": {
+     "graph_runs": 34,
+     "ann_runs": 18,
+     "days": 57.588568820947756,
+     "over_fallback_limit": false
+    }
+   }
+  },
+  "sddmm": {
+   "registered": {
+    "A": {
+     "graph_runs": 43,
+     "ann_runs": 24,
+     "days": 0.9808970512018901,
+     "over_fallback_limit": false
+    },
+    "B": {
+     "graph_runs": 43,
+     "ann_runs": 24,
+     "days": 2.8584707993854646,
+     "over_fallback_limit": false
+    },
+    "C": {
+     "graph_runs": 43,
+     "ann_runs": 24,
+     "days": 39.87671705019439,
+     "over_fallback_limit": false
+    }
+   },
+   "fallback_1": {
+    "A": {
+     "graph_runs": 40,
+     "ann_runs": 18,
+     "days": 0.9113954321813479,
+     "over_fallback_limit": false
+    },
+    "B": {
+     "graph_runs": 40,
+     "ann_runs": 18,
+     "days": 2.6558912286157716,
+     "over_fallback_limit": false
+    },
+    "C": {
+     "graph_runs": 40,
+     "ann_runs": 18,
+     "days": 35.76122308035184,
+     "over_fallback_limit": false
+    }
+   },
+   "fallback_2": {
+    "A": {
+     "graph_runs": 34,
+     "ann_runs": 18,
+     "days": 0.775356779001437,
+     "over_fallback_limit": false
+    },
+    "B": {
+     "graph_runs": 34,
+     "ann_runs": 18,
+     "days": 2.259628980200845,
+     "over_fallback_limit": false
+    },
+    "C": {
+     "graph_runs": 34,
+     "ann_runs": 18,
+     "days": 31.28668128388167,
+     "over_fallback_limit": false
+    }
+   }
+  }
+ },
+ "fallback_limit_days": 60
+}
