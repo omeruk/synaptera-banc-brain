@@ -9,7 +9,7 @@ per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_en
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
 (`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
 docs/05 section 7.1): see `check_machine_repro`; F5 step 2b (`docs/results/f5_benchmark.md`): see
-`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. Rebuilt JSON is compared value by value with floats within a relative
+`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. Rebuilt JSON is compared value by value with floats within a relative
 JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
@@ -1194,6 +1194,42 @@ F5SA_JSON = ROOT / "docs" / "results" / "f5_stageA_records.json"
 F5SA_MD = ROOT / "docs" / "results" / "f5_stageA_records.md"
 
 
+F5RU_JSON = ROOT / "docs" / "results" / "f5_stageA_runner.json"
+F5RU_MD = ROOT / "docs" / "results" / "f5_stageA_runner.md"
+
+
+def check_f5_runner():
+    """F5 step 3 (stage-A runner). The JSON is rebuilt from the setup, the smoke runs and the diagnostic and compared,
+    the markdown re-rendered and compared; independently: the reported runs are smoke runs evaluated on training
+    trials, and the informational projection is recomputed from the stored step and evaluation times."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_train_report as R
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5RU_JSON.read_text())
+    chk("f5ru:json_equals_rebuild", json_close("f5ru:json_equals_rebuild", stored, R.build()))
+    chk("f5ru:md_equals_render", F5RU_MD.read_text() == R.render(stored))
+    for run in (R.RUN_FULL, R.RUN_PAUSED):
+        cfg = json.loads((run / "config.json").read_text())
+        done = json.loads((run / "DONE").read_text())
+        chk(f"f5ru:smoke:{run.name}", cfg["smoke"] is True and done["smoke"] is True
+            and done["eval_set"] == "smoke_eval_on_training_trials" and cfg["n_val"] is None)
+    s, p = stored["smoke"], stored["projection_stage_A"]
+    graph_runs, ann_runs = 12 + 12 + 12 + 7, 12 + 12
+    run_s = 2000 * s["median_step_s"] + 41 * s["eval_s_240"]
+    test_s = 400 / 240 * s["eval_s_240"]
+    days = (graph_runs * (run_s + test_s) + s["eval_s_240"] + test_s + ann_runs * 2000 * p["mlp_step_s_pr25"]) / 86400
+    chk("f5ru:projection_days", abs(p["days"] - days) <= 1e-9 * days, (p["days"], days))
+    chk("f5ru:summary_in_md", R.summary(stored) in F5RU_MD.read_text())
+    return n, bad
+
+
 def check_f5_stageA():
     """F5 step 2c (prereg/14 gate 5, prereg/17). The JSON is rebuilt and compared, the markdown re-rendered and
     compared; the gate-5 records are compared here member by member (uncompressed bytes), and the manifest hashes of
@@ -1339,6 +1375,10 @@ def main(argv=None):
         bad += b
     if F5SA_MD.exists():
         k, b = check_f5_stageA()
+        n += k
+        bad += b
+    if F5RU_MD.exists():
+        k, b = check_f5_runner()
         n += k
         bad += b
     if "--print" in argv:
