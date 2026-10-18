@@ -72,7 +72,8 @@ def build(log=print):
     return cx, groups_in, eyes
 
 
-def render(eyes, log=print):
+def render_setup():
+    """Camera rays of the fixed body and the FlyGym retina, shared by every render."""
     import mujoco
     from flygym.vision import Retina
 
@@ -80,21 +81,32 @@ def render(eyes, log=print):
     from tasks import t0_stimuli as S
     b = FlightBody(spawn_pos=(0, 0, 100), spawn_yaw=0.0, legs="tuck", enable_vision=True)
     mujoco.mj_forward(b.m, b.d)
-    rays = S.camera_rays(b.m, b.d, b.root)
-    retina = Retina()
+    return S.camera_rays(b.m, b.d, b.root), Retina()
+
+
+def render_stimulus(eyes, cond, rays, retina, tf_hz=None, phase_deg=0.0):
+    """Boundary-layer rates (L, R) of one t0 condition: 100 grey + 200 stimulus intervals, float32. tf_hz / phase_deg:
+    the F5 drum temporal frequency and grating phase (tasks/t0_stimuli.luminance; defaults = the F3b render)."""
+    from tasks import t0_stimuli as S
+    tf_hz = S.TF_HZ if tf_hz is None else tf_hz
     dt = C.INTERVAL_MS * 1e-3
+    eyes.reset()
+    rl, rr = [], []
+    for k in range(C.N_GREY + C.N_STIM):
+        t = None if k < C.N_GREY else (k - C.N_GREY + 1) * dt
+        act, _ = eyes.step([S.encode(S.luminance(cond, t, rays, tf_hz=tf_hz, phase_deg=phase_deg), retina)])
+        r = eyes.rates(act)
+        rl.append(r["L"].astype(np.float32))
+        rr.append(r["R"].astype(np.float32))
+    return np.array(rl), np.array(rr)
+
+
+def render(eyes, log=print, tf_hz=None, phase_deg=0.0):
+    rays, retina = render_setup()
     out = {}
     for name, (cond, _) in C.STIMULI.items():
         t1 = time.time()
-        eyes.reset()
-        rl, rr = [], []
-        for k in range(C.N_GREY + C.N_STIM):
-            t = None if k < C.N_GREY else (k - C.N_GREY + 1) * dt
-            act, _ = eyes.step([S.encode(S.luminance(cond, t, rays), retina)])
-            r = eyes.rates(act)
-            rl.append(r["L"].astype(np.float32))
-            rr.append(r["R"].astype(np.float32))
-        out[f"{name}__L"], out[f"{name}__R"] = np.array(rl), np.array(rr)
+        out[f"{name}__L"], out[f"{name}__R"] = render_stimulus(eyes, cond, rays, retina, tf_hz, phase_deg)
         lo, hi = C.WINDOW
         log(f"render {name:9s} (t0 cond {cond}): window mean L {out[f'{name}__L'][lo:hi].mean():.2f} "
             f"R {out[f'{name}__R'][lo:hi].mean():.2f} Hz ({time.time() - t1:.0f} s)", flush=True)

@@ -9,7 +9,7 @@ per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_en
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
 (`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
 docs/05 section 7.1): see `check_machine_repro`; F5 step 2b (`docs/results/f5_benchmark.md`): see
-`check_f5_benchmark`. Rebuilt JSON is compared value by value with floats within a relative
+`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. Rebuilt JSON is compared value by value with floats within a relative
 JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
@@ -1190,6 +1190,51 @@ def check_f5_benchmark():
     return n, bad
 
 
+F5SA_JSON = ROOT / "docs" / "results" / "f5_stageA_records.json"
+F5SA_MD = ROOT / "docs" / "results" / "f5_stageA_records.md"
+
+
+def check_f5_stageA():
+    """F5 step 2c (prereg/14 gate 5, prereg/17). The JSON is rebuilt and compared, the markdown re-rendered and
+    compared; the gate-5 records are compared here member by member (uncompressed bytes), and the manifest hashes of
+    the checked training-seed records are recomputed. No test-seed record is opened."""
+    import zipfile
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_stageA_report as R
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5SA_JSON.read_text())
+    chk("f5sa:json_equals_rebuild", json_close("f5sa:json_equals_rebuild", stored, R.build()))
+    chk("f5sa:md_equals_render", F5SA_MD.read_text() == R.render(stored))
+    with zipfile.ZipFile(ROOT / stored["gate5"]["record"]) as a, zipfile.ZipFile(ROOT / stored["gate5"]["reference"]) as b:
+        same = sorted(a.namelist()) == sorted(b.namelist()) and all(a.read(m) == b.read(m) for m in a.namelist())
+    chk("f5sa:gate5_bit_identical", same == stored["gate5"]["bit_identical"] is True)
+    man = dict(reversed(ln.split("  ", 1)) for ln in (R.F.OUT / "manifest.sha256").read_text().splitlines())
+    for c in stored["record_checks"]:
+        seed = int(c["file"].rsplit("_s", 1)[1].split(".")[0])
+        chk(f"f5sa:not_test:{c['file']}", seed < 200)
+        chk(f"f5sa:sha:{c['file']}", hashlib.sha256((R.F.OUT / c["file"]).read_bytes()).hexdigest() == man[c["file"]])
+    chk("f5sa:summary_in_md", R.summary(stored) in F5SA_MD.read_text())
+    # completion, recomputed independently: every planned record is in the manifest with its file hash (test-seed
+    # records are hashed only), and every input check passed
+    plan = json.loads((R.F.OUT / "plan.json").read_text())["records"]
+    chk("f5sa:n_plan_2400", len(plan) == 2400 and len({e["file"] for e in plan}) == 2400)
+    chk("f5sa:plan_in_manifest", {e["file"] for e in plan} == set(man))
+    nbad = sum(hashlib.sha256((R.F.OUT / f).read_bytes()).hexdigest() != h for f, h in man.items())
+    chk("f5sa:all_hashes", nbad == 0 == stored["completion"]["hash_mismatches"], nbad)
+    ic = json.loads((R.F.OUT / "input_checks.json").read_text())
+    chk("f5sa:input_checks_all_passed", len(ic) == 4 + 200 * 4 and all(v["passed"] for v in ic.values()), len(ic))
+    chk("f5sa:test_input_checks_no_values", not any("A_in_T4aT5a" in v for k, v in ic.items()
+                                                    if k.startswith("s") and int(k[1:4]) >= 200))
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -1290,6 +1335,10 @@ def main(argv=None):
         bad += b
     if F5B_MD.exists():
         k, b = check_f5_benchmark()
+        n += k
+        bad += b
+    if F5SA_MD.exists():
+        k, b = check_f5_stageA()
         n += k
         bad += b
     if "--print" in argv:
