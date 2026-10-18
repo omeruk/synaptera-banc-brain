@@ -399,6 +399,39 @@ def test_final_evaluation_runs_once_and_never_on_smoke(world, tmp_path):
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="needs CUDA")
+def test_final_evaluation_runs_on_the_cpu_and_is_reproducible(world, tmp_path):
+    """prereg/19 section 1: a GPU-trained run is evaluated on the CPU from best.pt; two evaluations of the same
+    checkpoint give identical numbers."""
+    setup, rec, sp = world
+    train(world, tmp_path / "r", steps=4, device="cuda")
+    res = []
+    for k in range(2):
+        d = tmp_path / f"copy{k}"
+        d.mkdir()
+        for f in ("DONE", "best.pt"):
+            (d / f).write_bytes((tmp_path / "r" / f).read_bytes())
+        br = A.make_bridge(setup, "true", 0)
+        m, _ = A.make_model("true", 0, setup, br)
+        res.append(A.final_evaluate(d, setup, br, m.cuda(), records=rec, split_path=sp))
+    assert res[0]["device"] == "cpu" and res[0]["threads"] == A.TEST_THREADS
+    assert res[0]["groups"] == res[1]["groups"]
+
+
+def test_replicate_is_never_tested_or_selected(world, tmp_path):
+    setup, rec, sp = world
+    run = A.run_dir_of("true", 0, 3e-3, tmp_path, replicate=True)
+    assert run.name == "t0_lr0.003_replicate"
+    train(world, run, steps=2, replicate=True)
+    assert json.loads((run / "DONE").read_text())["replicate"] is True
+    br = A.make_bridge(setup, "true", 0)
+    m, _ = A.make_model("true", 0, setup, br)
+    with pytest.raises(SystemExit, match="replicate"):
+        A.final_evaluate(run, setup, br, m, records=rec, split_path=sp)
+    with pytest.raises(SystemExit, match="missing"):                      # select_lr reads only t0_lr<rate>
+        A.select_lr("true", tmp_path)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="needs CUDA")
 def test_gpu_resume_is_bit_identical(world, tmp_path):
     """On this tiny graph the cuSPARSE products happen to be reproducible; on the full VNC they are not (see
     A.REPRODUCIBILITY), so this checks the resume bookkeeping on the GPU, not GPU bit-reproducibility in general."""

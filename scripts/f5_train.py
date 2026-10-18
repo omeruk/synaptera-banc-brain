@@ -7,7 +7,9 @@
     env -u PYTHONPATH python scripts/f5_train.py run --arm true --seed 0 --lr 1e-3     # one run (resumes)
     env -u PYTHONPATH python scripts/f5_train.py select-lr --arm true        # after the three seed-0 runs
     env -u PYTHONPATH python scripts/f5_train.py run --arm true --seed 3     # seeds 1-9: the selected rate
-    env -u PYTHONPATH python scripts/f5_train.py final-eval --arm true --seed 3        # the ONLY reader of test seeds
+    env -u PYTHONPATH python scripts/f5_train.py run --arm true --seed 0 --replicate   # prereg/19 second run
+    env -u PYTHONPATH CUDA_VISIBLE_DEVICES= python scripts/f5_train.py final-eval --arm true --seed 3
+                                                    # the ONLY reader of test seeds; CPU (prereg/19)
     env -u PYTHONPATH python scripts/f5_train.py curves          # PNGs of every run, copied to the preview folder
     env -u PYTHONPATH python scripts/f5_train.py run --arm true --seed 0 --lr 1e-2 --smoke --steps 20
 
@@ -260,6 +262,8 @@ def run(a):
         raise SystemExit(f"unknown arm {a.arm}")
     if a.seed not in A.TRAIN_SEEDS[a.arm]:
         raise SystemExit(f"training seed {a.seed} is not registered for {a.arm}")
+    if a.replicate and (a.smoke or a.arm != "true" or a.seed != 0):
+        raise SystemExit("the prereg/19 replicate is the true arm at training seed 0 (not a smoke run)")
     if a.smoke:
         if a.arm == "untrained":
             raise SystemExit("no smoke run for untrained")
@@ -273,6 +277,8 @@ def run(a):
             raise SystemExit("--steps / --eval-every / --ckpt-every differ from prereg/14 only in a smoke run")
         if a.arm == "untrained":
             lr = None
+        elif a.replicate:
+            lr = selected_lr(a.arm)
         elif a.seed == 0:
             if a.lr is None or a.lr not in A.LR_GRID:
                 raise SystemExit(f"seed 0 runs the learning-rate grid: --lr one of {A.LR_GRID}")
@@ -282,7 +288,7 @@ def run(a):
             if a.lr is not None and a.lr != lr:
                 raise SystemExit(f"seeds 1-9 use the selected rate {lr:g}")
         out_root = A.OUT
-    run_dir = A.run_dir_of(a.arm, a.seed, lr, out_root)
+    run_dir = A.run_dir_of(a.arm, a.seed, lr, out_root, replicate=a.replicate)
     if (run_dir / "DONE").exists():
         if not a.overwrite:
             print(f"{run_dir} is finished (DONE); nothing to do (rule 13: --overwrite to redo)", flush=True)
@@ -298,7 +304,8 @@ def run(a):
     load_s = time.time() - t0
     model, info = A.make_model(a.arm, a.seed, setup, bridge, GRAPHS)
     cfg = A.RunConfig(arm=a.arm, seed=a.seed, lr=lr if lr is not None else 0.0, run_dir=run_dir, steps=a.steps,
-                      eval_every=a.eval_every, ckpt_every=a.ckpt_every, device=a.device, smoke=a.smoke)
+                      eval_every=a.eval_every, ckpt_every=a.ckpt_every, device=a.device, smoke=a.smoke,
+                      replicate=a.replicate)
     rec = A.run_record(cfg, setup, info, bridge, train, val)
     if a.smoke:
         rec["smoke_note"] = ("SMOKE RUN: timing and memory only; evaluated on training trials; never used for any "
@@ -331,7 +338,7 @@ def final_eval(a):
     setup = load_setup()
     bridge = A.make_bridge(setup, a.arm, a.seed)
     model, _ = A.make_model(a.arm, a.seed, setup, bridge, GRAPHS)
-    print(json.dumps(A.final_evaluate(run_dir, setup, bridge, model, a.device)), flush=True)
+    print(json.dumps(A.final_evaluate(run_dir, setup, bridge, model)), flush=True)
 
 
 # ── learning curves ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -410,13 +417,13 @@ def main(argv=None):
     r.add_argument("--eval-every", type=int, default=A.EVAL_EVERY)
     r.add_argument("--ckpt-every", type=int, default=A.CKPT_EVERY)
     r.add_argument("--overwrite", action="store_true")
+    r.add_argument("--replicate", action="store_true", help="prereg/19: second run of true / seed 0 / selected rate")
     r.add_argument("--copy-to", default=None, help=f"copy the learning-curve PNG here (default {PREVIEW} if present)")
     s = sub.add_parser("select-lr")
     s.add_argument("--arm", required=True)
     f = sub.add_parser("final-eval")
     f.add_argument("--arm", required=True)
     f.add_argument("--seed", type=int, required=True)
-    f.add_argument("--device", default="cuda")
     c = sub.add_parser("curves")
     c.add_argument("--smoke", action="store_true")
     c.add_argument("--copy-to", default=str(PREVIEW) if PREVIEW.parent.exists() else None)

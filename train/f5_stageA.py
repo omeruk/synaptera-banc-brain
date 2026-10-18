@@ -39,7 +39,9 @@ steps on the 240 validation trials (loss, turn-sign accuracy, R2); checkpoints e
 atomic, last 3 kept, plus ``best.pt`` = lowest validation loss among the evaluations at steps 50, 100, ...).
 Deterministic algorithms are on. On the CPU a resumed run is bit-identical to an uninterrupted one; on the GPU the
 cuSPARSE CSR products are not bit-reproducible on the full VNC, so GPU runs agree only to float32 rounding
-(:data:`REPRODUCIBILITY`, recorded in every run).
+(:data:`REPRODUCIBILITY`, recorded in every run). prereg/19: GPU training is accepted at that level; the `true` arm
+at training seed 0 and the selected rate is trained a second time (``replicate``) to measure it; the final test
+evaluation runs on the CPU from ``best.pt`` and is exactly reproducible.
 """
 from __future__ import annotations
 
@@ -90,6 +92,7 @@ SHUFFLE_SEED0 = 20261501
 SET_ACCURACY = 0.90
 EDGE_GRAD, CHECKPOINT_EVERY = "sddmm", 0              # prereg/18 section 1, stage A
 GPU_FRACTION = 0.7                                   # per-process cap on the GPU memory (machine-2 policy)
+TEST_THREADS = 8                                     # CPU threads of the final test evaluation (prereg/19 section 1)
 ARMS = ("true", "shuffled", "derange", "mlp", "linear", "bridge_off", "untrained")
 GRAPH_ARMS = ("true", "shuffled", "derange", "bridge_off", "untrained")
 TRAIN_SEEDS = {"true": range(10), "shuffled": range(10), "derange": range(10), "mlp": range(10), "linear": range(10),
@@ -566,6 +569,7 @@ class RunConfig:
     ckpt_every: int = CKPT_EVERY
     device: str = "cpu"
     smoke: bool = False
+    replicate: bool = False                          # prereg/19: second run of true / seed 0 / selected rate
 
     def record(self) -> dict:
         d = dict(self.__dict__)
@@ -698,6 +702,7 @@ def train_run(cfg: RunConfig, model, record: dict, train: Trials, val: Trials | 
         best_step = 0
     sel = [e for e in evals if e["selectable"]]
     done = dict(stage=STAGE, arm=cfg.arm, training_seed=cfg.seed, lr=cfg.lr if trainable else None, smoke=cfg.smoke,
+                replicate=cfg.replicate,
                 steps=cfg.steps if trainable else 0, eval_set=ev_name, selected_step=best_step,
                 selected_val_loss=(min(e["loss"] for e in sel) if sel else evals[0]["loss"]),
                 final_val_loss=evals[-1]["loss"], final_step=evals[-1]["step"],
@@ -724,8 +729,11 @@ def _evaluate(model, data: Trials, dev) -> dict:
 
 
 # ── learning-rate selection ─────────────────────────────────────────────────────────────────────────────────────────
-def run_dir_of(arm, t, lr, out=OUT) -> Path:
-    """runs/f5/A/<arm>/t<seed>_lr<lr> (`untrained`: t0). Smoke runs live under runs/f5/A_smoke instead."""
+def run_dir_of(arm, t, lr, out=OUT, replicate=False) -> Path:
+    """runs/f5/A/<arm>/t<seed>_lr<lr> (`untrained`: t0; the prereg/19 replicate: t0_lr<lr>_replicate). Smoke runs live
+    under runs/f5/A_smoke instead."""
+    if replicate:
+        return Path(out) / arm / f"t{t}_lr{lr:g}_replicate"
     return Path(out) / arm / (f"t{t}" if arm == "untrained" else f"t{t}_lr{lr:g}")
 
 
@@ -752,9 +760,10 @@ TEST_GROUPS = {"training_speeds": TRAIN_CONDITIONS,
                "held_out_secondary_30": (("rot_left", HELD_OUT["secondary"]), ("rot_right", HELD_OUT["secondary"]))}
 
 
-def final_evaluate(run_dir, setup: Setup, bridge, model, device="cpu", records=RECORDS, split_path=SPLIT_FILE) -> dict:
-    """Test metrics of the selected checkpoint (best.pt) of a finished, non-smoke run. Runs once: test.lock is created
-    exclusively first, so a second call is refused even after a crash. Writes test.json."""
+def final_evaluate(run_dir, setup: Setup, bridge, model, records=RECORDS, split_path=SPLIT_FILE) -> dict:
+    """Test metrics of the selected checkpoint (best.pt) of a finished, non-smoke, non-replicate run, on the CPU with
+    deterministic algorithms and TEST_THREADS threads (prereg/19 section 1: exactly reproducible from best.pt). Runs
+    once: test.lock is created exclusively first, so a second call is refused even after a crash. Writes test.json."""
     run_dir = Path(run_dir)
     done = run_dir / "DONE"
     if not done.exists():
@@ -762,6 +771,8 @@ def final_evaluate(run_dir, setup: Setup, bridge, model, device="cpu", records=R
     d = json.loads(done.read_text())
     if d.get("smoke") or d["eval_set"] != "validation":
         raise SystemExit("smoke runs are never evaluated on the test set")
+    if d.get("replicate"):
+        raise SystemExit("the prereg/19 replicate run is never evaluated on the test set")
     try:
         fd = os.open(run_dir / "test.lock", os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     except FileExistsError:
@@ -769,17 +780,22 @@ def final_evaluate(run_dir, setup: Setup, bridge, model, device="cpu", records=R
     os.write(fd, time.strftime("%Y-%m-%dT%H:%M:%S\n").encode())
     os.close(fd)
     ck = torch.load(run_dir / "best.pt", weights_only=False, map_location="cpu")
+    device = "cpu"
+    threads = torch.get_num_threads()
+    torch.set_num_threads(TEST_THREADS)
     model.load_state_dict(ck["model"])
     deterministic(device)
     model = model.to(device)
     res = dict(stage=STAGE, arm=d["arm"], training_seed=d["training_seed"], lr=d["lr"], selected_step=ck["step"],
-               split_sha256=split_sha256(split_path), groups={})
+               split_sha256=split_sha256(split_path), device=device, threads=torch.get_num_threads(),
+               best_sha256=sha256_file(run_dir / "best.pt"), groups={})
     with final_evaluation():
         for name, conds in TEST_GROUPS.items():
             data = load_trials("test", setup, bridge, conds, records, split_path)
             m = metrics(predict(model, data.units, device), data)
             m["records_sha256"] = hashlib.sha256("".join(data.sha256).encode()).hexdigest()
             res["groups"][name] = m
+    torch.set_num_threads(threads)
     tmp = run_dir / "test.json.tmp"
     tmp.write_text(json.dumps(res, indent=1))
     os.replace(tmp, run_dir / "test.json")
