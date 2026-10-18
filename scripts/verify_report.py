@@ -1221,6 +1221,17 @@ def check_f5_stageA():
         chk(f"f5sa:not_test:{c['file']}", seed < 200)
         chk(f"f5sa:sha:{c['file']}", hashlib.sha256((R.F.OUT / c["file"]).read_bytes()).hexdigest() == man[c["file"]])
     chk("f5sa:summary_in_md", R.summary(stored) in F5SA_MD.read_text())
+    # completion, recomputed independently: every planned record is in the manifest with its file hash (test-seed
+    # records are hashed only), and every input check passed
+    plan = json.loads((R.F.OUT / "plan.json").read_text())["records"]
+    chk("f5sa:n_plan_2400", len(plan) == 2400 and len({e["file"] for e in plan}) == 2400)
+    chk("f5sa:plan_in_manifest", {e["file"] for e in plan} == set(man))
+    nbad = sum(hashlib.sha256((R.F.OUT / f).read_bytes()).hexdigest() != h for f, h in man.items())
+    chk("f5sa:all_hashes", nbad == 0 == stored["completion"]["hash_mismatches"], nbad)
+    ic = json.loads((R.F.OUT / "input_checks.json").read_text())
+    chk("f5sa:input_checks_all_passed", len(ic) == 4 + 200 * 4 and all(v["passed"] for v in ic.values()), len(ic))
+    chk("f5sa:test_input_checks_no_values", not any("A_in_T4aT5a" in v for k, v in ic.items()
+                                                    if k.startswith("s") and int(k[1:4]) >= 200))
     return n, bad
 
 

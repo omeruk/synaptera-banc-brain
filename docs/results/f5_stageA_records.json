@@ -372,5 +372,94 @@
    "model_as_f3b3": true
   }
  ],
- "record_checks_all_ok": true
+ "record_checks_all_ok": true,
+ "completion": {
+  "n_plan": 2400,
+  "n_manifest": 2400,
+  "n_files": 2400,
+  "plan_equals_manifest": true,
+  "plan_equals_files": true,
+  "hash_mismatches": 0,
+  "input_checks": {
+   "train": {
+    "groups": 484,
+    "passed": 484
+   },
+   "val": {
+    "groups": 160,
+    "passed": 160
+   },
+   "test": {
+    "groups": 160,
+    "passed": 160,
+    "values_kept": 0
+   }
+  },
+  "input_checks_total": 804,
+  "input_checks_passed": 804,
+  "starts": [
+   {
+    "time": "2026-10-17 18:11:55",
+    "records_existing": 0
+   },
+   {
+    "time": "2026-10-17 18:27:17",
+    "records_existing": 3
+   },
+   {
+    "time": "2026-10-17 19:17:05",
+    "records_existing": 400
+   },
+   {
+    "time": "2026-10-17 19:40:05",
+    "records_existing": 400
+   },
+   {
+    "time": "2026-10-17 22:22:29",
+    "records_existing": 1200
+   }
+  ],
+  "guard_kills": [
+   {
+    "time": "2026-10-17 19:38:57",
+    "reason": "Windows free RAM 5.3 GB < 6.0",
+    "gpu_used_mib": 1471,
+    "gpu_temp_c": 56,
+    "gpu_power_w": 11.94,
+    "windows_free_before_gb": [
+     11.3,
+     11.3,
+     5.3
+    ]
+   },
+   {
+    "time": "2026-10-17 22:08:08",
+    "reason": "Windows free RAM 6.0 GB < 6.0",
+    "gpu_used_mib": 3416,
+    "gpu_temp_c": 79,
+    "gpu_power_w": 87.55,
+    "windows_free_before_gb": [
+     11.6,
+     8.3,
+     6.0
+    ]
+   }
+  ],
+  "stop_notes": [
+   {
+    "time": "2026-10-17 18:25:02",
+    "text": "stopped by hand after batch-0 renders: renders 10x slower in parallel (BLAS thread oversubscription); fix and resume"
+   },
+   {
+    "time": "2026-10-17 19:16:58",
+    "text": "stopped by the Windows-memory limit at 19:12 (tests and verify_report run alongside, by hand); renders slow because numba used 16 threads per worker: NUMBA_NUM_THREADS=1, resume"
+   },
+   {
+    "time": "2026-10-17 19:39:51",
+    "text": "stopped by the guard (Windows free 5.3 GB): input checks left ~13 GB of renders in the WSL page cache; cache dropped, input check drops it now; resume"
+   }
+  ],
+  "finished": "2026-10-18T02:21:17",
+  "tmp_files_left": 0
+ }
 }

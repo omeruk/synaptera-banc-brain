@@ -53,6 +53,40 @@ def tech_check(entry, manifest, ref_members, ref_dn):
                 model_as_f3b3=all(str(z[k]) == str(ref_dn[k]) for k in ("weights_sha256", "model_sha256", "model_arm")))
 
 
+def completion(plan, manifest):
+    """Manifest completeness (every hash recomputed from the file bytes; test-seed records are hashed, never opened),
+    input-check totals (test seeds: pass / fail only) and the run history from the logs."""
+    import re
+    files = {f"brain/{p.name}" for p in (F.OUT / "brain").iterdir()}
+    pf = {e["file"] for e in plan}
+    mism = [f for f, h in manifest.items() if sha(F.OUT / f) != h]
+    ic = json.loads((F.OUT / "input_checks.json").read_text())
+    split = {k: ("train" if k.startswith("p0_") else F.split_of(int(k[1:4]))) for k in ic}
+    icn = {sp: dict(groups=sum(v == sp for v in split.values()),
+                    passed=sum(ic[k]["passed"] for k in ic if split[k] == sp)) for sp in ("train", "val", "test")}
+    icn["test"]["values_kept"] = sum("A_in_T4aT5a" in ic[k] for k in ic if split[k] == "test")
+    prog = (F.OUT / "progress.log").read_text().splitlines()
+    drv = (F.OUT / "driver.log").read_text().splitlines()
+    starts = [dict(time=ln[:19], records_existing=int(re.search(r"(\d+) exist", ln).group(1)))
+              for ln in prog if re.match(r"^\S+ \S+ start: ", ln)]
+    kills = []
+    for i, ln in enumerate(drv):
+        if " KILL: " in ln:
+            mon = next(x for x in reversed(drv[:i]) if " t=" in x)
+            g = re.search(r"gpu_used=(\d+)MiB temp=(\d+)C power=([\d.]+)W", mon)
+            wins = [float(re.search(r"windows_free=([\d.]+)GB", x).group(1)) for x in drv[max(0, i - 12):i]
+                    if "windows_free=" in x]
+            kills.append(dict(time=ln[:19], reason=ln.split(" KILL: ")[1], gpu_used_mib=int(g.group(1)),
+                              gpu_temp_c=int(g.group(2)), gpu_power_w=float(g.group(3)), windows_free_before_gb=wins))
+    notes = [dict(time=ln[:19], text=ln[20:]) for ln in prog if " stopped " in ln]
+    done = json.loads((F.OUT / "DONE").read_text())
+    return dict(n_plan=len(pf), n_manifest=len(manifest), n_files=len(files), plan_equals_manifest=pf == set(manifest),
+                plan_equals_files=pf == files, hash_mismatches=len(mism), input_checks=icn,
+                input_checks_total=len(ic), input_checks_passed=sum(v["passed"] for v in ic.values()),
+                starts=starts, guard_kills=kills, stop_notes=notes, finished=done["finished"],
+                tmp_files_left=len(list((F.OUT / "tmp").iterdir())))
+
+
 def build():
     gate_rec, ref_rec = GATE / "brain" / "rot_left_s10.npz", REF / "brain" / "rot_left_s10.npz"
     meas = json.loads((F.OUT / "measure" / "measure.json").read_text())
@@ -77,7 +111,8 @@ def build():
                   n_batches=len(F.batches()), batch_seeds=F.BATCH_SEEDS),
         input_checks_batch0={k: v for k, v in sorted(ic0.items())},
         record_checks=checks,
-        record_checks_all_ok=all(all(v for k, v in c.items() if k != "file") for c in checks))
+        record_checks_all_ok=all(all(v for k, v in c.items() if k != "file") for c in checks),
+        completion=completion(plan, manifest))
 
 
 def summary(o):
@@ -85,7 +120,10 @@ def summary(o):
     return (f"Gate 5 (prereg/17): the extended brain script reproduces the machine-2 record rot_left seed 10 at 60 deg/s "
             f"and phase 0 {'bit for bit' if g['bit_identical'] else 'NOT bit for bit'} (render "
             f"{'identical' if g['render_bit_identical'] else 'different'}); the generation driver's record of the same "
-            f"run is {'identical' if o['driver_record_equals_reference'] else 'different'}.")
+            f"run is {'identical' if o['driver_record_equals_reference'] else 'different'}. Generation complete: "
+            f"{o['completion']['n_manifest']:,} records in the SHA-256 manifest (all hashes recomputed, "
+            f"{o['completion']['hash_mismatches']} mismatches); input checks {o['completion']['input_checks_passed']} "
+            f"of {o['completion']['input_checks_total']} passed.")
 
 
 def render(o):
@@ -135,6 +173,35 @@ def render(o):
     L.append(f"Records of training seeds {', '.join(map(str, CHECK_SEEDS))} ({len(o['record_checks'])} files): "
              "SHA-256 equals the manifest, zip test, members as the F3b-3 record, stimulus and seed fields, shapes and "
              f"dtypes, DN table and model hashes as the F3b-3 record. All passed: {o['record_checks_all_ok']}.")
+    L.append("")
+    c = o["completion"]
+    L.append("## 5. Generation result")
+    L.append("")
+    L.append(f"- Records: plan {c['n_plan']:,}, manifest {c['n_manifest']:,}, files {c['n_files']:,}; plan = manifest "
+             f"{c['plan_equals_manifest']}, plan = files {c['plan_equals_files']}. Every SHA-256 recomputed from the "
+             f"file bytes: {c['hash_mismatches']} mismatches. Temporary files left: {c['tmp_files_left']}. Finished "
+             f"{c['finished'].replace('T', ' ')}.")
+    ic = c["input_checks"]
+    L.append(f"- Input checks (prereg/09, per render group and speed): {c['input_checks_passed']} of "
+             f"{c['input_checks_total']} passed; train {ic['train']['passed']}/{ic['train']['groups']}, validation "
+             f"{ic['val']['passed']}/{ic['val']['groups']}, test {ic['test']['passed']}/{ic['test']['groups']} (test: "
+             f"pass / fail only, {ic['test']['values_kept']} values kept).")
+    L.append("- Sealed test seeds 200-239: their records were written and hashed only, never opened, summarised or "
+             "plotted; no record statistic was logged for any seed.")
+    L.append("")
+    L.append("Run history (starts from `progress.log`; guard stops from `driver.log`, with the guard's last monitor "
+             "reading before each; every start resumed from the existing records and renders, nothing was lost):")
+    L.append("")
+    L.append("| time | event |")
+    L.append("|---|---|")
+    ev = [(x["time"], f"start, {x['records_existing']:,} records existing") for x in c["starts"]]
+    ev += [(k["time"], f"guard stop: {k['reason']}; Windows free before (GB): "
+            f"{', '.join(f'{w:.1f}' for w in k['windows_free_before_gb'])}; GPU at the last reading "
+            f"{k['gpu_used_mib']:,} MiB, {k['gpu_temp_c']} C, {k['gpu_power_w']:.1f} W (this job: CUDA hidden)")
+           for k in c["guard_kills"]]
+    ev += [(x["time"], f"note: {x['text']}") for x in c["stop_notes"]]
+    for t, e in sorted(ev):
+        L.append(f"| {t} | {e} |")
     L.append("")
     return "\n".join(L)
 
