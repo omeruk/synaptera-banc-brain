@@ -1347,6 +1347,210 @@
       "used_in": [
         "engine/rate_torch.py:R_IN"
       ]
+    },
+    "f5.a_max": {
+      "value": 12.5,
+      "unit": "deg (A_L - A_R per direction)",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md sections 4 and 12; docs/10 section 4: v1 turn range 25 deg / 2 (docs/08 section 4.2)",
+      "used_in": [
+        "train/f5_stageA.py:A_MAX"
+      ]
+    },
+    "f5.v_max": {
+      "value": 120.0,
+      "unit": "deg/s",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md sections 4 and 12: the fastest drum; K_P = A_MAX / V_MAX",
+      "used_in": [
+        "train/f5_stageA.py:V_MAX"
+      ]
+    },
+    "f5.g1": {
+      "value": 0.395,
+      "unit": "deg/Hz",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 2 readout; docs/08 sections 3.3 and 10.4: G1, fixed at the v1 value by the owner (largest F3a-3 MN asymmetry = v1 range)",
+      "used_in": [
+        "train/f5_stageA.py:G1"
+      ]
+    },
+    "f5.window": {
+      "value": [
+        120,
+        300
+      ],
+      "unit": "interval indices (end exclusive)",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 7: analysis window, the stimulus after its first 100 ms",
+      "used_in": [
+        "train/f5_stageA.py:WINDOW"
+      ]
+    },
+    "f5.stage_a_batch": {
+      "value": 16,
+      "unit": "trials per optimiser step",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md sections 6 and 12",
+      "used_in": [
+        "train/f5_stageA.py:BATCH"
+      ]
+    },
+    "f5.stage_a_steps": {
+      "value": 2000,
+      "unit": "optimiser steps",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md sections 6 and 12",
+      "used_in": [
+        "train/f5_stageA.py:STEPS"
+      ]
+    },
+    "f5.lr_grid": {
+      "value": [
+        0.001,
+        0.003,
+        0.01
+      ],
+      "unit": "Adam learning rates",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 6: chosen per (stage, arm) on the final validation loss at training seed 0",
+      "used_in": [
+        "train/f5_stageA.py:LR_GRID"
+      ]
+    },
+    "f5.adam_betas": {
+      "value": [
+        0.9,
+        0.999
+      ],
+      "unit": "Adam beta1, beta2",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 6",
+      "used_in": [
+        "train/f5_stageA.py:BETAS"
+      ]
+    },
+    "f5.adam_eps": {
+      "value": 1e-08,
+      "unit": "Adam epsilon",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 6",
+      "used_in": [
+        "train/f5_stageA.py:ADAM_EPS"
+      ]
+    },
+    "f5.clip_norm": {
+      "value": 1.0,
+      "unit": "global gradient norm",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 6",
+      "used_in": [
+        "train/f5_stageA.py:CLIP_NORM"
+      ]
+    },
+    "f5.eval_every": {
+      "value": 50,
+      "unit": "optimiser steps",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 6: validation every 50 steps on the full validation set",
+      "used_in": [
+        "train/f5_stageA.py:EVAL_EVERY"
+      ]
+    },
+    "f5.ckpt_every": {
+      "value": 25,
+      "unit": "optimiser steps",
+      "origin": "E",
+      "source": "docs/10_TRAINING.md section 10: checkpoints every 25 steps and at every evaluation",
+      "used_in": [
+        "train/f5_stageA.py:CKPT_EVERY"
+      ]
+    },
+    "f5.filter_ms": {
+      "value": [
+        10.0,
+        25.0,
+        50.0,
+        100.0
+      ],
+      "unit": "ms (exponential filter time constants of the mlp / linear input)",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md sections 5 and 12",
+      "used_in": [
+        "train/f5_stageA.py:FILTER_MS"
+      ]
+    },
+    "f5.shuffle_seed0": {
+      "value": 20261501,
+      "unit": "RNG seed (shuffle of training seed t: seed0 + t)",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 5",
+      "used_in": [
+        "train/f5_stageA.py:SHUFFLE_SEED0"
+      ]
+    },
+    "f5.set_accuracy": {
+      "value": 0.9,
+      "unit": "validation turn-sign accuracy",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 8.1: samples to set accuracy",
+      "used_in": [
+        "train/f5_stageA.py:SET_ACCURACY"
+      ]
+    },
+    "f5.stage_a_edge_grad": {
+      "value": "sddmm",
+      "unit": "edge-gradient implementation",
+      "origin": "E",
+      "source": "prereg/18_f5_sddmm_checkpointing.md section 1",
+      "used_in": [
+        "train/f5_stageA.py:EDGE_GRAD"
+      ]
+    },
+    "f5.stage_a_checkpoint_every": {
+      "value": 0,
+      "unit": "intervals per gradient-checkpoint segment (0 = none)",
+      "origin": "E",
+      "source": "prereg/18_f5_sddmm_checkpointing.md section 1: none in stage A",
+      "used_in": [
+        "train/f5_stageA.py:CHECKPOINT_EVERY"
+      ]
+    },
+    "f5.gpu_fraction": {
+      "value": 0.7,
+      "unit": "per-process fraction of the GPU memory",
+      "origin": "E",
+      "source": "machine-2 safety policy after the 2026-10-17 driver faults (PR #25, docs/results/f5_benchmark.md)",
+      "used_in": [
+        "train/f5_stageA.py:GPU_FRACTION"
+      ]
+    },
+    "f5.alignment_projection_dim": {
+      "value": 2048,
+      "unit": "dimensions",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 9 gate 1: Gaussian projection of the window-mean FlyVis output",
+      "used_in": [
+        "train/f5_gates.py:PROJ_DIM"
+      ]
+    },
+    "f5.alignment_projection_seed": {
+      "value": 9,
+      "unit": "RNG seed",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 9 gate 1: default_rng(9)",
+      "used_in": [
+        "train/f5_gates.py:PROJ_SEED"
+      ]
+    },
+    "f5.alignment_folds": {
+      "value": 5,
+      "unit": "folds (by data seed)",
+      "origin": "E",
+      "source": "prereg/14_f5_training.md section 9 gate 1",
+      "used_in": [
+        "train/f5_gates.py:N_FOLDS"
+      ]
     }
   }
 }
