@@ -1196,6 +1196,8 @@ F5SA_MD = ROOT / "docs" / "results" / "f5_stageA_records.md"
 
 F5RU_JSON = ROOT / "docs" / "results" / "f5_stageA_runner.json"
 F5RU_MD = ROOT / "docs" / "results" / "f5_stageA_runner.md"
+F5VA_JSON = ROOT / "docs" / "results" / "f5_stageA_validation.json"
+F5VA_MD = ROOT / "docs" / "results" / "f5_stageA_validation.md"
 
 
 def check_f5_runner():
@@ -1227,6 +1229,41 @@ def check_f5_runner():
     days = (graph_runs * (run_s + test_s) + s["eval_s_240"] + test_s + ann_runs * 2000 * p["mlp_step_s_pr25"]) / 86400
     chk("f5ru:projection_days", abs(p["days"] - days) <= 1e-9 * days, (p["days"], days))
     chk("f5ru:summary_in_md", R.summary(stored) in F5RU_MD.read_text())
+    return n, bad
+
+
+def check_f5_validation():
+    """F5 stage-A validation report. The JSON is rebuilt from the run directories and compared, the markdown
+    re-rendered and compared; independently, from each run log: no run has a test evaluation, every evaluation is on
+    the validation split, the best loss is the lowest selectable validation loss, the trials to 0.90 are recomputed,
+    and each arm's selected rate is the lowest final seed-0 validation loss (ties to the smaller rate)."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_stageA_validation as R
+    from train import f5_stageA as A
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5VA_JSON.read_text())
+    chk("f5va:json_equals_rebuild", json_close("f5va:json_equals_rebuild", stored, R.build()))
+    chk("f5va:md_equals_render", F5VA_MD.read_text() == R.render(stored))
+    chk("f5va:summary_in_md", R.summary(stored) in F5VA_MD.read_text())
+    chk("f5va:no_test_evaluation", stored["test_evaluated"] is False
+        and not list(A.OUT.glob("*/*/test.json")) and not list(A.OUT.glob("*/*/test.lock")))
+    for a, rows in stored["runs"].items():
+        for s, r in rows.items():
+            ev = R.evals_of(A.run_dir_of(a, int(s[1:]), stored["selected_lr"].get(a), A.OUT))
+            sel = [e for e in ev if e["selectable"]] or ev
+            chk(f"f5va:best:{a}:{s}", r["best_loss"] == min(e["loss"] for e in sel))
+            chk(f"f5va:t90:{a}:{s}", r["trials_to_090"] == A.samples_to_set_accuracy(ev, budget=A.STEPS)["samples"]
+                or a == "untrained")
+    for a, g in stored["lr_grid"].items():
+        best = min(g, key=lambda x: (x["final_val_loss"], x["lr"]))
+        chk(f"f5va:lr:{a}", stored["selected_lr"][a] == best["lr"], (stored["selected_lr"][a], best["lr"]))
     return n, bad
 
 
@@ -1379,6 +1416,10 @@ def main(argv=None):
         bad += b
     if F5RU_MD.exists():
         k, b = check_f5_runner()
+        n += k
+        bad += b
+    if F5VA_MD.exists():
+        k, b = check_f5_validation()
         n += k
         bad += b
     if "--print" in argv:
