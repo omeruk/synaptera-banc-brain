@@ -30,8 +30,11 @@ c. **`linear` is unstable at every rate.** It diverges at 0.01. At the selected 
    checkpoints are not.
 d. **The `mlp` rate choice is a near tie.** 0.003 has a lower final validation loss than 0.001 by a small margin, and
    the `mlp` final-step values are noisy.
+e. **`true` is close to the ceiling guard.** On validation, `true` has mean R2 0.975 at the selected checkpoint, just
+   under the prereg/14 section 8.2 ceiling guard of 0.98. The guard needs both arms at or above 0.98, and `shuffled`
+   is at 0.945 (mean validation R2 at the selected checkpoint, as the guard uses on the test set).
 
-Every stage-A report states these four limitations next to the section-8 results.
+Every stage-A report states these five limitations next to the section-8 results.
 
 ## 2. Exploratory follow-up (never part of any verdict)
 
@@ -73,7 +76,15 @@ prereg/14 section 8.2, quoted unchanged:
 
 So, with stages B and C not run, their p values are 1 and stage A has the smallest p of the three. Its Holm-adjusted p
 is min(1, 3 p_A), and the verdict "The connectome helps in stage A" needs 3 p_A < 0.05. With 10 training seeds the
-smallest exact p_A is 1/1024, so the smallest adjusted p is 3/1024. Nothing in this section changes prereg/14.
+smallest exact p_A is 1/1024, so the smallest adjusted p is 3/1024.
+
+**Reporting before B and C are run.** The stage-A Holm-adjusted p reported before B and C are run, min(1, 3 p_A), is
+an upper bound: Holm-adjusted p values never increase when other p values in the family fall below 1. Therefore:
+- a verdict "The connectome helps in stage A" reported before B and C are run is **final**;
+- a verdict "No advantage in stage A" reported before B and C are run is **provisional**. It is recomputed once B and
+  C have p values, or are declared not run.
+
+Every stage report states which of the two applies. Nothing in this section changes prereg/14.
 
 ## 4. Hardware: machine 2 is no longer used for long GPU training
 

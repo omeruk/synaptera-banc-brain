@@ -1259,7 +1259,9 @@ def check_prereg20():
             f"total {stored['total_gpu_hours']:.1f} GPU hours"]
     va = json.loads(F5VA_JSON.read_text())
     figs += [f"validation turn-sign accuracy {va['runs']['untrained']['t0']['final_sign_accuracy']:.3f}",
-             f"({_first_eval_trials(va)} training trials)"]
+             f"({_first_eval_trials(va)} training trials)",
+             f"`true` has mean R2 {va['summary']['true']['best_r2']['mean']:.3f} at the selected checkpoint",
+             f"`shuffled` is at {va['summary']['shuffled']['best_r2']['mean']:.3f} (mean validation R2 at the selected"]
     for i, f in enumerate(figs):
         chk(f"prereg20:text:{i}", f in pre, f)
     chk("prereg20:selected", va["selected_lr"]["true"] == va["selected_lr"]["shuffled"] == 0.01
