@@ -572,3 +572,31 @@ def test_guard_limits():
     assert "RAM" in lim.pause_reason(g, 3.9, 10.0, 50.0)
     assert "Windows" in lim.pause_reason(g, 10.0, 5.9, 50.0)
     assert "C:" in lim.pause_reason(g, 10.0, 10.0, 24.0)
+
+
+# ── learning-curve preview ──────────────────────────────────────────────────────────────────────────────────────────
+def test_preview_copy_failure_never_stops_a_run(tmp_path, monkeypatch, capsys):
+    """Stage-A queue job 1 stopped at step 1250 when the copy to the Windows preview folder raised EINVAL (the file was
+    open in Windows). A failing preview copy is retried, then skipped with a warning; a transient failure recovers."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import shutil
+
+    import f5_train as T
+    png = tmp_path / "curves.png"
+    png.write_bytes(b"png")
+    real = shutil.copyfile
+    calls = []
+
+    def flaky(src, dst, fail):
+        calls.append(dst)
+        if len(calls) <= fail:
+            raise OSError(22, "Invalid argument", str(dst))
+        return real(src, dst)
+    monkeypatch.setattr(T.shutil, "copyfile", lambda s, d: flaky(s, d, fail=1))
+    assert T.copy_preview(png, tmp_path / "preview" / "a.png", wait_s=0) is True
+    assert (tmp_path / "preview" / "a.png").read_bytes() == b"png" and len(calls) == 2
+    calls.clear()
+    monkeypatch.setattr(T.shutil, "copyfile", lambda s, d: flaky(s, d, fail=99))
+    assert T.copy_preview(png, tmp_path / "preview" / "b.png", tries=3, wait_s=0) is False
+    assert len(calls) == 3 and not (tmp_path / "preview" / "b.png").exists()
+    assert "preview copy" in (out := capsys.readouterr().out) and "skipped after 3 tries" in out

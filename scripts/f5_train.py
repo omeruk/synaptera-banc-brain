@@ -46,6 +46,7 @@ GATE_PARTS = ("records", "shuffle", "engine", "causality", "resume", "alignment_
               "symmetry")
 FLYVIS_WORKERS = 2
 PREVIEW = Path("/mnt/c/Users/omerf/Desktop/synaptera_preview")     # machine 2: learning curves for viewing in Windows
+PREVIEW_TRIES, PREVIEW_WAIT_S = 3, 1.0                            # best-effort preview copy (copy_preview)
 
 
 def write_json(path, obj):
@@ -381,11 +382,28 @@ def curves_of(run_dir, copy_to=None):
     fig.savefig(png, dpi=100)
     plt.close(fig)
     if copy_to:
-        dst = Path(copy_to)
-        dst.mkdir(parents=True, exist_ok=True)
-        name = f"{'SMOKE_' if smoke else ''}f5A_{c['arm']}_{run_dir.name}.png"
-        shutil.copyfile(png, dst / name)
+        copy_preview(png, Path(copy_to) / f"{'SMOKE_' if smoke else ''}f5A_{c['arm']}_{run_dir.name}.png")
     return png
+
+
+def copy_preview(png, dst, tries=PREVIEW_TRIES, wait_s=PREVIEW_WAIT_S):
+    """Best-effort copy of a learning-curve PNG to the viewing folder. On the Windows mount (drvfs) a write fails with
+    EINVAL while Windows holds the file open (e.g. an image viewer showing it), so a failed copy is retried and then
+    skipped with a warning: the preview never stops a run (the PNG in the run directory is always written)."""
+    dst = Path(dst)
+    for k in range(tries):
+        try:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            tmp = dst.with_name(dst.stem + ".tmp" + dst.suffix)
+            shutil.copyfile(png, tmp)
+            os.replace(tmp, dst)
+            return True
+        except OSError as e:
+            err = e
+            if k + 1 < tries:
+                time.sleep(wait_s)
+    print(f"warning: preview copy to {dst} skipped after {tries} tries ({err})", flush=True)
+    return False
 
 
 def curves(a):
