@@ -1,0 +1,45 @@
+{
+ "note": "machine-2 GPU hours (RTX 4070 Laptop) from measured stage-A wall times; no metric read; heat pauses, the CPU test evaluation and setup are not included",
+ "measured_from": {
+  "arms": [
+   "true",
+   "shuffled"
+  ],
+  "lr": 0.01,
+  "seeds": "0-9",
+  "n_runs": 20,
+  "median_step_s": 0.8803795355051989,
+  "median_eval_s": 1.1873122110046097,
+  "median_data_load_s": 5.779716730117798
+ },
+ "exploratory_arms": [
+  "true",
+  "shuffled"
+ ],
+ "exploratory_seeds": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "configurations": {
+  "i_lr0.03_2000_steps": {
+   "lr": 0.03,
+   "steps": 2000,
+   "n_evaluations": 41,
+   "n_runs": 10,
+   "hours_per_run": 0.5042273856643624,
+   "gpu_hours": 5.042273856643623
+  },
+  "ii_lr0.01_6000_steps": {
+   "lr": 0.01,
+   "steps": 6000,
+   "n_evaluations": 121,
+   "n_runs": 10,
+   "hours_per_run": 1.5088115853591302,
+   "gpu_hours": 15.088115853591303
+  }
+ },
+ "total_gpu_hours": 20.130389710234926
+}
