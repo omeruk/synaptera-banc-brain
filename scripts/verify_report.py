@@ -1198,6 +1198,8 @@ F5RU_JSON = ROOT / "docs" / "results" / "f5_stageA_runner.json"
 F5RU_MD = ROOT / "docs" / "results" / "f5_stageA_runner.md"
 F5VA_JSON = ROOT / "docs" / "results" / "f5_stageA_validation.json"
 F5VA_MD = ROOT / "docs" / "results" / "f5_stageA_validation.md"
+F5P20_JSON = ROOT / "docs" / "results" / "f5_prereg20_estimate.json"
+PREREG20 = ROOT / "prereg" / "20_f5_stageA_limitations_exploratory.md"
 
 
 def check_f5_runner():
@@ -1230,6 +1232,46 @@ def check_f5_runner():
     chk("f5ru:projection_days", abs(p["days"] - days) <= 1e-9 * days, (p["days"], days))
     chk("f5ru:summary_in_md", R.summary(stored) in F5RU_MD.read_text())
     return n, bad
+
+
+def check_prereg20():
+    """prereg/20. The GPU-hour estimate JSON is rebuilt from the stage-A wall times and compared; every estimate and
+    limitation number in the prereg text is formatted from that JSON or from the stage-A validation JSON."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_prereg20_estimate as E
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5P20_JSON.read_text())
+    chk("prereg20:json_equals_rebuild", json_close("prereg20:json_equals_rebuild", stored, E.build()))
+    pre = " ".join(PREREG20.read_text().split())
+    m, c = stored["measured_from"], stored["configurations"]
+    ci, cii = c["i_lr0.03_2000_steps"], c["ii_lr0.01_6000_steps"]
+    figs = [f"median step {m['median_step_s']:.3f} s", f"median validation evaluation {m['median_eval_s']:.2f} s",
+            f"median data load {m['median_data_load_s']:.1f} s",
+            f"(i) {ci['n_runs']} runs, {ci['hours_per_run']:.2f} h each: {ci['gpu_hours']:.1f} GPU hours",
+            f"(ii) {cii['n_runs']} runs, {cii['hours_per_run']:.2f} h each: {cii['gpu_hours']:.1f} GPU hours",
+            f"total {stored['total_gpu_hours']:.1f} GPU hours"]
+    va = json.loads(F5VA_JSON.read_text())
+    figs += [f"validation turn-sign accuracy {va['runs']['untrained']['t0']['final_sign_accuracy']:.3f}",
+             f"({_first_eval_trials(va)} training trials)",
+             f"`true` has mean R2 {va['summary']['true']['best_r2']['mean']:.3f} at the selected checkpoint",
+             f"`shuffled` is at {va['summary']['shuffled']['best_r2']['mean']:.3f} (mean validation R2 at the selected"]
+    for i, f in enumerate(figs):
+        chk(f"prereg20:text:{i}", f in pre, f)
+    chk("prereg20:selected", va["selected_lr"]["true"] == va["selected_lr"]["shuffled"] == 0.01
+        and va["selected_lr"]["mlp"] == 0.003 and va["selected_lr"]["linear"] == 0.001)
+    return n, bad
+
+
+def _first_eval_trials(va):
+    """Training trials at the first evaluation (50 steps x batch 16), as stored in the trials-to-0.90 of `true`."""
+    return f"{min(r['trials_to_090'] for r in va['runs']['true'].values()):,}"
 
 
 def check_f5_validation():
@@ -1416,6 +1458,10 @@ def main(argv=None):
         bad += b
     if F5RU_MD.exists():
         k, b = check_f5_runner()
+        n += k
+        bad += b
+    if PREREG20.exists():
+        k, b = check_prereg20()
         n += k
         bad += b
     if F5VA_MD.exists():
