@@ -9,7 +9,7 @@ per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_en
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
 (`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
 docs/05 section 7.1): see `check_machine_repro`; F5 step 2b (`docs/results/f5_benchmark.md`): see
-`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. Rebuilt JSON is compared value by value with floats within a relative
+`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. Rebuilt JSON is compared value by value with floats within a relative
 JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
@@ -1309,13 +1309,78 @@ def check_f5_validation():
     return n, bad
 
 
+F5RP_JSON = ROOT / "docs" / "results" / "f5_stageA_report.json"
+F5RP_MD = ROOT / "docs" / "results" / "f5_stageA_report.md"
+
+
+def check_f5_stageA_report():
+    """F5 stage-A test report (prereg/14 section 8, prereg/20). The JSON is rebuilt from the run directories and
+    compared, the markdown re-rendered and compared; independently, from each registered run's test.json: the paired
+    differences, the exact one-sided and two-sided sign-flip p (every pattern enumerated here), Holm with B and C at
+    p = 1, both guards (binomial interval from math.comb), the verdict and its final / provisional status."""
+    import itertools
+    import math
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_stageA_report as R
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5RP_JSON.read_text())
+    chk("f5rp:json_equals_rebuild", json_close("f5rp:json_equals_rebuild", stored, R.build()))
+    chk("f5rp:md_equals_render", F5RP_MD.read_text() == R.render(stored))
+    chk("f5rp:summary_in_md", R.summary(stored) in F5RP_MD.read_text())
+
+    def test_json(arm, s):
+        return json.loads((R.RUNS / stored["runs"][arm][s]["run"] / "test.json").read_text())["groups"]
+
+    def pvals(d):
+        obs, tol = sum(d) / len(d), 1e-12 * max(sum(abs(x) for x in d) / len(d), sys.float_info.min)
+        ms = [sum(s * x for s, x in zip(sg, d)) / len(d) for sg in itertools.product((1, -1), repeat=len(d))]
+        return (sum(m >= obs - tol for m in ms) / len(ms), sum(abs(m) >= abs(obs) - tol for m in ms) / len(ms))
+
+    pr = stored["primary"]
+    seeds = [f"t{t}" for t in range(10)]
+    r2 = {a: [test_json(a, s)["training_speeds"]["r2"] for s in seeds] for a in ("true", "shuffled")}
+    d = [x - y for x, y in zip(r2["true"], r2["shuffled"])]
+    chk("f5rp:d", d == pr["d"], (d, pr["d"]))
+    p1, p2 = pvals(d)
+    chk("f5rp:p_one_sided", p1 == pr["test"]["p_greater"], (p1, pr["test"]["p_greater"]))
+    chk("f5rp:p_two_sided", p2 == pr["test"]["p_two_sided"], (p2, pr["test"]["p_two_sided"]))
+    chk("f5rp:holm_A", pr["holm"]["adjusted"]["A"] == min(1.0, 3 * p1) and pr["holm"]["p"] == {"A": p1, "B": 1.0,
+                                                                                              "C": 1.0})
+    ceil = sum(r2["true"]) / 10 >= 0.98 and sum(r2["shuffled"]) / 10 >= 0.98
+    chk("f5rp:ceiling", pr["guards"]["ceiling"]["triggered"] is ceil)
+    bo = [test_json("bridge_off", f"t{t}")["training_speeds"] for t in range(5)]
+    nr = bo[0]["n_rotation"]
+    cdf = list(itertools.accumulate(math.comb(nr, k) / 2 ** nr for k in range(nr + 1)))
+    lo, hi = next(k for k, c in enumerate(cdf) if c >= 0.025), next(k for k, c in enumerate(cdf) if c >= 0.975)
+    acc = sum(x["sign_accuracy"] for x in bo) / len(bo)
+    leak = acc < lo / nr or acc > hi / nr
+    chk("f5rp:leak_interval", (lo, hi) == (pr["guards"]["leakage"]["interval"]["lo_count"],
+                                           pr["guards"]["leakage"]["interval"]["hi_count"]), (lo, hi))
+    chk("f5rp:leak", pr["guards"]["leakage"]["triggered"] is leak)
+    helps = min(1.0, 3 * p1) < 0.05
+    want = ("withheld (leak)", "withheld") if leak else (
+        ("The connectome helps in stage A", "final") if helps else ("No advantage in stage A", "provisional"))
+    chk("f5rp:verdict", (pr["verdict"], pr["status"]) == want, (pr["verdict"], pr["status"], want))
+    chk("f5rp:shuffled_better", leak or pr["shuffled_better"] is ((not helps) and sum(d) < 0 and p2 < 0.05))
+    chk("f5rp:limitations", [x["id"] for x in stored["limitations"]] == list("abcde"))
+    chk("f5rp:exploratory_stated", stored["exploratory"]["statement"] in F5RP_MD.read_text())
+    return n, bad
+
+
 def check_f5_stageA():
     """F5 step 2c (prereg/14 gate 5, prereg/17). The JSON is rebuilt and compared, the markdown re-rendered and
     compared; the gate-5 records are compared here member by member (uncompressed bytes), and the manifest hashes of
     the checked training-seed records are recomputed. No test-seed record is opened."""
     import zipfile
     sys.path.insert(0, str(ROOT / "scripts"))
-    import f5_stageA_report as R
+    import f5_stageA_records_report as R
     bad, n = [], 0
 
     def chk(key, ok, v=None):
@@ -1466,6 +1531,10 @@ def main(argv=None):
         bad += b
     if F5VA_MD.exists():
         k, b = check_f5_validation()
+        n += k
+        bad += b
+    if F5RP_MD.exists():
+        k, b = check_f5_stageA_report()
         n += k
         bad += b
     if "--print" in argv:

@@ -1,208 +1,376 @@
-"""F5 step 2c report: gate 5 (prereg/17 section 3), worker RAM, and technical checks of a few training-seed records.
+"""F5 stage A: the pre-registered test report (prereg/14 section 8 with prereg/20).
 
-    env -u PYTHONPATH python scripts/f5_stageA_report.py          # writes docs/results/f5_stageA_records.{json,md}
+    env -u PYTHONPATH python scripts/f5_stageA_report.py          # writes docs/results/f5_stageA_report.{json,md}
 
-Inputs (not committed): runs/f5/stageA_gate5 (the extended brain script, rot_left seed 10, 60 deg/s, phase 0),
-runs/machine_x86/f3b3_rot_left_s10 (the machine-2 record of `scripts/f3b3_brain.py`), runs/f5/stageA/measure,
-runs/f5/stageA (plan, input checks, manifest, the records of CHECK_SEEDS). Only fixed inputs are read, so the report
-does not change while the generation goes on. Technical properties only: no record statistic is computed, and no test
-seed (200-239) record is opened. Refuses to overwrite without --overwrite.
+Written and committed before any stage-A test evaluation; it is not changed after the first `final-eval`.
+Inputs (not committed): of every registered stage-A run (each arm at its selected rate, `untrained` t0; never a
+seed-0 grid run at another rate, the prereg/19 replicate or a smoke run) runs/f5/A/<arm>/<run>/test.json, written
+by `scripts/f5_train.py final-eval`, with DONE (samples to set accuracy, a validation quantity) and the SHA-256 of
+best.pt; runs/f5/A/<arm>/lr_selected.json; prereg/20 section 1 (the limitations, quoted). No record is opened.
+Refuses to run unless every registered run has test.json; refuses to overwrite without --overwrite.
+
+- Primary (8.2): d_t = test R2(`true`, t) - test R2(`shuffled`, t) at the training speeds, t = 0-9. One-sided exact
+  sign-flip permutation test over all 2^10 sign patterns (H1: mean d > 0), the two-sided test for "shuffled
+  better", Holm over stages A, B, C with B and C at p = 1, and whether the verdict is final or provisional
+  (prereg/20 section 3).
+- Effect size: mean d with a 95 % percentile bootstrap interval over training seeds (`default_rng(14)`, 10,000
+  resamples of the seeds with replacement).
+- Guards: ceiling (both arms mean R2 >= 0.98); leakage (`bridge_off` mean test sign accuracy outside the
+  equal-tailed binomial(n, 0.5) 95 % interval, n = the test rotation trials of one run).
+- Secondary (8.3, no Holm, never a verdict): the same test for `true` against `derange`, `mlp`, `linear` on R2, and
+  against `shuffled` on samples to set accuracy (pooled ranks, censored runs ranked largest) and on generalisation
+  (sign accuracy and R2 at 90 and 30 deg/s).
+- Every 8.1 metric per arm and seed, the 8.4 learning rule, the five prereg/20 limitations and the state of the
+  prereg/20 exploratory follow-up.
 """
 import argparse
 import hashlib
 import json
+import re
 import sys
-import zipfile
 from pathlib import Path
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))
-import f5_stageA_records as F  # noqa: E402
+sys.path.insert(0, str(ROOT))
+from train import f5_stageA as A  # noqa: E402
 
-GATE = ROOT / "runs" / "f5" / "stageA_gate5"
-REF = ROOT / "runs" / "machine_x86" / "f3b3_rot_left_s10"
-OUT_JSON = ROOT / "docs" / "results" / "f5_stageA_records.json"
-OUT_MD = ROOT / "docs" / "results" / "f5_stageA_records.md"
-CHECK_SEEDS = (0, 1, 39)                     # training seeds of batch 0 (phase 0)
-MEMBERS = sorted(["stimulus", "t0_condition", "seed", "dn_counts", "net_counts", "input_mean_L", "input_mean_R",
-                  "interval_ms", "weights_sha256", "model_sha256", "model_arm", "dn_index", "dn_cell_type", "dn_side"])
+RUNS = A.OUT
+SPLIT_PATH = A.SPLIT_FILE
+PREREG20 = ROOT / "prereg" / "20_f5_stageA_limitations_exploratory.md"
+EXPLORATORY = A.OUT.parent / "A_exploratory"          # prereg/20 section 2; never read by this report
+OUT_JSON = ROOT / "docs" / "results" / "f5_stageA_report.json"
+OUT_MD = ROOT / "docs" / "results" / "f5_stageA_report.md"
+
+# ── registered rules (prereg/14 section 8, prereg/20 section 3) ────────────────────────────────────────────────────
+TRAINED = ("true", "shuffled", "derange", "mlp", "linear", "bridge_off")
+STAGES = ("A", "B", "C")
+NOT_RUN = ("B", "C")                 # p = 1 (prereg/14 8.2); a "no advantage" verdict is provisional (prereg/20 s. 3)
+ALPHA = 0.05
+CEILING_R2 = 0.98
+BOOT_SEED, N_BOOT, CI = 14, 10_000, 0.95
+LEAK_LEVEL = 0.95
+LEARNED_SIGN, LEARNED_MIN_SEEDS = 0.9, 8
+GROUPS = {"train": "training_speeds", "g90": "held_out_primary_90", "g30": "held_out_secondary_30"}
+VERDICT_HELPS = "The connectome helps in stage A"
+VERDICT_NONE = "No advantage in stage A"
+SHUFFLED_BETTER = "shuffled better (descriptive)"
+CEILING_NOTE = "ceiling: the task does not separate the wirings"
+METRICS = ("r2", "sign_accuracy", "loss", "g90_sign_accuracy", "g90_r2", "g30_sign_accuracy", "g30_r2",
+           "samples_to_set_accuracy")
 
 
-def sha(p):
+# ── statistics ──────────────────────────────────────────────────────────────────────────────────────────────────────
+def sign_flip(d) -> dict:
+    """Exact paired sign-flip permutation test of mean d over all 2^n sign patterns (the observed one included).
+    p_greater: H1 mean d > 0; p_two_sided: |mean| at least as large. Ties within 1e-12 of the scale of d count."""
+    d = np.asarray(d, np.float64)
+    n = len(d)
+    signs = 1.0 - 2.0 * ((np.arange(2 ** n)[:, None] >> np.arange(n)) & 1)
+    means = signs @ d / n
+    obs = float(d.mean())
+    tol = 1e-12 * max(float(np.abs(d).mean()), np.finfo(float).tiny)
+    k1, k2 = int((means >= obs - tol).sum()), int((np.abs(means) >= abs(obs) - tol).sum())
+    return dict(n=n, n_patterns=2 ** n, mean_d=obs, count_greater=k1, p_greater=k1 / 2 ** n, count_two_sided=k2,
+                p_two_sided=k2 / 2 ** n)
+
+
+def holm(p: dict) -> dict:
+    """Holm step-down adjusted p values of a family {name: p}."""
+    names = sorted(p, key=lambda k: (p[k], k))
+    m, out, run = len(names), {}, 0.0
+    for i, k in enumerate(names):
+        run = max(run, min(1.0, (m - i) * p[k]))
+        out[k] = run
+    return out
+
+
+def bootstrap_ci(d, seed=BOOT_SEED, n_boot=N_BOOT, level=CI) -> dict:
+    """Mean of d with a percentile bootstrap interval over the seeds (resampled with replacement)."""
+    d = np.asarray(d, np.float64)
+    idx = np.random.default_rng(seed).integers(0, len(d), size=(n_boot, len(d)))
+    lo, hi = np.percentile(d[idx].mean(1), [100 * (1 - level) / 2, 100 * (1 + level) / 2])
+    return dict(mean=float(d.mean()), lo=float(lo), hi=float(hi), level=level, n_boot=n_boot, rng_seed=seed)
+
+
+def binomial_interval(n, level=LEAK_LEVEL) -> dict:
+    """Equal-tailed interval of binomial(n, 0.5): the (1 - level) / 2 and (1 + level) / 2 quantiles, as counts and as
+    fractions of n."""
+    from scipy.stats import binom
+    lo, hi = (int(binom.ppf(q, n, 0.5)) for q in ((1 - level) / 2, (1 + level) / 2))
+    return dict(n=int(n), level=level, lo_count=lo, hi_count=hi, lo=lo / n, hi=hi / n)
+
+
+def ceiling_guard(r2_true, r2_shuffled) -> dict:
+    mt, ms = float(np.mean(r2_true)), float(np.mean(r2_shuffled))
+    return dict(threshold=CEILING_R2, mean_r2_true=mt, mean_r2_shuffled=ms,
+                triggered=bool(mt >= CEILING_R2 and ms >= CEILING_R2))
+
+
+def leakage_guard(sign_acc, n_rotation) -> dict:
+    m = float(np.mean(sign_acc))
+    iv = binomial_interval(n_rotation)
+    return dict(mean_sign_accuracy=m, n_seeds=len(sign_acc), interval=iv, triggered=bool(m < iv["lo"] or m > iv["hi"]))
+
+
+def verdict(p_holm, test, ceiling, leak, not_run=NOT_RUN) -> dict:
+    """prereg/14 section 8.2 verdict with its guards; status per prereg/20 section 3 (a "helps" verdict is final, a
+    "no advantage" verdict is provisional while any other stage of the Holm family has not been run)."""
+    if leak["triggered"]:
+        return dict(verdict="withheld (leak)", status="withheld", shuffled_better=None, qualifiers=["leak"])
+    helps = p_holm < ALPHA
+    better = (not helps) and test["mean_d"] < 0 and test["p_two_sided"] < ALPHA
+    q = ([SHUFFLED_BETTER] if better else []) + ([CEILING_NOTE] if ceiling["triggered"] else [])
+    status = "final" if helps or not not_run else "provisional"
+    return dict(verdict=VERDICT_HELPS if helps else VERDICT_NONE, status=status, shuffled_better=bool(better),
+                qualifiers=q)
+
+
+def censored_ranks(a_val, a_cens, b_val, b_cens):
+    """Ranks (1 = fewest samples) of the pooled values of two arms; censored runs are ranked above every uncensored
+    one (ties share the mean rank)."""
+    from scipy.stats import rankdata
+    key = np.array([np.inf if c else float(v) for v, c in zip(list(a_val) + list(b_val), list(a_cens) + list(b_cens))])
+    r = rankdata(key)
+    return r[:len(a_val)], r[len(a_val):]
+
+
+def paired(d, label) -> dict:
+    d = [float(x) for x in d]
+    return dict(label=label, d=d, test=sign_flip(d), effect=bootstrap_ci(d))
+
+
+# ── inputs ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+def _sha(p):
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 
-def members(p):
-    with zipfile.ZipFile(p) as z:
-        return sorted(m.removesuffix(".npy") for m in z.namelist())
+def selected_lrs(runs=None):
+    runs = Path(runs or RUNS)
+    return {a: json.loads((runs / a / "lr_selected.json").read_text())["lr"] for a in TRAINED}
 
 
-def tech_check(entry, manifest, ref_members, ref_dn):
-    """File integrity and record format of one training-seed record; no statistic of its content."""
-    p = F.OUT / entry["file"]
-    assert F.split_of(entry["seed"]) != "test"
-    z = np.load(p, allow_pickle=True)            # the project's own records (object DN-type columns)
-    return dict(file=entry["file"], sha256_in_manifest=manifest.get(entry["file"]) == sha(p),
-                zip_test_ok=zipfile.ZipFile(p).testzip() is None, members_as_f3b3=members(p) == ref_members,
-                stimulus_seed_match=str(z["stimulus"]) == entry["stimulus"] and int(z["seed"]) == entry["seed"],
-                shapes_ok=z["dn_counts"].shape == ref_dn["dn_counts"].shape and z["dn_counts"].dtype == np.int16
-                and z["net_counts"].shape == (300,),
-                dn_table_as_f3b3=all(np.array_equal(z[k], ref_dn[k]) for k in ("dn_index", "dn_cell_type", "dn_side")),
-                model_as_f3b3=all(str(z[k]) == str(ref_dn[k]) for k in ("weights_sha256", "model_sha256", "model_arm")))
+def registered(runs=None):
+    """(arm, seed, lr, run directory) of every registered stage-A run (prereg/14 sections 5-6, prereg/19)."""
+    runs = Path(runs or RUNS)
+    sel = selected_lrs(runs)
+    out = [(a, t, sel[a], A.run_dir_of(a, t, sel[a], runs)) for a in TRAINED for t in A.TRAIN_SEEDS[a]]
+    return out + [("untrained", 0, None, A.run_dir_of("untrained", 0, None, runs))]
 
 
-def completion(plan, manifest):
-    """Manifest completeness (every hash recomputed from the file bytes; test-seed records are hashed, never opened),
-    input-check totals (test seeds: pass / fail only) and the run history from the logs."""
-    import re
-    files = {f"brain/{p.name}" for p in (F.OUT / "brain").iterdir()}
-    pf = {e["file"] for e in plan}
-    mism = [f for f, h in manifest.items() if sha(F.OUT / f) != h]
-    ic = json.loads((F.OUT / "input_checks.json").read_text())
-    split = {k: ("train" if k.startswith("p0_") else F.split_of(int(k[1:4]))) for k in ic}
-    icn = {sp: dict(groups=sum(v == sp for v in split.values()),
-                    passed=sum(ic[k]["passed"] for k in ic if split[k] == sp)) for sp in ("train", "val", "test")}
-    icn["test"]["values_kept"] = sum("A_in_T4aT5a" in ic[k] for k in ic if split[k] == "test")
-    prog = (F.OUT / "progress.log").read_text().splitlines()
-    drv = (F.OUT / "driver.log").read_text().splitlines()
-    starts = [dict(time=ln[:19], records_existing=int(re.search(r"(\d+) exist", ln).group(1)))
-              for ln in prog if re.match(r"^\S+ \S+ start: ", ln)]
-    kills = []
-    for i, ln in enumerate(drv):
-        if " KILL: " in ln:
-            mon = next(x for x in reversed(drv[:i]) if " t=" in x)
-            g = re.search(r"gpu_used=(\d+)MiB temp=(\d+)C power=([\d.]+)W", mon)
-            wins = [float(re.search(r"windows_free=([\d.]+)GB", x).group(1)) for x in drv[max(0, i - 12):i]
-                    if "windows_free=" in x]
-            kills.append(dict(time=ln[:19], reason=ln.split(" KILL: ")[1], gpu_used_mib=int(g.group(1)),
-                              gpu_temp_c=int(g.group(2)), gpu_power_w=float(g.group(3)), windows_free_before_gb=wins))
-    notes = [dict(time=ln[:19], text=ln[20:]) for ln in prog if " stopped " in ln]
-    done = json.loads((F.OUT / "DONE").read_text())
-    return dict(n_plan=len(pf), n_manifest=len(manifest), n_files=len(files), plan_equals_manifest=pf == set(manifest),
-                plan_equals_files=pf == files, hash_mismatches=len(mism), input_checks=icn,
-                input_checks_total=len(ic), input_checks_passed=sum(v["passed"] for v in ic.values()),
-                starts=starts, guard_kills=kills, stop_notes=notes, finished=done["finished"],
-                tmp_files_left=len(list((F.OUT / "tmp").iterdir())))
+def run_row(arm, t, lr, run, split_sha, n_test_seeds, runs=None) -> dict:
+    """The 8.1 metrics of one run from its test.json (DONE: samples to set accuracy), after consistency checks."""
+    done, te = json.loads((run / "DONE").read_text()), json.loads((run / "test.json").read_text())
+    if done.get("smoke") or done["eval_set"] != "validation" or done.get("replicate"):
+        raise SystemExit(f"{run}: not a registered validation run")
+    want = dict(stage=A.STAGE, arm=arm, training_seed=t, lr=lr, selected_step=done["selected_step"],
+                split_sha256=split_sha, device="cpu", threads=A.TEST_THREADS, best_sha256=_sha(run / "best.pt"))
+    bad = {k: (te.get(k), v) for k, v in want.items() if te.get(k) != v}
+    if bad or set(te["groups"]) != set(GROUPS.values()):
+        raise SystemExit(f"{run}/test.json does not match the run: {bad or sorted(te['groups'])}")
+    g = {k: te["groups"][v] for k, v in GROUPS.items()}
+    exp = dict(train=(6 * n_test_seeds, 4 * n_test_seeds), g90=(2 * n_test_seeds,) * 2, g30=(2 * n_test_seeds,) * 2)
+    for k, (nt, nr) in exp.items():
+        if (g[k]["n_trials"], g[k]["n_rotation"]) != (nt, nr):
+            raise SystemExit(f"{run}/test.json: {GROUPS[k]} has {g[k]['n_trials']} trials, expected {nt}")
+    s2a = done["samples_to_set_accuracy"]
+    return dict(r2=g["train"]["r2"], sign_accuracy=g["train"]["sign_accuracy"], loss=g["train"]["loss"],
+                g90_sign_accuracy=g["g90"]["sign_accuracy"], g90_r2=g["g90"]["r2"],
+                g30_sign_accuracy=g["g30"]["sign_accuracy"], g30_r2=g["g30"]["r2"],
+                samples_to_set_accuracy=s2a["samples"], samples_censored=s2a["censored"],
+                n_test_trials=g["train"]["n_trials"], n_test_rotation=g["train"]["n_rotation"],
+                selected_step=done["selected_step"], lr=lr, run=str(run.relative_to(runs or RUNS)),
+                test_json_sha256=_sha(run / "test.json"), best_sha256=want["best_sha256"])
 
 
-def build():
-    gate_rec, ref_rec = GATE / "brain" / "rot_left_s10.npz", REF / "brain" / "rot_left_s10.npz"
-    meas = json.loads((F.OUT / "measure" / "measure.json").read_text())
-    plan = json.loads((F.OUT / "plan.json").read_text())["records"]
-    manifest = dict(reversed(ln.split("  ", 1)) for ln in (F.OUT / "manifest.sha256").read_text().splitlines())
-    ref_dn = np.load(ref_rec, allow_pickle=True)
-    checks = [tech_check(e, manifest, members(ref_rec), ref_dn) for e in plan if e["seed"] in CHECK_SEEDS]
-    ic = json.loads((F.OUT / "input_checks.json").read_text())
-    ic0 = {k: v for k, v in ic.items() if k.startswith("p0_")}
-    return dict(
-        prereg="prereg/14 section 7 and section 9 gate 5, with prereg/17 sections 2-3",
-        gate5=dict(record=str(gate_rec.relative_to(ROOT)), reference=str(ref_rec.relative_to(ROOT)),
-                   members_identical=members(gate_rec) == members(ref_rec),
-                   bit_identical=F.npz_identical(gate_rec, ref_rec),
-                   sha256=dict(record=sha(gate_rec), reference=sha(ref_rec)),
-                   render_bit_identical=F.npz_identical(GATE / "stim_rates.npz", REF / "stim_rates.npz"),
-                   input_check_passed=json.loads((GATE / "input_check.json").read_text())["passed"]),
-        driver_record_equals_reference=meas["brain"]["equals_machine2_f3b3_record"],
-        measure=meas,
-        plan=dict(n_records=len(plan), n_renders=len({e["render"] for e in plan}),
-                  per_split={s: sum(e["split"] == s for e in plan) for s in ("train", "val", "test")},
-                  n_batches=len(F.batches()), batch_seeds=F.BATCH_SEEDS),
-        input_checks_batch0={k: v for k, v in sorted(ic0.items())},
-        record_checks=checks,
-        record_checks_all_ok=all(all(v for k, v in c.items() if k != "file") for c in checks),
-        completion=completion(plan, manifest))
+def limitations(path=None) -> list:
+    """The five limitations of prereg/20 section 1, quoted (one line each)."""
+    text = Path(path or PREREG20).read_text()
+    sec = text.split("## 1. ", 1)[1].split("\n## ", 1)[0]
+    items = re.findall(r"^([a-e])\. (.+?)(?=^[a-e]\. |^Every stage-A report|\Z)", sec, re.S | re.M)
+    out = [dict(id=k, text=" ".join(v.split())) for k, v in items]
+    if [x["id"] for x in out] != list("abcde"):
+        raise SystemExit(f"{path or PREREG20}: expected limitations a-e in section 1, found {[x['id'] for x in out]}")
+    return out
 
 
-def summary(o):
-    g = o["gate5"]
-    return (f"Gate 5 (prereg/17): the extended brain script reproduces the machine-2 record rot_left seed 10 at 60 deg/s "
-            f"and phase 0 {'bit for bit' if g['bit_identical'] else 'NOT bit for bit'} (render "
-            f"{'identical' if g['render_bit_identical'] else 'different'}); the generation driver's record of the same "
-            f"run is {'identical' if o['driver_record_equals_reference'] else 'different'}. Generation complete: "
-            f"{o['completion']['n_manifest']:,} records in the SHA-256 manifest (all hashes recomputed, "
-            f"{o['completion']['hash_mismatches']} mismatches); input checks {o['completion']['input_checks_passed']} "
-            f"of {o['completion']['input_checks_total']} passed.")
+def exploratory_state(path=None) -> dict:
+    p = Path(path or EXPLORATORY)
+    ran = p.exists() and any(p.glob("**/DONE"))
+    return dict(run=bool(ran), location=str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p),
+                statement=("The prereg/20 exploratory follow-up (true and shuffled, training seeds 0-4; lr 0.03 for "
+                           "2,000 steps and lr 0.01 for 6,000 steps) "
+                           + ("has runs; it is exploratory, never part of a verdict, and reported separately."
+                              if ran else "has not been run.")))
 
 
-def render(o):
-    g, m = o["gate5"], o["measure"]
-    L = ["# F5 step 2c: stage-A records", ""]
-    L.append("Generated by `scripts/f5_stageA_report.py` from `runs/f5/` (not committed). "
-             f"{o['prereg']}. Technical properties only: no record statistic is computed, and no test-seed record "
-             "is opened.")
-    L.append("")
-    L.append(f"- {summary(o)}")
-    L.append("")
-    L.append("## 1. Gate 5")
-    L.append("")
-    L.append(f"- Record `{g['record']}` against `{g['reference']}`: same members {g['members_identical']}, "
-             f"identical uncompressed member bytes {g['bit_identical']}; SHA-256 `{g['sha256']['record'][:16]}` and "
-             f"`{g['sha256']['reference'][:16]}`.")
-    L.append(f"- Render identical: {g['render_bit_identical']}; prereg/09 input check passed: {g['input_check_passed']}.")
-    L.append(f"- The generation driver (`scripts/f5_stageA_records.py`: separate render and brain processes, one "
-             f"thread per numeric pool: torch, numba, OpenBLAS, OpenMP) gives the same record: {o['driver_record_equals_reference']}.")
-    L.append("")
-    L.append("## 2. Worker RAM and time (each alone, CPU, CUDA hidden, one thread per numeric pool)")
-    L.append("")
-    L.append("| worker | peak RSS GiB | wall s | work s | output equals the machine-2 F3b-3 output |")
-    L.append("|---|---|---|---|---|")
-    for k, v in m.items():
-        if k.startswith("render"):
-            L.append(f"| render | {v['peak_rss_gb']:.2f} | "
-                     f"{v['wall_s']:.0f} | {v['render_s']:.1f} (one render) | {v['equals_machine2_f3b3_render']} |")
-    b = m["brain"]
-    L.append(f"| brain | {b['peak_rss_gb']:.2f} | {b['wall_s']:.0f} | {b['record_s']:.1f} (one record) | "
-             f"{b['equals_machine2_f3b3_record']} |")
-    L.append("")
-    p = o["plan"]
-    L.append("## 3. Plan")
-    L.append("")
-    L.append(f"- {p['n_records']:,} records (train {p['per_split']['train']:,}, validation {p['per_split']['val']:,}, "
-             f"test {p['per_split']['test']:,}) from {p['n_renders']:,} distinct renders, in {p['n_batches']} batches "
-             f"(seeds 0-39, then {p['batch_seeds']} seeds each).")
-    L.append("")
-    L.append("## 4. Input checks of batch 0 (phase 0) and technical record checks")
-    L.append("")
-    L.append("| render group | passed | A_in T4a/T5a rot_left | rot_right |")
-    L.append("|---|---|---|---|")
-    for k, v in o["input_checks_batch0"].items():
-        L.append(f"| {k} | {v['passed']} | {v['A_in_T4aT5a']['rot_left']:.4f} | {v['A_in_T4aT5a']['rot_right']:.4f} |")
-    L.append("")
-    L.append(f"Records of training seeds {', '.join(map(str, CHECK_SEEDS))} ({len(o['record_checks'])} files): "
-             "SHA-256 equals the manifest, zip test, members as the F3b-3 record, stimulus and seed fields, shapes and "
-             f"dtypes, DN table and model hashes as the F3b-3 record. All passed: {o['record_checks_all_ok']}.")
-    L.append("")
-    c = o["completion"]
-    L.append("## 5. Generation result")
-    L.append("")
-    L.append(f"- Records: plan {c['n_plan']:,}, manifest {c['n_manifest']:,}, files {c['n_files']:,}; plan = manifest "
-             f"{c['plan_equals_manifest']}, plan = files {c['plan_equals_files']}. Every SHA-256 recomputed from the "
-             f"file bytes: {c['hash_mismatches']} mismatches. Temporary files left: {c['tmp_files_left']}. Finished "
-             f"{c['finished'].replace('T', ' ')}.")
-    ic = c["input_checks"]
-    L.append(f"- Input checks (prereg/09, per render group and speed): {c['input_checks_passed']} of "
-             f"{c['input_checks_total']} passed; train {ic['train']['passed']}/{ic['train']['groups']}, validation "
-             f"{ic['val']['passed']}/{ic['val']['groups']}, test {ic['test']['passed']}/{ic['test']['groups']} (test: "
-             f"pass / fail only, {ic['test']['values_kept']} values kept).")
-    L.append("- Sealed test seeds 200-239: their records were written and hashed only, never opened, summarised or "
-             "plotted; no record statistic was logged for any seed.")
-    L.append("")
-    L.append("Run history (starts from `progress.log`; guard stops from `driver.log`, with the guard's last monitor "
-             "reading before each; every start resumed from the existing records and renders, nothing was lost):")
-    L.append("")
-    L.append("| time | event |")
-    L.append("|---|---|")
-    ev = [(x["time"], f"start, {x['records_existing']:,} records existing") for x in c["starts"]]
-    ev += [(k["time"], f"guard stop: {k['reason']}; Windows free before (GB): "
-            f"{', '.join(f'{w:.1f}' for w in k['windows_free_before_gb'])}; GPU at the last reading "
-            f"{k['gpu_used_mib']:,} MiB, {k['gpu_temp_c']} C, {k['gpu_power_w']:.1f} W (this job: CUDA hidden)")
-           for k in c["guard_kills"]]
-    ev += [(x["time"], f"note: {x['text']}") for x in c["stop_notes"]]
-    for t, e in sorted(ev):
-        L.append(f"| {t} | {e} |")
-    L.append("")
+# ── report ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+def _mean_sd(x):
+    x = np.asarray(x, np.float64)
+    return dict(mean=float(x.mean()), sd=float(x.std(ddof=1)) if len(x) > 1 else None, n=len(x))
+
+
+def build(runs=None, prereg20=None, exploratory=None, split_path=None) -> dict:
+    runs = Path(runs or RUNS)
+    split_path = Path(split_path or SPLIT_PATH)
+    reg = registered(runs)
+    missing = [str(r) for *_, r in reg if not (r / "test.json").exists()]
+    if missing:
+        raise SystemExit(f"{len(missing)} of {len(reg)} registered runs have no test.json (first: {missing[0]}); "
+                         "the report runs only after every final-eval")
+    split_sha, n_test = A.split_sha256(split_path), len(A.splits(split_path)["test"])
+    rows = {}
+    for a, t, lr, r in reg:
+        rows.setdefault(a, {})[f"t{t}"] = run_row(a, t, lr, r, split_sha, n_test, runs)
+    seeds = [f"t{t}" for t in A.TRAIN_SEEDS["true"]]
+    tr, sh = rows["true"], rows["shuffled"]
+
+    # primary (8.2)
+    d = [tr[s]["r2"] - sh[s]["r2"] for s in seeds]
+    test = sign_flip(d)
+    p = {"A": test["p_greater"], **{x: 1.0 for x in NOT_RUN}}
+    adj = holm(p)
+    ceil = ceiling_guard([tr[s]["r2"] for s in seeds], [sh[s]["r2"] for s in seeds])
+    bo = rows["bridge_off"]
+    nrot = {r["n_test_rotation"] for r in bo.values()}
+    if len(nrot) != 1:
+        raise SystemExit(f"bridge_off runs differ in their number of test rotation trials: {sorted(nrot)}")
+    leak = leakage_guard([r["sign_accuracy"] for r in bo.values()], nrot.pop())
+    primary = dict(metric="test R2 at the training speeds (window mean, all trials)", d=d, seeds=seeds, test=test,
+                   holm=dict(family=list(STAGES), p=p, adjusted=adj, not_run=list(NOT_RUN)),
+                   effect=bootstrap_ci(d), guards=dict(ceiling=ceil, leakage=leak),
+                   **verdict(adj["A"], test, ceil, leak))
+
+    # secondary (8.3)
+    sec = {f"true_vs_{b}_r2": paired([tr[s]["r2"] - rows[b][s]["r2"] for s in seeds], f"R2(true) - R2({b})")
+           for b in ("derange", "mlp", "linear")}
+    rt, rs = censored_ranks([tr[s]["samples_to_set_accuracy"] for s in seeds],
+                            [tr[s]["samples_censored"] for s in seeds],
+                            [sh[s]["samples_to_set_accuracy"] for s in seeds],
+                            [sh[s]["samples_censored"] for s in seeds])
+    sec["true_vs_shuffled_samples"] = paired(rs - rt, "rank(shuffled) - rank(true) of samples to set accuracy "
+                                                      "(pooled ranks, censored largest; > 0 favours true)")
+    sec["true_vs_shuffled_samples"].update(rank_true=rt.tolist(), rank_shuffled=rs.tolist())
+    for g, deg in (("g90", 90), ("g30", 30)):
+        for m in ("sign_accuracy", "r2"):
+            sec[f"true_vs_shuffled_{g}_{m}"] = paired([tr[s][f"{g}_{m}"] - sh[s][f"{g}_{m}"] for s in seeds],
+                                                      f"{m}(true) - {m}(shuffled) at {deg} deg/s")
+
+    # 8.1 summaries and 8.4 learning
+    summ = {a: {m: _mean_sd([r[m] for r in rs_.values()]) for m in METRICS} for a, rs_ in rows.items()}
+    for a, rs_ in rows.items():
+        summ[a]["n_samples_censored"] = sum(r["samples_censored"] for r in rs_.values())
+    learned = {}
+    for a, rs_ in rows.items():
+        k = sum(r["sign_accuracy"] >= LEARNED_SIGN and r["r2"] > 0 for r in rs_.values())
+        learned[a] = dict(n_seeds=len(rs_), n_meeting=int(k),
+                          learned=bool(k >= LEARNED_MIN_SEEDS) if len(rs_) == 10 else None)
+    return dict(stage=A.STAGE, split="test", test_seeds=n_test, split_sha256=split_sha,
+                note=("pre-registered stage-A test report (prereg/14 section 8 with prereg/20); every value from "
+                      "the test.json of each registered run, written once by final-eval on the CPU from best.pt"),
+                selected_lr=selected_lrs(runs), n_runs=len(reg), runs=rows, summary=summ, primary=primary,
+                secondary=dict(note="prereg/14 section 8.3: same test, no Holm, never a verdict", comparisons=sec),
+                learning=dict(rule=f"at least {LEARNED_MIN_SEEDS} of 10 training seeds with test sign accuracy >= "
+                                   f"{LEARNED_SIGN} and R2 > 0 (prereg/14 section 8.4; None: the arm has not 10 seeds)",
+                              arms=learned),
+                not_applicable_in_A=["g", "stability", "drift", "imitation R2"],
+                limitations=limitations(prereg20), exploratory=exploratory_state(exploratory))
+
+
+def _f(x, k=4):
+    return "n/a" if x is None else f"{x:.{k}f}"
+
+
+def _ms(d, k=4):
+    return f"{d['mean']:.{k}f} ± {_f(d['sd'], k)}" if d["sd"] is not None else f"{d['mean']:.{k}f}"
+
+
+def _p(t, key="greater"):
+    return f"{t[f'p_{key}']:.4f} ({t[f'count_{key}']}/{t['n_patterns']})"
+
+
+def summary(d):
+    pr = d["primary"]
+    t, e = pr["test"], pr["effect"]
+    q = "; ".join(pr["qualifiers"])
+    return (f"Stage A (test split): mean d = R2(true) - R2(shuffled) {e['mean']:.4f} (95 % bootstrap interval "
+            f"{e['lo']:.4f} to {e['hi']:.4f}, {t['n']} seeds); one-sided exact p {_p(t)}, Holm-adjusted "
+            f"{pr['holm']['adjusted']['A']:.4f}. Verdict: {pr['verdict']} ({pr['status']})" + (f"; {q}" if q else "")
+            + ".")
+
+
+def render(d):
+    pr = d["primary"]
+    t, e, g = pr["test"], pr["effect"], pr["guards"]
+    L = ["# F5 stage A: pre-registered test report", "",
+         "Generated by `scripts/f5_stageA_report.py`; checked by `scripts/verify_report.py`. prereg/14 section 8 "
+         "with prereg/20. Every metric is from the test split (data seeds 200-239) at the selected checkpoint of "
+         "each registered run, evaluated once on the CPU by `final-eval`.", "", summary(d), "",
+         "## 1. Primary test (prereg/14 section 8.2)", "",
+         f"d_t = test R2(`true`, t) - test R2(`shuffled`, t) at the training speeds, t = 0-{t['n'] - 1}.", "",
+         "| seed | R2 true | R2 shuffled | d |", "|---:|---:|---:|---:|"]
+    for s, x in zip(pr["seeds"], pr["d"]):
+        L.append(f"| {s[1:]} | {_f(d['runs']['true'][s]['r2'])} | {_f(d['runs']['shuffled'][s]['r2'])} | {_f(x)} |")
+    h = pr["holm"]
+    L += ["", f"- One-sided exact sign-flip permutation test (all {t['n_patterns']} sign patterns, H1: mean d > 0): "
+          f"p = {_p(t)}.",
+          f"- Two-sided test: p = {_p(t, 'two_sided')}; \"shuffled better\" needs mean d < 0 and p < {ALPHA}: "
+          f"{'yes' if pr['shuffled_better'] else 'no' if pr['shuffled_better'] is not None else 'n/a (withheld)'}.",
+          f"- Holm over stages {', '.join(h['family'])}; stages not run ({', '.join(h['not_run'])}) have p = 1. "
+          "Adjusted p: " + ", ".join(f"{k} {h['adjusted'][k]:.4f}" for k in h["family"]) + ".",
+          f"- Effect size: mean d {e['mean']:.4f}, 95 % percentile bootstrap interval {e['lo']:.4f} to {e['hi']:.4f} "
+          f"({e['n_boot']:,} resamples of the seeds, `default_rng({e['rng_seed']})`).",
+          f"- Ceiling guard: mean R2 `true` {g['ceiling']['mean_r2_true']:.4f}, `shuffled` "
+          f"{g['ceiling']['mean_r2_shuffled']:.4f}; both >= {g['ceiling']['threshold']}: "
+          f"{'yes' if g['ceiling']['triggered'] else 'no'}.",
+          f"- Leakage guard: `bridge_off` mean test sign accuracy {g['leakage']['mean_sign_accuracy']:.4f} over "
+          f"{g['leakage']['n_seeds']} seeds; binomial(n = {g['leakage']['interval']['n']}, 0.5) 95 % interval "
+          f"{g['leakage']['interval']['lo']:.4f} to {g['leakage']['interval']['hi']:.4f} "
+          f"({g['leakage']['interval']['lo_count']} to {g['leakage']['interval']['hi_count']} of "
+          f"{g['leakage']['interval']['n']} test rotation trials of one run); outside: "
+          f"{'yes (leak)' if g['leakage']['triggered'] else 'no'}.", "",
+          f"**Verdict: {pr['verdict']}**" + (f" ({'; '.join(pr['qualifiers'])})" if pr["qualifiers"] else "")
+          + f". Status: **{pr['status']}**. "
+          + {"final": "A \"helps\" verdict reported before B and C are run is final (prereg/20 section 3)."
+             if pr["verdict"] == VERDICT_HELPS else "Every stage of the Holm family has a p value.",
+             "provisional": "A \"no advantage\" verdict reported before B and C are run is provisional; it is "
+                            "recomputed once B and C have p values or are declared not run (prereg/20 section 3).",
+             "withheld": "The leakage guard withholds the verdict (prereg/14 section 8.2)."}[pr["status"]], "",
+          "## 2. Limitations recorded before unsealing (prereg/20 section 1)", ""]
+    L += [f"{x['id']}. {x['text']}" for x in d["limitations"]]
+    L += ["", "## 3. Secondary comparisons (prereg/14 section 8.3; no Holm, never a verdict)", "",
+          "| comparison | mean d | 95 % bootstrap interval | one-sided p | two-sided p |", "|---|---:|---:|---:|---:|"]
+    for c in d["secondary"]["comparisons"].values():
+        L.append(f"| {c['label']} | {c['effect']['mean']:.4f} | {c['effect']['lo']:.4f} to {c['effect']['hi']:.4f} | "
+                 f"{_p(c['test'])} | {_p(c['test'], 'two_sided')} |")
+    L += ["", "## 4. Metrics per arm and seed (prereg/14 section 8.1)", "",
+          "Test split at the selected checkpoint; R2 and sign at the training speeds (240 trials, sign over the 160 "
+          "rotation trials); 90 and 30 deg/s: rot_left and rot_right only. Samples to set accuracy: training trials "
+          "until the validation turn-sign accuracy first reached 0.90 (`>` = censored at the budget). g, stability, "
+          "drift and imitation R2 are stage-C metrics.", "",
+          "| arm | seed | lr | R2 | sign | loss | 90 sign | 90 R2 | 30 sign | 30 R2 | samples to 0.90 |",
+          "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    for a, rows in d["runs"].items():
+        for s, r in rows.items():
+            lr = "-" if r["lr"] is None else f"{r['lr']:g}"
+            L.append(f"| {a} | {s[1:]} | {lr} | {_f(r['r2'])} | {_f(r['sign_accuracy'], 3)} | {_f(r['loss'])} | "
+                     f"{_f(r['g90_sign_accuracy'], 3)} | {_f(r['g90_r2'])} | {_f(r['g30_sign_accuracy'], 3)} | "
+                     f"{_f(r['g30_r2'])} | {'>' if r['samples_censored'] else ''}{r['samples_to_set_accuracy']:,} |")
+    L += ["", "### Mean ± sd over seeds (sample sd, ddof = 1)", "",
+          "| arm | seeds | R2 | sign | loss | 90 sign | 90 R2 | 30 sign | 30 R2 | samples to 0.90 (censored) |",
+          "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    for a, s in d["summary"].items():
+        L.append(f"| {a} | {s['r2']['n']} | {_ms(s['r2'])} | {_ms(s['sign_accuracy'], 3)} | {_ms(s['loss'])} | "
+                 f"{_ms(s['g90_sign_accuracy'], 3)} | {_ms(s['g90_r2'])} | {_ms(s['g30_sign_accuracy'], 3)} | "
+                 f"{_ms(s['g30_r2'])} | {_ms(s['samples_to_set_accuracy'], 0)} ({s['n_samples_censored']}) |")
+    L += ["", "## 5. Learning (prereg/14 section 8.4, descriptive)", "", f"Rule: {d['learning']['rule']}.", "",
+          "| arm | seeds | seeds meeting the rule | learned |", "|---|---:|---:|---|"]
+    for a, x in d["learning"]["arms"].items():
+        L.append(f"| {a} | {x['n_seeds']} | {x['n_meeting']} | "
+                 f"{'n/a' if x['learned'] is None else 'yes' if x['learned'] else 'no'} |")
+    L += ["", "`untrained` is the reference point (prereg/14 section 8.4).", "",
+          "## 6. Exploratory follow-up (prereg/20 section 2)", "", d["exploratory"]["statement"], ""]
     return "\n".join(L)
 
 
@@ -212,12 +380,11 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if (OUT_JSON.exists() or OUT_MD.exists()) and not a.overwrite:
         raise SystemExit("output exists; use --overwrite")
-    o = build()
-    OUT_JSON.write_text(json.dumps(o, indent=1) + "\n")
-    OUT_MD.write_text(render(o))
-    print(summary(o))
-    return 0
+    d = build()
+    OUT_JSON.write_text(json.dumps(d, indent=1) + "\n")
+    OUT_MD.write_text(render(d))
+    print(summary(d), flush=True)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
