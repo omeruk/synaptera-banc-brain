@@ -1198,6 +1198,7 @@ F5RU_JSON = ROOT / "docs" / "results" / "f5_stageA_runner.json"
 F5RU_MD = ROOT / "docs" / "results" / "f5_stageA_runner.md"
 F5VA_JSON = ROOT / "docs" / "results" / "f5_stageA_validation.json"
 F5VA_MD = ROOT / "docs" / "results" / "f5_stageA_validation.md"
+CODE_LOCK_COMMIT = "26b8445"           # merge of PR #31: the stage-A test-report code locked
 F5P20_JSON = ROOT / "docs" / "results" / "f5_prereg20_estimate.json"
 PREREG20 = ROOT / "prereg" / "20_f5_stageA_limitations_exploratory.md"
 
@@ -1276,8 +1277,9 @@ def _first_eval_trials(va):
 
 def check_f5_validation():
     """F5 stage-A validation report. The JSON is rebuilt from the run directories and compared, the markdown
-    re-rendered and compared; independently, from each run log: no run has a test evaluation, every evaluation is on
-    the validation split, the best loss is the lowest selectable validation loss, the trials to 0.90 are recomputed,
+    re-rendered and compared; independently, from each run log: the report was written before any test evaluation and
+    every registered run's test.lock is dated after the code lock (merge of PR #31), every evaluation is on the
+    validation split, the best loss is the lowest selectable validation loss, the trials to 0.90 are recomputed,
     and each arm's selected rate is the lowest final seed-0 validation loss (ties to the smaller rate)."""
     sys.path.insert(0, str(ROOT / "scripts"))
     import f5_stageA_validation as R
@@ -1294,8 +1296,20 @@ def check_f5_validation():
     chk("f5va:json_equals_rebuild", json_close("f5va:json_equals_rebuild", stored, R.build()))
     chk("f5va:md_equals_render", F5VA_MD.read_text() == R.render(stored))
     chk("f5va:summary_in_md", R.summary(stored) in F5VA_MD.read_text())
-    chk("f5va:no_test_evaluation", stored["test_evaluated"] is False
-        and not list(A.OUT.glob("*/*/test.json")) and not list(A.OUT.glob("*/*/test.lock")))
+    # Maintained after unsealing: the live scan (no test.json / test.lock) can only hold before final-eval. Now every
+    # registered run's test.lock must be dated after the merge of PR #31 (the code lock), both compared in UTC; the
+    # lock holds the evaluating machine's local time without an offset (time.strftime in final_evaluate).
+    import datetime
+    import subprocess
+    import f5_stageA_report as RP
+    lock = datetime.datetime.fromisoformat(subprocess.run(
+        ["git", "show", "-s", "--format=%cI", CODE_LOCK_COMMIT], cwd=ROOT, capture_output=True, text=True,
+        check=True).stdout.strip()).astimezone(datetime.timezone.utc)
+    locks = [run / "test.lock" for _, _, _, run in RP.registered()]
+    late = [str(f) for f in locks if not f.exists() or datetime.datetime.fromisoformat(
+        f.read_text().strip()).astimezone(datetime.timezone.utc) <= lock]
+    chk("f5va:no_test_evaluation", stored["test_evaluated"] is False and len(locks) == 56 and not late,
+        (len(locks), late))
     for a, rows in stored["runs"].items():
         for s, r in rows.items():
             ev = R.evals_of(A.run_dir_of(a, int(s[1:]), stored["selected_lr"].get(a), A.OUT))
