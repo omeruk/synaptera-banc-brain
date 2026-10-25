@@ -16,8 +16,9 @@ Steps (outputs under runs/viz/anatomy/, not committed; an existing output is not
   the VNC subgraph (matches per root_* column of compiled_data/banc_888/banc_888_meta.feather), the bridge-target DNs,
   the 16 steering MNs (setup.readout) and at most 150 VNC interneurons (bucket super_class
   ventral_nerve_cord_intrinsic, neither target nor MN) on the strongest two-hop paths target -> interneuron -> MN in
-  the stage-A subgraph. Path strength = summed synapse count n_syn of its two edges; an interneuron ranks by its
-  strongest path (ties: all two-hop synapses through it, then root ID). -> ids.json, circuit.csv
+  the stage-A subgraph: an interneuron ranks by the weaker edge (n_syn) of its strongest path (bottleneck), ties by
+  the path's summed synapses, then all two-hop synapses through it, then root ID; ids.json also counts how many
+  differ from ranking by the summed synapses alone. -> ids.json, circuit.csv
 - fetch: the SWCs of the circuit (FlyWire DNs from fafb_783/fafb_banc_space_swc (warped into BANC space by the BANC
   team; first of <id>_skeleton.swc, <id>_l2.swc, <id>.swc) and fafb_783/fafb_fafb_space_swc (native space, <id>.swc);
   BANC neurons from banc_888/banc_banc_space_swc, <id>_skeleton.swc, else <id>_l2.swc) and the outline meshes
@@ -38,7 +39,9 @@ Steps (outputs under runs/viz/anatomy/, not committed; an existing output is not
   region dims the farther one; BANC DNs are faint in the brain (alpha ramp over 40 um behind the cut). Skeletons are
   reduced for drawing: terminal twigs < 2 um removed in one pass (skeletor files carry sub-micron hairs below the line
   width), nodes >= 1 um apart along each unbranched chain, chain ends kept, straight edges > 20 um (healing jumps)
-  dropped. PDF (vector) + PNG (600 dpi) + caption.txt in the preview folder; figure.json in runs/viz/anatomy/.
+  dropped. A colour key (line samples, black labels) sits below the scale bar. PDF (vector) + PNG (600 dpi) +
+  caption.txt (short) + methods_figure.txt (every technical detail) in the preview folder; figure.json in
+  runs/viz/anatomy/. The check step also writes warp_check.md to the preview folder.
 """
 import argparse
 import base64
@@ -96,7 +99,8 @@ ROOT_TOL_UM = 5.0
 FW_VOXEL_NM = np.array([4.0, 4.0, 40.0])
 FILES = {"ids": ("ids.json", "circuit.csv"), "fetch": ("fetch_manifest.csv", "fetch.json"),
          "check": ("axes.json", "warp_check.csv", "warp_check.json"), "figure": ("figure.json",)}
-FIG_FILES = (f"{FIG_NAME}.pdf", f"{FIG_NAME}.png", "caption.txt")
+FIG_FILES = {"check": ("warp_check.md",),
+             "figure": (f"{FIG_NAME}.pdf", f"{FIG_NAME}.png", "caption.txt", "methods_figure.txt")}
 
 # BANC axes (README / documentation and the check step): +x the fly's left, +y posterior, +z dorsal
 AXIS_ENDS = {0: ("R", "L"), 1: ("A", "P"), 2: ("V", "D")}
@@ -115,6 +119,12 @@ OUTLINE_FILL, OUTLINE_ALPHA, OUTLINE_EDGE, OUTLINE_LW = "#E4E4E4", 0.75, "#C8C8C
 MIN_CONTOUR_UM2 = 50.0
 MAX_EDGE_UM = 20.0
 KEY_BOX_MM = 9.0
+KEY_LABELS = {"fw_dn": "FlyWire DNs", "banc_dn": "BANC DNs", "interneuron": "VNC interneurons", "mn": "steering MNs"}
+KEY_PT, KEY_LINE_MM, KEY_LW, KEY_ROW_MM = 6.5, 4.0, 1.0, 2.9      # colour key: label size, sample length / width, row
+# colour-vision-deficiency simulation, linear RGB (Machado, Oliveira and Fernandes 2009, severity 1)
+CVD = {"protan": ((0.152286, 1.052583, -0.204868), (0.114503, 0.786281, 0.099216), (-0.003882, -0.048116, 1.051998)),
+       "deutan": ((0.367322, 0.860646, -0.227968), (0.280085, 0.672501, 0.047413), (-0.011820, 0.042940, 0.968881)),
+       "tritan": ((1.255528, -0.076749, -0.178779), (-0.078411, 0.930809, 0.147602), (0.004733, 0.691367, 0.303900))}
 TWIG_UM, STEP_UM = 2.0, 1.0
 SIL_RES_UM = 0.5
 FIG_W_MM, MARGIN_MM, GAP_MM, PAD_UM = 180.0, 1.5, 5.0, 4.0
@@ -384,10 +394,11 @@ def step_ids(a):
     mns = np.asarray(setup.readout, np.int64)
     sc = bm["super_class"].reindex(vnc_ids).astype(object).to_numpy()
     hop = two_hop_interneurons(setup, targets, mns, sc)
-    cand = np.flatnonzero(hop["ok"])
-    score = hop["w_in"][cand] + hop["w_out"][cand]
-    cand = cand[np.lexsort((vnc_ids[cand], -hop["total"][cand], -score))][:N_INTERNEURONS]
-    score = hop["w_in"][cand] + hop["w_out"][cand]
+    ok = np.flatnonzero(hop["ok"])
+    path_syn, bottleneck = hop["w_in"] + hop["w_out"], np.minimum(hop["w_in"], hop["w_out"])
+    # the strongest path of k (strongest target edge, strongest MN edge) is strongest by both measures
+    cand = ok[np.lexsort((vnc_ids[ok], -hop["total"][ok], -path_syn[ok], -bottleneck[ok]))][:N_INTERNEURONS]
+    by_summed = ok[np.lexsort((vnc_ids[ok], -hop["total"][ok], -path_syn[ok]))][:N_INTERNEURONS]
 
     bt = setup.banc_table().set_index("index")
     rows = [dict(role="fw_dn", dataset="fafb_783", id=int(fw_ids[i]), node=int(i), cell_type=str(setup.fw_cell_type[p]),
@@ -399,7 +410,7 @@ def step_ids(a):
                   side=names[k].split("|")[1]) for k, i in enumerate(mns)]
     rows += [dict(role="interneuron", dataset="banc_888", id=int(vnc_ids[i]), node=int(i),
                   cell_type=bm["cell_type"].get(vnc_ids[i]), side=bm["side"].get(vnc_ids[i]),
-                  w_in=hop["w_in"][i], w_out=hop["w_out"][i], path_syn=hop["w_in"][i] + hop["w_out"][i],
+                  w_in=hop["w_in"][i], w_out=hop["w_out"][i], bottleneck_syn=bottleneck[i], path_syn=path_syn[i],
                   two_hop_syn=hop["total"][i], via_target_id=int(vnc_ids[hop["via_t"][i]]),
                   via_mn_id=int(vnc_ids[hop["via_m"][i]])) for i in cand]
     circ = pd.DataFrame(rows)
@@ -420,16 +431,24 @@ def step_ids(a):
         banc=dict(vnc_neurons=len(vnc_ids), matches_per_column=version,
                   version=[c for c, k in version.items() if k == len(vnc_ids)],
                   missing_in_banc_888_id=[int(i) for i in vnc_ids[~np.isin(vnc_ids, bm.index)]],
-                  bridge_targets=len(targets), mns=len(mns), bridge_units=len(bridge.units)),
-        interneurons=dict(rule="two-hop target -> k -> MN in the stage-A subgraph; path strength = n_syn(T->k) + "
-                               "n_syn(k->MN); k ranked by its strongest path, ties by all two-hop synapses through k, "
-                               "then root ID", super_class=INTERNEURON_CLASS, cap=N_INTERNEURONS,
+                  bridge_targets=len(targets), mns=len(mns), bridge_units=len(bridge.units),
+                  bridge_units_by_match=pd.Series([u["match"] for u in bridge.units]).value_counts().to_dict()),
+        interneurons=dict(rule="two-hop target -> k -> MN in the stage-A subgraph; k ranked by the weaker edge "
+                               "(bottleneck) of its strongest path, min(max_T n_syn(T->k), max_MN n_syn(k->MN)); ties "
+                               "by the path's summed synapses, then all two-hop synapses through k, then root ID",
+                          super_class=INTERNEURON_CLASS, cap=N_INTERNEURONS,
                           two_hop_intermediates=int(two.sum()),
                           two_hop_by_super_class=pd.Series(sc[two]).fillna("none").value_counts().to_dict(),
-                          eligible=int(hop["ok"].sum()), selected=len(cand),
-                          path_syn_min_selected=float(score.min()) if len(cand) else None,
+                          eligible=len(ok), selected=len(cand),
+                          bottleneck_min_selected=float(bottleneck[cand].min()),
+                          eligible_at_or_above_cutoff=int((bottleneck[ok] >= bottleneck[cand].min()).sum()),
+                          path_syn_min_selected=float(path_syn[cand].min()),
                           selected_w_in_below_5=int((hop["w_in"][cand] < 5).sum()),
-                          selected_w_out_below_5=int((hop["w_out"][cand] < 5).sum())),
+                          selected_w_out_below_5=int((hop["w_out"][cand] < 5).sum()),
+                          vs_summed_rule=dict(rule="previous: ranked by the path's summed synapses",
+                                              in_both=len(set(cand) & set(by_summed)),
+                                              changed=len(set(cand) - set(by_summed)),
+                                              summed_rule_w_in_below_5=int((hop["w_in"][by_summed] < 5).sum()))),
         circuit=circ["role"].value_counts().to_dict(),
         circuit_in_meta=circ.groupby("role")["in_meta"].sum().astype(int).to_dict())
     OUT.mkdir(parents=True, exist_ok=True)
@@ -598,10 +617,14 @@ def step_check(a):
             median_node_ratio_native_to_warped=float((other["nodes_native"] / other["nodes_warped"]).median()),
             root_vs_root=summary(other["root_vs_root_um"].to_numpy()),
             nearest_warped_node_um=summary(other["nearest_warped_node_um"].to_numpy())),
-        all_root_within_tol_root_vs_root=summary(err_all[ok]))
+        all_root_within_tol_root_vs_root=summary(err_all[ok]),
+        root_outside_tol=d.loc[has & ~d["root_ok"], ["id", "cell_type", "side", "root_soma_um"]].to_dict("records"))
+    res["excluded_other_tree"]["cell_types"] = int(other["cell_type"].nunique())
     d.drop(columns=["root_native", "root_warped"]).to_csv(OUT / "warp_check.csv", index=False)
     (OUT / "warp_check.json").write_text(json.dumps(res, indent=1))
     (OUT / "axes.json").write_text(json.dumps(axes, indent=1))
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    (FIG_DIR / "warp_check.md").write_text(warp_md(res), encoding="utf-8")
     print(json.dumps(axes, indent=1))
     print(json.dumps(res, indent=1))
 
@@ -794,6 +817,16 @@ def render(lines, meshes, paths: dict, dpi: int) -> dict:
                           transform=fig.transFigure, color="black", lw=1.0, solid_capstyle="butt"))
     fig.text((MARGIN_MM + SCALE_UM * s / 2) / FIG_W_MM, (sb_y - 1.0) / H_MM, f"{SCALE_UM} \u00b5m", ha="center",
              va="top", fontsize=FONT_PT)
+    # colour key: below the scale bar in the empty lower-left corner; text in black, the sample carries the colour
+    ky = sb_y - 1.0 - FONT_PT * 0.3528 - 3.0
+    if ky - (len(ROLES) - 1) * KEY_ROW_MM - KEY_ROW_MM / 2 < MARGIN_MM:
+        raise SystemExit("the colour key does not fit below the scale bar")
+    for k, role in enumerate(ROLES):
+        y = (ky - k * KEY_ROW_MM) / H_MM
+        fig.add_artist(Line2D([MARGIN_MM / FIG_W_MM, (MARGIN_MM + KEY_LINE_MM) / FIG_W_MM], [y, y],
+                              transform=fig.transFigure, color=STYLE[role][0], lw=KEY_LW, solid_capstyle="butt"))
+        fig.text((MARGIN_MM + KEY_LINE_MM + 1.2) / FIG_W_MM, y, KEY_LABELS[role], ha="left", va="center",
+                 fontsize=KEY_PT)
     t0 = time.time()
     for ext, path in paths.items():
         fig.savefig(path, dpi=dpi, facecolor="white")
@@ -816,48 +849,188 @@ def step_figure(a):
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     info = render(lines, meshes, {"pdf": FIG_DIR / f"{FIG_NAME}.pdf", "png": FIG_DIR / f"{FIG_NAME}.png"}, DPI)
     info.update(font=fam, neck_cut_y_um=round(y_cut, 1), neurons_drawn=n_drawn, long_edges_dropped=dropped,
-                vertices={r: int(sum(len(p) for nr in v for p, _ in nr.values())) for r, v in lines.items()})
-    (FIG_DIR / "caption.txt").write_text(caption(n_drawn, fetch, dropped), encoding="utf-8")
+                vertices={r: int(sum(len(p) for nr in v for p, _ in nr.values())) for r, v in lines.items()},
+                palette_min_delta_e=palette_check([STYLE[r][0] for r in ROLES]),
+                caption_words=len(caption_body(n_drawn).split()))
+    (FIG_DIR / "caption.txt").write_text(caption(n_drawn), encoding="utf-8")
+    (FIG_DIR / "methods_figure.txt").write_text(methods_text(info, fetch), encoding="utf-8")
     (OUT / "figure.json").write_text(json.dumps(info, indent=1))
     print(json.dumps(info, indent=1))
 
 
-def caption(n, fetch, dropped) -> str:
-    sw = fetch["swc"]
-    banc = {r: sw.get(f"{r}/banc", {}) for r in ("banc_dn", "interneuron", "mn")}
-    sk = sum(v.get("skeleton", 0) for v in banc.values())
-    l2 = sum(v.get("l2", 0) for v in banc.values())
+CREDITS = (
+    "Data: FlyWire v783 connectome of the female adult fly brain (Dorkenwald et al. 2024; Schlegel et al. 2024; EM: "
+    "Zheng et al. 2018), CC BY-NC 4.0. BANC brain-and-nerve-cord connectome, materialisation v888 (Bates, Phelps, "
+    f"Kim, Yang et al. 2026, Nature 656:957-970), CC BY 4.0, Harvard Dataverse doi:{DOI}; skeletons, warped FlyWire "
+    "skeletons and region outlines from gs://lee-lab_brain-and-nerve-cord-fly-connectome (compiled_data/, "
+    "region_outlines/). This figure combines both sources and carries the more restrictive licence, CC BY-NC 4.0.")
+
+
+def _um(text: str) -> str:
+    return text.replace(" um", " µm")
+
+
+def caption_body(n) -> str:
+    return (
+        "Stage-A circuit in BANC space.\n\n"
+        "a-d, Frontal (a), dorsal (b), lateral (c, from the left) and posterior (d) views, same scale. Sky blue, "
+        f"{n['fw_dn']} FlyWire descending neurons (DNs) that drive the model; blue, the {n['banc_dn']} BANC DNs "
+        f"receiving their input; orange, {n['interneuron']} VNC interneurons on the strongest two-hop paths to the "
+        f"steering motor neurons; vermillion, the {n['mn']} wing steering motor neurons the model reads out. Grey, "
+        "brain and VNC neuropil. FlyWire DNs (brain) and BANC DNs (cord) of the same types meet at the neck: this "
+        "junction is the model's DN bridge. D/V, L/R, A/P: dorsal/ventral, left/right, anterior/posterior. Scale "
+        f"bar, {SCALE_UM} um. Demonstration only.")
+
+
+def caption(n) -> str:
+    return _um(caption_body(n) + "\n\n" + CREDITS) + "\n"
+
+
+def methods_text(info, fetch) -> str:
     ids = json.loads((OUT / "ids.json").read_text())
-    lines = [
-        "Stage-A circuit of the brain-to-nerve-cord model in BANC space.",
-        "",
-        "a-d, Frontal (a), dorsal (b), lateral (c, from the fly's left) and posterior (d) orthographic views at the "
-        f"same scale. Lines: {n['fw_dn']} FlyWire descending neurons (DNs) that drive the model's DN bridge (sky "
-        "blue; FlyWire v783 skeletons transformed into BANC space by the BANC team, FAFB14 -> JRC2018F -> mirror "
-        "(FlyWire convention) -> BANC, elastix and thin-plate spline; brain portion only); "
-        f"{n['banc_dn']} BANC DNs that receive the bridge input (blue); {n['interneuron']} VNC interneurons on the "
-        "strongest two-hop paths from these DNs to the steering motor neurons, ranked by the summed synapse count "
-        f"of the path in the model's nerve-cord graph ({ids['interneurons']['eligible']} eligible, at most "
-        f"{N_INTERNEURONS} shown; orange); and the {n['mn']} wing steering motor neurons read out by the model "
-        "(b2, b3, i1, i2, hg1-hg4, left and right; BANC types iv1-iv4 for hg1-hg4; vermillion). BANC skeletons are "
-        f"full-resolution skeletor skeletons where available ({sk}) and L2 skeletons otherwise ({l2}); for drawing, "
-        f"terminal twigs shorter than {TWIG_UM:g} um are removed, nodes are kept >= {STEP_UM:g} um apart along "
-        f"the cable and {dropped} straight edges longer than {MAX_EDGE_UM:g} um (skeleton-healing jumps) are "
-        "omitted. Grey: BANC brain and VNC neuropil outlines (region_outlines, alpha shapes of synapse density), "
-        "semi-opaque; each neuron is split at the posterior end of the brain outline and brain and VNC are drawn "
-        "far to near, so in a and d the nearer region dims the farther one. BANC DNs are drawn faint inside the "
-        f"brain, where the FlyWire DNs of the same types run (alpha ramp over {RAMP_UM:g} um behind the split). "
-        "Fly's own axes: D, dorsal; V, ventral; L, left; R, "
-        "right; A, anterior; P, posterior. Scale bar, 100 um. Colours: Okabe-Ito palette. Demonstration only; not "
-        "an experiment and no claim.",
-        "",
-        "Data: FlyWire v783 connectome of the female adult fly brain (Dorkenwald et al. 2024; Schlegel et al. 2024; "
-        "EM: Zheng et al. 2018), CC BY-NC 4.0. BANC brain-and-nerve-cord connectome, materialisation v888 (Bates, "
-        f"Phelps, Kim, Yang et al. 2026, Nature 656:957-970), CC BY 4.0, Harvard Dataverse doi:{DOI}; skeletons, "
-        "warped FlyWire skeletons and region outlines from gs://lee-lab_brain-and-nerve-cord-fly-connectome "
-        "(compiled_data/, region_outlines/). This figure combines both sources and carries the more restrictive "
-        "licence, CC BY-NC 4.0."]
-    return "\n".join(lines).replace(" um", " \u00b5m") + "\n"
+    axes = json.loads((OUT / "axes.json").read_text())["differences"]
+    fw, bc, it = ids["flywire"], ids["banc"], ids["interneurons"]
+    sw, n = fetch["swc"], info["neurons_drawn"]
+    banc = [sw[f"{r}/banc"] for r in ("banc_dn", "interneuron", "mn")]
+    ver = bc["matches_per_column"]
+    seg = fetch["segment_ids"]
+    st = {r: STYLE[r] for r in ROLES}
+    pal = info["palette_min_delta_e"]
+    f = lambda x: f"{x:,}"
+    paras = [
+        ("Status", "Demonstration figure (origin class E, viewing only): not an experiment, no claim. Code: "
+                   "scripts/viz_anatomy.py (steps ids, fetch, check, figure)."),
+        ("Neurons and IDs",
+         f"FlyWire: the brain-model root IDs are FlyWire v783 ({f(fw['in_fafb_783_meta'])} of "
+         f"{f(fw['model_neurons'])} in compiled_data/fafb_783/fafb_783_meta.feather; missing: "
+         f"{', '.join(map(str, fw['missing'])) or 'none'}). The {n['fw_dn']} FlyWire DNs are those of the stage-A DN "
+         f"bridge ({bc['bridge_units']} units: {bc['bridge_units_by_match'].get('type', 0)} matched by cell type and "
+         f"side, {bc['bridge_units_by_match'].get('family', 0)} by type family). BANC: the {f(bc['vnc_neurons'])} "
+         f"nerve-cord neurons of the stage-A subgraph carry v888 root IDs ({f(ver['banc_888_id'])} match banc_888_id "
+         f"/ root_888 in compiled_data/banc_888/banc_888_meta.feather; v626 {f(ver['root_626'])}, v850 "
+         f"{f(ver['root_850'])}, current root_id {f(ver['root_id'])}). {n['banc_dn']} BANC DNs receive the bridge "
+         f"input; the {n['mn']} steering MNs are the model readout (b2, b3, i1, i2, hg1-hg4, left and right; BANC "
+         "types iv1-iv4 correspond to MANC hg1-hg4)."),
+        ("Interneurons",
+         f"Super class {it['super_class']}, neither a bridge target nor an MN, with at least one target -> k and one "
+         f"k -> MN edge in the stage-A subgraph: {f(it['eligible'])} eligible of {f(it['two_hop_intermediates'])} "
+         "two-hop intermediates. Ranked by the weaker edge (bottleneck) of the strongest path, min(max_T n_syn(T -> "
+         "k), max_MN n_syn(k -> MN)); ties by the summed synapses of that path, then all two-hop synapses through k, "
+         f"then root ID. The first {it['selected']} are drawn (bottleneck >= {it['bottleneck_min_selected']:g} "
+         f"synapses; {it['eligible_at_or_above_cutoff']} eligible reach it). {it['vs_summed_rule']['changed']} of "
+         f"the {it['selected']} differ from ranking by summed synapses alone."),
+        ("Skeletons",
+         f"FlyWire DNs: compiled_data/fafb_783/fafb_banc_space_swc/<id>_skeleton.swc ({sw['fw_dn/fafb_banc']['found']}"
+         "), FlyWire v783 skeletons transformed into BANC space by the BANC team (bancpipeline, "
+         "banc/transforms/banc-fafb-skel-transform.R): FAFB14 -> JRC2018F -> mirror (FlyWire convention) -> BANC, "
+         "elastix and thin-plate spline (bancr::banc_to_JRC2018F(method = \"tpsreg\", inverse = TRUE)). FAFB covers "
+         "the brain only, so these axons end at the neck. BANC neurons: compiled_data/banc_888/banc_banc_space_swc, "
+         f"<id>_skeleton.swc (skeletor, full resolution) where present ({sum(b['skeleton'] for b in banc)}), else "
+         f"<id>_l2.swc (pcg_skel L2; {sum(b['l2'] for b in banc)}). Node coordinates in nm, BANC space."),
+        ("Outlines",
+         f"region_outlines, legacy Neuroglancer precomputed meshes; segment IDs from segment_properties/info: "
+         f"{OUTLINES[0]} = {seg[OUTLINES[0]]}, {OUTLINES[1]} = {seg[OUTLINES[1]]}. Alpha shapes of synapse density "
+         "(banc_neuropil_meshes.md). The vertices are in nm (the note says voxels; the values match the nm "
+         f"skeletons). Per view the mesh is projected, rasterised at {SIL_RES_UM:g} um, closed (5 x 5 px), holes "
+         f"filled, contours under {MIN_CONTOUR_UM2:g} um\u00b2 dropped, and the contour simplified to "
+         f"{SIL_RES_UM:g} um."),
+        ("Axes and views",
+         "BANC axes: +x the fly's left, +y posterior, +z dorsal. +y posterior is documented (neck planes at y = 92500 "
+         "and 121000 voxels, neck_connective_y92500.md); +z dorsal and +x left were checked on the region meshes "
+         f"(mushroom-body calyces {axes['z_MB_CA_minus_GNG_um']:.0f} um and antennal lobes "
+         f"{axes['z_AL_minus_GNG_um']:.0f} um above the GNG; left antennal lobe {axes['x_AL_L_minus_AL_R_um']:.0f} "
+         "um towards +x of the right one). Orthographic projections: a frontal (viewer anterior, dorsal up), b dorsal "
+         "(anterior up), c lateral from the fly's left (anterior up, dorsal right), d posterior (dorsal up); one "
+         f"scale, {info['scale_mm_per_100um']:g} mm per 100 um at {FIG_W_MM:g} mm width."),
+        ("Drawing",
+         f"Skeleton reduction: terminal twigs shorter than {TWIG_UM:g} um removed in one pass (the skeletor files "
+         f"carry sub-micron hairs below the line width); nodes kept >= {STEP_UM:g} um apart along each unbranched "
+         "chain, chain ends kept; chains joined into polylines; "
+         f"{info['long_edges_dropped']} straight edges longer than {MAX_EDGE_UM:g} um (skeleton-healing jumps) "
+         "dropped; matplotlib path simplification at its default tolerance. Depth: each neuron is split at the "
+         f"posterior end of the brain outline (y = {info['neck_cut_y_um']:g} um) and brain and VNC are drawn far to "
+         f"near (outline, then neurons), so in a and d the nearer region dims the farther one; outline fill "
+         f"{OUTLINE_FILL} at alpha {OUTLINE_ALPHA:g}, edge {OUTLINE_EDGE} {OUTLINE_LW:g} pt. Lines (colour, width, "
+         "alpha): " + "; ".join(
+             f"{KEY_LABELS[r]} {st[r][0]}, {st[r][1]:g} pt, "
+             + (f"{st[r][2]:g}" if st[r][2] == st[r][3] else f"{st[r][2]:g} in the brain and {st[r][3]:g} in the "
+                f"VNC, ramped linearly over {RAMP_UM:g} um behind the split in {N_RAMP} bands")
+             for r in ROLES) + ". BANC DNs are faint in the brain, where the FlyWire DNs of the same types run. "
+         f"Drawing order within a region: {', '.join(KEY_LABELS[r] for r in DRAW_ORDER)}."),
+        ("Colours and type",
+         "Okabe-Ito sky blue, blue, orange and vermillion (the four-colour subset with the largest separation under "
+         "simulated colour-vision deficiency); smallest pairwise distance (OKLab x 100): normal "
+         f"{pal['normal']:g}, protanopia {pal['protan']:g}, deuteranopia {pal['deutan']:g}, tritanopia "
+         f"{pal['tritan']:g} (Machado et al. 2009, severity 1). {info['font']}, {FONT_PT} pt (keys {FONT_PT - 1}-"
+         f"{KEY_PT:g} pt), panel letters {LETTER_PT} pt bold. PDF fully vector "
+         f"({info['bytes']['pdf'] / 1e6:.0f} MB); PNG {DPI} dpi."),
+        ("Data", CREDITS.removeprefix("Data: "))]
+    return _um("Figure methods: stage-A circuit anatomy\n\n" + "\n\n".join(f"{h}. {t}" for h, t in paras)) + "\n"
+
+
+def warp_md(r) -> str:
+    e, x, dd = r["error"], r["excluded_other_tree"], r["distance_dependence"]
+    out = "; ".join(f"{o['cell_type']} {o['side']} ({o['root_soma_um']:.0f} um)" for o in r["root_outside_tol"])
+    row = lambda name, s: (f"| {name} | {s['n']} | {s['median_um']:.1f} | {s['rmse_um']:.1f} | {s['p95_um']:.1f} | "
+                           f"{s['max_um']:.1f} |" if s["n"] else f"| {name} | 0 | | | | |")
+    tl = ", ".join(f"{t['median_err_um']:.1f} um ({t['dist_um'][0]:.0f}-{t['dist_um'][1]:.0f} um, n = {t['n']})"
+                   for t in dd["tertiles"])
+    L = ["# Affine FlyWire -> BANC transform against the BANC team's warp", "",
+         "Demonstration (origin class E), no claim. Written by `scripts/viz_anatomy.py check` from "
+         "`runs/viz/anatomy/warp_check.json`.", "",
+         "**What is compared.** Per bridged FlyWire DN: our FlyWire soma (FlyWire voxels x (4, 4, 40) nm) mapped "
+         "into BANC space with our 12-parameter affine (`runs/viz/transforms.json`, fitted to DN-type landmarks), "
+         "against the root node of the same neuron's skeleton in `compiled_data/fafb_783/fafb_banc_space_swc`, "
+         "which the BANC team transformed FAFB14 -> JRC2018F -> mirror (FlyWire convention) -> BANC with elastix and "
+         "a thin-plate spline.", "",
+         "**Which DNs.**",
+         f"- {r['bridged_dns']} bridged DNs; {r['with_flywire_soma']} have a FlyWire soma and both skeletons.",
+         f"- The native-space root (`fafb_fafb_space_swc`, unit {r['native_unit']}) lies within "
+         f"{r['root_tol_um']:g} um of our soma for {r['root_within_tol']} (median {r['root_soma_um_median']:.2f} um); "
+         f"outside: {out or 'none'}.",
+         f"- **{x['n']} of these {r['root_within_tol']} are excluded**: their BANC-space file is not the native "
+         f"tree node for node (median {x['median_node_ratio_native_to_warped']:.1f} times fewer nodes; "
+         f"{x['cell_types']} cell types), so it is another, coarser skeleton and its root is not the soma. Taken "
+         f"literally, root against root gives a median of {x['root_vs_root']['median_um']:.0f} um for them, while "
+         f"our soma lies a median {x['nearest_warped_node_um']['median_um']:.1f} um from the nearest node of that "
+         "skeleton. This fits the FlyWire L2 fallback described in `fafb_783_banc_space_swc.md`.",
+         f"- **Used: {r['used']} DNs** (root within {r['root_tol_um']:g} um and the same tree).", "",
+         "**Result, um.**", "",
+         "| set | n | median | RMSE | 95th pct | max |", "|---|---|---|---|---|---|",
+         row("all used", e),
+         row("landmark types used in the fit", r["error_by_landmark_set"]["control"]),
+         row("held-out landmark types", r["error_by_landmark_set"]["check"]),
+         row("fit outlier types", r["error_by_landmark_set"]["control_outlier"]),
+         row("types without a landmark", r["error_by_landmark_set"]["none"]),
+         row(f"literal, all {r['root_within_tol']} roots (for reference)", r["all_root_within_tol_root_vs_root"]),
+         "",
+         "Mean offset, ours minus warp: " + ", ".join(f"{k} {v:+.1f}" for k, v in r["mean_signed_diff_um"].items())
+         + " um.", "",
+         "**Distance from the landmark centroid** (centroid of the "
+         f"{r['n_fitted_landmarks']} fitted control landmarks, BANC space): Spearman rho {dd['spearman_rho']:.2f} "
+         f"(p = {dd['spearman_p']:.1g}); least-squares slope {dd['slope_um_per_100um']:.1f} um per 100 um; tertile "
+         f"medians {tl}. The error grows a little with distance and is not monotone in the outer tertile.", "",
+         "**Caveat.** This is agreement with the BANC team's registration, not with ground truth: both are "
+         "transforms, the warp has errors of its own, and no independent anatomical truth enters. The affine was "
+         "fitted to type-mean soma landmarks of these same DNs, so for the landmark types used in the fit the "
+         "comparison is not out of sample; the held-out types are the cleaner estimate."]
+    return _um("\n".join(L)) + "\n"
+
+
+def palette_check(hexes) -> dict:
+    """Smallest pairwise OKLab distance (x 100) of the colours for normal vision and simulated CVD."""
+    A = np.array([[0.4122214708, 0.5363325363, 0.0514459929], [0.2119034982, 0.6806995451, 0.1073969566],
+                  [0.0883024619, 0.2817188376, 0.6299787005]])
+    B = np.array([[0.2104542553, 0.7936177850, -0.0040720468], [1.9779984951, -2.4285922050, 0.4505937099],
+                  [0.0259040371, 0.7827717662, -0.8086757660]])
+    c = np.array([[int(h[i:i + 2], 16) for i in (1, 3, 5)] for h in hexes]) / 255
+    lin = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+    res = {}
+    for name, M in [("normal", np.eye(3))] + [(k, np.array(v)) for k, v in CVD.items()]:
+        lab = np.cbrt(np.clip(lin @ np.asarray(M).T, 0, 1) @ A.T) @ B.T
+        d = np.linalg.norm(lab[:, None] - lab[None], axis=-1)
+        res[name] = round(float(100 * d[np.triu_indices(len(hexes), 1)].min()), 1)
+    return res
 
 
 STEPS = {"ids": step_ids, "fetch": step_fetch, "check": step_check, "figure": step_figure}
@@ -870,8 +1043,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     steps = list(STEPS) if a.step == "all" else [a.step]
     existing = [str(OUT / f) for st in steps for f in FILES.get(st, ()) if (OUT / f).exists()]
-    if "figure" in steps:
-        existing += [str(FIG_DIR / f) for f in FIG_FILES if (FIG_DIR / f).exists()]
+    existing += [str(FIG_DIR / f) for st in steps for f in FIG_FILES.get(st, ()) if (FIG_DIR / f).exists()]
     if existing and not a.overwrite:
         raise SystemExit(f"{existing} exist; pass --overwrite")
     for st in steps:
