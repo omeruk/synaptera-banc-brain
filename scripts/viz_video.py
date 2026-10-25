@@ -1,6 +1,6 @@
 """Visualisation (demonstration, no claim): a short video of the stage-A circuit. Origin class E (viewing only).
 
-    env -u PYTHONPATH CUDA_VISIBLE_DEVICES= python scripts/viz_video.py [data|stills|test|video] [--overwrite]
+    env -u PYTHONPATH CUDA_VISIBLE_DEVICES= python scripts/viz_video.py [data|stills|video] [--overwrite]
 
 Trials: the validation split only (configs/f5_splits.json, data seeds 160-199), rot_right and rot_left at 120 deg/s
 (one speed, so dA and the teacher match): 80 trials through train/f5_stageA.load_trials (manifest SHA-256, split and
@@ -10,16 +10,19 @@ DN-column checks; it refuses test seeds and held-out speeds). CPU only.
   training; the state of each drawn BANC neuron per interval, and dA. Per direction the mean over the 40 seeds; per
   neuron minus its own pre-stimulus baseline (mean over BASELINE_MS) and smoothed causally (exponential, TAU_MS).
   -> runs/viz/video/traces.npz, data.json
-- stills: +0, +300 and +800 ms of rot_right on a light and a dark background, and the title and end cards (dark).
-- test: a 3 s test clip (dark), rot_right from +0 to +300 ms of the trial.
-- video: title card, rot_right, rot_left (each -200 to +1000 ms, slowed SLOW x), end card.
-Neurons, anatomy and neck split as scripts/viz_activity_figure.py (circuit_lines). Colour: the activity figure's
-diverging map (light: light-grey centre; dark: dark-grey centre), one symmetric range per population at the 95th
-percentile of |value| over its neurons and every frame of both clips. Camera: perspective turntable about the fly's
-dorsal-ventral axis (BANC z), elevation ELEV_DEG, from the fly's left side (anterior-posterior axis horizontal)
-ORBIT_DEG per clip with cosine easing; dorsal stays up. Frames are drawn at 2x (3840 x 2160, matplotlib Agg) and
-downsampled (area); 1 pt = 1 px at 1080p. Encoding: H.264 (libx264, yuv420p, CRF 18, +faststart), 30 fps, via the
-ffmpeg of imageio-ffmpeg. Outputs into the preview video folder; never overwritten without --overwrite (rule 13).
+- stills: the check stills STILLS (act, ms). -> preview video folder, runs/viz/video/stills.json
+- video: title card, act 1, a cross-fade, act 2, end card. -> VIDEO_NAME in the preview video folder, video.json
+Act 1, "activity": rot_right, each neuron's change from its pre-stimulus baseline. Act 2, "direction": per neuron and
+interval the trial-mean rot_right minus rot_left (the same causal smoothing); the dA trace shows both directions.
+Each act runs CLIP_MS around stimulus onset, slowed SLOW x. Neurons, anatomy and neck split as
+scripts/viz_activity_figure.py (circuit_lines); in addition the FlyWire DN segments outside the brain neuropil
+outline are dropped (point-in-mesh by ray parity on a NECK_GRID_UM grid; a segment needs both ends inside). Colour:
+the activity figure's diverging map with a dark-grey centre (dark theme only), per act and population one symmetric
+range at the 95th percentile of |value| over its neurons and every frame of the act. Camera: fixed (open loop: the
+fly does not turn), perspective from straight behind the fly (azimuth AZ_DEG, posterior), elevation ELEV_DEG, dorsal
+up. Frames are drawn at 2x (3840 x 2160, matplotlib Agg) and downsampled (area); 1 pt = 1 px at 1080p. Encoding:
+H.264 (libx264, yuv420p, CRF 18, +faststart), 30 fps, via the ffmpeg of imageio-ffmpeg. Outputs are never
+overwritten without --overwrite (rule 13).
 """
 import argparse
 import json
@@ -52,11 +55,13 @@ CHUNK = 16
 BASELINE_MS = (-200, 0)
 TAU_MS = 25.0
 CLIP_MS = (-200, 1000)
-STILL_MS = (0, 300, 800)
-TEST_MS = (0, 300)
+STILLS = ((1, 300), (2, 300), (2, 800))              # (act, ms from onset)
 FPS, SLOW = 30, 10
-TITLE_S, END_S, FADE_S = 2.0, 3.0, 0.3
-ELEV_DEG, AZ0_DEG, ORBIT_DEG = 30.0, 0.0, 90.0
+TITLE_S, END_S, FADE_S, XFADE_S = 2.0, 3.0, 0.3, 0.5   # cards, card text fade, cross-fade between the acts
+ELEV_DEG, AZ_DEG = 30.0, 90.0                        # azimuth 90: camera at +y, straight behind the fly
+NECK_GRID_UM = 2.0
+ACT_LABEL = {1: "change from baseline", 2: "right minus left"}
+VIDEO_NAME = "stageA_circuit_video.mp4"
 DIST_UM = 4500.0                                     # camera distance: mild perspective
 RANGE_PCT = 95
 W, H, SS = 1920, 1080, 2                             # output size, supersampling
@@ -66,17 +71,15 @@ LINE_ALPHA = 0.85
 THREADS = 12
 TITLE = "Visual turning signal from brain to wing motor neurons"
 SOURCES = "Data: FlyWire v783 connectome (brain) and BANC v888 connectome (brain and nerve cord)"
-END_LINE = "Brain: untrained spiking reference model; only the nerve cord was trained."
+END_LINES = ("Brain: untrained spiking reference model; only the nerve cord was trained.",
+             "Open-loop simulation: the fly is held fixed; colours show model activity.")
 END_CREDITS = (
     "FlyWire v783: Dorkenwald et al. 2024; Schlegel et al. 2024; EM: Zheng et al. 2018. CC BY-NC 4.0.",
     "BANC v888: Bates, Phelps, Kim, Yang et al. 2026, Nature 656:957-970. CC BY 4.0. doi:10.7910/DVN/7WTH1N.",
     "Skeletons, warped FlyWire skeletons and outlines: gs://lee-lab_brain-and-nerve-cord-fly-connectome.",
     "This video: CC BY-NC 4.0 (it combines both sources).")
-THEMES = {
-    "light": dict(bg="#FFFFFF", fill=V.OUTLINE_FILL, fill_alpha=V.OUTLINE_ALPHA, edge=V.OUTLINE_EDGE, mid=AF.MID,
-                  ink="#1A1A1A", ink2="#6B6B6B", teacher=AF.TEACHER_COL, zero="#BDBDBD"),
-    "dark": dict(bg="#0E0F11", fill="#24262A", fill_alpha=0.75, edge="#3E4146", mid="#4D4D4D",
-                 ink="#E8E8E8", ink2="#9A9A9A", teacher="#A8A8A8", zero="#4A4A4A")}
+TH = dict(bg="#0E0F11", fill="#24262A", fill_alpha=0.75, edge="#3E4146", mid="#4D4D4D", ink="#E8E8E8",
+          ink2="#9A9A9A", teacher="#A8A8A8", zero="#4A4A4A")       # dark theme
 FILES = {"data": ("traces.npz", "data.json")}
 
 
@@ -175,102 +178,126 @@ def step_data(a):
 
 
 # ── scene ───────────────────────────────────────────────────────────────────────────────────────────────────────────
-def ease(u):
-    return 0.5 - 0.5 * math.cos(math.pi * min(max(u, 0.0), 1.0))
+def act_frame(act, i):
+    n = n_clip()
+    return dict(kind="clip", act=act, i=i, t=CLIP_MS[0] + i / (n - 1) * (CLIP_MS[1] - CLIP_MS[0]))
 
 
 def schedule():
-    """Every frame of the full video: kind (title, clip, end), stimulus, trial time (ms), camera azimuth (deg)."""
+    """Every frame: title card, act 1, cross-fade (last act-1 frame into the first act-2 frame), act 2, end card."""
     fr = [dict(kind="title", i=i, n=int(TITLE_S * FPS)) for i in range(int(TITLE_S * FPS))]
-    n = n_clip()
-    for c, s in enumerate(STIMULI):
-        for i in range(n):
-            u = i / (n - 1)
-            fr.append(dict(kind="clip", stim=s, t=CLIP_MS[0] + u * (CLIP_MS[1] - CLIP_MS[0]),
-                           az=AZ0_DEG + ORBIT_DEG * (c + ease(u))))
+    n, nf = n_clip(), int(XFADE_S * FPS)
+    fr += [act_frame(1, i) for i in range(n)]
+    fr += [dict(kind="fade", i=i, w=(i + 1) / (nf + 1)) for i in range(nf)]
+    fr += [act_frame(2, i) for i in range(n)]
     fr += [dict(kind="end", i=i, n=int(END_S * FPS)) for i in range(int(END_S * FPS))]
     return fr
 
 
-def clip_frame(stim, t):
-    """The clip frame of a stimulus at trial time t (nearest frame)."""
+def still_frame(act, t):
     n = n_clip()
-    i = int(round((t - CLIP_MS[0]) / (CLIP_MS[1] - CLIP_MS[0]) * (n - 1)))
-    c = STIMULI.index(stim)
-    u = i / (n - 1)
-    return dict(kind="clip", stim=stim, t=CLIP_MS[0] + u * (CLIP_MS[1] - CLIP_MS[0]),
-                az=AZ0_DEG + ORBIT_DEG * (c + ease(u)))
+    return act_frame(act, int(round((t - CLIP_MS[0]) / (CLIP_MS[1] - CLIP_MS[0]) * (n - 1))))
 
 
 class Camera:
-    """Perspective camera on a circle about the vertical through the circuit centre; focal and screen offset fixed."""
+    """Fixed perspective camera: azimuth AZ_DEG about the vertical through the circuit centre, elevation ELEV_DEG."""
 
     def __init__(self, centre, focal=1.0, cx=0.0, cy=0.0):
         self.c, self.f, self.cx, self.cy = np.asarray(centre, float), focal, cx, cy
+        a, e = math.radians(AZ_DEG), math.radians(ELEV_DEG)
+        self.pos = self.c + DIST_UM * np.array([math.cos(e) * math.cos(a), math.cos(e) * math.sin(a), math.sin(e)])
+        self.fwd = (self.c - self.pos) / np.linalg.norm(self.c - self.pos)
+        r = np.cross(self.fwd, [0.0, 0.0, 1.0])
+        self.right = r / np.linalg.norm(r)
+        self.up = np.cross(self.right, self.fwd)
 
-    def basis(self, az):
-        a, e = math.radians(az), math.radians(ELEV_DEG)
-        pos = self.c + DIST_UM * np.array([math.cos(e) * math.cos(a), math.cos(e) * math.sin(a), math.sin(e)])
-        fwd = (self.c - pos) / np.linalg.norm(self.c - pos)
-        right = np.cross(fwd, [0.0, 0.0, 1.0])
-        right /= np.linalg.norm(right)
-        return pos, fwd, right, np.cross(right, fwd)
-
-    def project(self, P, az):
-        pos, fwd, right, up = self.basis(az)
-        d = P - pos
-        z = d @ fwd
-        return np.c_[self.cx + self.f * (d @ right) / z, self.cy - self.f * (d @ up) / z]
+    def project(self, P):
+        d = P - self.pos
+        z = d @ self.fwd
+        return np.c_[self.cx + self.f * (d @ self.right) / z, self.cy - self.f * (d @ self.up) / z]
 
 
 def fit_camera(points, centre) -> Camera:
-    """Focal length and screen offset so that the circuit fits VIEW_BOX at every azimuth of the orbit."""
-    cam = Camera(centre)
-    lo, hi = np.full(2, np.inf), np.full(2, -np.inf)
-    for az in np.linspace(AZ0_DEG, AZ0_DEG + 2 * ORBIT_DEG, 37):
-        q = cam.project(points, az)
-        lo, hi = np.minimum(lo, q.min(0)), np.maximum(hi, q.max(0))
+    """Focal length and screen offset so that the circuit fills VIEW_BOX."""
+    q = Camera(centre).project(points)
+    lo, hi = q.min(0), q.max(0)
     bx0, by0, bx1, by1 = VIEW_BOX
     f = min((bx1 - bx0) / (hi[0] - lo[0]), (by1 - by0) / (hi[1] - lo[1]))
     return Camera(centre, f, (bx0 + bx1) / 2 - f * (lo[0] + hi[0]) / 2, (by0 + by1) / 2 - f * (lo[1] + hi[1]) / 2)
 
 
-def lut_for(theme):
-    """The activity figure's diverging map (OKLab arms) with the theme's neutral centre."""
-    lab = {k: AF._oklab(AF._lin(AF._hex(h))) for k, h in (("neg", AF.NEG), ("mid", THEMES[theme]["mid"]),
-                                                          ("pos", AF.POS))}
+def lut_dark():
+    """The activity figure's diverging map (OKLab arms) with the dark theme's neutral centre."""
+    lab = {k: AF._oklab(AF._lin(AF._hex(h))) for k, h in (("neg", AF.NEG), ("mid", TH["mid"]), ("pos", AF.POS))}
     t = np.linspace(-1, 1, AF.N_LUT)[:, None]
     arm = np.where(t < 0, lab["neg"], lab["pos"])
     return AF._srgb(AF._from_oklab(lab["mid"] + np.abs(t) * (arm - lab["mid"])))
 
 
-def palette_check(theme) -> dict:
+def palette_check() -> dict:
     """The activity figure's check (mirror and centre-to-pole separation under simulated CVD), lightness monotone
-    away from the centre in either direction, and the distance of centre and poles from the background."""
-    lut = lut_for(theme)
+    away from the centre, and the distance of centre and poles from the background."""
+    lut = lut_dark()
     c = AF.diverging_check(lut)
     L = AF._oklab(AF._lin(lut))[:, 0]
     mid = AF.N_LUT // 2
-    up = np.all(np.diff(L[mid:]) >= 0) and np.all(np.diff(L[:mid + 1]) <= 0)
-    down = np.all(np.diff(L[mid:]) <= 0) and np.all(np.diff(L[:mid + 1]) >= 0)
-    c["lightness"]["monotone"] = bool(up or down)
-    c["lightness"]["direction_from_centre"] = "up" if up else "down" if down else "mixed"
-    bg = AF._oklab(AF._lin(AF._hex(THEMES[theme]["bg"])))
+    c["lightness"]["monotone"] = bool(np.all(np.diff(L[mid:]) >= 0) and np.all(np.diff(L[:mid + 1]) <= 0))
+    c["lightness"]["direction_from_centre"] = "up"
+    bg = AF._oklab(AF._lin(AF._hex(TH["bg"])))
     lab = AF._oklab(AF._lin(lut))
 
     def lum(rgb):
         lin = AF._lin(rgb)
         return float(0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2])
 
-    lb = lum(AF._hex(THEMES[theme]["bg"]))
+    lb = lum(AF._hex(TH["bg"]))
     c["background"] = {k: dict(delta_e=round(float(100 * np.linalg.norm(lab[i] - bg)), 1),
                                contrast=round((max(lum(lut[i]), lb) + 0.05) / (min(lum(lut[i]), lb) + 0.05), 2))
                        for k, i in (("neg", 0), ("centre", mid), ("pos", -1))}
     return c
 
 
+def inside_mesh(Vx, F, res=NECK_GRID_UM):
+    """Test for points (um) inside a closed triangle mesh (um): parity of the crossings, left of the point, of the ray
+    along x through the centre of the point's (y, z) grid cell (spacing res; centres offset so none falls on a grid
+    line). Returns the test as a function of an (n, 3) array."""
+    off = 0.3137 * res
+    lo = Vx[:, 1:].min(0) - res
+    n = np.ceil((Vx[:, 1:].max(0) + res - lo) / res).astype(int) + 1
+    cells, xs = [], []
+    for tri in Vx[F]:
+        yz = tri[:, 1:]
+        i0 = np.floor((yz.min(0) - lo - off) / res).astype(int)
+        i1 = np.ceil((yz.max(0) - lo - off) / res).astype(int)
+        iy, iz = np.meshgrid(np.arange(i0[0], i1[0] + 1), np.arange(i0[1], i1[1] + 1), indexing="ij")
+        c = np.c_[lo[0] + off + iy.ravel() * res, lo[1] + off + iz.ravel() * res]
+        v0, v1, v2 = yz[1] - yz[0], yz[2] - yz[0], c - yz[0]
+        d00, d01, d11 = v0 @ v0, v0 @ v1, v1 @ v1
+        den = d00 * d11 - d01 * d01
+        if abs(den) < 1e-12:
+            continue
+        b1 = (d11 * (v2 @ v0) - d01 * (v2 @ v1)) / den
+        b2 = (d00 * (v2 @ v1) - d01 * (v2 @ v0)) / den
+        m = (b1 >= 0) & (b2 >= 0) & (b1 + b2 <= 1)
+        cells.append((iy.ravel() * n[1] + iz.ravel())[m])
+        xs.append((tri[0, 0] * (1 - b1 - b2) + tri[1, 0] * b1 + tri[2, 0] * b2)[m])
+    cells, xs = np.concatenate(cells), np.concatenate(xs)
+    x0, big = xs.min() - 1e4, xs.max() - xs.min() + 2e4                 # x - x0 in (0, big) for any point nearby
+    key = np.sort(cells * big + (xs - x0))
+
+    def test(pts):
+        ip = np.round((pts[:, 1:] - lo - off) / res).astype(int)
+        ok = (ip >= 0).all(1) & (ip < n).all(1)
+        cp = ip[:, 0] * n[1] + ip[:, 1]
+        xr = np.clip(pts[:, 0] - x0, 0, big - 1)
+        cnt = np.searchsorted(key, cp * big + xr) - np.searchsorted(key, cp * big)
+        return ok & (cnt % 2 == 1)
+
+    return test
+
+
 class Scene:
-    """Geometry (projected per frame), activity traces, ranges and camera; shared by the frame workers."""
+    """Geometry, the per-act traces and ranges, and the fixed camera; shared by the frame workers."""
 
     def __init__(self):
         import pandas as pd
@@ -278,38 +305,65 @@ class Scene:
         meshes, y_cut = V.outline_meshes(fetch)
         self.meshes = [(Vx / 1e3, F) for Vx, F in meshes.values()]
         lines, _ = AF.circuit_lines(y_cut)
+        brain_V, brain_F = self.meshes[0]
+        inside = inside_mesh(brain_V, brain_F)
+        before = after = touched = 0
+        verts, self.codes = [], []
+        for role, _, _, (p, st) in lines:
+            if role == "fw_dn" and len(p):                          # neck cleanup: FlyWire DNs inside the brain outline
+                ins = inside(p)
+                q, s2 = V.runs(p, st, ins & np.r_[False, ins[:-1]])
+                before, after, touched = before + len(p), after + len(q), touched + int(len(q) < len(p))
+                p, st = q, s2
+            verts.append(p)
+            self.codes.append(np.where(st, 1, 2).astype(np.uint8))
+        self.neck = dict(fw_dn_vertices_before=before, after=after, dropped=before - after,
+                         dropped_fraction=round((before - after) / before, 4), neurons_with_drops=touched,
+                         fw_dn_inside_fraction=round(after / before, 4),
+                         cord_vertices_inside_brain_fraction=round(float(np.mean(inside(np.concatenate(
+                             [p for r, _, _, (p, _) in lines if r in ("interneuron", "mn") and len(p)])))), 4))
         self.role = np.array([r for r, _, _, _ in lines])
         self.node = np.array([nd for _, _, nd, _ in lines])
-        verts = [p for _, _, _, (p, _) in lines]
-        self.codes = [np.where(st, 1, 2).astype(np.uint8) for _, _, _, (_, st) in lines]
         self.off = np.r_[0, np.cumsum([len(p) for p in verts])]
         self.P = np.concatenate(verts)
         tr = dict(np.load(OUT / "traces.npz"))
         self.t_ms = tr["t_ms"]
-        col = {int(b): k for k, b in enumerate(tr["fw_index"])}
-        cpos = {int(n): k for k, n in enumerate(tr["cord_nodes"])}
         circ = pd.read_csv(ANAT / "circuit.csv")
         if not np.array_equal(np.sort(tr["cord_nodes"]), np.sort(circ.loc[circ["role"] != "fw_dn", "node"])):
             raise SystemExit("traces.npz and the circuit differ")
+        col = {int(b): k for k, b in enumerate(tr["fw_index"])}
+        cpos = {int(nd): k for k, nd in enumerate(tr["cord_nodes"])}
         self.fw = self.role == "fw_dn"
-        self.trace = {}
-        for s in STIMULI:
+        fi = [col[int(nd)] for nd in self.node[self.fw]]
+        ci = [cpos[int(nd)] for nd in self.node[~self.fw]]
+
+        def per_neuron(fw, cord):
             x = np.zeros((len(self.t_ms), len(lines)))
-            x[:, self.fw] = tr[f"fw_{s}"][:, [col[int(n)] for n in self.node[self.fw]]]
-            x[:, ~self.fw] = tr[f"cord_{s}"][:, [cpos[int(n)] for n in self.node[~self.fw]]]
-            self.trace[s] = x
-            self.trace[f"dA_{s}"], self.trace[f"target_{s}"] = tr[f"dA_{s}"], tr[f"target_{s}"]
-        frames = [f for f in schedule() if f["kind"] == "clip"]
-        allv = np.stack([self.value(f["stim"], f["t"]) for f in frames])     # (frames, neurons)
-        self.range = {"brain": float(np.percentile(np.abs(allv[:, self.fw]), RANGE_PCT)),
-                      "cord": float(np.percentile(np.abs(allv[:, ~self.fw]), RANGE_PCT))}
-        self.rng = np.where(self.fw, self.range["brain"], self.range["cord"])
+            x[:, self.fw], x[:, ~self.fw] = fw[:, fi], cord[:, ci]
+            return x
+
+        ms = float(tr["interval_ms"])
+        self.trace = {1: per_neuron(tr["fw_rot_right"], tr["cord_rot_right"]),
+                      2: per_neuron(smooth(tr["fw_raw_rot_right"].astype(float) - tr["fw_raw_rot_left"], ms),
+                                    smooth(tr["cord_raw_rot_right"].astype(float) - tr["cord_raw_rot_left"], ms))}
+        self.dA = {s: tr[f"dA_{s}"] for s in STIMULI}
+        self.target = {s: tr[f"target_{s}"] for s in STIMULI}
+        pre = self.t_ms <= 0
+        self.act2_pre_max = {"brain": float(np.abs(self.trace[2][pre][:, self.fw]).max()),
+                             "cord": float(np.abs(self.trace[2][pre][:, ~self.fw]).max())}
+        self.range = {}
+        for act in (1, 2):
+            v = np.stack([self.value(act, f["t"]) for f in schedule() if f["kind"] == "clip" and f["act"] == act])
+            self.range[act] = {"brain": float(np.percentile(np.abs(v[:, self.fw]), RANGE_PCT)),
+                               "cord": float(np.percentile(np.abs(v[:, ~self.fw]), RANGE_PCT))}
+        self.rng = {act: np.where(self.fw, r["brain"], r["cord"]) for act, r in self.range.items()}
         sample = np.concatenate([self.P[::40]] + [Vx for Vx, _ in self.meshes])
         self.camera = fit_camera(sample, sample.mean(0))
+        self.silhouettes = silhouettes(self)
 
-    def value(self, stim, t):
-        """Per neuron, the trace linearly interpolated at trial time t (ms)."""
-        x = self.trace[stim]
+    def value(self, act, t):
+        """Per neuron, the act's trace linearly interpolated at trial time t (ms)."""
+        x = self.trace[act]
         j = float(np.interp(t, self.t_ms, np.arange(len(self.t_ms))))
         i0 = int(math.floor(j))
         i1 = min(i0 + 1, len(self.t_ms) - 1)
@@ -333,12 +387,12 @@ def _figure():
     return _FIG["fig"], _FIG["ax"]
 
 
-def silhouettes(scene, az):
-    """Outer contours (1080p px) of the projected brain and VNC outlines, rasterised at the 2x size."""
+def silhouettes(scene):
+    """Outer contours (1080p px) of the projected brain and VNC outlines, rasterised at the 2x size (fixed camera)."""
     import cv2
     out = []
     for Vx, F in scene.meshes:
-        q = np.round(scene.camera.project(Vx, az) * SS).astype(np.int32)
+        q = np.round(scene.camera.project(Vx) * SS).astype(np.int32)
         img = np.zeros((H * SS, W * SS), np.uint8)
         cv2.fillPoly(img, list(q[F]), 255)
         img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
@@ -347,45 +401,54 @@ def silhouettes(scene, az):
     return out
 
 
-def draw_drum(ax, th, stim, x, y, r=34):
-    """Drum seen from above, the fly in the middle (anterior up); the arrow shows the pattern motion in front of the
-    fly: to the fly's right (clockwise from above) for rot_right."""
-    from matplotlib.patches import Circle, Polygon
-    ax.add_artist(Circle((x, y), r, fill=False, ec=th["ink"], lw=1.4))
-    for k in range(12):
-        a = 2 * math.pi * k / 12
-        ax.plot([x + 0.78 * r * math.cos(a), x + r * math.cos(a)], [y + 0.78 * r * math.sin(a), y + r * math.sin(a)],
-                color=th["ink"], lw=1.4, solid_capstyle="butt")
-    ax.add_artist(Polygon([(x, y - 9), (x - 6, y + 7), (x + 6, y + 7)], closed=True, fc=th["ink"], ec="none"))
-    col = AF.DIR_COL[stim]
-    ra = r + 9
-    a0, a1 = (math.radians(130), math.radians(50)) if stim == "rot_right" else (math.radians(50), math.radians(130))
+def _arrow(ax, x, y, ra, a0, a1, col):
+    from matplotlib.patches import Polygon
     a = np.linspace(a0, a1, 40)
     ax.plot(x + ra * np.cos(a), y - ra * np.sin(a), color=col, lw=2.2, solid_capstyle="round")
     tip = np.array([x + ra * math.cos(a1), y - ra * math.sin(a1)])
     tang = np.array([-math.sin(a1), -math.cos(a1)]) * (-1 if a1 < a0 else 1)     # motion direction at the tip
-    tang /= np.linalg.norm(tang)
     nrm = np.array([-tang[1], tang[0]])
     ax.add_artist(Polygon([tip + 9 * tang, tip - 3 * tang + 6 * nrm, tip - 3 * tang - 6 * nrm], closed=True, fc=col,
                           ec="none"))
 
 
-def draw_colour_bars(ax, th, lut, ranges, x=130, y=905):
+def draw_drum(ax, act, x, y, r=34):
+    """Drum seen from above, the fly in the middle (anterior up). Act 1: the rot_right arrow (pattern in front of the
+    fly moving to its right, clockwise from above); act 2: both arrows from the front, right (vermillion) and left
+    (blue)."""
+    from matplotlib.patches import Circle, Polygon
+    ax.add_artist(Circle((x, y), r, fill=False, ec=TH["ink"], lw=1.4))
+    for k in range(12):
+        a = 2 * math.pi * k / 12
+        ax.plot([x + 0.78 * r * math.cos(a), x + r * math.cos(a)], [y + 0.78 * r * math.sin(a), y + r * math.sin(a)],
+                color=TH["ink"], lw=1.4, solid_capstyle="butt")
+    ax.add_artist(Polygon([(x, y - 9), (x - 6, y + 7), (x + 6, y + 7)], closed=True, fc=TH["ink"], ec="none"))
+    ra = r + 9
+    if act == 1:
+        _arrow(ax, x, y, ra, math.radians(130), math.radians(50), AF.DIR_COL["rot_right"])
+    else:
+        _arrow(ax, x, y, ra, math.radians(95), math.radians(35), AF.DIR_COL["rot_right"])
+        _arrow(ax, x, y, ra, math.radians(85), math.radians(145), AF.DIR_COL["rot_left"])
+
+
+def draw_colour_bars(ax, lut, ranges, label, x=130, y=905):
     from matplotlib.collections import PolyCollection
     w, h = 190, 9
-    for k, (label, unit, r) in enumerate((("FlyWire DNs", "Hz", ranges["brain"]),
-                                          ("BANC neurons", "a.u.", ranges["cord"]))):
+    ax.text(x, y - 34, label, color=TH["ink2"], fontsize=16, ha="left", va="bottom")
+    for k, (name, unit, r) in enumerate((("FlyWire DNs", "Hz", ranges["brain"]),
+                                         ("BANC neurons", "a.u.", ranges["cord"]))):
         yy = y + 62 * k
         e = np.linspace(x, x + w, len(lut) + 1)
         ax.add_collection(PolyCollection([[(e[i], yy), (e[i + 1], yy), (e[i + 1], yy + h), (e[i], yy + h)]
                                           for i in range(len(lut))], facecolors=lut, edgecolors=lut, linewidths=0.3))
-        ax.text(x, yy - 5, f"{label} ({unit})", color=th["ink"], fontsize=17, ha="left", va="bottom")
-        for v, s in ((x, f"\u2212{r:.2g}"), (x + w / 2, "0"), (x + w, f"{r:.2g}")):
-            ax.plot([v, v], [yy + h, yy + h + 4], color=th["ink"], lw=1.0)
-            ax.text(v, yy + h + 6, s, color=th["ink"], fontsize=15, ha="center", va="top")
+        ax.text(x, yy - 5, f"{name} ({unit})", color=TH["ink"], fontsize=17, ha="left", va="bottom")
+        for v, s in ((x, f"−{r:.2g}"), (x + w / 2, "0"), (x + w, f"{r:.2g}")):
+            ax.plot([v, v], [yy + h, yy + h + 4], color=TH["ink"], lw=1.0)
+            ax.text(v, yy + h + 6, s, color=TH["ink"], fontsize=15, ha="center", va="top")
 
 
-def draw_dA(ax, th, scene, stim, t, box=(560, 915, 1360, 1010)):
+def draw_dA(ax, scene, act, t, box=(560, 915, 1360, 1010)):
+    """dA up to the current time (act 1: rot_right; act 2: both directions), the teacher dA* dashed."""
     x0, y0, x1, y1 = box
     ym = (y0 + y1) / 2
     amp = 14.0                                                            # deg at the box edge (A_MAX 12.5 inside)
@@ -393,53 +456,59 @@ def draw_dA(ax, th, scene, stim, t, box=(560, 915, 1360, 1010)):
     ty = lambda v: ym - v / amp * (y1 - y0) / 2                                        # noqa: E731
     m = (scene.t_ms >= CLIP_MS[0]) & (scene.t_ms <= CLIP_MS[1])
     tt = scene.t_ms[m]
-    ax.plot([x0, x1], [ym, ym], color=th["zero"], lw=0.8)
-    ax.plot([tx(0), tx(0)], [y0, y1], color=th["zero"], lw=0.8)
-    ax.plot(tx(tt), ty(scene.trace[f"target_{stim}"][m]), color=th["teacher"], lw=1.0, ls=(0, (4, 3)))
-    k = tt <= t
-    if k.any():
-        cur = np.interp(t, scene.t_ms, scene.trace[f"dA_{stim}"])
-        xs = np.r_[tx(tt[k]), tx(t)]
-        ys = np.r_[ty(scene.trace[f"dA_{stim}"][m][k]), ty(cur)]
-        ax.plot(xs, ys, color=AF.DIR_COL[stim], lw=1.8, solid_capstyle="round")
-        ax.plot([xs[-1]], [ys[-1]], "o", color=AF.DIR_COL[stim], ms=4.5, mew=0)
+    ax.plot([x0, x1], [ym, ym], color=TH["zero"], lw=0.8)
+    ax.plot([tx(0), tx(0)], [y0, y1], color=TH["zero"], lw=0.8)
+    for s in (("rot_right",) if act == 1 else STIMULI):
+        ax.plot(tx(tt), ty(scene.target[s][m]), color=TH["teacher"], lw=1.0, ls=(0, (4, 3)))
+        k = tt <= t
+        if k.any():
+            cur = np.interp(t, scene.t_ms, scene.dA[s])
+            xs, ys = np.r_[tx(tt[k]), tx(t)], np.r_[ty(scene.dA[s][m][k]), ty(cur)]
+            ax.plot(xs, ys, color=AF.DIR_COL[s], lw=1.8, solid_capstyle="round")
+            ax.plot([xs[-1]], [ys[-1]], "o", color=AF.DIR_COL[s], ms=4.5, mew=0)
 
 
-def draw_card(ax, th, f):
-    i, n = f["i"], f["n"]
-    tsec = i / FPS
-    alpha = min(1.0, tsec / FADE_S, (n / FPS - tsec) / FADE_S) if f["kind"] == "title" else min(1.0, tsec / FADE_S)
+def draw_card(ax, f):
+    tsec, n = f["i"] / FPS, f["n"] / FPS
     if f["kind"] == "title":
-        ax.text(W / 2, H / 2 - 20, TITLE, color=th["ink"], fontsize=46, ha="center", va="bottom", alpha=alpha)
-        ax.text(W / 2, H / 2 + 30, SOURCES, color=th["ink2"], fontsize=22, ha="center", va="top", alpha=alpha)
+        alpha = min(1.0, tsec / FADE_S, (n - tsec) / FADE_S)
+        ax.text(W / 2, H / 2 - 20, TITLE, color=TH["ink"], fontsize=46, ha="center", va="bottom", alpha=alpha)
+        ax.text(W / 2, H / 2 + 30, SOURCES, color=TH["ink2"], fontsize=22, ha="center", va="top", alpha=alpha)
     else:
-        ax.text(W / 2, H / 2 - 120, END_LINE, color=th["ink"], fontsize=28, ha="center", va="bottom", alpha=alpha)
+        alpha = min(1.0, tsec / FADE_S)
+        for k, ln in enumerate(END_LINES):
+            ax.text(W / 2, H / 2 - 150 + 44 * k, ln, color=TH["ink"], fontsize=28, ha="center", va="bottom",
+                    alpha=alpha)
         for k, ln in enumerate(END_CREDITS):
-            ax.text(W / 2, H / 2 - 40 + 40 * k, ln, color=th["ink2"], fontsize=21, ha="center", va="top", alpha=alpha)
+            ax.text(W / 2, H / 2 - 20 + 40 * k, ln, color=TH["ink2"], fontsize=21, ha="center", va="top", alpha=alpha)
 
 
-def render_frame(scene, f, theme) -> np.ndarray:
+def render_frame(scene, f) -> np.ndarray:
     import cv2
     from matplotlib.colors import to_rgba
     from matplotlib.patches import PathPatch
     from matplotlib.path import Path as MPath
-    th = THEMES[theme]
+    if f["kind"] == "fade":                                               # cross-fade between the two acts
+        n = n_clip()
+        a = render_frame(scene, act_frame(1, n - 1)).astype(float)
+        b = render_frame(scene, act_frame(2, 0)).astype(float)
+        return np.round((1 - f["w"]) * a + f["w"] * b).astype(np.uint8)
     fig, ax = _figure()
     ax.cla()
     ax.set_xlim(0, W)
     ax.set_ylim(H, 0)
     ax.set_axis_off()
-    fig.patch.set_facecolor(th["bg"])
+    fig.patch.set_facecolor(TH["bg"])
     if f["kind"] != "clip":
-        draw_card(ax, th, f)
+        draw_card(ax, f)
     else:
-        lut = lut_for(theme)
-        for c in silhouettes(scene, f["az"]):
+        act, t = f["act"], f["t"]
+        lut = lut_dark()
+        for c in scene.silhouettes:
             ax.add_artist(PathPatch(MPath(np.r_[c, c[:1]], [1] + [2] * (len(c) - 1) + [79]),
-                                    fc=to_rgba(th["fill"], th["fill_alpha"]), ec=th["edge"], lw=1.0))
-        q = scene.camera.project(scene.P, f["az"])
-        v = scene.value(f["stim"], f["t"])
-        tn = np.clip(v / scene.rng, -1, 1)
+                                    fc=to_rgba(TH["fill"], TH["fill_alpha"]), ec=TH["edge"], lw=1.0))
+        q = scene.camera.project(scene.P)
+        tn = np.clip(scene.value(act, t) / scene.rng[act], -1, 1)
         col = lut[np.round((tn + 1) / 2 * (AF.N_LUT - 1)).astype(int)]
         for k in np.argsort(np.abs(tn), kind="stable"):                       # weakest first
             a, b = scene.off[k], scene.off[k + 1]
@@ -447,12 +516,11 @@ def render_frame(scene, f, theme) -> np.ndarray:
                 continue
             ax.add_artist(PathPatch(MPath(q[a:b], scene.codes[k]), fill=False, ec=col[k], lw=LW_PX[scene.role[k]],
                                     alpha=LINE_ALPHA, capstyle="round", joinstyle="round"))
-        t = f["t"]
-        sign = "+" if round(t) >= 0 else "\u2212"
-        ax.text(W - 110, 70, f"{sign}{abs(round(t)):d} ms", color=th["ink"], fontsize=30, ha="right", va="top")
-        draw_drum(ax, th, f["stim"], 160, 115)
-        draw_colour_bars(ax, th, lut, scene.range)
-        draw_dA(ax, th, scene, f["stim"], t)
+        sign = "+" if round(t) >= 0 else "−"
+        ax.text(W - 110, 70, f"{sign}{abs(round(t)):d} ms", color=TH["ink"], fontsize=30, ha="right", va="top")
+        draw_drum(ax, act, 160, 115)
+        draw_colour_bars(ax, lut, scene.range[act], ACT_LABEL[act])
+        draw_dA(ax, scene, act, t)
     fig.canvas.draw()
     img = np.asarray(fig.canvas.buffer_rgba())[..., :3]
     return cv2.resize(img, (W, H), interpolation=cv2.INTER_AREA)
@@ -464,10 +532,9 @@ _SCENE = {}
 
 def _worker(job):
     import cv2
-    f, theme, path = job
+    f, path = job
     t0 = time.time()
-    img = render_frame(_SCENE["scene"], f, theme)
-    cv2.imwrite(str(path), img[..., ::-1])
+    cv2.imwrite(str(path), render_frame(_SCENE["scene"], f)[..., ::-1])
     return time.time() - t0
 
 
@@ -497,74 +564,50 @@ def guard(paths, overwrite):
         raise SystemExit(f"{existing} exist; pass --overwrite")
 
 
+def scene_info(scene) -> dict:
+    return dict(neck_cleanup=scene.neck, ranges=scene.range, act2_pre_stimulus_max_abs=scene.act2_pre_max,
+                camera=dict(az_deg=AZ_DEG, elev_deg=ELEV_DEG, dist_um=DIST_UM, focal_px=scene.camera.f),
+                palette=palette_check())
+
+
 def step_stills(a):
-    scene = Scene()
-    names = [VID_DIR / f"still_{th}_{t:+05d}ms.png" for th in THEMES for t in STILL_MS]
-    names += [VID_DIR / "card_title_dark.png", VID_DIR / "card_end_dark.png"]
+    names = [VID_DIR / f"still_act{act}_{t:+05d}ms.png" for act, t in STILLS]
     guard(names + [OUT / "stills.json"], a.overwrite)
-    VID_DIR.mkdir(parents=True, exist_ok=True)
-    jobs = [(clip_frame("rot_right", t), th, VID_DIR / f"still_{th}_{t:+05d}ms.png") for th in THEMES for t in STILL_MS]
-    sch = schedule()
-    jobs += [(next(f for f in sch if f["kind"] == "title" and f["i"] == int(TITLE_S * FPS) // 2), "dark", names[-2]),
-             (next(f for f in sch if f["kind"] == "end" and f["i"] == int(END_S * FPS) - 1), "dark", names[-1])]
     t0 = time.time()
-    single = _single_timing(scene, jobs[0])
-    info = dict(single_process_frame_s=single, **render_frames(scene, jobs), prep_s=round(t0 - _T0, 1),
-                ranges=scene.range, camera=dict(focal_px=scene.camera.f, cx=scene.camera.cx, cy=scene.camera.cy,
-                                                dist_um=DIST_UM, elev_deg=ELEV_DEG),
-                palette={th: palette_check(th) for th in THEMES},
-                still_frames={str(p.name): dict(t_ms=round(f.get("t", 0), 1), az_deg=round(f.get("az", 0), 1))
-                        for f, _, p in jobs})
+    scene = Scene()
+    prep = time.time() - t0
+    VID_DIR.mkdir(parents=True, exist_ok=True)
+    r = render_frames(scene, [(still_frame(act, t), p) for (act, t), p in zip(STILLS, names)])
+    info = dict(prep_s=round(prep, 1), **r, **scene_info(scene))
     (OUT / "stills.json").write_text(json.dumps(info, indent=1))
     print(json.dumps(info, indent=1))
 
 
-def _single_timing(scene, job):
-    import cv2
+def step_video(a):
+    out = VID_DIR / VIDEO_NAME
+    guard([out, OUT / "video.json"], a.overwrite)
     t0 = time.time()
-    img = render_frame(scene, job[0], job[1])
-    dt = time.time() - t0
-    cv2.imwrite(str(OUT / "_timing.png"), img[..., ::-1])
-    (OUT / "_timing.png").unlink()
-    return round(dt, 2)
-
-
-def _clip_jobs(frames, theme, frame_dir):
-    return [(f, theme, frame_dir / f"{i:05d}.png") for i, f in enumerate(frames)]
-
-
-def step_test(a):
-    out = VID_DIR / "test_dark_3s.mp4"
-    guard([out, OUT / "test.json"], a.overwrite)
     scene = Scene()
-    clip = [f for f in schedule() if f["kind"] == "clip" and f["stim"] == "rot_right"]
-    i0 = min(range(len(clip)), key=lambda i: abs(clip[i]["t"] - TEST_MS[0]))
-    frames = clip[i0:i0 + int(3 * FPS)]
-    fd = OUT / "frames_test"
+    prep = time.time() - t0
+    frames = schedule()
+    fd = OUT / "frames_video"
     shutil.rmtree(fd, ignore_errors=True)
     fd.mkdir(parents=True)
     VID_DIR.mkdir(parents=True, exist_ok=True)
     if out.exists():
         out.unlink()
-    r = render_frames(scene, _clip_jobs(frames, "dark", fd))
+    r = render_frames(scene, [(f, fd / f"{i:05d}.png") for i, f in enumerate(frames)])
     enc = encode(fd, out)
     shutil.rmtree(fd)
-    total = len(schedule())
-    size = out.stat().st_size
-    info = dict(**r, encode_s=enc, bytes=size, seconds=len(frames) / FPS, t_ms=[frames[0]["t"], frames[-1]["t"]],
-                az_deg=[frames[0]["az"], frames[-1]["az"]], full_frames=total, full_seconds=total / FPS,
-                projected_render_min=round(total * r["wall_per_frame_s"] / 60, 1),
-                projected_bytes_upper=int(size / (len(frames) / FPS) * total / FPS))
-    (OUT / "test.json").write_text(json.dumps(info, indent=1))
+    kinds = {k: sum(f["kind"] == k for f in frames) for k in ("title", "clip", "fade", "end")}
+    info = dict(file=str(out), bytes=out.stat().st_size, frames=len(frames), seconds=round(len(frames) / FPS, 2),
+                frames_by_kind=kinds, prep_s=round(prep, 1), render=r, encode_s=enc,
+                total_s=round(time.time() - t0, 1), **scene_info(scene))
+    (OUT / "video.json").write_text(json.dumps(info, indent=1))
     print(json.dumps(info, indent=1))
 
 
-def step_video(a):
-    raise SystemExit("the full video is step 2 (not rendered yet)")
-
-
-STEPS = {"data": step_data, "stills": step_stills, "test": step_test, "video": step_video}
-_T0 = time.time()
+STEPS = {"data": step_data, "stills": step_stills, "video": step_video}
 
 
 def main(argv=None):
