@@ -19,7 +19,8 @@ checks; it refuses test seeds and the held-out speeds). No new brain run. CPU on
   left-minus-right state per steering-MN type and direction (mean +- s.d. over the trials of a direction, both
   speeds), with the readout sign. d: dA over time per direction and speed (mean +- s.d. over its trials), teacher
   dA* dashed.
-  The analysis window is shaded in d; in c, whose values are window means, the whole plot area carries that shade.
+  The analysis window is shaded in d (c has no time axis). The brain records must all come from the reference arm R
+  (the untrained spiking FlyWire model); only the nerve-cord model was trained in stage A.
   -> stageA_circuit_activity.pdf (vector) / .png (600 dpi), caption_activity.txt, methods_activity.txt in the
   preview folder; figure.json in runs/viz/activity_figure/.
 Outputs are never overwritten without --overwrite (rule 13).
@@ -48,6 +49,7 @@ FIG_DIR = V.FIG_DIR
 FIG_NAME = "stageA_circuit_activity"
 COND = (("rot_left", 60), ("rot_right", 60), ("rot_left", 120), ("rot_right", 120))
 ARM, TRAINING_SEED = "true", 0
+BRAIN_ARM = "R"                                      # the unmodified spiking reference arm (prereg/12, rule 8)
 CHUNK = 16
 FILES = {"data": ("val_activity.npz", "data.json"), "figure": ("figure.json",)}
 FIG_FILES = {"figure": (f"{FIG_NAME}.pdf", f"{FIG_NAME}.png", "caption_activity.txt", "methods_activity.txt")}
@@ -92,6 +94,7 @@ def step_data(a):
     man = A.read_manifest(A.RECORDS / "manifest.sha256")
     lo, hi = A.WINDOW
     dn_rate = np.zeros((len(tr), len(setup.fw_index)), np.float64)
+    arms, model_sha, weights_sha = set(), set(), set()
     for b, f in enumerate(tr.files):
         p = A.RECORDS / f
         if A.sha256_file(p) != man[f]:
@@ -100,6 +103,11 @@ def step_data(a):
         if not np.array_equal(z["dn_index"], setup.fw_index):
             raise SystemExit(f"{f}: DN columns differ from the setup")
         dn_rate[b] = z["dn_counts"][lo:hi].mean(0) / (A.INTERVAL_MS / 1e3)
+        arms.add(str(z["model_arm"]))
+        model_sha.add(str(z["model_sha256"]))
+        weights_sha.add(str(z["weights_sha256"]))
+    if arms != {BRAIN_ARM}:
+        raise SystemExit(f"brain records come from arms {sorted(arms)}, not only the reference arm {BRAIN_ARM}")
 
     model, _ = A.make_model(ARM, TRAINING_SEED, setup, bridge, T.GRAPHS)
     run_dir = A.run_dir_of(ARM, TRAINING_SEED, T.selected_lr(ARM), A.OUT)
@@ -153,7 +161,9 @@ def step_data(a):
                constants=dict(G1=A.G1, R_IN=RT.R_IN, SCALE=A.SCALE, A_MAX=A.A_MAX, V_MAX=A.V_MAX, K_P=A.K_P),
                window_intervals=list(A.WINDOW), interval_ms=A.INTERVAL_MS, n_grey=A.N_GREY,
                run_dir=str(run_dir.relative_to(ROOT)), arm=ARM, training_seed=TRAINING_SEED, lr=T.selected_lr(ARM),
-               threads=A.TEST_THREADS, check=check, metrics=met, seconds=round(time.time() - t0, 1))
+               threads=A.TEST_THREADS, check=check, metrics=met,
+               brain=dict(model_arm=sorted(arms), model_sha256=sorted(model_sha), weights_sha256=sorted(weights_sha)),
+               seconds=round(time.time() - t0, 1))
     (OUT / "data.json").write_text(json.dumps(res, indent=1))
     print(json.dumps(res, indent=1))
 
@@ -341,7 +351,6 @@ def render(lines, meshes, d, ranges, lut, paths) -> dict:
     stim = d["stimulus"]
     names = list(d["readout_names"])
     axc = fig.add_axes([xr / W, (V.MARGIN_MM + 7.0 + hc + TOP_MM + 6.0) / H, wr / W, hc / H])
-    axc.axvspan(-0.6, len(MN_TYPES) - 0.4, color=WINDOW_SHADE, lw=0, zorder=0)
     axc.axhline(0, color="#9A9A9A", lw=0.4, zorder=1)
     signs = []
     for k, mt in enumerate(MN_TYPES):
@@ -436,14 +445,13 @@ def caption_body(info, data) -> str:
     sp = " and ".join(str(v) for v in data["speeds"])
     return (
         "Direction preference of the stage-A circuit (validation trials).\n\n"
-        "a, b, Dorsal (a) and lateral (b) views as in the anatomy figure. Each neuron is coloured by its mean "
-        f"window activity for rightward minus leftward rotation ({data['n_seeds']} seeds, {sp} deg/s): "
-        f"{n['fw_dn']} FlyWire DNs "
-        "in Hz (spiking brain model); BANC DNs, VNC interneurons and steering motor neurons in model units "
-        "(trained rate model, true wiring); strongest on top. c, Left-minus-right state per steering motor-neuron "
-        "type and direction (mean +- s.d.); +/\u2212, readout sign. d, Turn command dA per direction and speed "
-        "(mean +- "
-        "s.d.); dashed, teacher dA*. Shading, analysis window. Demonstration only."
+        "a, b, Dorsal (a) and lateral (b) views. Each neuron is coloured by its mean window activity for "
+        f"rightward minus leftward rotation ({data['n_seeds']} seeds, {sp} deg/s), strongest on top: "
+        f"{n['fw_dn']} FlyWire DNs in Hz, from the untrained spiking reference brain; BANC "
+        "DNs, VNC interneurons and steering motor neurons in units of the nerve-cord rate model (true wiring), "
+        "the only part trained in stage A. c, Left-minus-right state per steering motor-neuron type and direction "
+        "(mean +- s.d.; colours as in d); +/\u2212, readout sign. d, Turn command dA per direction and speed (mean "
+        "+- s.d.); dashed, teacher dA*. Shading, analysis window. Demonstration only."
     ).replace(" deg/s", "\u00b0 s\u207b\u00b9").replace("+-", "\u00b1")
 
 
@@ -469,15 +477,21 @@ def methods_text(info, data, d) -> str:
          f"The stage-A analysis window: intervals {lo}-{hi - 1} of {ms:g} ms ({(lo - data['n_grey']) * ms:g}-"
          f"{(hi - data['n_grey']) * ms:g} ms after stimulus onset; the grating starts at interval {data['n_grey']})."),
         ("FlyWire DNs",
-         "Per DN column of the record, the mean spike count over the window divided by the interval length (Hz); "
-         "the spiking FlyWire v783 brain model of the stage-A records."),
+         "Per DN column of the record, the mean spike count over the window divided by the interval length (Hz). "
+         "This is the recorded activity of the FlyWire v783 brain as the untrained spiking reference model: arm "
+         f"{', '.join(data['brain']['model_arm'])} in every record (model_arm), the unmodified Shiu et al. 2023 LIF "
+         "network with its reference parameters (prereg/12, CLAUDE.md rule 8); "
+         f"{len(data['brain']['model_sha256'])} model hash and {len(data['brain']['weights_sha256'])} weight hash "
+         f"across the {data['trials']} records. Nothing in the brain was trained: in stage A only the BANC "
+         "nerve-cord rate model was trained (prereg/14)."),
         ("VNC model",
          f"The `{data['arm']}` arm, training seed {data['training_seed']}, selected rate {data['lr']:g} "
          f"({data['run_dir']}/best.pt, step {ck['best_step']}), run on the CPU ({data['threads']} threads). Input "
          "as in training: the recorded DN counts through the `true` DN bridge (window "
          f"{data['bridge']['window_intervals']} intervals, latency {data['bridge']['latency_intervals']}) into "
          "unit rates, BANC DN clamp = unit rate / R_IN. State = the rate-model state of each neuron (model a.u.; "
-         "for the BANC DNs the clamp). Checks: dA from the states equals the forward pass (max difference "
+         "for the BANC DNs the clamp). This nerve-cord model is the only trained part of stage A. "
+         "Checks: dA from the states equals the forward pass (max difference "
          f"{ck['max_abs_dA_states_vs_forward']:.1e} deg); validation sign accuracy {ck['sign_accuracy']:.2f} over "
          f"{data['trials']} rotation trials, as logged at the best step ({ck['logged_sign_accuracy']:.2f})."),
         ("Only the true model",
@@ -517,8 +531,8 @@ def methods_text(info, data, d) -> str:
          + f". dA = G1 x R_IN x sum over types of sigma (s_L - s_R), G1 = {cst['G1']:g} deg/Hz, R_IN = "
          f"{cst['R_IN']:g} Hz (scale "
          f"{float(d['scale']):g} deg per a.u.), so a type contributes to a right turn when its L - R state has the "
-         "sign of sigma. Types are not averaged together because their signs differ. The values are window means, "
-         "so the whole plot area carries the window shading."),
+         "sign of sigma. Types are not averaged together because their signs differ. Colours as in d (rot_right "
+         "vermillion, rot_left blue). No shading: c has no time axis."),
         ("Turn command (d)",
          f"dA per {ms:g} ms interval, mean +- s.d. over the {data['per_condition']} trials of each direction and "
          "speed; time from stimulus onset (interval start). Teacher dA* (thin dashed): K_P v with K_P = A_MAX / "
