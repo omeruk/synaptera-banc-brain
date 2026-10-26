@@ -156,3 +156,26 @@ def test_read_group_uses_the_final_eval_groups_and_refuses_others(world, no_file
     assert P.GROUPS["held_out_primary_90"] == (("rot_left", 90), ("rot_right", 90))
     with pytest.raises(P.PosthocRefusal):
         P.read_group("training_speeds", world.setup, world.bridge, **world.kw)
+
+
+# ── analysis A helpers (synthetic numbers only) ─────────────────────────────────────────────────────────────────────
+def test_tuning_recovers_gain_offset_and_gain_ratio():
+    stim, speed = [], []
+    for v in P.TUNING_SPEEDS:
+        for st in P.STIMULI:
+            stim += [st] * 3
+            speed += [v] * 3
+    tgt = np.array([A.target_value(s, v) for s, v in zip(stim, speed)])
+    t = P.tuning(0.8 * tgt + 0.5, stim, speed)
+    assert np.isclose(t["gain"], 0.8) and np.isclose(t["offset"], 0.5) and np.isclose(t["fit_r2"], 1.0)
+    assert all(np.isclose(g, 0.8) for g in t["G"].values())        # the offset cancels over both directions
+    assert np.isclose(t["response"]["rot_right_v030"], 0.8 * A.K_P * 30 + 0.5)
+    assert t["n_trials"] == 24 and set(t["n_per_speed"].values()) == {6}
+
+
+def test_compare_applies_the_registered_tolerances():
+    base = dict(r2=0.9, loss=0.05, sign_accuracy=1.0, n_trials=240, n_rotation=160)
+    assert P.compare(dict(base, r2=0.9 + 0.9e-4, loss=0.05 - 0.9e-4), base)["passed"]
+    assert not P.compare(dict(base, r2=0.9 + 1.1e-4), base)["passed"]
+    assert not P.compare(dict(base, loss=0.05 + 1.1e-4), base)["passed"]
+    assert not P.compare(dict(base, sign_accuracy=0.99375), base)["passed"]
