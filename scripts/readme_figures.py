@@ -45,10 +45,11 @@ RC = {"font.size": FONT_PT, "pdf.fonttype": 42, "svg.fonttype": "none",
       "axes.labelsize": FONT_PT, "xtick.labelsize": FONT_PT - 1, "ytick.labelsize": FONT_PT - 1,
       "legend.fontsize": FONT_PT - 1, "axes.titlesize": FONT_PT}
 
-# true, shuffled and mlp in their colours; the other arms in greys, told apart by marker shape
+BRIDGE_OFF = "#333333"
+# every arm in its ARM_COLOR colour (as in the post-hoc figure, Figure 4); marker shapes tell the arms apart as well
 STYLE = {"true": (ARM_COLOR["true"], "o"), "shuffled": (ARM_COLOR["shuffled"], "o"), "mlp": (ARM_COLOR["mlp"], "o"),
-         "derange": ("#a6a6a6", "s"), "linear": ("#737373", "D"), "untrained": (ARM_COLOR["untrained"], "^"),
-         "bridge_off": ("#333333", "v")}
+         "derange": (ARM_COLOR["derange"], "s"), "linear": (ARM_COLOR["linear"], "D"),
+         "untrained": (ARM_COLOR["untrained"], "^"), "bridge_off": (BRIDGE_OFF, "v")}
 TRAINED = ("true", "shuffled", "derange", "mlp", "linear")
 GROUPS = (("r2", "training speeds\n(60, 120 deg/s)"), ("g90_r2", "90 deg/s\n(held out)"),
           ("g30_r2", "30 deg/s\n(held out)"))
