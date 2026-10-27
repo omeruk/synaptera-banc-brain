@@ -9,7 +9,7 @@ per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_en
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
 (`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
 docs/05 section 7.1): see `check_machine_repro`; F5 step 2b (`docs/results/f5_benchmark.md`): see
-`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. F5 stage-A post-hoc analyses (`docs/results/f5_stageA_posthoc.md`): see `check_f5_stageA_posthoc`. README (`README.md`, `docs/FIGURES.md`, every entry of `docs/readme_numbers.json`): see `check_readme`. F5 stage-A validation curves (`docs/results/f5_stageA_curves.json`): see `check_f5_stageA_curves`. FlyWire -> BANC alignment data of the figures (`docs/figures/landmarks.csv`, `transforms.json`, `warp_check.csv`, `warp_check.json`): see `check_alignment`. Rebuilt JSON is compared value by value with floats within a relative
+`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. F5 stage-A post-hoc analyses (`docs/results/f5_stageA_posthoc.md`): see `check_f5_stageA_posthoc`. README (`README.md`, `docs/FIGURES.md`, every entry of `docs/readme_numbers.json`): see `check_readme`. F5 stage-A validation curves (`docs/results/f5_stageA_curves.json`): see `check_f5_stageA_curves`. FlyWire -> BANC alignment data of the figures (`docs/figures/landmarks.csv`, `transforms.json`, `warp_check.csv`, `warp_check.json`): see `check_alignment`. Visual input of stage A (`docs/figures/input_checks.csv`, `visual_input.json`): see `check_visual_input`. Rebuilt JSON is compared value by value with floats within a relative
 JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
@@ -2110,6 +2110,105 @@ def check_alignment(fig_dir=None):
     return n, bad
 
 
+VI_JSON = ROOT / "docs" / "figures" / "visual_input.json"
+VI_CSV = ROOT / "docs" / "figures" / "input_checks.csv"
+
+
+def _a_in(rl, rr):
+    """f3b1_brain.a_in, reimplemented (f3b1_brain imports pandas); tests/test_visual_input_data.py checks equality."""
+    return float((rl - rr) / (rl + rr + 1.0))
+
+
+def check_visual_input(fig_dir=None, records_json=None):
+    """Visual input of stage A (`docs/figures/input_checks.csv`, `visual_input.json`; written by
+    scripts/readme_visual_input.py). Committed files only. CSV: row counts against `completion` of
+    docs/results/f5_stageA_records.json, every check passed, test rows without values, the p0 rows equal to
+    `input_checks_batch0`, opposite signs and min |A_in| >= INPUT_CHECK_MIN (f3b1_common) for train / val rows, the four
+    speeds per group, split and phase_deg recomputed (f5_stageA_records.split_of / phase_of). JSON: the gate flags, its
+    stored A_in values against the p0 rows, every asymmetry against a_in of the stored mean rates, the per-eye totals
+    and the window."""
+    import csv
+    import f3b1_common as C1
+    import f5_stageA_records as R
+    fig = Path(fig_dir or ALIGN_DIR)
+    rec = json.loads(Path(records_json or F5SA_JSON).read_text())
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    with open(fig / "input_checks.csv", newline="") as f:
+        rd = csv.DictReader(f)
+        cols, rows = rd.fieldnames, list(rd)
+    chk("vi:csv:columns", cols == ["group", "split", "speed_deg_s", "phase_deg", "passed", "A_in_rot_left",
+                                   "A_in_rot_right"], cols)
+    comp = rec["completion"]
+    chk("vi:csv:rows", len(rows) == comp["input_checks_total"], (len(rows), comp["input_checks_total"]))
+    for s in ("train", "val", "test"):
+        k = sum(r["split"] == s for r in rows)
+        chk(f"vi:csv:rows:{s}", k == comp["input_checks"][s]["groups"], (k, comp["input_checks"][s]["groups"]))
+    chk("vi:csv:unique", len({(r["group"], r["speed_deg_s"]) for r in rows}) == len(rows))
+    groups = {}
+    for r in rows:
+        g = r["group"]
+        seed = 0 if g == "p0" else int(g[1:])
+        groups.setdefault(g, set()).add(int(r["speed_deg_s"]))
+        key = f"vi:csv:{g}_v{int(r['speed_deg_s']):03d}"
+        chk(f"{key}:passed", r["passed"] == "True", r["passed"])
+        chk(f"{key}:split", r["split"] == R.split_of(seed), r["split"])
+        chk(f"{key}:phase", r["phase_deg"] == repr(R.phase_of(seed)), r["phase_deg"])
+        a = (r["A_in_rot_left"], r["A_in_rot_right"])
+        if r["split"] == "test":
+            chk(f"{key}:test_empty", a == ("", ""), a)
+            continue
+        if "" in a:
+            chk(f"{key}:values", False, a)
+            continue
+        y = tuple(float(x) for x in a)
+        chk(f"{key}:signs", np.sign(y[0]) != np.sign(y[1]), y)
+        chk(f"{key}:min_abs", min(abs(x) for x in y) >= C1.INPUT_CHECK_MIN, y)
+    for g, sp in groups.items():
+        chk(f"vi:csv:{g}:speeds", sorted(sp) == sorted(R.SPEEDS), sorted(sp))
+    p0 = {f"p0_v{int(r['speed_deg_s']):03d}": r for r in rows if r["group"] == "p0"}
+    b0 = rec["input_checks_batch0"]
+    chk("vi:csv:p0_groups", sorted(p0) == sorted(b0), (sorted(p0), sorted(b0)))
+    for name, v in b0.items():
+        r = p0.get(name)
+        if r is None:
+            continue
+        for st in ("rot_left", "rot_right"):
+            chk(f"vi:csv:{name}:{st}:batch0", float(r[f"A_in_{st}"]) == v["A_in_T4aT5a"][st],
+                (r[f"A_in_{st}"], v["A_in_T4aT5a"][st]))
+        chk(f"vi:csv:{name}:passed_batch0", (r["passed"] == "True") == v["passed"], r["passed"])
+
+    d = json.loads((fig / "visual_input.json").read_text())
+    gt = d["gate"]
+    chk("vi:json:gate:passed", gt["passed"] is True, gt["passed"])
+    chk("vi:json:gate:comparisons", bool(gt["comparisons"]) and all(c["equal"] is True for c in gt["comparisons"]))
+    for name, per in gt["A_in_T4aT5a"].items():
+        for st, x in per.items():
+            r = p0.get(name)
+            chk(f"vi:json:gate:{name}:{st}:equal", x["equal"] is True, x)
+            chk(f"vi:json:gate:{name}:{st}:csv",
+                r is not None and x["recomputed"] == x["input_checks_json"] == x["records_json"] ==
+                float(r[f"A_in_{st}"]), (x, r and r[f"A_in_{st}"]))
+    for key, per in d["asymmetry"]["values"].items():
+        for t, v in per.items():
+            want = _a_in(d["mean_rate_hz"][key]["L"][t], d["mean_rate_hz"][key]["R"][t])
+            chk(f"vi:json:asymmetry:{key}:{t}", abs(v - want) <= 1e-12 * max(abs(v), abs(want)), (v, want))
+    chk("vi:json:asymmetry:subtypes", all(list(per) == d["subtypes"] for per in d["asymmetry"]["values"].values()))
+    for e, v in d["neurons"].items():
+        chk(f"vi:json:neurons:{e}:total", sum(v["per_subtype"].values()) == v["t4t5_total"], v)
+        chk(f"vi:json:neurons:{e}:subtypes", list(v["per_subtype"]) == d["subtypes"], list(v["per_subtype"]))
+    w = d["window"]
+    chk("vi:json:window", (w["window"], w["n_grey"], w["interval_ms"]) == (list(C1.WINDOW), C1.N_GREY, C1.INTERVAL_MS),
+        w)
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -2246,6 +2345,10 @@ def main(argv=None):
         bad += b
     if (ALIGN_DIR / "landmarks.csv").exists():
         k, b = check_alignment()
+        n += k
+        bad += b
+    if VI_JSON.exists() or VI_CSV.exists():
+        k, b = check_visual_input()
         n += k
         bad += b
     if "--print" in argv:
