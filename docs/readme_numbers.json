@@ -1014,6 +1014,17 @@
    }
   },
   {
+   "string": "BANC (fly 2)",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "scripts/readme_figures.py",
+    "verbatim": true
+   }
+  },
+  {
    "string": "CC BY 4.0",
    "files": [
     "README.md"
@@ -1032,6 +1043,17 @@
    "kind": "name",
    "source": {
     "file": "docs/figures/README.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "FlyWire (fly 1)",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "scripts/readme_figures.py",
     "verbatim": true
    }
   },

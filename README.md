@@ -58,15 +58,9 @@ Test split, mean over training seeds (standard deviations in [docs/results/f5_st
 
 ## How it works
 
-```mermaid
-flowchart TD
-  S["Drum stimulus: rotating grating"] --> E["FlyGym eyes, FlyVis"]
-  E --> Bn["FlyWire v783 spiking brain (Shiu et al.), not trained; DN spike counts recorded"]
-  Bn --> D["DN bridge: 225 units to 305 BANC DNs, replayed"]
-  D --> V["BANC VNC subgraph, rate model: trained"]
-  V --> M["Fixed readout: 16 steering MNs to dA"]
-  M --> L["Loss against the teacher dA*"]
-```
+<img src="docs/figures/fig0_pipeline.png" width="100%" alt="Schematic in two rows of boxes joined by arrows: rotating drum, FlyGym eyes and FlyVis, FlyWire brain model (spiking, not trained, recorded once); then DN bridge (by cell type, fixed), BANC VNC subgraph (rate model, trained) and the fixed readout from steering motor neurons to the turn command dA, compared with the teacher dA*.">
+
+*Figure 0 | The stage-A pipeline: light blue is FlyWire (fly 1), darker blue BANC (fly 2), grey neither; only the BANC VNC subgraph is trained.*
 
 - **Stimulus and brain.** A rotating grating (rot_left / rot_right at 30, 60, 90 and 120 deg/s), a static grating and grey were rendered for the FlyGym eyes and passed through FlyVis to a visual boundary layer that drives the FlyWire v783 brain, the unmodified spiking reference model of Shiu et al. Each trial is 300 intervals of 5 ms (100 grey lead-in intervals, then the stimulus). The brain was run once per trial and its DN spike counts recorded; stage A replays these records, so the brain is the same for every arm and is never trained.
 - **DN bridge.** The recorded FlyWire DN counts are turned into unit rates (window 5 intervals, latency 1 interval) that clamp the BANC DNs of the same types (BANC DN state = unit rate / 100 Hz). DNg02 is clamped at a fixed baseline; every other BANC DN is 0.

@@ -369,14 +369,14 @@ def readme():
 
     H(2, "How it works")
     win = _const("train/f5_stageA.py", "WINDOW")
-    L += ["```mermaid", "flowchart TD",
-          f'  S["Drum stimulus: rotating grating"] --> E["FlyGym eyes, FlyVis"]',
-          f'  E --> Bn["{fw} spiking brain (Shiu et al.), not trained; DN spike counts recorded"]',
-          f'  Bn --> D["DN bridge: {units} units to {targets} BANC DNs, replayed"]',
-          f'  D --> V["BANC VNC subgraph, rate model: trained"]',
-          f'  V --> M["Fixed readout: {J(POSTHOC, "B/targets/n")} steering MNs to dA"]',
-          f'  M --> L["Loss against the teacher dA*"]',
-          "```", "",
+    L += [img("docs/figures/fig0_pipeline.png",
+              "Schematic in two rows of boxes joined by arrows: rotating drum, FlyGym eyes and FlyVis, FlyWire brain "
+              "model (spiking, not trained, recorded once); then DN bridge (by cell type, fixed), BANC VNC subgraph "
+              "(rate model, trained) and the fixed readout from steering motor neurons to the turn command dA, "
+              "compared with the teacher dA*."), "",
+          f"*Figure 0 | The stage-A pipeline: light blue is {T('scripts/readme_figures.py', 'FlyWire (fly 1)', 'name')}, "
+          f"darker blue {T('scripts/readme_figures.py', 'BANC (fly 2)', 'name')}, grey neither; only the BANC VNC "
+          f"subgraph is trained.*", "",
           f"- **Stimulus and brain.** A rotating grating (rot_left / rot_right at {held30}, {sp1}, {held90} and {sp2} "
           f"deg/s), a static grating and grey were rendered for the FlyGym eyes and passed through FlyVis to a visual "
           f"boundary layer that drives the {fw} brain, the unmodified spiking reference model of Shiu et al. "
