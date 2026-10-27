@@ -4,7 +4,7 @@ A simulation test of whether the real wiring of a BANC v888 ventral nerve cord (
 
 Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)
 
-**Contents:** [Result in brief](#result-in-brief) · [The stage-A circuit](#the-stage-a-circuit) · [Activity on the circuit](#activity-on-the-circuit) · [Post-hoc analyses](#post-hoc-analyses) · [How we got here (F0-F3)](#how-we-got-here-f0-f3) · [Key numbers](#key-numbers) · [How it works](#how-it-works) · [Methods and safeguards](#methods-and-safeguards) · [Limitations](#limitations) · [Reproduce](#reproduce) · [Repository layout](#repository-layout) · [Data, credits and licences](#data-credits-and-licences) · [Authorship](#authorship) · [How to cite](#how-to-cite)
+**Contents:** [Result in brief](#result-in-brief) · [The stage-A circuit](#the-stage-a-circuit) · [Activity on the circuit](#activity-on-the-circuit) · [Post-hoc analyses](#post-hoc-analyses) · [How we got here (F0-F3)](#how-we-got-here-f0-f3) · [Key numbers](#key-numbers) · [How it works](#how-it-works) · [Training](#training) · [Methods and safeguards](#methods-and-safeguards) · [Limitations](#limitations) · [Reproduce](#reproduce) · [Repository layout](#repository-layout) · [Data, credits and licences](#data-credits-and-licences) · [Authorship](#authorship) · [How to cite](#how-to-cite)
 
 <img src="docs/figures/stageA_circuit_direction.gif" width="100%" alt="Animation of the stage-A circuit seen from behind: brain and nerve-cord neurons light up orange or blue by their preference for rightward or leftward drum rotation, above a trace of the turn command for both directions.">
 
@@ -86,7 +86,6 @@ Test split, mean over training seeds (standard deviations in [docs/results/f5_st
 - **VNC subgraph.** A rate model of the BANC VNC subgraph (25,818 neurons, 3,020,333 edges), one update per interval. Trained: a gain per edge and a leak rate per neuron; the topology and the synapse signs are fixed (prereg/14 section 2).
 - **Readout (fixed).** dA = 0.395 deg/Hz x 100 Hz x sum over types of sigma (s_left - s_right), one MN per type and side, over the wing steering MN types b2 (sigma +) and b3, i1, i2, hg1, hg2, hg3, hg4 (sigma -) (`LATERAL` in `scripts/f5_train.py`; the types of Lindsay et al., see the references).
 - **Teacher and loss.** dA* = K_P v during the stimulus (v = +speed for rot_right, -speed for rot_left; 0 under static, grey and the lead-in), clipped at ±12.5 deg, K_P = 12.5 / 120 deg per deg/s. Loss: the mean over every interval of ((dA - dA*) / 12.5 deg)^2. Metrics use the window mean over intervals 120-299 (the stimulus after its first 100 ms).
-- **Training.** Adam, batch 16, 2,000 steps, the learning rate chosen per arm at training seed 0 from {0.001, 0.003, 0.01} by the lowest final validation loss, and the checkpoint with the lowest validation loss kept. Data seeds: training 0-159, validation 160-199, test 200-239.
 
 Arms (the same data, budget and test for each):
 
@@ -111,6 +110,53 @@ Arms (the same data, budget and test for each):
 Training seeds: 10 per trained arm, 5 for `bridge_off`.
 
 </details>
+
+## Training
+
+Stage A trains only the nerve cord. The brain is fixed: its DN spike counts were recorded once and are replayed through the bridge. The rate model of the BANC VNC subgraph learns a gain per edge and a leak rate per neuron, each within fixed bounds (prereg/14 section 2), so the wiring itself, topology and synapse signs, never changes: the comparison asks whether the real wiring is a better substrate for learning the turn command than the same neurons with shuffled wiring. Every arm gets the same data, budget, learning-rate selection rule and test (H1, prereg/14 section 1).
+
+The curriculum (prereg/14 section 3):
+
+| stage | trained part | input | task | status |
+|---|---|---|---|---|
+| A | rate BANC VNC subgraph | recorded FlyWire DN spike counts (spiking reference brain R) through the bridge | open-loop dA | run |
+| B | rate FlyWire brain + rate VNC (VNC warm-started from A, same arm and training seed) | frozen FlyVis 1.2.0 -> boundary layer | open-loop dA | not run |
+| C | as B, warm-started from B | online frozen FlyVis in the docs/08 closed loop | behaviour cloning, then 5 DAgger rounds (beta = 0) | not run |
+| D | optional | - | needs its own pre-registration before any D run; never part of the section 8 verdict | optional, not run |
+
+What was trained:
+
+- **The graph:** 25,818 neurons, 3,020,333 edges and 3,044,835 trainable parameters, one gain per edge and one leak rate per neuron; the 1,316 clamped DN inputs have no leak rate.
+- **Fair controls:** `mlp` has 3,047,360 parameters (width 1,346, the smallest with at least the parameter count of `true`, prereg/14 section 5); `linear` has 14,416; `shuffled` keeps every neuron's in- and out-degree, and every edge keeps its synapse count and presynaptic sign.
+- **The same input for every arm:** the brain was recorded once, 2,400 records, with 804 of 804 input checks passed, and the gate-5 check reproduced a reference record bit for bit (prereg/14 gate 5).
+
+<details><summary>How it was trained</summary>
+
+- **Data:** 960 training and 240 validation trials (rot_left / rot_right at 60 and 120 deg/s, static and grey); data seeds: training 0-159, validation 160-199, test 200-239.
+- **Optimiser and budget:** Adam, batch 16, 2,000 steps, so 32,000 training trials presented per run.
+- **Evaluation and checkpoint:** the full validation set every 50 steps; the checkpoint with the lowest validation loss is kept (prereg/14 section 6).
+- **Learning rate:** the grid {0.001, 0.003, 0.01}; per arm, the rate with the lowest final validation loss at training seed 0 is used for every seed.
+- **Training seeds:** 10 per trained arm, 5 for `bridge_off`.
+- **Memory:** a sparse edge gradient (sddmm, prereg/18), so the full graph trains on an 8 GiB laptop GPU; the smoke run peaked at 1.2 GiB of GPU memory.
+- **One GPU job at a time,** through a guard (`scripts/f5_train_guard.py`) with GPU memory capped at a fraction 0.7, a RAM cap of MemoryMax=14G, no swap (systemd scope) and a pause at a GPU temperature of 87 °C. This followed the parallel benchmark, which ended in a driver fault (5,043 nvlddmkm events and an unexpected shutdown; `docs/results/f5_benchmark.json`, incident).
+- **Guard record:** 76 of 77 jobs ended normally; 6 pauses, all for GPU temperature; from 2026-10-18 18:39:32 to 2026-10-19 19:06:39. After a pause a run resumes from its latest checkpoint (written every 25 steps).
+- **Replicate (prereg/19):** `true` at seed 0 and its selected rate, trained a second time, agreed with the first run at every evaluation to 8.0e-09 in validation loss and 4.7e-08 in R2, with equal turn-sign accuracy.
+- **Test:** once per run, on the CPU, from the selected checkpoint (see [Methods and safeguards](#methods-and-safeguards)).
+
+</details>
+
+What happened (validation split, descriptive):
+
+- **Selected learning rates:** `true` 0.01, `shuffled` 0.01, `derange` 0.01, `mlp` 0.003, `linear` 0.001, `bridge_off` 0.001.
+
+<img src="docs/figures/fig5_training.png" width="100%" alt="Four panels: final validation loss against learning rate per arm with the selected rate circled; validation loss and validation R2 over training with mean lines and bands per arm; and dots for the training trials each seed needed to reach the set turn-sign accuracy.">
+
+**Figure 5 | Stage-A training on the validation split: learning-rate selection, learning curves and the trials to the set turn-sign accuracy.** a, Learning-rate selection at training seed 0: final validation loss per arm and learning rate (log scale); circles mark the selected rate. b, Validation loss over training trials presented at the selected rate (log scale); lines, means over training seeds; bands, ± 1 SD (cut at the axis where they fall below it). c, Validation R2 of the window mean, same layout; dotted, `untrained` (one evaluation at initialisation); the `linear` mean leaves the axis at some evaluations (its R2 swings widely; prereg/20 limitation c). d, Training trials until the validation turn-sign accuracy first reached 0.90, one marker per training seed (vertical jitter only); ticks at the evaluation interval (800 trials); open markers at the right edge, later than the axis end or never (`bridge_off` never). Validation split, data seeds 160-199 (240 trials per evaluation); 10 training seeds per arm, 5 for `bridge_off`.
+
+- **Training trials to the set turn-sign accuracy** (mean over seeds): `true` 800, `shuffled` 1,600, `derange` 1,600, `mlp` 880, `linear` 960; `bridge_off` never (5 of 5 seeds). `true` reached it at the first evaluation in every seed. The evaluation interval limits the resolution, and turn-sign accuracy is near ceiling (prereg/20 limitation b).
+- **Registered secondary comparison** of samples to set accuracy, `true` against `shuffled` (prereg/14 section 8.3: counted on the validation evaluations during training, compared in the test report; no Holm, never a verdict): in favour of `true`, one-sided p = 0.0078 (8/1024).
+- `mlp` reached the lowest validation loss (selected checkpoints, mean 0.0325).
+- The `shuffled` validation loss was still falling at the end of the budget (prereg/20 limitation a; see [Limitations](#limitations)).
 
 ## Methods and safeguards
 

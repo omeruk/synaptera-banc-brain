@@ -1707,6 +1707,8 @@ FORMULAS = {
     "n_smaller + n_ge": lambda a, c: a[0] + a[1],
     "len(section1/relabelled_readout_types)": lambda a, c: len(a[0]),
     "comma-separated list": lambda a, c: ", ".join(a[0]),
+    "steps x batch": lambda a, c: a[0] * a[1],
+    "eval_every x batch": lambda a, c: a[0] * a[1],
 }
 
 # Numeric tokens of README.md / docs/FIGURES.md that are not recorded numbers. Categories only; a single number is

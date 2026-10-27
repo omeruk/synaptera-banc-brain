@@ -22,6 +22,9 @@ README, GALLERY, NUMBERS = ROOT / "README.md", ROOT / "docs" / "FIGURES.md", ROO
 REPORT = "docs/results/f5_stageA_report.json"
 POSTHOC = "docs/results/f5_stageA_posthoc.json"
 VALID = "docs/results/f5_stageA_validation.json"
+CURVES = "docs/results/f5_stageA_curves.json"
+RUNNER = "docs/results/f5_stageA_runner.json"
+RECORDS = "docs/results/f5_stageA_records.json"
 SUMMARY = "docs/results/summary_f0_f3.json"
 XWALK = "docs/results/f3_dn_crosswalk.json"
 F3B3 = "docs/results/f3b3_specificity.json"
@@ -238,7 +241,7 @@ def readme():
           "Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)", ""]
     toc = ["Result in brief", "The stage-A circuit", "Activity on the circuit", "Post-hoc analyses",
            "How we got here (F0-F3)", "Key numbers",
-           "How it works", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
+           "How it works", "Training", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
            "Data, credits and licences", "Authorship", "How to cite"]
     L += ["**Contents:** " + " · ".join(f"[{t}](#{anchor(t)})" for t in toc), ""]
     speed = C("scripts/viz_video.py", "SPEED")
@@ -473,12 +476,7 @@ def readme():
           f"Metrics use the window mean over intervals {C('train/f5_stageA.py', 'WINDOW', fn=lambda w: w[0], formula='WINDOW[0]')}-"
           f"{C('train/f5_stageA.py', 'WINDOW', fn=lambda w: w[1] - 1, formula='WINDOW[1] - 1')} (the stimulus after its "
           f"first {C('train/f5_stageA.py', 'WINDOW', fn=lambda w: int((w[0] - _const('train/f5_stageA.py', 'N_GREY')) * _const('train/f5_stageA.py', 'INTERVAL_MS')), formula='(WINDOW[0] - N_GREY) x INTERVAL_MS')} ms).",
-          f"- **Training.** Adam, batch {C('train/f5_stageA.py', 'BATCH')}, "
-          f"{C('train/f5_stageA.py', 'STEPS', '{:,}')} steps, the learning rate chosen per arm at training seed {seed0} from "
-          f"{{{', '.join(C('train/f5_stageA.py', 'LR_GRID', '{:g}', fn=lambda g, i=i: g[i], formula=f'LR_GRID[{i}]') for i in range(3))}}} "
-          f"by the lowest final validation loss, and the checkpoint with the lowest validation loss kept. Data seeds: "
-          f"training {JX(SPLITS, ['train'], min, '{}', 'min of train')}-{JX(SPLITS, ['train'], max, '{}', 'max of train')}, "
-          f"validation {v_lo}-{v_hi}, test {t_lo}-{t_hi}.", "",
+          "",
           "Arms (the same data, budget and test for each):", "",
           "- `true`: the VNC subgraph with its real wiring.",
           "- `shuffled`: the same subgraph rewired by degree-preserving edge swaps; the primary comparison arm.",
@@ -503,6 +501,141 @@ def readme():
           f"- `bridge_off`: `true` with every bridged DN clamped to {zero_off} (DNg02 kept).",
           "- `untrained`: `true` at initialisation, one deterministic evaluation on the test set.", "",
           f"Training seeds: {n_true} per trained arm, {seeds_n('bridge_off')} for `bridge_off`.", "", "</details>", ""]
+
+    H(2, "Training")
+    rn, rc = _load(RUNNER)["design"], _load(RECORDS)
+    if rn["n_trainable_graph"] != rn["n_edges"] + rn["n_neurons"] - rn["n_inputs"]:
+        raise SystemExit("trainable parameters are not one gain per edge and one leak rate per non-input neuron")
+    if rn["mlp_params"] < rn["n_trainable_graph"] or not rc["gate5"]["bit_identical"]:
+        raise SystemExit("mlp smaller than true, or gate 5 not bit-identical; the README text differs")
+    if rc["completion"]["input_checks_passed"] != rc["completion"]["input_checks_total"]:
+        raise SystemExit("not every input check passed; the README text differs")
+    if holm["not_run"] != ["B", "C"]:
+        raise SystemExit("stages B and C are not both 'not run'")
+    vs, cu = _load(VALID), _load(CURVES)
+    first_eval = cu["eval_every"] * cu["batch"]
+    if vs["summary"]["true"]["trials_to_090"] != {"mean": first_eval, "sd": 0.0}:
+        raise SystemExit("true did not reach the set accuracy at the first evaluation in every seed")
+    bo = vs["summary"]["bridge_off"]
+    if bo["n_censored_090"] != bo["n_seeds"]:
+        raise SystemExit("bridge_off reached the set accuracy in some seed; the README text differs")
+    if min(vs["summary"], key=lambda a: vs["summary"][a]["best_loss"]["mean"]) != "mlp":
+        raise SystemExit("mlp does not have the lowest validation loss")
+    if list(vs["guard"]["pause_reasons"]) != ["GPU temperature"]:
+        raise SystemExit("a guard pause had another reason")
+    sec = rep["secondary"]["comparisons"]["true_vs_shuffled_samples"]
+    if sec["test"]["mean_d"] <= 0 or "> 0 favours true" not in sec["label"]:
+        raise SystemExit("the samples-to-set-accuracy comparison does not favour true")
+    import numpy as _np
+    lin_r2 = _np.array([r["evaluations"]["r2"] for r in cu["runs"] if r["arm"] == "linear" and r["selected_rate"]]).mean(0)
+    fig_src = (ROOT / "scripts/readme_figures.py").read_text()
+    r2_lo = float(re.search(r"FIG5_R2_LIM = \((-?[\d.]+),", fig_src).group(1))
+    if not (lin_r2 < r2_lo).any():
+        raise SystemExit("the linear mean stays inside the Figure 5 c axis; the caption says it leaves it")
+    P14S = "prereg/14_f5_training.md"
+    cur_rows = [("A", ("rate BANC VNC subgraph", "recorded FlyWire DN spike counts (spiking reference brain R) through the "
+                       "bridge", "open-loop dA"), "run"),
+                ("B", ("rate FlyWire brain + rate VNC (VNC warm-started from A, same arm and training seed)",
+                       "frozen FlyVis 1.2.0 -> boundary layer", "open-loop dA"), "not run"),
+                ("C", ("as B, warm-started from B", "online frozen FlyVis in the docs/08 closed loop",
+                       "behaviour cloning, then 5 DAgger rounds (beta = 0)"), "not run"),
+                ("D", ("optional", "-", "needs its own pre-registration before any D run; never part of the section 8 "
+                       "verdict"), "optional, not run")]
+    table = ["| stage | trained part | input | task | status |", "|---|---|---|---|---|"]
+    for st, cells, status in cur_rows:
+        line = f"| {st} | " + " | ".join(cells) + " |"
+        T(P14S, line, "text")                                         # the row of prereg/14 section 3, verbatim
+        table.append(f"| {st} | " + " | ".join(T(P14S, c, "text") if any(ch.isdigit() for ch in c) else c
+                                               for c in cells) + f" | {status} |")
+    seeds_tr = J(VALID, "summary/true/n_seeds")
+    L += [f"Stage A trains only the nerve cord. The brain is fixed: its DN spike counts were recorded once and are "
+          f"replayed through the bridge. The rate model of the BANC VNC subgraph learns a gain per edge and a leak rate "
+          f"per neuron, each within fixed bounds (prereg/14 section 2), so the wiring itself, topology and synapse "
+          f"signs, never changes: the comparison asks whether the real wiring is a better substrate for learning the "
+          f"turn command than the same neurons with shuffled wiring. Every arm gets the same data, budget, "
+          f"learning-rate selection rule and test (H1, prereg/14 section 1).", "",
+          "The curriculum (prereg/14 section 3):", ""] + table + ["",
+          "What was trained:", "",
+          f"- **The graph:** {J(RUNNER, 'design/n_neurons', '{:,}')} neurons, {J(RUNNER, 'design/n_edges', '{:,}')} "
+          f"edges and {J(RUNNER, 'design/n_trainable_graph', '{:,}')} trainable parameters, one gain per edge and one "
+          f"leak rate per neuron; the {J(RUNNER, 'design/n_inputs', '{:,}')} clamped DN inputs have no leak rate.",
+          f"- **Fair controls:** `mlp` has {J(RUNNER, 'design/mlp_params', '{:,}')} parameters (width "
+          f"{J(RUNNER, 'design/mlp_width', '{:,}')}, the smallest with at least the parameter count of `true`, prereg/14 "
+          f"section 5); `linear` has {J(RUNNER, 'design/linear_params', '{:,}')}; `shuffled` keeps every neuron's in- "
+          f"and out-degree, and every edge keeps its synapse count and presynaptic sign.",
+          f"- **The same input for every arm:** the brain was recorded once, "
+          f"{J(RECORDS, 'completion/n_plan', '{:,}')} records, with {J(RECORDS, 'completion/input_checks_passed')} of "
+          f"{J(RECORDS, 'completion/input_checks_total')} input checks passed, and the gate-5 check reproduced a "
+          f"reference record bit for bit (prereg/14 gate 5).", "",
+          "<details><summary>How it was trained</summary>", "",
+          f"- **Data:** {J(RUNNER, 'design/n_train_trials', '{:,}')} training and {J(RUNNER, 'design/n_val_trials')} "
+          f"validation trials (rot_left / rot_right at {sp1} and {sp2} deg/s, static and grey); data seeds: training "
+          f"{JX(SPLITS, ['train'], min, '{}', 'min of train')}-{JX(SPLITS, ['train'], max, '{}', 'max of train')}, "
+          f"validation {v_lo}-{v_hi}, test {t_lo}-{t_hi}.",
+          f"- **Optimiser and budget:** Adam, batch {J(RUNNER, 'design/batch')}, {J(RUNNER, 'design/steps', '{:,}')} "
+          f"steps, so {JX(RUNNER, ['design/steps', 'design/batch'], lambda a, b: a * b, '{:,}', 'steps x batch')} "
+          f"training trials presented per run.",
+          f"- **Evaluation and checkpoint:** the full validation set every {J(RUNNER, 'design/eval_every')} steps; the "
+          f"checkpoint with the lowest validation loss is kept (prereg/14 section 6).",
+          f"- **Learning rate:** the grid {{{', '.join(J(RUNNER, f'design/lr_grid/{i}', '{:g}') for i in range(3))}}}; "
+          f"per arm, the rate with the lowest final validation loss at training seed {seed0} is used for every seed.",
+          f"- **Training seeds:** {seeds_tr} per trained arm, {J(VALID, 'summary/bridge_off/n_seeds')} for `bridge_off`.",
+          f"- **Memory:** a sparse edge gradient (sddmm, prereg/18), so the full graph trains on an "
+          f"{J(BENCH, 'machine/gpu_total_gib', '{:.0f}')} GiB laptop GPU; the smoke run peaked at "
+          f"{J(RUNNER, 'smoke/gpu_peak_allocated_gib', '{:.1f}')} GiB of GPU memory.",
+          f"- **One GPU job at a time,** through a guard (`scripts/f5_train_guard.py`) with GPU memory capped at a "
+          f"fraction {J(BENCH, 'policy/gpu_fraction_cap')}, a RAM cap of {J(BENCH, 'policy/ram_cap')} and a pause at a "
+          f"GPU temperature of {J(BENCH, 'policy/kill_temp_c')} °C. This followed the parallel benchmark, which ended in "
+          f"a driver fault ({J(BENCH, 'incident/nvlddmkm_events', '{:,}')} nvlddmkm events and an unexpected shutdown; "
+          f"`docs/results/f5_benchmark.json`, incident).",
+          f"- **Guard record:** {J(VALID, 'guard/job_ends_rc0')} of {J(VALID, 'guard/job_ends')} jobs ended normally; "
+          f"{J(VALID, 'guard/pauses')} pauses, all for GPU temperature; from {J(VALID, 'guard/first')} to "
+          f"{J(VALID, 'guard/last')}. After a pause a run resumes from its latest checkpoint (written every "
+          f"{J(RUNNER, 'design/ckpt_every')} steps).",
+          f"- **Replicate (prereg/19):** `true` at seed {seed0} and its selected rate, trained a second time, agreed with "
+          f"the first run at every evaluation to "
+          f"{J(VALID, 'replicate/max_abs_diff_over_evaluations/loss', '{:.1e}')} in validation loss and "
+          f"{J(VALID, 'replicate/max_abs_diff_over_evaluations/r2', '{:.1e}')} in R2, with equal turn-sign accuracy.",
+          "- **Test:** once per run, on the CPU, from the selected checkpoint (see "
+          "[Methods and safeguards](#methods-and-safeguards)).", "", "</details>", "",
+          "What happened (validation split, descriptive):", "",
+          "- **Selected learning rates:** " + ", ".join(f"`{a}` {J(VALID, f'selected_lr/{a}', '{:g}')}"
+                                                        for a in vs["selected_lr"]) + ".", "",
+          img("docs/figures/fig5_training.png",
+              "Four panels: final validation loss against learning rate per arm with the selected rate circled; "
+              "validation loss and validation R2 over training with mean lines and bands per arm; and dots for the "
+              "training trials each seed needed to reach the set turn-sign accuracy."),
+          "",
+          f"**Figure 5 | Stage-A training on the validation split: learning-rate selection, learning curves and the "
+          f"trials to the set turn-sign accuracy.** a, Learning-rate selection at training seed {seed0}: final "
+          f"validation loss per arm and learning rate (log scale); circles mark the selected rate. b, Validation loss "
+          f"over training trials presented at the selected rate (log scale); lines, means over training seeds; bands, "
+          f"± 1 SD (cut at the axis where they fall below it). c, Validation R2 of the window mean, same layout; "
+          f"dotted, `untrained` (one evaluation at initialisation); the `linear` mean leaves the axis at some "
+          f"evaluations (its R2 swings widely; prereg/20 limitation c). d, Training trials until the validation "
+          f"turn-sign accuracy first reached {J(CURVES, 'set_accuracy', '{:.2f}')}, one marker per training seed "
+          f"(vertical jitter only); ticks at the evaluation interval "
+          f"({JX(CURVES, ['eval_every', 'batch'], lambda a, b: a * b, '{:,}', 'eval_every x batch')} trials); open "
+          f"markers at the right edge, later than the axis end or never (`bridge_off` never). Validation split, data seeds "
+          f"{v_lo}-{v_hi} ({J(RUNNER, 'design/n_val_trials')} trials per evaluation); {seeds_tr} training seeds per "
+          f"arm, {J(VALID, 'summary/bridge_off/n_seeds')} for `bridge_off`.", "",
+          f"- **Training trials to the set turn-sign accuracy** (mean over seeds): " + ", ".join(
+              f"`{a}` {J(VALID, f'summary/{a}/trials_to_090/mean', '{:,.0f}')}"
+              for a in ("true", "shuffled", "derange", "mlp", "linear")) +
+          f"; `bridge_off` never ({J(VALID, 'summary/bridge_off/n_censored_090')} of "
+          f"{J(VALID, 'summary/bridge_off/n_seeds')} seeds). `true` reached it at the first evaluation in every seed. "
+          f"The evaluation interval limits the resolution, and turn-sign accuracy is near ceiling (prereg/20 "
+          f"limitation b).",
+          f"- **Registered secondary comparison** of samples to set accuracy, `true` against `shuffled` (prereg/14 "
+          f"section 8.3: counted on the validation evaluations during training, compared in the test report; no "
+          f"Holm, never a verdict): in favour of `true`, one-sided p = "
+          f"{J(REPORT, 'secondary/comparisons/true_vs_shuffled_samples/test/p_greater', '{:.4f}')} "
+          f"({J(REPORT, 'secondary/comparisons/true_vs_shuffled_samples/test/count_greater')}/"
+          f"{J(REPORT, 'secondary/comparisons/true_vs_shuffled_samples/test/n_patterns')}).",
+          f"- `mlp` reached the lowest validation loss (selected checkpoints, mean "
+          f"{J(VALID, 'summary/mlp/best_loss/mean', '{:.4f}')}).",
+          "- The `shuffled` validation loss was still falling at the end of the budget (prereg/20 limitation a; see "
+          "[Limitations](#limitations)).", ""]
 
     H(2, "Methods and safeguards")
     rl = _load(RATE_LIF)
@@ -761,19 +894,19 @@ def gallery():
             f"Rows, the arms `true`, `shuffled`, `derange`, `mlp`, `linear` and `bridge_off`; left, validation loss "
             f"(log scale); right, validation R2 of the window mean; x, training trials presented; colours, the "
             f"learning rates {grid}, the selected one marked in the legend. Validation split (used for selection); "
-            f"training seed {seed0}."),
+            f"training seed {seed0}. Figure 5 in the README shows the same validation evaluations."),
         "validation_b_selected_lr_all_seeds.png": (
             "Validation R2 over training at each arm's selected learning rate.",
             f"One panel per arm, its rate in the title; thin grey lines, single training seeds; red, their mean. "
             f"Validation split (used for selection); {J(REPORT, 'summary/derange/r2/n')} "
-            f"training seeds per arm, {J(REPORT, 'summary/bridge_off/r2/n')} for `bridge_off`."),
+            f"training seeds per arm, {J(REPORT, 'summary/bridge_off/r2/n')} for `bridge_off`. Figure 5 in the README shows the same validation evaluations."),
         "validation_c_arm_comparison.png": (
             "The arms at their selected learning rates over training.",
             f"Left, validation loss (log scale); centre, turn-sign accuracy (red dashed line, the "
             f"{C('train/f5_stageA.py', 'SET_ACCURACY', '{:.2f}')} set-accuracy level); right, R2 of the window mean; "
             f"x, training trials presented; lines, means over training seeds; shading, ± s.d.; dotted, `untrained` at "
             f"initialisation; colours as in the legend (they differ from Figures 1 and 4). Validation split (used for "
-            f"selection)."),
+            f"selection). Figure 5 in the README shows the same validation evaluations."),
         "validation_d_true_vs_shuffled_final_val_loss.png": (
             "The final validation loss was lower for `true` than for `shuffled` in every training seed (descriptive).",
             f"Final validation loss (step {C('train/f5_stageA.py', 'STEPS', '{:,}')}) per training seed, `true` against "

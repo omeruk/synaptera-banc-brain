@@ -20,15 +20,15 @@ Every file of `docs/figures/supplementary/`, by group. Sources, scripts and hash
 
 <img src="figures/supplementary/validation_a_lr_grid.png" width="100%" alt="Figure S4: Learning-rate grid at training seed 0: validation loss and R2 over training, per arm and rate.">
 
-**Figure S4 | Learning-rate grid at training seed 0: validation loss and R2 over training, per arm and rate.** Rows, the arms `true`, `shuffled`, `derange`, `mlp`, `linear` and `bridge_off`; left, validation loss (log scale); right, validation R2 of the window mean; x, training trials presented; colours, the learning rates 0.001, 0.003, 0.01, the selected one marked in the legend. Validation split (used for selection); training seed 0.
+**Figure S4 | Learning-rate grid at training seed 0: validation loss and R2 over training, per arm and rate.** Rows, the arms `true`, `shuffled`, `derange`, `mlp`, `linear` and `bridge_off`; left, validation loss (log scale); right, validation R2 of the window mean; x, training trials presented; colours, the learning rates 0.001, 0.003, 0.01, the selected one marked in the legend. Validation split (used for selection); training seed 0. Figure 5 in the README shows the same validation evaluations.
 
 <img src="figures/supplementary/validation_b_selected_lr_all_seeds.png" width="100%" alt="Figure S5: Validation R2 over training at each arm's selected learning rate.">
 
-**Figure S5 | Validation R2 over training at each arm's selected learning rate.** One panel per arm, its rate in the title; thin grey lines, single training seeds; red, their mean. Validation split (used for selection); 10 training seeds per arm, 5 for `bridge_off`.
+**Figure S5 | Validation R2 over training at each arm's selected learning rate.** One panel per arm, its rate in the title; thin grey lines, single training seeds; red, their mean. Validation split (used for selection); 10 training seeds per arm, 5 for `bridge_off`. Figure 5 in the README shows the same validation evaluations.
 
 <img src="figures/supplementary/validation_c_arm_comparison.png" width="100%" alt="Figure S6: The arms at their selected learning rates over training.">
 
-**Figure S6 | The arms at their selected learning rates over training.** Left, validation loss (log scale); centre, turn-sign accuracy (red dashed line, the 0.90 set-accuracy level); right, R2 of the window mean; x, training trials presented; lines, means over training seeds; shading, ± s.d.; dotted, `untrained` at initialisation; colours as in the legend (they differ from Figures 1 and 4). Validation split (used for selection).
+**Figure S6 | The arms at their selected learning rates over training.** Left, validation loss (log scale); centre, turn-sign accuracy (red dashed line, the 0.90 set-accuracy level); right, R2 of the window mean; x, training trials presented; lines, means over training seeds; shading, ± s.d.; dotted, `untrained` at initialisation; colours as in the legend (they differ from Figures 1 and 4). Validation split (used for selection). Figure 5 in the README shows the same validation evaluations.
 
 <img src="figures/supplementary/validation_d_true_vs_shuffled_final_val_loss.png" width="100%" alt="Figure S7: The final validation loss was lower for true than for shuffled in every training seed (descriptive).">
 
