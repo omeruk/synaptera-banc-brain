@@ -12,7 +12,7 @@ A simulation test of whether the real wiring of a BANC v888 ventral nerve cord (
 
 ## Result in brief
 
-The pre-registered stage-A verdict is "The connectome helps in stage A" (final). In plain words: on the sealed test split, the VNC subgraph trained with its real wiring (`true`) reached a higher test R2 at the training speeds than the same subgraph with degree-preserving shuffled wiring (`shuffled`), in all 10 training seeds. R2 is 1 - SSE / SST of the window-mean turn command dA against the teacher dA*; d is the per-seed difference R2(`true`) - R2(`shuffled`). Mean d was 0.0268 (95 % bootstrap interval 0.0242 to 0.0291), one-sided exact sign-flip p = 0.00098 (1/1024), Holm-adjusted p = 0.0029 (stages B and C were not run and count as p = 1).
+The pre-registered stage-A verdict is "The connectome helps in stage A" (final). In plain words: on the sealed test split, the VNC subgraph trained with its real wiring (`true`) reached a higher test R2 at the training speeds than the same subgraph with degree-preserving shuffled wiring (`shuffled`), in all 10 training seeds. R2 is 1 - SSE / SST of the window-mean turn command dA against the teacher dA*; d is the per-seed difference R2(`true`) - R2(`shuffled`). Mean d was 0.0268 (95 % bootstrap interval 0.0242 to 0.0291), one-sided exact sign-flip p = 0.0010 (1/1024), Holm-adjusted p = 0.0029 (stages B and C were not run and count as p = 1).
 
 Context. An unconstrained two-layer network (`mlp`) had a higher test R2 than `true` at the training speeds. At the held-out 90 deg/s, `shuffled` and `mlp` had a higher test R2 than `true`. At the held-out 30 deg/s, `true` had the highest test R2 of all 7 arms. On the validation data seeds the 30 deg/s advantage was found again (post-hoc, exploratory: mean d 0.451, one-sided p = 1/1024); it used the same trained networks on new trials, so it is not an independent replication of training.
 
@@ -38,7 +38,7 @@ These analyses were planned after the test result (prereg/21, committed before t
 
 <img src="docs/figures/posthoc_stageA_figure.png" width="100%" alt="Four panels: gain ratio against drum speed per arm; validation R2 at 30 deg/s, true above shuffled for every seed; z-scores of 18 graph measures of the true graph against 10 shuffled graphs; a scatter of one graph measure against the per-seed deficit.">
 
-**Figure 4 | Post-hoc, exploratory: on the validation data seeds `true` kept its advantage at 30 deg/s, and its graph lay outside the range of the shuffles on 14 of 18 structure measures.** a, Speed tuning: gain ratio G(v) = mean sign(dA*) dA / (K_P v) of the window-mean output against drum speed, per arm; lines, means over the training seeds; small dots, single seeds; `untrained`, one run; dashed line, the teacher (G = 1); the held-out speeds are shaded. b, Validation R2 at 30 deg/s, `true` against `shuffled` per training seed (lines pair the seeds), with the primary post-hoc test in the panel. c, Structure of the `true` VNC graph against the shuffled graphs: per measure S1-S18 ([definitions](docs/results/f5_stageA_posthoc.md)), z = (value - shuffled mean) / shuffled SD; grey, the shuffled graphs; blue, `true` (filled where it lies outside the shuffled range); symmetric-log axis. d, The strongest structure-deficit correlation, selected as the largest |rho| of 54 uncorrected Spearman correlations, none of which reached |rho| >= 0.648 (the two-sided 5 % level at n = 10; 0 reached it): S16 (signed lateral influence index L_hg3) of each training seed's shuffled graph against D3, the validation 30 deg/s deficit R2(`true`) - R2(`shuffled`); numbers, the training seeds. Validation split, data seeds 160-199, 80 rotation trials per held-out speed and run; post-hoc and exploratory.
+**Figure 4 | Post-hoc, exploratory: on the validation data seeds `true` kept its advantage at 30 deg/s, and its graph lay outside the range of the shuffles on 14 of 18 structure measures.** a, Speed tuning: gain ratio G(v) = mean sign(dA*) dA / (K_P v) of the window-mean output against drum speed, per arm; lines, means over the training seeds; small dots, single seeds; `untrained`, one run; dashed line, the teacher (G = 1); the held-out speeds are shaded. b, Validation R2 at 30 deg/s, `true` against `shuffled` per training seed (lines pair the seeds), with the primary post-hoc test in the panel. c, Structure of the `true` VNC graph against the shuffled graphs: per measure S1-S18 ([definitions](docs/results/f5_stageA_posthoc.md)), z = (value - shuffled mean) / shuffled SD; grey, the shuffled graphs; blue, `true` (filled where it lies outside the shuffled range); symmetric-log axis. d, The strongest structure-deficit correlation, selected as the largest |rho| of 54 uncorrected Spearman correlations, none of which reached |rho| >= 0.648 (the two-sided 5 % level at n = 10): S16 (signed lateral influence index L_hg3) of each training seed's shuffled graph against D3, the validation 30 deg/s deficit R2(`true`) - R2(`shuffled`); numbers, the training seeds. Validation split, data seeds 160-199, 80 rotation trials per held-out speed and run; post-hoc and exploratory.
 
 All supporting figures (test split, validation and learning-rate selection, stimulus and visual input, video stills, alignment): [docs/FIGURES.md](docs/FIGURES.md).
 
@@ -59,12 +59,12 @@ Test split, mean over training seeds (standard deviations in [docs/results/f5_st
 ## How it works
 
 ```mermaid
-flowchart LR
-  S["Drum stimulus: rotating grating, rot_left / rot_right, static, grey"] --> E["FlyGym eyes, FlyVis, visual boundary layer"]
-  E --> Bn["FlyWire v783 brain: spiking reference model (Shiu et al.), not trained; per-interval DN spike counts recorded once per trial"]
-  Bn --> D["DN bridge: 225 units into 305 BANC DNs, replayed from the records"]
-  D --> V["BANC VNC subgraph, rate model: edge gains and leak rates trained, topology fixed"]
-  V --> M["Fixed readout: 16 steering MNs to the turn command dA"]
+flowchart TD
+  S["Drum stimulus: rotating grating"] --> E["FlyGym eyes, FlyVis"]
+  E --> Bn["FlyWire v783 spiking brain (Shiu et al.), not trained; DN spike counts recorded"]
+  Bn --> D["DN bridge: 225 units to 305 BANC DNs, replayed"]
+  D --> V["BANC VNC subgraph, rate model: trained"]
+  V --> M["Fixed readout: 16 steering MNs to dA"]
   M --> L["Loss against the teacher dA*"]
 ```
 
@@ -138,6 +138,7 @@ Further:
 - The post-hoc results (Figure 4) are exploratory.
 - The `untrained` arm already had a test turn-sign accuracy of 1.000, so turn-sign accuracy does not separate the arms; R2, which also scores the size of the turn, is the primary metric.
 - The readout uses only the 8 MN types named above, one neuron per type and side.
+- The model was not compared with neural or behavioural recordings from flies.
 - Everything here is a simulation: open loop, one steering task (optomotor yaw), stage A only.
 
 ## Reproduce
@@ -235,16 +236,16 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 env -u PYTHONPATH python -m pytest tests/
 
 Works this repository uses:
 
-- FlyWire connectome: Dorkenwald, S. et al. (2024). *Nature* 634, 124–138. doi:10.1038/s41586-024-07558-y
-- FlyWire annotations: Schlegel, P. et al. (2024). *Nature* 634, 139–152. doi:10.1038/s41586-024-07686-5
-- FAFB electron-microscopy volume: Zheng, Z. et al. (2018). *Cell* 174, 730–743.e22. doi:10.1016/j.cell.2018.06.019
+- FlyWire connectome: Dorkenwald, S. et al. (2024). *Nature* 634, 124–138. doi:[10.1038/s41586-024-07558-y](https://doi.org/10.1038/s41586-024-07558-y)
+- FlyWire annotations: Schlegel, P. et al. (2024). *Nature* 634, 139–152. doi:[10.1038/s41586-024-07686-5](https://doi.org/10.1038/s41586-024-07686-5)
+- FAFB electron-microscopy volume: Zheng, Z. et al. (2018). *Cell* 174, 730–743.e22. doi:[10.1016/j.cell.2018.06.019](https://doi.org/10.1016/j.cell.2018.06.019)
 - FlyWire transmitter predictions (synapse signs): Eckstein, N. et al. (2024). *Cell* 187, 2574–2594. doi:[10.1016/j.cell.2024.03.016](https://doi.org/10.1016/j.cell.2024.03.016)
-- BANC connectome: Bates, Phelps, Kim, Yang et al. (2026). *Nature* 656, 957–970. doi:10.1038/s41586-026-10735-w; data: Harvard Dataverse doi:10.7910/DVN/7WTH1N
-- brain model: Shiu, P. K. et al. (2024). *Nature* 634, 210–219. doi:10.1038/s41586-024-07763-9
-- FlyGym / NeuroMechFly v2 (body, eyes): Wang-Chen, S. et al. (2024). *Nature Methods*. doi:10.1038/s41592-024-02497-y
-- FlyVis (visual network): Lappalainen, J. K. et al. (2024). *Nature* 634, 1132–1140. doi:10.1038/s41586-024-07939-3
-- Brian2 (spiking simulation): Stimberg, M., Brette, R. & Goodman, D. F. M. (2019). *eLife* 8, e47314. doi:10.7554/eLife.47314
-- wing steering motor system (readout MN types): Lindsay, T., Sustar, A. & Dickinson, M. (2017). *Current Biology* 27, 345–358. doi:10.1016/j.cub.2016.12.018
+- BANC connectome: Bates, A. S. et al. (2026). *Nature* 656, 957–970. doi:[10.1038/s41586-026-10735-w](https://doi.org/10.1038/s41586-026-10735-w); data: Harvard Dataverse doi:[10.7910/DVN/7WTH1N](https://doi.org/10.7910/DVN/7WTH1N)
+- brain model: Shiu, P. K. et al. (2024). *Nature* 634, 210–219. doi:[10.1038/s41586-024-07763-9](https://doi.org/10.1038/s41586-024-07763-9)
+- FlyGym / NeuroMechFly v2 (body, eyes): Wang-Chen, S. et al. (2024). *Nature Methods* 21, 2353–2362. doi:[10.1038/s41592-024-02497-y](https://doi.org/10.1038/s41592-024-02497-y)
+- FlyVis (visual network): Lappalainen, J. K. et al. (2024). *Nature* 634, 1132–1140. doi:[10.1038/s41586-024-07939-3](https://doi.org/10.1038/s41586-024-07939-3)
+- Brian2 (spiking simulation): Stimberg, M., Brette, R. & Goodman, D. F. M. (2019). *eLife* 8, e47314. doi:[10.7554/eLife.47314](https://doi.org/10.7554/eLife.47314)
+- wing steering motor system (readout MN types): Lindsay, T., Sustar, A. & Dickinson, M. (2017). *Current Biology* 27, 345–358. doi:[10.1016/j.cub.2016.12.018](https://doi.org/10.1016/j.cub.2016.12.018)
 
 ## Authorship
 

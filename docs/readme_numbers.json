@@ -618,6 +618,18 @@
    }
   },
   {
+   "string": "14.5",
+   "files": [
+    "docs/FIGURES.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error/median_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "159",
    "files": [
     "README.md"
@@ -706,6 +718,18 @@
      "test"
     ],
     "formula": "max of test",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "264",
+   "files": [
+    "docs/FIGURES.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error/n",
     "format": "{}"
    }
   },
@@ -936,23 +960,34 @@
    }
   },
   {
-   "string": "Bates, Phelps, Kim, Yang et al. (2026). *Nature* 656, 957–970. doi:10.1038/s41586-026-10735-w",
+   "string": "10.7910/DVN/7WTH1N",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "source": "Crossref (api.crossref.org/works/<doi>), checked 2026-10-27"
+    "file": "scripts/viz_anatomy.py",
+    "verbatim": true
    }
   },
   {
-   "string": "Dorkenwald, S. et al. (2024). *Nature* 634, 124–138. doi:10.1038/s41586-024-07558-y",
+   "string": "Bates, A. S. et al. (2026). *Nature* 656, 957–970. doi:[10.1038/s41586-026-10735-w](https://doi.org/10.1038/s41586-026-10735-w)",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "file": "docs/provenance/synaptera_v1_NOTICE.md",
+    "source": "Crossref (api.crossref.org/works/<doi>), checked 2026-10-27; no copy in the repository"
+   }
+  },
+  {
+   "string": "Dorkenwald, S. et al. (2024). *Nature* 634, 124–138. doi:[10.1038/s41586-024-07558-y](https://doi.org/10.1038/s41586-024-07558-y)",
+   "files": [
+    "README.md"
+   ],
+   "kind": "reference",
+   "source": {
+    "file": "docs/provenance/synaptera_v1_THIRD_PARTY.md",
     "verbatim": true
    }
   },
@@ -968,101 +1003,78 @@
    }
   },
   {
-   "string": "Lappalainen, J. K. et al. (2024). *Nature* 634, 1132–1140. doi:10.1038/s41586-024-07939-3",
+   "string": "Lappalainen, J. K. et al. (2024). *Nature* 634, 1132–1140. doi:[10.1038/s41586-024-07939-3](https://doi.org/10.1038/s41586-024-07939-3)",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "file": "docs/provenance/synaptera_v1_NOTICE.md",
+    "file": "docs/provenance/synaptera_v1_THIRD_PARTY.md",
     "verbatim": true
    }
   },
   {
-   "string": "Lindsay, T., Sustar, A. & Dickinson, M. (2017). *Current Biology* 27, 345–358. doi:10.1016/j.cub.2016.12.018",
+   "string": "Lindsay, T., Sustar, A. & Dickinson, M. (2017). *Current Biology* 27, 345–358. doi:[10.1016/j.cub.2016.12.018](https://doi.org/10.1016/j.cub.2016.12.018)",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "source": "Crossref (api.crossref.org/works/<doi>), checked 2026-10-27"
+    "source": "Crossref (api.crossref.org/works/<doi>), checked 2026-10-27; no copy in the repository"
    }
   },
   {
-   "string": "Schlegel, P. et al. (2024). *Nature* 634, 139–152. doi:10.1038/s41586-024-07686-5",
+   "string": "Schlegel, P. et al. (2024). *Nature* 634, 139–152. doi:[10.1038/s41586-024-07686-5](https://doi.org/10.1038/s41586-024-07686-5)",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "file": "docs/provenance/synaptera_v1_NOTICE.md",
+    "file": "docs/provenance/synaptera_v1_THIRD_PARTY.md",
     "verbatim": true
    }
   },
   {
-   "string": "Shiu, P. K. et al. (2024). *Nature* 634, 210–219. doi:10.1038/s41586-024-07763-9",
+   "string": "Shiu, P. K. et al. (2024). *Nature* 634, 210–219. doi:[10.1038/s41586-024-07763-9](https://doi.org/10.1038/s41586-024-07763-9)",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "file": "docs/provenance/synaptera_v1_NOTICE.md",
+    "file": "docs/provenance/synaptera_v1_THIRD_PARTY.md",
     "verbatim": true
    }
   },
   {
-   "string": "Stimberg, M., Brette, R. & Goodman, D. F. M. (2019). *eLife* 8, e47314. doi:10.7554/eLife.47314",
+   "string": "Stimberg, M., Brette, R. & Goodman, D. F. M. (2019). *eLife* 8, e47314. doi:[10.7554/eLife.47314](https://doi.org/10.7554/eLife.47314)",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "file": "docs/provenance/synaptera_v1_NOTICE.md",
+    "file": "docs/provenance/synaptera_v1_THIRD_PARTY.md",
     "verbatim": true
    }
   },
   {
-   "string": "Wang-Chen, S. et al. (2024). *Nature Methods*. doi:10.1038/s41592-024-02497-y",
+   "string": "Wang-Chen, S. et al. (2024). *Nature Methods* 21, 2353–2362. doi:[10.1038/s41592-024-02497-y](https://doi.org/10.1038/s41592-024-02497-y)",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "file": "docs/provenance/synaptera_v1_NOTICE.md",
+    "file": "docs/provenance/synaptera_v1_THIRD_PARTY.md",
     "verbatim": true
    }
   },
   {
-   "string": "Zheng, Z. et al. (2018). *Cell* 174, 730–743.e22. doi:10.1016/j.cell.2018.06.019",
+   "string": "Zheng, Z. et al. (2018). *Cell* 174, 730–743.e22. doi:[10.1016/j.cell.2018.06.019](https://doi.org/10.1016/j.cell.2018.06.019)",
    "files": [
     "README.md"
    ],
    "kind": "reference",
    "source": {
-    "source": "Crossref (api.crossref.org/works/<doi>), checked 2026-10-27"
-   }
-  },
-  {
-   "string": "doi:10.7910/DVN/7WTH1N",
-   "files": [
-    "README.md"
-   ],
-   "kind": "reference",
-   "source": {
-    "file": "docs/figures/README.md",
-    "verbatim": true
-   }
-  },
-  {
-   "string": "0",
-   "files": [
-    "README.md"
-   ],
-   "kind": "result",
-   "source": {
-    "file": "docs/results/f5_stageA_posthoc.json",
-    "key": "B/correlations/n_at_or_above_crit",
-    "format": "{}"
+    "source": "Crossref (api.crossref.org/works/<doi>), checked 2026-10-27; no copy in the repository"
    }
   },
   {
@@ -1111,7 +1123,7 @@
    }
   },
   {
-   "string": "0.00098",
+   "string": "0.0010",
    "files": [
     "README.md"
    ],
@@ -1119,7 +1131,7 @@
    "source": {
     "file": "docs/results/f5_stageA_report.json",
     "key": "primary/test/p_greater",
-    "format": "{:.5f}"
+    "format": "{:.4f}"
    }
   },
   {

@@ -1,13 +1,14 @@
 """The repository README, the figure gallery and the list of every number they print.
 
     env -u PYTHONPATH python scripts/readme_text.py [--overwrite]
+    env -u PYTHONPATH python scripts/readme_text.py --check      # exit 1 if a committed output differs; writes nothing
 
 Writes README.md, docs/FIGURES.md and docs/readme_numbers.json. No number is typed here (CLAUDE.md rule 11): each one
 is read from a committed JSON (docs/results/*.json, docs/figures/*.json, configs/f5_splits.json), from a code constant
 (parsed from the source, not imported), or from the text of a pre-registration, and docs/readme_numbers.json records
 for each printed string the file(s) it appears in and its source. References and the commands of the Reproduce
 section are copied from repository files and checked against them. Refuses to overwrite an existing output without
---overwrite.
+--overwrite. scripts/verify_report.py (check_readme) recomputes every entry of docs/readme_numbers.json.
 """
 import argparse
 import ast
@@ -243,7 +244,7 @@ def readme():
           f"1 - SSE / SST of the window-mean turn command dA against the teacher dA*; d is the per-seed difference "
           f"R2(`true`) - R2(`shuffled`). Mean d was {J(REPORT, 'primary/effect/mean', '{:.4f}')} (95 % bootstrap "
           f"interval {J(REPORT, 'primary/effect/lo', '{:.4f}')} to {J(REPORT, 'primary/effect/hi', '{:.4f}')}), "
-          f"one-sided exact sign-flip p = {J(REPORT, 'primary/test/p_greater', '{:.5f}')} "
+          f"one-sided exact sign-flip p = {J(REPORT, 'primary/test/p_greater', '{:.4f}')} "
           f"({J(REPORT, 'primary/test/count_greater')}/{J(REPORT, 'primary/test/n_patterns')}), Holm-adjusted p = "
           f"{J(REPORT, 'primary/holm/adjusted/A', '{:.4f}')} (stages B and C were not run and count as p = "
           f"{J(REPORT, 'primary/holm/p/B', '{:g}')}).", "",
@@ -331,8 +332,8 @@ def readme():
           f"shuffled graphs; blue, `true` (filled where it lies outside the shuffled range); symmetric-log axis. d, The "
           f"strongest structure-deficit correlation, selected as the largest |rho| of "
           f"{J(POSTHOC, 'B/correlations/n')} uncorrected Spearman correlations, none of which reached |rho| >= "
-          f"{J(POSTHOC, 'B/correlations/rho_crit')} (the two-sided 5 % level at n = {n_true}; "
-          f"{J(POSTHOC, 'B/correlations/n_at_or_above_crit')} reached it): {J(POSTHOC, 'B/correlations/strongest/measure')} "
+          f"{J(POSTHOC, 'B/correlations/rho_crit')} (the two-sided 5 % level at n = {n_true}): "
+          f"{J(POSTHOC, 'B/correlations/strongest/measure')} "
           f"({J(POSTHOC, 'B/measures/' + s['measure'] + '/description')}) of each training seed's shuffled graph "
           f"against {J(POSTHOC, 'B/correlations/strongest/deficit')}, the "
           f"validation {held30} deg/s deficit R2(`true`) - R2(`shuffled`); numbers, the training seeds. Validation "
@@ -358,14 +359,12 @@ def readme():
 
     H(2, "How it works")
     win = _const("train/f5_stageA.py", "WINDOW")
-    L += ["```mermaid", "flowchart LR",
-          f'  S["Drum stimulus: rotating grating, rot_left / rot_right, static, grey"] --> E["FlyGym eyes, FlyVis, '
-          f'visual boundary layer"]',
-          f'  E --> Bn["{fw} brain: spiking reference model (Shiu et al.), not trained; per-interval DN spike counts '
-          f'recorded once per trial"]',
-          f'  Bn --> D["DN bridge: {units} units into {targets} BANC DNs, replayed from the records"]',
-          f'  D --> V["BANC VNC subgraph, rate model: edge gains and leak rates trained, topology fixed"]',
-          f'  V --> M["Fixed readout: {J(POSTHOC, "B/targets/n")} steering MNs to the turn command dA"]',
+    L += ["```mermaid", "flowchart TD",
+          f'  S["Drum stimulus: rotating grating"] --> E["FlyGym eyes, FlyVis"]',
+          f'  E --> Bn["{fw} spiking brain (Shiu et al.), not trained; DN spike counts recorded"]',
+          f'  Bn --> D["DN bridge: {units} units to {targets} BANC DNs, replayed"]',
+          f'  D --> V["BANC VNC subgraph, rate model: trained"]',
+          f'  V --> M["Fixed readout: {J(POSTHOC, "B/targets/n")} steering MNs to dA"]',
           f'  M --> L["Loss against the teacher dA*"]',
           "```", "",
           f"- **Stimulus and brain.** A rotating grating (rot_left / rot_right at {held30}, {sp1}, {held90} and {sp2} "
@@ -477,6 +476,7 @@ def readme():
           f"arms; R2, which also scores the size of the turn, is the primary metric.",
           f"- The readout uses only the {n_types} "
           f"MN types named above, one neuron per type and side.",
+          "- The model was not compared with neural or behavioural recordings from flies.",
           "- Everything here is a simulation: open loop, one steering task (optomotor yaw), stage A only.", ""]
     assert not rep["exploratory"]["run"] and holm["not_run"] == ["B", "C"]
 
@@ -560,19 +560,22 @@ def readme():
     H(2, "Data, credits and licences")
     N = "docs/provenance/synaptera_v1_NOTICE.md"
     TP = "docs/provenance/synaptera_v1_THIRD_PARTY.md"
-    xref = dict(source="Crossref (api.crossref.org/works/<doi>), checked 2026-10-27")
+    xref = dict(source="Crossref (api.crossref.org/works/<doi>), checked 2026-10-27; no copy in the repository")
+
+    def linked(doi):
+        return f"doi:[{doi}](https://doi.org/{doi})"
     refs = [
-        ("FlyWire connectome", T(N, "Dorkenwald, S. et al. (2024). *Nature* 634, 124–138. doi:10.1038/s41586-024-07558-y")),
-        ("FlyWire annotations", T(N, "Schlegel, P. et al. (2024). *Nature* 634, 139–152. doi:10.1038/s41586-024-07686-5")),
-        ("FAFB electron-microscopy volume", X("Zheng, Z. et al. (2018). *Cell* 174, 730–743.e22. doi:10.1016/j.cell.2018.06.019", xref)),
-        ("FlyWire transmitter predictions (synapse signs)", T(TP, "Eckstein, N. et al. (2024). *Cell* 187, 2574–2594. doi:[10.1016/j.cell.2024.03.016](https://doi.org/10.1016/j.cell.2024.03.016)")),
-        ("BANC connectome", X("Bates, Phelps, Kim, Yang et al. (2026). *Nature* 656, 957–970. doi:10.1038/s41586-026-10735-w", xref)
-         + "; data: Harvard Dataverse " + T("docs/figures/README.md", "doi:10.7910/DVN/7WTH1N", "reference")),
-        ("brain model", T(N, "Shiu, P. K. et al. (2024). *Nature* 634, 210–219. doi:10.1038/s41586-024-07763-9")),
-        ("FlyGym / NeuroMechFly v2 (body, eyes)", T(N, "Wang-Chen, S. et al. (2024). *Nature Methods*. doi:10.1038/s41592-024-02497-y")),
-        ("FlyVis (visual network)", T(N, "Lappalainen, J. K. et al. (2024). *Nature* 634, 1132–1140. doi:10.1038/s41586-024-07939-3")),
-        ("Brian2 (spiking simulation)", T(N, "Stimberg, M., Brette, R. & Goodman, D. F. M. (2019). *eLife* 8, e47314. doi:10.7554/eLife.47314")),
-        ("wing steering motor system (readout MN types)", X("Lindsay, T., Sustar, A. & Dickinson, M. (2017). *Current Biology* 27, 345–358. doi:10.1016/j.cub.2016.12.018", xref)),
+        ("FlyWire connectome", T(TP, "Dorkenwald, S. et al. (2024). *Nature* 634, 124–138. " + linked("10.1038/s41586-024-07558-y"))),
+        ("FlyWire annotations", T(TP, "Schlegel, P. et al. (2024). *Nature* 634, 139–152. " + linked("10.1038/s41586-024-07686-5"))),
+        ("FAFB electron-microscopy volume", X("Zheng, Z. et al. (2018). *Cell* 174, 730–743.e22. " + linked("10.1016/j.cell.2018.06.019"), xref)),
+        ("FlyWire transmitter predictions (synapse signs)", T(TP, "Eckstein, N. et al. (2024). *Cell* 187, 2574–2594. " + linked("10.1016/j.cell.2024.03.016"))),
+        ("BANC connectome", X("Bates, A. S. et al. (2026). *Nature* 656, 957–970. " + linked("10.1038/s41586-026-10735-w"), xref)
+         + "; data: Harvard Dataverse " + linked(T("scripts/viz_anatomy.py", "10.7910/DVN/7WTH1N", "reference"))),
+        ("brain model", T(TP, "Shiu, P. K. et al. (2024). *Nature* 634, 210–219. " + linked("10.1038/s41586-024-07763-9"))),
+        ("FlyGym / NeuroMechFly v2 (body, eyes)", T(TP, "Wang-Chen, S. et al. (2024). *Nature Methods* 21, 2353–2362. " + linked("10.1038/s41592-024-02497-y"))),
+        ("FlyVis (visual network)", T(TP, "Lappalainen, J. K. et al. (2024). *Nature* 634, 1132–1140. " + linked("10.1038/s41586-024-07939-3"))),
+        ("Brian2 (spiking simulation)", T(TP, "Stimberg, M., Brette, R. & Goodman, D. F. M. (2019). *eLife* 8, e47314. " + linked("10.7554/eLife.47314"))),
+        ("wing steering motor system (readout MN types)", X("Lindsay, T., Sustar, A. & Dickinson, M. (2017). *Current Biology* 27, 345–358. " + linked("10.1016/j.cub.2016.12.018"), xref)),
     ]
     L += ["- **Code:** MIT ([LICENSE](LICENSE)).",
           f"- **Data:** {fw} data are {cc_nc}; BANC {banc} data are {cc_by} and need their attribution. "
@@ -699,8 +702,9 @@ def gallery():
             f"landmark fit of the affine in `docs/figures/transforms.json`: RMSE "
             f"{J(TRANSFORMS, f'{tf}/rmse_control_um', '{:.1f}')} µm on the control points and "
             f"{J(TRANSFORMS, f'{tf}/rmse_check_um', '{:.1f}')} µm on the check points, determinant "
-            f"{J(TRANSFORMS, f'{tf}/determinant', '{:.3f}')}. The comparison with the BANC team's warp is in "
-            f"`docs/figures/warp_check.json`."),
+            f"{J(TRANSFORMS, f'{tf}/determinant', '{:.3f}')}. Against the BANC team's warp (`docs/figures/warp_check.json`: "
+            f"our affine FlyWire soma against the root node of the BANC team's warped skeleton) the median distance was "
+            f"{J(WARP, 'error/median_um', '{:.1f}')} µm over {J(WARP, 'error/n')} DNs."),
     }
     assert sel and set(cap) == set(files)
     assert [s[1] for s in stills] == [int(x.split("_+")[1][:4]) for x in sorted(f for f in files if f.startswith("video_"))]
@@ -720,13 +724,9 @@ def gallery():
     return "\n".join(L)
 
 
-def main(argv=None):
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--overwrite", action="store_true")
-    a = ap.parse_args(argv)
-    for p in (README, GALLERY, NUMBERS):
-        if p.exists() and not a.overwrite:
-            raise SystemExit(f"{p} exists; pass --overwrite to replace it")
+def build() -> dict:
+    """The three outputs as text, keyed by their path; nothing is written."""
+    ENTRIES.clear()
     texts = {"README.md": readme(), "docs/FIGURES.md": gallery()}
     for t in texts.values():
         for bad in ("@", "omerf", "C:\\", "/mnt/c"):
@@ -741,12 +741,46 @@ def main(argv=None):
     for m in nums:
         for f in m["files"]:
             assert m["string"] in texts[f], (m["string"], f)
-    README.write_text(texts["README.md"])
-    GALLERY.write_text(texts["docs/FIGURES.md"])
-    NUMBERS.write_text(json.dumps(dict(
+    texts["docs/readme_numbers.json"] = json.dumps(dict(
         note="every number, name with a version, reference and command printed in README.md and docs/FIGURES.md, with "
-             "its source; generated by scripts/readme_text.py", entries=nums), indent=1, ensure_ascii=False) + "\n")
-    print(f"{len(nums)} entries; README {len(texts['README.md']):,} chars, gallery {len(texts['docs/FIGURES.md']):,}")
+             "its source; generated by scripts/readme_text.py", entries=nums), indent=1, ensure_ascii=False) + "\n"
+    return texts
+
+
+def check(texts) -> int:
+    """0 if every committed output equals the generator output, else 1 with the first differing line."""
+    for rel, new in texts.items():
+        path = ROOT / rel
+        old = path.read_text() if path.exists() else None
+        if old == new:
+            continue
+        if old is None:
+            print(f"{rel}: missing")
+            return 1
+        a, b = old.splitlines(), new.splitlines()
+        k = next((i for i, (x, y) in enumerate(zip(a, b)) if x != y), min(len(a), len(b)))
+        print(f"{rel}: line {k + 1} differs\n  committed: {a[k] if k < len(a) else '<end of file>'}\n"
+              f"  generated: {b[k] if k < len(b) else '<end of file>'}")
+        return 1
+    print("README.md, docs/FIGURES.md and docs/readme_numbers.json equal the generator output")
+    return 0
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--overwrite", action="store_true")
+    ap.add_argument("--check", action="store_true", help="compare with the committed files; write nothing")
+    a = ap.parse_args(argv)
+    if a.check:
+        return check(build())
+    for p in (README, GALLERY, NUMBERS):
+        if p.exists() and not a.overwrite:
+            raise SystemExit(f"{p} exists; pass --overwrite to replace it")
+    texts = build()
+    for rel, t in texts.items():
+        (ROOT / rel).write_text(t)
+    n = len(json.loads(texts["docs/readme_numbers.json"])["entries"])
+    print(f"{n} entries; README {len(texts['README.md']):,} chars, gallery {len(texts['docs/FIGURES.md']):,}")
     return 0
 
 
