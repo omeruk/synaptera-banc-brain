@@ -1429,6 +1429,204 @@ def check_f5_stageA():
     return n, bad
 
 
+F5PH_JSON = ROOT / "docs" / "results" / "f5_stageA_posthoc.json"
+F5PH_MD = ROOT / "docs" / "results" / "f5_stageA_posthoc.md"
+
+
+def check_f5_stageA_posthoc():
+    """F5 stage-A post-hoc analyses (prereg/21; post-hoc, exploratory). The JSON is rebuilt and compared, the markdown
+    re-rendered and compared. Independently of the script: the part-B measures S1-S18 of the true graph and the 10
+    cached shuffled graphs from the edge lists (bincount joins and a breadth-first search, no sparse matrix), the
+    ranks, ranges and Spearman correlations (scipy.stats.spearmanr); from the saved predictions, the primary post-hoc
+    test (R2 per run, every sign pattern enumerated, the label) and the speed-tuning summaries (least squares by
+    numpy.linalg.lstsq). D1 and D2 come from the committed test report JSON; no test record is opened."""
+    import itertools
+    from scipy.stats import spearmanr
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import f5_stageA_posthoc as P
+    import f5_train as FT
+    from train import f5_stageA as A
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    stored = json.loads(F5PH_JSON.read_text())
+    md = F5PH_MD.read_text()
+    chk("f5ph:json_equals_rebuild", json_close("f5ph:json_equals_rebuild", stored, P.build()))
+    chk("f5ph:md_equals_render", md == P.render(stored))
+    chk("f5ph:label", stored["label"] == "post-hoc, exploratory" and md.lower().count("post-hoc, exploratory") >= 2)
+    chk("f5ph:summary_B_in_md", P.summary_B(stored["B"]) in md)
+    chk("f5ph:plan_sha", hashlib.sha256(P.PLAN.read_bytes()).hexdigest() == stored["plan_sha256"])
+
+    # part B, from the edge lists
+    B = stored["B"]
+    setup = FT.load_setup()
+    bridge = A.make_bridge(setup, "true", 0)
+    src = np.asarray(bridge.target_index, np.int64)
+    side_of = dict(zip(setup.banc_index.tolist(), setup.banc_side.astype(str).tolist()))
+    sside = np.array([side_of[int(i)] for i in src])
+    tgt = np.asarray(setup.readout, np.int64)
+    tname = setup.meta["readout_names"]
+    types = ["b2", "b3", "i1", "i2", "hg1", "hg2", "hg3", "hg4"]
+    rsign = {m: 1 if m == "b2" else -1 for m in types}
+    N = setup.n
+
+    def measures(post):
+        pre, w, s = setup.pre.astype(np.int64), setup.n_syn.astype(np.int64), setup.sign.astype(np.int64)
+        post = np.asarray(post, np.int64)
+        is_src, tcol = np.zeros(N, bool), np.full(N, -1)
+        is_src[src] = True
+        tcol[tgt] = np.arange(len(tgt))
+        e_src, e_tgt = is_src[pre], tcol[post] >= 0
+
+        def into(mask, wt):                     # per interneuron x: sum of wt over the masked source edges i -> x
+            return np.bincount(post[mask], wt[mask], minlength=N)
+
+        def outof(mask, wt):                    # per x: sum of wt over the masked edges x -> target
+            return np.bincount(pre[mask], wt[mask], minlength=N)
+
+        one = np.ones(len(pre), np.float64)
+        wf, sw = w.astype(np.float64), (s * w).astype(np.float64)
+        d1 = e_src & e_tgt
+        S = dict(S3=int(d1.sum()), S6=int(w[d1].sum()))
+        S["S4"] = int(round(float(into(e_src, one) @ outof(e_tgt, one))))
+        a1, c1 = into(e_src, one), outof(e_tgt, one)
+        S["S5"] = int(round(float((a1[pre] * c1[post]).sum())))
+        S["S7"] = int(round(float(into(e_src, wf) @ outof(e_tgt, wf))))
+        sides = {k: np.isin(pre, src[sside == k]) for k in ("left", "right")}
+        tsd = np.array([x.split("|")[1] for x in tname])
+        tty = np.array([x.split("|")[0] for x in tname])
+        Pw = {}
+        for a in ("left", "right"):
+            for b in ("left", "right"):
+                m_t = e_tgt & np.isin(tcol[post], np.flatnonzero(tsd == b))
+                Pw[a, b] = float(w[sides[a] & m_t].sum()) + float(into(sides[a] & e_src, wf) @ outof(m_t, wf))
+        S["S8"] = (Pw["left", "left"] + Pw["right", "right"]) / sum(Pw.values())
+        pos = float(w[d1 & (s > 0)].sum())
+        for sg in (1, -1):
+            pos += float(into(e_src & (s == sg), wf) @ outof(e_tgt & (s == sg), wf))
+        S["S9"] = pos / sum(Pw.values())
+
+        def Q(a, m, b):
+            j = int(np.flatnonzero((tty == m) & (tsd == b))[0])
+            m_t = tcol[post] == j
+            return int(round(float(sw[sides[a] & m_t].sum()) + float(into(sides[a] & e_src, sw) @ outof(m_t, sw))))
+
+        L = {m: (Q("left", m, "left") - Q("right", m, "left")) - (Q("left", m, "right") - Q("right", m, "right"))
+             for m in types}
+        S.update({f"S{10 + k}": L[m] for k, m in enumerate(types)})
+        S["S18"] = sum(rsign[m] * L[m] for m in types)
+        dist = np.full((len(src), len(tgt)), -1)
+        for j, mn in enumerate(tgt):           # BFS on the reversed graph from each MN
+            dd = np.full(N, -1)
+            dd[mn], front, k = 0, np.zeros(N, bool), 0
+            front[mn] = True
+            while front.any():
+                k += 1
+                nxt = np.zeros(N, bool)
+                nxt[pre[front[post]]] = True
+                nxt &= dd < 0
+                dd[nxt] = k
+                front = nxt
+            dist[:, j] = dd[src]
+        reach = dist > 0
+        S["S1"] = float(dist[reach].mean())
+        S["S2"] = float(((dist > 0) & (dist <= 2)).sum() / dist.size)
+        lengths = {"1": int((dist == 1).sum()), "2": int((dist == 2).sum()), "3": int((dist == 3).sum()),
+                   "4": int((dist == 4).sum()), ">=5": int((dist >= 5).sum()), "unreachable": int((dist < 0).sum())}
+        return S, lengths
+
+    def close(x, y, tol=1e-12):
+        return x == y if isinstance(x, int) and isinstance(y, int) else abs(x - y) <= tol * max(1.0, abs(x), abs(y))
+
+    posts = {"true": setup.post}
+    for t in range(10):
+        z = np.load(ROOT / "runs" / "f5" / "A" / "graphs" / f"shuffled_t{t}.npz", allow_pickle=False)
+        chk(f"f5ph:graph_seed:t{t}", int(z["seed"]) == A.SHUFFLE_SEED0 + t)
+        chk(f"f5ph:graph_sha:t{t}", hashlib.sha256((ROOT / "runs" / "f5" / "A" / "graphs" / f"shuffled_t{t}.npz")
+                                                   .read_bytes()).hexdigest() == B["inputs"]["shuffled_graphs_sha256"][f"t{t}"])
+        posts[f"shuffled_t{t}"] = z["post"]
+    vals = {}
+    for g, post in posts.items():
+        S, lengths = measures(post)
+        vals[g] = S
+        for k, v in S.items():
+            chk(f"f5ph:B:{g}:{k}", close(v, B["graphs"][g]["values"][k]), (v, B["graphs"][g]["values"][k]))
+        chk(f"f5ph:B:{g}:lengths", lengths == B["graphs"][g]["lengths"], lengths)
+    sh = [f"shuffled_t{t}" for t in range(10)]
+    rep = json.loads((ROOT / "docs" / "results" / "f5_stageA_report.json").read_text())["runs"]
+    D = {"D1": [rep["true"][f"t{t}"]["r2"] - rep["shuffled"][f"t{t}"]["r2"] for t in range(10)],
+         "D2": [rep["true"][f"t{t}"]["g30_r2"] - rep["shuffled"][f"t{t}"]["g30_r2"] for t in range(10)],
+         "D3": B["deficits"]["D3"]}                                 # D3 is checked against the predictions below
+    rhos = []
+    for k, m in B["measures"].items():
+        tv, xs = vals["true"][k], [vals[g][k] for g in sh]
+        chk(f"f5ph:B:rank:{k}", m["rank_true"] == 1 + sum(x > tv for x in xs) + 0.5 * sum(x == tv for x in xs))
+        chk(f"f5ph:B:outside:{k}", m["outside_shuffled_range"] is (tv > max(xs) or tv < min(xs)))
+        for dk in ("D1", "D2", "D3"):
+            r = spearmanr(xs, D[dk])[0]
+            chk(f"f5ph:B:rho:{k}:{dk}", close(float(r), B["correlations"]["rho"][k][dk], 1e-9),
+                (r, B["correlations"]["rho"][k][dk]))
+            rhos.append((k, dk, float(r)))
+    chk("f5ph:B:deficits", all(np.allclose(D[k], B["deficits"][k], rtol=0, atol=1e-15) for k in ("D1", "D2")))
+    best = max(rhos, key=lambda x: abs(x[2]))                     # max returns the first of equal |rho| in S, D order
+    s = B["correlations"]["strongest"]
+    chk("f5ph:B:strongest", (best[0], best[1]) == (s["measure"], s["deficit"]), (best, s))
+    chk("f5ph:B:n_crit", sum(abs(r) >= 0.648 for _, _, r in rhos) == B["correlations"]["n_at_or_above_crit"])
+    chk("f5ph:B:n_corr", len(rhos) == 54 == B["correlations"]["n"] and abs(B["correlations"]["expected_by_chance"]
+                                                                            - 2.7) < 1e-12)
+
+    # part A, from the saved predictions
+    pred = ROOT / "runs" / "f5" / "A_posthoc" / "pred"
+    W0, W1_ = A.WINDOW
+
+    def wm(dA):
+        return np.asarray(dA, np.float64)[W0:W1_].mean(0)
+
+    def tv(stims, speeds):
+        return np.array([A.target_value(str(a), int(v)) for a, v in zip(stims, speeds)])
+
+    r30, G, gb = {}, {}, {}
+    for arm in ("true", "shuffled", "derange", "mlp", "linear", "untrained"):
+        for t in (range(10) if arm != "untrained" else (0,)):
+            z1, z2 = np.load(pred / f"{arm}_t{t}_train_speeds.npz"), np.load(pred / f"{arm}_t{t}_held_out.npz")
+            seeds = np.concatenate([z1["seed"], z2["g30_seed"], z2["g90_seed"]])
+            chk(f"f5ph:A:no_test_seed:{arm}:t{t}", bool(((seeds >= 160) & (seeds < 200)).all()))
+            x30, y30 = wm(z2["g30_dA"]), tv(z2["g30_stimulus"], z2["g30_speed"])
+            r30[arm, t] = 1 - ((x30 - y30) ** 2).sum() / ((y30 - y30.mean()) ** 2).sum()
+            rot = np.char.startswith(z1["stimulus"].astype(str), "rot")
+            x = np.concatenate([wm(z1["dA"])[rot], wm(z2["g30_dA"]), wm(z2["g90_dA"])])
+            sp = np.concatenate([z1["speed"][rot], z2["g30_speed"], z2["g90_speed"]])
+            st = np.concatenate([z1["stimulus"][rot], z2["g30_stimulus"], z2["g90_stimulus"]])
+            y = tv(st, sp)
+            gb[arm, t] = np.linalg.lstsq(np.c_[y, np.ones_like(y)], x, rcond=None)[0]
+            G[arm, t] = {v: float((np.sign(y[sp == v]) * x[sp == v]).mean() / (A.K_P * v)) for v in (30, 60, 90, 120)}
+    pr = stored["A"]["primary"]
+    d = [r30["true", t] - r30["shuffled", t] for t in range(10)]
+    chk("f5ph:A:d30", np.allclose(d, pr["d"], rtol=0, atol=1e-12) and pr["d"] == B["deficits"]["D3"], (d, pr["d"]))
+    obs, tol = sum(d) / 10, 1e-12 * max(sum(abs(x) for x in d) / 10, sys.float_info.min)
+    ms = [sum(g * x for g, x in zip(sg, d)) / 10 for sg in itertools.product((1, -1), repeat=10)]
+    p1 = sum(m >= obs - tol for m in ms) / len(ms)
+    p2 = sum(abs(m) >= abs(obs) - tol for m in ms) / len(ms)
+    chk("f5ph:A:p_one_sided", p1 == pr["test"]["p_greater"], (p1, pr["test"]["p_greater"]))
+    chk("f5ph:A:p_two_sided", p2 == pr["test"]["p_two_sided"], (p2, pr["test"]["p_two_sided"]))
+    want = P.REPLICATED if obs > 0 and p1 < 0.05 else P.NOT_REPLICATED
+    chk("f5ph:A:label", pr["label"] == want and f"Label: **{want}**" in md)
+    for arm, s in stored["A"]["summary"].items():
+        ts = range(10) if arm != "untrained" else (0,)
+        for k, i in (("gain", 0), ("offset", 1)):
+            chk(f"f5ph:A:{arm}:{k}", abs(np.mean([gb[arm, t][i] for t in ts]) - s[k]["mean"]) <= 1e-9)
+        for v in (30, 60, 90, 120):
+            chk(f"f5ph:A:{arm}:G{v}", abs(np.mean([G[arm, t][v] for t in ts]) - s["G"][str(v)]["mean"]) <= 1e-9)
+    chk("f5ph:A:consistency", stored["consistency"]["passed"] is True
+        and stored["consistency"]["n_passed"] == stored["consistency"]["n_checked"] == 50)
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -1549,6 +1747,10 @@ def main(argv=None):
         bad += b
     if F5RP_MD.exists():
         k, b = check_f5_stageA_report()
+        n += k
+        bad += b
+    if F5PH_MD.exists():
+        k, b = check_f5_stageA_posthoc()
         n += k
         bad += b
     if "--print" in argv:
