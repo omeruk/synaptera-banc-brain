@@ -9,7 +9,7 @@ per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_en
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
 (`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
 docs/05 section 7.1): see `check_machine_repro`; F5 step 2b (`docs/results/f5_benchmark.md`): see
-`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. F5 stage-A post-hoc analyses (`docs/results/f5_stageA_posthoc.md`): see `check_f5_stageA_posthoc`. README (`README.md`, `docs/FIGURES.md`, every entry of `docs/readme_numbers.json`): see `check_readme`. Rebuilt JSON is compared value by value with floats within a relative
+`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. F5 stage-A post-hoc analyses (`docs/results/f5_stageA_posthoc.md`): see `check_f5_stageA_posthoc`. README (`README.md`, `docs/FIGURES.md`, every entry of `docs/readme_numbers.json`): see `check_readme`. F5 stage-A validation curves (`docs/results/f5_stageA_curves.json`): see `check_f5_stageA_curves`. Rebuilt JSON is compared value by value with floats within a relative
 JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
@@ -1846,6 +1846,89 @@ def check_readme():
     return n, bad
 
 
+F5SC_JSON = ROOT / "docs" / "results" / "f5_stageA_curves.json"
+F5VA_JSON_CURVES = ROOT / "docs" / "results" / "f5_stageA_validation.json"
+
+
+def check_f5_stageA_curves(curves_path=None):
+    """F5 stage-A validation curves (`docs/results/f5_stageA_curves.json`, scripts/f5_stageA_curves.py) against the
+    validation report (`docs/results/f5_stageA_validation.json`). The training code is not imported; its rules are
+    reimplemented here: (a) the run count; (b) per registered run and per grid run, the evaluation at final_step and at
+    selected_step (and selected_step is the lowest validation loss over the evaluations with step > 0, or step 0 for
+    the untrained run) against final_* / best_*; (c) trials to 0.90 by samples_to_set_accuracy of train/f5_stageA.py
+    (first evaluation with step > 0 and turn-sign accuracy >= 0.90 gives step x batch, none gives the budget, censored);
+    (d) the largest differences of the prereg/19 replicate pair."""
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    def close(x, y, rel=1e-12):
+        return x == y or abs(x - y) <= rel * max(abs(x), abs(y))
+
+    cur = json.loads(Path(curves_path or F5SC_JSON).read_text())
+    val = json.loads(F5VA_JSON_CURVES.read_text())
+    runs = cur["runs"]
+    sel = val["selected_lr"]
+    # a. run count
+    registered = [r for r in runs if r["selected_rate"] and not r["replicate"] and r["arm"] != "untrained"]
+    grid_other = [r for r in runs if not r["selected_rate"]]
+    replicate = [r for r in runs if r["replicate"]]
+    untrained = [r for r in runs if r["arm"] == "untrained"]
+    n_reg = sum(len(v) for a, v in val["runs"].items() if a != "untrained")
+    chk("f5sc:a:registered", len(registered) == n_reg, (len(registered), n_reg))
+    chk("f5sc:a:grid", len(grid_other) == sum(len(v) - 1 for v in val["lr_grid_runs"].values()), len(grid_other))
+    chk("f5sc:a:replicate_untrained", len(replicate) == 1 and len(untrained) == 1)
+    chk("f5sc:a:n_finished_runs", len(registered) + len(untrained) + len(grid_other) + len(replicate)
+        == len(runs) == cur["n_runs"] == val["n_finished_runs"], (len(runs), val["n_finished_runs"]))
+    chk("f5sc:a:selected_lr", cur["selected_lr"] == sel and all(r["lr"] == sel[r["arm"]] for r in registered))
+
+    def at(r, step):
+        e = r["evaluations"]
+        i = e["step"].index(step)
+        return {m: e[m][i] for m in ("loss", "r2", "sign_accuracy")}
+
+    def compare(key, r, row):
+        e = r["evaluations"]
+        chk(f"{key}:trials", e["trials"] == [s * r["batch"] for s in e["step"]])
+        chk(f"{key}:final_is_last", e["step"][-1] == r["final_step"] == row["final_step"])
+        chk(f"{key}:selected_step", r["selected_step"] == row["selected_step"])
+        later = [i for i, s in enumerate(e["step"]) if s > 0]
+        best = (min(later, key=lambda i: (e["loss"][i], e["step"][i])) if later else e["step"].index(0))
+        chk(f"{key}:selected_is_lowest_loss", e["step"][best] == r["selected_step"], (e["step"][best], r["selected_step"]))
+        fin, bst = at(r, r["final_step"]), at(r, r["selected_step"])
+        for m in ("loss", "r2", "sign_accuracy"):
+            chk(f"{key}:final_{m}", close(fin[m], row[f"final_{m}"]), (fin[m], row[f"final_{m}"]))
+            chk(f"{key}:best_{m}", close(bst[m], row[f"best_{m}"]), (bst[m], row[f"best_{m}"]))
+        # c. samples_to_set_accuracy of train/f5_stageA.py, reimplemented
+        hit = next((s for s, acc in zip(e["step"], e["sign_accuracy"]) if s > 0 and acc >= cur["set_accuracy"]), None)
+        samples, censored = (hit * r["batch"], False) if hit is not None else (r["config_steps"] * r["batch"], True)
+        chk(f"{key}:trials_to_090", samples == row["trials_to_090"], (samples, row["trials_to_090"]))
+        chk(f"{key}:trials_to_090_censored", censored == row["trials_to_090_censored"])
+
+    # b, c. registered runs (and the untrained run) against runs; grid runs against lr_grid_runs
+    for r in registered + untrained:
+        compare(f"f5sc:{r['run']}", r, val["runs"][r["arm"]][f"t{r['training_seed']}"])
+    for r in [x for x in runs if x["training_seed"] == 0 and x["arm"] in val["lr_grid_runs"] and not x["replicate"]]:
+        compare(f"f5sc:grid:{r['run']}", r, val["lr_grid_runs"][r["arm"]][f"{r['lr']:g}"])
+    for a, g in val["lr_grid"].items():
+        for row in g:
+            r = next(x for x in runs if x["arm"] == a and x["training_seed"] == 0 and x["lr"] == row["lr"]
+                     and not x["replicate"])
+            chk(f"f5sc:lr_grid:{a}:{row['lr']:g}", close(at(r, r["final_step"])["loss"], row["final_val_loss"]))
+    # d. the replicate pair
+    rep = replicate[0]
+    first = next(x for x in registered if x["arm"] == "true" and x["training_seed"] == 0)
+    chk("f5sc:d:same_steps", rep["evaluations"]["step"] == first["evaluations"]["step"])
+    for m, v in val["replicate"]["max_abs_diff_over_evaluations"].items():
+        d = max(abs(x - y) for x, y in zip(rep["evaluations"][m], first["evaluations"][m]))
+        chk(f"f5sc:d:max_abs_diff:{m}", close(d, v), (d, v))
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -1974,6 +2057,10 @@ def main(argv=None):
         bad += b
     if README_NUMBERS.exists():
         k, b = check_readme()
+        n += k
+        bad += b
+    if F5SC_JSON.exists():
+        k, b = check_f5_stageA_curves()
         n += k
         bad += b
     if "--print" in argv:
