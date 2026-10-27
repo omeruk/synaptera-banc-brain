@@ -180,7 +180,6 @@
   {
    "string": "0.001",
    "files": [
-    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "constant",
@@ -193,7 +192,6 @@
   {
    "string": "0.003",
    "files": [
-    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "constant",
@@ -206,7 +204,6 @@
   {
    "string": "0.01",
    "files": [
-    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "constant",
@@ -413,17 +410,6 @@
    }
   },
   {
-   "string": "16",
-   "files": [
-    "README.md"
-   ],
-   "kind": "constant",
-   "source": {
-    "code": "train/f5_stageA.py:BATCH",
-    "format": "{}"
-   }
-  },
-  {
    "string": "2",
    "files": [
     "docs/FIGURES.md"
@@ -450,7 +436,6 @@
   {
    "string": "2,000",
    "files": [
-    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "constant",
@@ -1368,6 +1353,42 @@
    }
   },
   {
+   "string": "0.001",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/lr_grid/0",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.001",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "selected_lr/linear",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.001",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "selected_lr/bridge_off",
+    "format": "{:g}"
+   }
+  },
+  {
    "string": "0.0010",
    "files": [
     "README.md"
@@ -1389,6 +1410,90 @@
     "file": "docs/results/f5_stageA_report.json",
     "key": "primary/holm/adjusted/A",
     "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.003",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/lr_grid/1",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.003",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "selected_lr/mlp",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.0078",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "key": "secondary/comparisons/true_vs_shuffled_samples/test/p_greater",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.01",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/lr_grid/2",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.01",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "selected_lr/true",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.01",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "selected_lr/shuffled",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.01",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "selected_lr/derange",
+    "format": "{:g}"
    }
   },
   {
@@ -1424,6 +1529,18 @@
    "source": {
     "file": "docs/results/f5_stageA_report.json",
     "key": "primary/effect/hi",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0325",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_loss/mean",
     "format": "{:.4f}"
    }
   },
@@ -1680,6 +1797,30 @@
    }
   },
   {
+   "string": "0.7",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_benchmark.json",
+    "key": "policy/gpu_fraction_cap",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "0.90",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_curves.json",
+    "key": "set_accuracy",
+    "format": "{:.2f}"
+   }
+  },
+  {
    "string": "0.9444",
    "files": [
     "README.md"
@@ -1914,6 +2055,54 @@
    }
   },
   {
+   "string": "1,316",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/n_inputs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,346",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/mlp_width",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,600",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/trials_to_090/mean",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "1,600",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/trials_to_090/mean",
+    "format": "{:,.0f}"
+   }
+  },
+  {
    "string": "1.000",
    "files": [
     "README.md"
@@ -1983,6 +2172,18 @@
     "file": "docs/results/f5_stageA_report.json",
     "key": "summary/untrained/sign_accuracy/mean",
     "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.2",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "smoke/gpu_peak_allocated_gib",
+    "format": "{:.1f}"
    }
   },
   {
@@ -2065,6 +2266,18 @@
    }
   },
   {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
    "string": "1024",
    "files": [
     "README.md"
@@ -2085,6 +2298,18 @@
    "source": {
     "file": "docs/results/f5_stageA_posthoc.json",
     "key": "A/primary/test/n_patterns",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "1024",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "key": "secondary/comparisons/true_vs_shuffled_samples/test/n_patterns",
     "format": "{}"
    }
   },
@@ -2116,6 +2341,18 @@
    }
   },
   {
+   "string": "14,416",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/linear_params",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "16",
    "files": [
     "README.md"
@@ -2124,6 +2361,18 @@
    "source": {
     "file": "docs/results/f5_stageA_posthoc.json",
     "key": "B/targets/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "16",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/batch",
     "format": "{}"
    }
   },
@@ -2155,6 +2404,54 @@
    }
   },
   {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/steps",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,400",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "completion/n_plan",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2026-10-18 18:39:32",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "guard/first",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "2026-10-19 19:06:39",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "guard/last",
+    "format": "{}"
+   }
+  },
+  {
    "string": "240",
    "files": [
     "README.md"
@@ -2163,6 +2460,18 @@
    "source": {
     "file": "docs/results/f5_stageA_report.json",
     "key": "runs/true/t0/n_test_trials",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "240",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/n_val_trials",
     "format": "{}"
    }
   },
@@ -2176,6 +2485,30 @@
     "file": "docs/results/summary_f0_f3.json",
     "key": "b1_max/values/2",
     "format": "{}"
+   }
+  },
+  {
+   "string": "25",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/ckpt_every",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "25,818",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/n_neurons",
+    "format": "{:,}"
    }
   },
   {
@@ -2203,6 +2536,42 @@
    }
   },
   {
+   "string": "3,020,333",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/n_edges",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "3,044,835",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/n_trainable_graph",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "3,047,360",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/mlp_params",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "305",
    "files": [
     "README.md"
@@ -2212,6 +2581,22 @@
     "file": "docs/results/f5_stageA_posthoc.json",
     "key": "B/sources/n",
     "format": "{}"
+   }
+  },
+  {
+   "string": "32,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "keys": [
+     "design/steps",
+     "design/batch"
+    ],
+    "formula": "steps x batch",
+    "format": "{:,}"
    }
   },
   {
@@ -2243,6 +2628,18 @@
    }
   },
   {
+   "string": "4.7e-08",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "replicate/max_abs_diff_over_evaluations/r2",
+    "format": "{:.1e}"
+   }
+  },
+  {
    "string": "454",
    "files": [
     "README.md"
@@ -2264,6 +2661,54 @@
    "source": {
     "file": "docs/results/f5_stageA_report.json",
     "key": "summary/bridge_off/r2/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/n_censored_090",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "5,043",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_benchmark.json",
+    "key": "incident/nvlddmkm_events",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "50",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/eval_every",
     "format": "{}"
    }
   },
@@ -2316,6 +2761,18 @@
    }
   },
   {
+   "string": "6",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "guard/pauses",
+    "format": "{}"
+   }
+  },
+  {
    "string": "6.9",
    "files": [
     "README.md"
@@ -2358,6 +2815,30 @@
    }
   },
   {
+   "string": "76",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "guard/job_ends_rc0",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "77",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "guard/job_ends",
+    "format": "{}"
+   }
+  },
+  {
    "string": "8",
    "files": [
     "README.md"
@@ -2369,6 +2850,30 @@
      "B/targets/names"
     ],
     "formula": "number of MN types in B/targets/names",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "8",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_benchmark.json",
+    "key": "machine/gpu_total_gib",
+    "format": "{:.0f}"
+   }
+  },
+  {
+   "string": "8",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "key": "secondary/comparisons/true_vs_shuffled_samples/test/count_greater",
     "format": "{}"
    }
   },
@@ -2397,6 +2902,18 @@
    }
   },
   {
+   "string": "8.0e-09",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "replicate/max_abs_diff_over_evaluations/loss",
+    "format": "{:.1e}"
+   }
+  },
+  {
    "string": "80",
    "files": [
     "README.md"
@@ -2421,6 +2938,82 @@
     "file": "docs/results/f5_stageA_posthoc.json",
     "key": "A/runs/true/t0/g30/n_trials",
     "format": "{}"
+   }
+  },
+  {
+   "string": "800",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_curves.json",
+    "keys": [
+     "eval_every",
+     "batch"
+    ],
+    "formula": "eval_every x batch",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "800",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/trials_to_090/mean",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "804",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "completion/input_checks_passed",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "804",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "completion/input_checks_total",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "87",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_benchmark.json",
+    "key": "policy/kill_temp_c",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "880",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/trials_to_090/mean",
+    "format": "{:,.0f}"
    }
   },
   {
@@ -2452,6 +3045,30 @@
     ],
     "formula": "level x 100",
     "format": "{}"
+   }
+  },
+  {
+   "string": "960",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/n_train_trials",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "960",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/trials_to_090/mean",
+    "format": "{:,.0f}"
    }
   },
   {
@@ -2520,6 +3137,18 @@
    "source": {
     "file": "docs/results/f5_stageA_posthoc.json",
     "key": "B/correlations/strongest/deficit",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "MemoryMax=14G, no swap (systemd scope)",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_benchmark.json",
+    "key": "policy/ram_cap",
     "format": "{}"
    }
   },
@@ -2657,6 +3286,94 @@
    "kind": "text",
    "source": {
     "file": "tasks/__init__.py",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "behaviour cloning, then 5 DAgger rounds (beta = 0)",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "frozen FlyVis 1.2.0 -> boundary layer",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "needs its own pre-registration before any D run; never part of the section 8 verdict",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "online frozen FlyVis in the docs/08 closed loop",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "| A | rate BANC VNC subgraph | recorded FlyWire DN spike counts (spiking reference brain R) through the bridge | open-loop dA |",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "| B | rate FlyWire brain + rate VNC (VNC warm-started from A, same arm and training seed) | frozen FlyVis 1.2.0 -> boundary layer | open-loop dA |",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "| C | as B, warm-started from B | online frozen FlyVis in the docs/08 closed loop | behaviour cloning, then 5 DAgger rounds (beta = 0) |",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "| D | optional | - | needs its own pre-registration before any D run; never part of the section 8 verdict |",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "prereg/14_f5_training.md",
     "verbatim": true
    }
   },
