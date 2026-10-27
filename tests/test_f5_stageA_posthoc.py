@@ -179,3 +179,41 @@ def test_compare_applies_the_registered_tolerances():
     assert not P.compare(dict(base, r2=0.9 + 1.1e-4), base)["passed"]
     assert not P.compare(dict(base, loss=0.05 + 1.1e-4), base)["passed"]
     assert not P.compare(dict(base, sign_accuracy=0.99375), base)["passed"]
+
+
+# ── analysis B helpers (a toy graph, every value derived by hand) ──────────────────────────────────────────────────
+def _toy():
+    """DNs 0 (left), 1 (right), 5 (left, no edges); interneuron 2; MNs 3 (b2 left), 4 (b2 right). Signs per
+    presynaptic neuron: 0 +, 1 -, 2 -."""
+    pre, post = np.array([0, 0, 2, 2, 1]), np.array([3, 2, 3, 4, 2])
+    n_syn, sign = np.array([2, 3, 4, 5, 1]), np.array([1, 1, -1, -1, -1])
+    ends = dict(src=np.array([0, 1, 5]), src_side=np.array(["left", "right", "left"]), tgt=np.array([3, 4]),
+                tgt_type=np.array(["b2", "b2"]), tgt_side=np.array(["left", "right"]))
+    return pre, post, n_syn, sign, ends
+
+
+def test_structure_measures_on_a_toy_graph():
+    pre, post, n_syn, sign, ends = _toy()
+    r = P.structure(6, pre, post, n_syn, sign, ends)
+    v = r["values"]
+    # W1: (0,3) 2; W2: (0,3) 12, (0,4) 15, (1,3) 4, (1,4) 5; P total 38, ipsilateral (0,3) 14 + (1,4) 5
+    assert (v["S6"], v["S7"]) == (2, 36) and np.isclose(v["S8"], 19 / 38)
+    # excitatory paths: 0->3 (2), 1->2->3 (4), 1->2->4 (5)
+    assert np.isclose(v["S9"], 11 / 38)
+    # Q: (0,3) 2 - 12, (0,4) -15, (1,3) 4, (1,4) 5; L_b2 = (-10 - 4) - (-15 - 5)
+    assert v["S10"] == 6 and v["S18"] == 6 and all(v[f"S{k}"] == 0 for k in range(11, 18))
+    assert (v["S3"], v["S4"], v["S5"]) == (1, 4, 0)
+    assert np.isclose(v["S1"], 7 / 4) and np.isclose(v["S2"], 4 / 6)
+    assert r["lengths"] == {"1": 1, "2": 3, "3": 0, "4": 0, ">=5": 0, "unreachable": 2} and r["n_pairs"] == 6
+
+
+def test_structure_refuses_a_source_with_an_incoming_edge():
+    pre, post, n_syn, sign, ends = _toy()
+    with pytest.raises(SystemExit, match="incoming edge"):
+        P.structure(6, np.r_[pre, 2], np.r_[post, 1], np.r_[n_syn, 1], np.r_[sign, -1], ends)
+
+
+def test_rank_and_spearman():
+    assert list(P.avg_rank_desc([3, 1, 3, 2])) == [1.5, 4, 1.5, 3]
+    assert np.isclose(P.spearman([1, 2, 3, 4], [10, 30, 20, 40]), 0.8)
+    assert P.spearman([1, 1, 1], [1, 2, 3]) is None
