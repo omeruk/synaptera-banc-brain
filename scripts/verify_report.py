@@ -9,7 +9,7 @@ per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_en
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
 (`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
 docs/05 section 7.1): see `check_machine_repro`; F5 step 2b (`docs/results/f5_benchmark.md`): see
-`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. F5 stage-A post-hoc analyses (`docs/results/f5_stageA_posthoc.md`): see `check_f5_stageA_posthoc`. README (`README.md`, `docs/FIGURES.md`, every entry of `docs/readme_numbers.json`): see `check_readme`. F5 stage-A validation curves (`docs/results/f5_stageA_curves.json`): see `check_f5_stageA_curves`. Rebuilt JSON is compared value by value with floats within a relative
+`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. F5 stage-A post-hoc analyses (`docs/results/f5_stageA_posthoc.md`): see `check_f5_stageA_posthoc`. README (`README.md`, `docs/FIGURES.md`, every entry of `docs/readme_numbers.json`): see `check_readme`. F5 stage-A validation curves (`docs/results/f5_stageA_curves.json`): see `check_f5_stageA_curves`. FlyWire -> BANC alignment data of the figures (`docs/figures/landmarks.csv`, `transforms.json`, `warp_check.csv`, `warp_check.json`): see `check_alignment`. Rebuilt JSON is compared value by value with floats within a relative
 JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
@@ -1931,6 +1931,174 @@ def check_f5_stageA_curves(curves_path=None):
     return n, bad
 
 
+ALIGN_DIR = ROOT / "docs" / "figures"
+
+
+def check_alignment(fig_dir=None):
+    """FlyWire -> BANC alignment data of the figures (`docs/figures/landmarks.csv`, `transforms.json`, `warp_check.csv`,
+    `warp_check.json`; written by scripts/viz_positions.py and the check step of scripts/viz_anatomy.py). The viz
+    scripts are not imported; their rules are reimplemented here as coded there, and their constants (HOLDOUT_FRAC,
+    SPLIT_SEED, SIGMA_K) are parsed from scripts/viz_positions.py with ast. (a) the stored affine and similarity
+    applied to the landmarks: RMSEs, determinant, reflection, scale; (b) an independent robust refit of both on the
+    control points: matrix, translation and the removed outliers; (c) landmark counts and the hold-out split; (d) the
+    warp check from warp_check.csv. Not recomputable from committed files: the side check of both transforms
+    (transforms.json side_check), which needs the BANC neuron table (side and nucleus of every BANC neuron) and the
+    position of every FlyWire DN; it is not checked here."""
+    import csv
+    fig = Path(fig_dir or ALIGN_DIR)
+    bad, n = [], 0
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    def close(x, y, rel=1e-9):
+        return x == y or abs(x - y) <= rel * max(abs(x), abs(y))
+
+    vp = "scripts/viz_positions.py"
+    holdout_frac, split_seed = _readme_const(vp, "HOLDOUT_FRAC"), _readme_const(vp, "SPLIT_SEED")
+    sigma_k = _readme_const(vp, "SIGMA_K")
+    tr = json.loads((fig / "transforms.json").read_text())
+    wc = json.loads((fig / "warp_check.json").read_text())
+    with open(fig / "landmarks.csv", newline="") as f:
+        lm = list(csv.DictReader(f))
+    X = np.array([[float(r[k]) for k in ("fw_x", "fw_y", "fw_z")] for r in lm])
+    Y = np.array([[float(r[k]) for k in ("banc_x", "banc_y", "banc_z")] for r in lm])
+    sets = np.array([r["set"] for r in lm])
+    keys = [(r["cell_type"], r["side"]) for r in lm]
+    ctl = sets == "control"
+
+    def apply(M, t, P):
+        return P @ M.T + t
+
+    def rmse_um(M, t, P, Q):
+        return float(np.sqrt(((apply(M, t, P) - Q) ** 2).sum(1).mean()) / 1e3)
+
+    # a. the stored transforms applied
+    for name, T in tr["transforms"].items():
+        M, t = np.array(T["matrix"]), np.array(T["translation"])
+        out = {(o["cell_type"], o["side"]) for o in T["outliers"]}
+        kept = ctl & np.array([k not in out for k in keys])
+        for key, val in (("rmse_control_um", rmse_um(M, t, X[kept], Y[kept])),
+                         ("rmse_control_all_um", rmse_um(M, t, X[ctl], Y[ctl])),
+                         ("rmse_check_um", rmse_um(M, t, X[~ctl], Y[~ctl]))):
+            chk(f"align:a:{name}:{key}", close(val, T[key]), (val, T[key]))
+        det = float(np.linalg.det(M))
+        chk(f"align:a:{name}:determinant", close(det, T["determinant"]), (det, T["determinant"]))
+        chk(f"align:a:{name}:reflection", (det < 0) == T["reflection"])
+        chk(f"align:a:{name}:scale", close(abs(det) ** (1 / 3), T["scale"]), (abs(det) ** (1 / 3), T["scale"]))
+        chk(f"align:a:{name}:counts", (T["n_control"], T["n_check"], T["outliers_removed"])
+            == (int(ctl.sum()), int((~ctl).sum()), len(out)) and len(out) == len(T["outliers"]))
+
+    # b. independent robust refit on the control points (fit_affine, fit_similarity, robust_fit of viz_positions.py)
+    def fit_affine(P, Q):
+        sol, *_ = np.linalg.lstsq(np.c_[P, np.ones(len(P))], Q, rcond=None)
+        return sol[:3].T, sol[3]
+
+    def fit_similarity(P, Q):
+        mp, mq = P.mean(0), Q.mean(0)
+        Pc, Qc = P - mp, Q - mq
+        U, S, Vt = np.linalg.svd(Qc.T @ Pc / len(P))
+        Ms = (S.sum() / (Pc ** 2).sum(1).mean()) * (U @ Vt)          # R = U @ Vt, no sign correction: reflection allowed
+        return Ms, mq - Ms @ mp
+
+    def robust_fit(fit, P, Q):
+        keep = np.ones(len(P), bool)
+        while True:
+            M, t = fit(P[keep], Q[keep])
+            r = np.linalg.norm(apply(M, t, P) - Q, axis=1)
+            out = keep & (r > sigma_k * np.sqrt((r[keep] ** 2).mean()))
+            if not out.any():
+                return M, t, keep
+            keep &= ~out                                               # a dropped point never returns
+
+    refit = {}
+    ckeys = [k for k, c in zip(keys, ctl) if c]
+    for name, fit in (("affine", fit_affine), ("similarity", fit_similarity)):
+        T = tr["transforms"][name]
+        M0, t0 = np.array(T["matrix"]), np.array(T["translation"])
+        M, t, keep = robust_fit(fit, X[ctl], Y[ctl])
+        dM = float(np.abs(M - M0).max() / np.abs(M0).max())
+        dt = float(np.abs(t - t0).max() / np.abs(t0).max())
+        found = {k for k, kp in zip(ckeys, keep) if not kp}
+        refit[name] = dict(matrix_rel=dM, translation_rel=dt, outliers=sorted(found))
+        chk(f"align:b:{name}:matrix", dM <= 1e-6, dM)
+        chk(f"align:b:{name}:translation", dt <= 1e-6, dt)
+        chk(f"align:b:{name}:outliers", found == {(o["cell_type"], o["side"]) for o in T["outliers"]},
+            (sorted(found), T["outliers"]))
+
+    # c. landmark counts and the hold-out split (viz_positions.landmarks)
+    L = tr["landmarks"]
+    types = np.array(sorted({k[0] for k in keys}))
+    check = set(np.random.default_rng(split_seed).permutation(types)[:int(round(holdout_frac * len(types)))])
+    chk("align:c:constants", (L["holdout_frac"], L["split_seed"], tr["sigma_k"]) == (holdout_frac, split_seed, sigma_k))
+    chk("align:c:counts", (L["n"], L["n_types"], L["n_control"], L["n_check"], L["n_check_types"])
+        == (len(lm), len(types), int(ctl.sum()), int((~ctl).sum()), len({k[0] for k, c in zip(keys, ctl) if not c})),
+        (L["n"], L["n_types"], L["n_control"], L["n_check"], L["n_check_types"]))
+    chk("align:c:check_types", {k[0] for k, c in zip(keys, ctl) if not c} == check)
+    chk("align:c:set_labels", set(sets) <= {"control", "check"}
+        and all((s == "check") == (k[0] in check) for k, s in zip(keys, sets)))
+
+    # d. the warp check (viz_anatomy.step_check)
+    with open(fig / "warp_check.csv", newline="") as f:
+        wr = list(csv.DictReader(f))
+
+    def flag(v):
+        return v == "True"
+
+    def num(v):
+        return float(v) if v not in ("", "nan") else float("nan")
+
+    soma = np.array([flag(r["soma"]) for r in wr])
+    root_ok = np.array([flag(r["root_ok"]) for r in wr])
+    used = np.array([flag(r["used"]) for r in wr])
+    landmark = np.array([r["landmark"] for r in wr])
+    rs = np.array([num(r["root_soma_um"]) for r in wr])
+    err_all = np.array([num(r["affine_vs_warp_um"]) for r in wr])
+    rad_all = np.array([num(r["dist_from_landmark_centroid_um"]) for r in wr])
+    err, rad, lm_used = err_all[used], rad_all[used], landmark[used]
+
+    def summary(e):
+        return dict(n=int(len(e)), median_um=float(np.median(e)), rmse_um=float(np.sqrt((e ** 2).mean())),
+                    p95_um=float(np.quantile(e, 0.95)), max_um=float(e.max())) if len(e) else dict(n=0)
+
+    def same(a, b):
+        return a.keys() == b.keys() and all(close(a[k], b[k]) for k in a)
+
+    chk("align:d:counts", (len(wr), int(soma.sum()), int(root_ok.sum()), int(used.sum()))
+        == (wc["bridged_dns"], wc["with_flywire_soma"], wc["root_within_tol"], wc["used"]),
+        (len(wr), int(soma.sum()), int(root_ok.sum()), int(used.sum())))
+    chk("align:d:finite_used", bool(np.isfinite(err).all() and np.isfinite(rad).all()))
+    chk("align:d:error", same(summary(err), wc["error"]), (summary(err), wc["error"]))
+    for k in ("control", "control_outlier", "check", "none"):
+        s = summary(err[lm_used == k])
+        chk(f"align:d:error_by_landmark_set:{k}", same(s, wc["error_by_landmark_set"][k]),
+            (s, wc["error_by_landmark_set"][k]))
+    has = soma & np.isfinite(rs)
+    med = float(np.median(rs[has]))
+    chk("align:d:root_soma_um_median", close(med, wc["root_soma_um_median"]), (med, wc["root_soma_um_median"]))
+    try:
+        from scipy.stats import spearmanr
+        rho = float(spearmanr(rad, err)[0])
+    except ImportError:                                                # average ranks for ties, Pearson of the ranks
+        def ranks(v):
+            order = np.argsort(v, kind="mergesort")
+            rk = np.empty(len(v))
+            rk[order] = np.arange(1, len(v) + 1)
+            for u in np.unique(v):
+                rk[v == u] = rk[v == u].mean()
+            return rk
+        rho = float(np.corrcoef(ranks(rad), ranks(err))[0, 1])
+    chk("align:d:spearman_rho", close(rho, wc["distance_dependence"]["spearman_rho"]),
+        (rho, wc["distance_dependence"]["spearman_rho"]))
+    chk("align:d:excluded_other_tree", int((root_ok & ~used).sum()) == wc["excluded_other_tree"]["n"],
+        (int((root_ok & ~used).sum()), wc["excluded_other_tree"]["n"]))
+    check_alignment.refit = refit                                      # for the report: refit differences, outliers
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -2063,6 +2231,10 @@ def main(argv=None):
         bad += b
     if F5SC_JSON.exists():
         k, b = check_f5_stageA_curves()
+        n += k
+        bad += b
+    if (ALIGN_DIR / "landmarks.csv").exists():
+        k, b = check_alignment()
         n += k
         bad += b
     if "--print" in argv:
