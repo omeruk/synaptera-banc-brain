@@ -4,7 +4,7 @@ A simulation test of whether the real wiring of a BANC v888 ventral nerve cord (
 
 Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)
 
-**Contents:** [Result in brief](#result-in-brief) · [The stage-A circuit](#the-stage-a-circuit) · [Activity on the circuit](#activity-on-the-circuit) · [Post-hoc analyses](#post-hoc-analyses) · [Key numbers](#key-numbers) · [How it works](#how-it-works) · [Methods and safeguards](#methods-and-safeguards) · [Limitations](#limitations) · [Reproduce](#reproduce) · [Repository layout](#repository-layout) · [Data, credits and licences](#data-credits-and-licences) · [Authorship](#authorship) · [How to cite](#how-to-cite)
+**Contents:** [Result in brief](#result-in-brief) · [The stage-A circuit](#the-stage-a-circuit) · [Activity on the circuit](#activity-on-the-circuit) · [Post-hoc analyses](#post-hoc-analyses) · [How we got here (F0-F3)](#how-we-got-here-f0-f3) · [Key numbers](#key-numbers) · [How it works](#how-it-works) · [Methods and safeguards](#methods-and-safeguards) · [Limitations](#limitations) · [Reproduce](#reproduce) · [Repository layout](#repository-layout) · [Data, credits and licences](#data-credits-and-licences) · [Authorship](#authorship) · [How to cite](#how-to-cite)
 
 <img src="docs/figures/stageA_circuit_direction.gif" width="100%" alt="Animation of the stage-A circuit seen from behind: brain and nerve-cord neurons light up orange or blue by their preference for rightward or leftward drum rotation, above a trace of the turn command for both directions.">
 
@@ -42,6 +42,23 @@ These analyses were planned after the test result (prereg/21, committed before t
 
 All supporting figures (test split, validation and learning-rate selection, stimulus and visual input, video stills, alignment): [docs/FIGURES.md](docs/FIGURES.md).
 
+## How we got here (F0-F3)
+
+Synaptera v1 ([github.com/omeruk/synaptera](https://github.com/omeruk/synaptera)) flew a fly with a FlyWire brain and a FlyGym body but steered it with hand-made code; this repository hands steering to connectomes, step by step. Each phase has its own report; negative results carry equal weight ([summary of F0-F3](docs/results/SUMMARY_F0_F3.md)).
+
+| phase | question | result | report |
+|---|---|---|---|
+| F0 | does the ported v1 stack reproduce v1 (FlyWire brain and FlyGym body)? | yes; largest position difference to v1 in the multi-seed acceptance 0.27 mm | [f0_acceptance](docs/results/f0_acceptance.md), [f0_multiseed](docs/results/f0_multiseed.md) |
+| F1-F2 | can the BANC whole-brain graph replace the FlyWire brain? | no: with the unchanged reference parameters the feeding motor neuron MN9 did not respond to the labellar sugar input of Shiu et al.'s benchmark (0.0 Hz against 59.7 Hz in FlyWire), and uniform w_syn scaling ignited the network first; so the hybrid keeps the FlyWire brain | [f1_banc_smoke](docs/results/f1_banc_smoke.md), [f2_full_graph](docs/results/f2_full_graph.md), [f2_wsyn_calibration](docs/results/f2_wsyn_calibration.md) |
+| F3 prep | which DN families are shared by name and pass the symmetry gate? | 112 of 348 shared families pass in both datasets | [f3_dn_crosswalk](docs/results/f3_dn_crosswalk.md) |
+| F3a | does the BANC VNC (subgraph) turn DN activity into wing MN activity? | yes for wing power (DLM1-4 53.8 Hz under bilateral DNg02 drive); ipsilateral steering by DNa04, DNa10 and DNa15 in the VNC subgraph | [f3a_banc_vnc](docs/results/f3a_banc_vnc.md), [f3a3_vnc_subgraph](docs/results/f3a3_vnc_subgraph.md) |
+| F3b-1 | does a rotating grating reach the VNC through three DN families? | no: three families were too few (highest applied DNa04 rate 6.9 Hz against its lowest steering rate of 25 Hz) | [f3b1_optomotor](docs/results/f3b1_optomotor.md) |
+| F3b-2 | does an ensemble of all shared, gate-passing families carry it? | direction-selective, but so is the shuffled control | [f3b2_dn_ensemble](docs/results/f3b2_dn_ensemble.md) |
+| F3b-3 | is that specific to the true bridge mapping (fresh brain seeds, permutation test against 39 random derangements)? | the untrained spiking hybrid carried grating direction to steering-MN asymmetry, replicated on fresh seeds and not direction-selective with the bridge off, but not specific to the true mapping: permutation p 0.250 (b3), 0.250 (i1), 0.450 (hg1) and 0.100 (hg4) | [f3b3_specificity](docs/results/f3b3_specificity.md) |
+| F5 stage A | with training, does the real VNC wiring help? | yes on the test split (the primary test, [Result in brief](#result-in-brief)) | [f5_stageA_report](docs/results/f5_stageA_report.md) |
+
+Side by side, and without a causal link: in stage A, with a different model (the trained rate VNC) and a different measure (test R2), the true bridge mapping beat `derange` (a secondary comparison) and the real VNC wiring beat `shuffled` (the primary test).
+
 ## Key numbers
 
 Test split, mean over training seeds (standard deviations in [docs/results/f5_stageA_report.md](docs/results/f5_stageA_report.md)). R2 at the training speeds is over all trials at those speeds (rotation, static and grey); turn-sign accuracy is over the rotation trials at the training speeds.
@@ -61,6 +78,8 @@ Test split, mean over training seeds (standard deviations in [docs/results/f5_st
 <img src="docs/figures/fig0_pipeline.png" width="100%" alt="Schematic in two rows of boxes joined by arrows: rotating drum, FlyGym eyes and FlyVis, FlyWire brain model (spiking, not trained, recorded once); then DN bridge (by cell type, fixed), BANC VNC subgraph (rate model, trained) and the fixed readout from steering motor neurons to the turn command dA, compared with the teacher dA*.">
 
 *Figure 0 | The stage-A pipeline: light blue is FlyWire (fly 1), darker blue BANC (fly 2), grey neither; only the BANC VNC subgraph is trained.*
+
+**Two flies, joined by cell type.** The brain (FlyWire v783) and the nerve cord (BANC v888) come from two different female flies ([`docs/07_HYBRID_INTERFACE.md`](docs/07_HYBRID_INTERFACE.md)), so the model joins them by DN cell type, not by position. FlyWire has 1,299 DNs in 454 type families, BANC 1,316 DNs in 537; 348 families are shared by name, and 112 of them pass the symmetry gate in both datasets. They form the bridge: 225 units into 305 BANC DNs. The spatial FlyWire -> BANC alignment (12-parameter affine on DN landmarks, with a reflection: determinant -0.832; median error 14.5 µm against the BANC team's warp) is used only for the figures and does not enter the model.
 
 - **Stimulus and brain.** A rotating grating (rot_left / rot_right at 30, 60, 90 and 120 deg/s), a static grating and grey were rendered for the FlyGym eyes and passed through FlyVis to a visual boundary layer that drives the FlyWire v783 brain, the unmodified spiking reference model of Shiu et al. Each trial is 300 intervals of 5 ms (100 grey lead-in intervals, then the stimulus). The brain was run once per trial and its DN spike counts recorded; stage A replays these records, so the brain is the same for every arm and is never trained.
 - **DN bridge.** The recorded FlyWire DN counts are turned into unit rates (window 5 intervals, latency 1 interval) that clamp the BANC DNs of the same types (BANC DN state = unit rate / 100 Hz). DNg02 is clamped at a fixed baseline; every other BANC DN is 0.
@@ -102,6 +121,9 @@ Training seeds: 10 per trained arm, 5 for `bridge_off`.
 - **Controls.** The arms above: a shuffled graph, a deranged bridge, an ablation, two unconstrained networks and the untrained model.
 - **Reproducibility.** Training ran on the GPU, where runs agree only to float32 rounding (prereg/19); the test numbers come from the CPU evaluation and are exactly reproducible from the saved checkpoints.
 - **Every number recomputed.** `scripts/verify_report.py` recomputes the numbers of the result reports from the records and checks them against the text.
+- **Rate model against the spiking VNC.** Before training, the rate model was checked against the spiking LIF VNC on the F3a-3 protocol (prereg/15): qualitative agreement, with power recruitment agreeing in 8 of 8 items and the steering sign in 27 of 27.
+- **Motor-neuron sides audited.** The side of every motor neuron was audited against its exit nerve (prereg/13): 7 readout types of the earlier F3 analyses were relabelled (ADNM1, ADNM2, CvN6, CvN7, CvN9, DLM5, PSI); the post-audit recomputation swapped ADNM2, CvN6, CvN9, DLM5, PSI and could not recompute ADNM1, CvN7. None of the 8 stage-A readout types is in the relabelled list.
+- **Errata, not edits.** Factual errors in pre-registration texts are corrected in an errata file, never by editing the pre-registration ([prereg/errata_01_post_hoc.md](prereg/errata_01_post_hoc.md)).
 
 <details><summary>Pre-registrations of stage A</summary>
 
@@ -133,6 +155,8 @@ Further:
 - The `untrained` arm already had a test turn-sign accuracy of 1.000, so turn-sign accuracy does not separate the arms; R2, which also scores the size of the turn, is the primary metric.
 - The readout uses only the 8 MN types named above, one neuron per type and side.
 - The model was not compared with neural or behavioural recordings from flies.
+- The brain and the nerve cord come from two different flies; the bridge assumes that DNs of the same type carry the same signal in both, which was not tested, and only DN types shared by name and passing the symmetry gate are bridged.
+- Wing power comes from a fixed, hand-set DNg02 baseline, because DNg02 is silent in the FlyWire brain model; steering is the only part driven by the brain.
 - Everything here is a simulation: open loop, one steering task (optomotor yaw), stage A only.
 
 ## Reproduce

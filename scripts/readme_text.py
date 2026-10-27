@@ -22,6 +22,12 @@ README, GALLERY, NUMBERS = ROOT / "README.md", ROOT / "docs" / "FIGURES.md", ROO
 REPORT = "docs/results/f5_stageA_report.json"
 POSTHOC = "docs/results/f5_stageA_posthoc.json"
 VALID = "docs/results/f5_stageA_validation.json"
+SUMMARY = "docs/results/summary_f0_f3.json"
+XWALK = "docs/results/f3_dn_crosswalk.json"
+F3B3 = "docs/results/f3b3_specificity.json"
+RATE_LIF = "docs/results/f5_rate_lif.json"
+SIDE = "docs/results/side_audit.json"
+SIDE_POST = "docs/results/side_audit_post_audit.json"
 BENCH = "docs/results/f5_benchmark.json"
 SPLITS = "configs/f5_splits.json"
 TRANSFORMS = "docs/figures/transforms.json"
@@ -230,7 +236,8 @@ def readme():
           f"a {fw} brain model through a descending-neuron (DN) bridge, helps it learn a steering readout better than "
           "the same subgraph with degree-preserving shuffled wiring.", "",
           "Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)", ""]
-    toc = ["Result in brief", "The stage-A circuit", "Activity on the circuit", "Post-hoc analyses", "Key numbers",
+    toc = ["Result in brief", "The stage-A circuit", "Activity on the circuit", "Post-hoc analyses",
+           "How we got here (F0-F3)", "Key numbers",
            "How it works", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
            "Data, credits and licences", "Authorship", "How to cite"]
     L += ["**Contents:** " + " · ".join(f"[{t}](#{anchor(t)})" for t in toc), ""]
@@ -353,6 +360,55 @@ def readme():
           "video stills, alignment): [docs/FIGURES.md](docs/FIGURES.md).", ""]
     assert s["measure"] and s["deficit"]
 
+    H(2, "How we got here (F0-F3)")
+    f3 = _load(F3B3)["primary"]
+    if f3["outcome"] != "replicated, not specific" or f3["bridge_off_selective"]:
+        raise SystemExit("F3b-3 outcome differs from the README text")
+    if rep["secondary"]["comparisons"]["true_vs_derange_r2"]["effect"]["mean"] <= 0:
+        raise SystemExit("true did not beat derange in stage A; the README text differs")
+    SM = "docs/results/SUMMARY_F0_F3.md"
+    rd = "docs/results/"
+
+    def lk(*names):
+        return ", ".join(f"[{n}]({rd}{n}.md)" for n in names)
+    pp = {t: J(F3B3, f"primary/perm/{t}/p_perm", "{:.3f}") for t in ("b3", "i1", "hg1", "hg4")}
+    n_rand = JX(F3B3, ["primary/perm/b3/n_smaller", "primary/perm/b3/n_ge"], lambda a, b: a + b, "{}",
+                "n_smaller + n_ge")
+    L += [f"Synaptera v1 ([{T('CLAUDE.md', 'github.com/omeruk/synaptera', 'name')}](https://github.com/omeruk/synaptera)) flew a fly with a FlyWire brain and "
+          "a FlyGym body but steered it with hand-made code; this repository hands steering to connectomes, step by "
+          "step. Each phase has its own report; negative results carry equal weight "
+          f"([summary of F0-F3]({rd}SUMMARY_F0_F3.md)).", "",
+          "| phase | question | result | report |", "|---|---|---|---|",
+          f"| F0 | does the ported v1 stack reproduce v1 (FlyWire brain and FlyGym body)? | yes; largest position "
+          f"difference to v1 in the multi-seed acceptance {J(SUMMARY, 'f0_posdiff/values/0')} mm | "
+          f"{lk('f0_acceptance', 'f0_multiseed')} |",
+          f"| F1-F2 | can the BANC whole-brain graph replace the FlyWire brain? | no: with the unchanged reference "
+          f"parameters the feeding motor neuron MN9 did not respond to the labellar sugar input of Shiu et al.'s "
+          f"benchmark ({J(SUMMARY, 'f2_full/values/0')} Hz against {J(SUMMARY, 'f2_full/values/1')} Hz in FlyWire), "
+          f"and uniform w_syn scaling ignited the network first; so the hybrid keeps the FlyWire brain | "
+          f"{lk('f1_banc_smoke', 'f2_full_graph', 'f2_wsyn_calibration')} |",
+          f"| {T(SM, 'F3 prep', 'name')} | which DN families are shared by name and pass the symmetry gate? | "
+          f"{J(XWALK, 'summary/n_shared_gate_both')} of {J(XWALK, 'summary/shared_families')} shared families pass in "
+          f"both datasets | {lk('f3_dn_crosswalk')} |",
+          f"| F3a | does the BANC VNC (subgraph) turn DN activity into wing MN activity? | yes for wing power ({T(SM, 'DLM1-4', 'name')} "
+          f"{J(SUMMARY, 'a_dlm/values/0')} Hz under bilateral DNg02 drive); ipsilateral steering by DNa04, DNa10 and "
+          f"DNa15 in the VNC subgraph | {lk('f3a_banc_vnc', 'f3a3_vnc_subgraph')} |",
+          f"| {T(SM, 'F3b-1', 'name')} | does a rotating grating reach the VNC through three DN families? | no: three "
+          f"families were too few (highest applied DNa04 rate {J(SUMMARY, 'b1_max/values/1')} Hz against its lowest "
+          f"steering rate of {J(SUMMARY, 'b1_max/values/2')} Hz) | {lk('f3b1_optomotor')} |",
+          f"| {T(SM, 'F3b-2', 'name')} | does an ensemble of all shared, gate-passing families carry it? | "
+          f"direction-selective, but so is the shuffled control | {lk('f3b2_dn_ensemble')} |",
+          f"| {T(SM, 'F3b-3', 'name')} | is that specific to the true bridge mapping (fresh brain seeds, permutation "
+          f"test against {n_rand} random derangements)? | the untrained spiking hybrid carried grating direction to "
+          f"steering-MN asymmetry, replicated on fresh seeds and not direction-selective with the bridge off, but not "
+          f"specific to the true mapping: permutation p {pp['b3']} (b3), {pp['i1']} (i1), {pp['hg1']} (hg1) and "
+          f"{pp['hg4']} (hg4) | {lk('f3b3_specificity')} |",
+          f"| F5 stage A | with training, does the real VNC wiring help? | yes on the test split (the primary test, "
+          f"[Result in brief](#result-in-brief)) | {lk('f5_stageA_report')} |", "",
+          "Side by side, and without a causal link: in stage A, with a different model (the trained rate VNC) and a "
+          "different measure (test R2), the true bridge mapping beat `derange` (a secondary comparison) and the real "
+          "VNC wiring beat `shuffled` (the primary test).", ""]
+
     H(2, "Key numbers")
     L += [f"Test split, mean over training seeds (standard deviations in "
           f"[docs/results/f5_stageA_report.md](docs/results/f5_stageA_report.md)). R2 at the training speeds is over "
@@ -368,6 +424,8 @@ def readme():
     L.append("")
 
     H(2, "How it works")
+    if _get(TRANSFORMS, "transforms/affine/reflection") is not True:
+        raise SystemExit("the affine has no reflection; the README text differs")
     win = _const("train/f5_stageA.py", "WINDOW")
     L += [img("docs/figures/fig0_pipeline.png",
               "Schematic in two rows of boxes joined by arrows: rotating drum, FlyGym eyes and FlyVis, FlyWire brain "
@@ -377,6 +435,17 @@ def readme():
           f"*Figure 0 | The stage-A pipeline: light blue is {T('scripts/readme_figures.py', 'FlyWire (fly 1)', 'name')}, "
           f"darker blue {T('scripts/readme_figures.py', 'BANC (fly 2)', 'name')}, grey neither; only the BANC VNC "
           f"subgraph is trained.*", "",
+          f"**Two flies, joined by cell type.** The brain ({fw}) and the nerve cord (BANC {banc}) come from two "
+          f"different female flies ([`docs/07_HYBRID_INTERFACE.md`](docs/07_HYBRID_INTERFACE.md)), so the model joins them by DN cell type, "
+          f"not by position. FlyWire has {J(XWALK, 'summary/flywire_dn_neurons', '{:,}')} DNs in "
+          f"{J(XWALK, 'summary/flywire_families')} type families, BANC {J(XWALK, 'summary/banc_dn_neurons', '{:,}')} DNs "
+          f"in {J(XWALK, 'summary/banc_families')}; {J(XWALK, 'summary/shared_families')} families are shared by name, "
+          f"and {J(XWALK, 'summary/n_shared_gate_both')} of them pass the symmetry gate in both datasets. They form the "
+          f"bridge: {units} units into {targets} BANC DNs. The spatial FlyWire -> BANC alignment "
+          f"({J(TRANSFORMS, 'transforms/affine/n_params')}-parameter affine on DN landmarks, with a reflection: "
+          f"determinant {J(TRANSFORMS, 'transforms/affine/determinant', '{:.3f}')}; median error "
+          f"{J(WARP, 'error/median_um', '{:.1f}')} µm against the BANC team's warp) is used only for the figures and "
+          f"does not enter the model.", "",
           f"- **Stimulus and brain.** A rotating grating (rot_left / rot_right at {held30}, {sp1}, {held90} and {sp2} "
           f"deg/s), a static grating and grey were rendered for the FlyGym eyes and passed through FlyVis to a visual "
           f"boundary layer that drives the {fw} brain, the unmodified spiking reference model of Shiu et al. "
@@ -436,6 +505,23 @@ def readme():
           f"Training seeds: {n_true} per trained arm, {seeds_n('bridge_off')} for `bridge_off`.", "", "</details>", ""]
 
     H(2, "Methods and safeguards")
+    rl = _load(RATE_LIF)
+    if not (rl["agreement"] and rl["c1"]["agrees"] and rl["c2"]["agrees"]):
+        raise SystemExit("the rate-LIF comparison is not 'qualitative agreement'; the README text differs")
+    if "qualitative agreement" not in (ROOT / "docs/results/f5_rate_lif.md").read_text():
+        raise SystemExit("f5_rate_lif.md does not state qualitative agreement")
+    relabelled = _load(SIDE)["section1"]["relabelled_readout_types"]
+    stage_a_types = set(_const("scripts/f5_train.py", "LATERAL"))
+    if stage_a_types & set(relabelled):
+        raise SystemExit(f"stage-A readout types in the relabelled list: {sorted(stage_a_types & set(relabelled))}")
+    post = _load(SIDE_POST)
+    if post["label"] != "post-audit" or set(post["swapped_types"]) | set(post["not_recomputable_types"]) != set(relabelled):
+        raise SystemExit("the post-audit swapped / not-recomputable types do not cover the relabelled list")
+    joined = lambda v: ", ".join(v)
+    relab_n = JX(SIDE, ["section1/relabelled_readout_types"], len, "{}", "len(section1/relabelled_readout_types)")
+    relab = JX(SIDE, ["section1/relabelled_readout_types"], joined, "{}", "comma-separated list")
+    swapped = JX(SIDE_POST, ["swapped_types"], joined, "{}", "comma-separated list")
+    not_rec = JX(SIDE_POST, ["not_recomputable_types"], joined, "{}", "comma-separated list")
     lk = pr["guards"]["leakage"]
     titles = []
     for p in sorted((ROOT / "prereg").glob("*.md")):
@@ -463,7 +549,17 @@ def readme():
           "- **Reproducibility.** Training ran on the GPU, where runs agree only to float32 rounding (prereg/19); the "
           "test numbers come from the CPU evaluation and are exactly reproducible from the saved checkpoints.",
           "- **Every number recomputed.** `scripts/verify_report.py` recomputes the numbers of the result reports "
-          "from the records and checks them against the text.", "",
+          "from the records and checks them against the text.",
+          f"- **Rate model against the spiking VNC.** Before training, the rate model was checked against the spiking "
+          f"LIF VNC on the {T('docs/results/SUMMARY_F0_F3.md', 'F3a-3', 'name')} protocol (prereg/15): qualitative agreement, with power recruitment agreeing in "
+          f"{J(RATE_LIF, 'c1/n_agree')} of {J(RATE_LIF, 'c1/n')} items and the steering sign in "
+          f"{J(RATE_LIF, 'c2/n_agree')} of {J(RATE_LIF, 'c2/n')}.",
+          f"- **Motor-neuron sides audited.** The side of every motor neuron was audited against its exit nerve "
+          f"(prereg/13): {relab_n} readout types of the earlier F3 analyses were relabelled ({relab}); the post-audit "
+          f"recomputation swapped {swapped} and could not recompute {not_rec}. None of the {n_types} stage-A readout "
+          f"types is in the relabelled list.",
+          "- **Errata, not edits.** Factual errors in pre-registration texts are corrected in an errata file, never by "
+          "editing the pre-registration ([prereg/errata_01_post_hoc.md](prereg/errata_01_post_hoc.md)).", "",
           "<details><summary>Pre-registrations of stage A</summary>", ""] + titles + ["", "</details>", ""]
 
     H(2, "Limitations")
@@ -487,6 +583,11 @@ def readme():
           f"- The readout uses only the {n_types} "
           f"MN types named above, one neuron per type and side.",
           "- The model was not compared with neural or behavioural recordings from flies.",
+          "- The brain and the nerve cord come from two different flies; the bridge assumes that DNs of the same type "
+          "carry the same signal in both, which was not tested, and only DN types shared by name and passing the "
+          "symmetry gate are bridged.",
+          "- Wing power comes from a fixed, hand-set DNg02 baseline, because DNg02 is silent in the FlyWire brain "
+          "model; steering is the only part driven by the brain.",
           "- Everything here is a simulation: open loop, one steering task (optomotor yaw), stage A only.", ""]
     assert not rep["exploratory"]["run"] and holm["not_run"] == ["B", "C"]
 

@@ -1704,6 +1704,9 @@ FORMULAS = {
     "STILLS[2][1]": lambda a, c: a[0][2][1],
     "the types with sign +1": lambda a, c: ", ".join(m for m, s in a[0].items() if s > 0),
     "the types with sign -1": lambda a, c: ", ".join(m for m, s in a[0].items() if s < 0),
+    "n_smaller + n_ge": lambda a, c: a[0] + a[1],
+    "len(section1/relabelled_readout_types)": lambda a, c: len(a[0]),
+    "comma-separated list": lambda a, c: ", ".join(a[0]),
 }
 
 # Numeric tokens of README.md / docs/FIGURES.md that are not recorded numbers. Categories only; a single number is

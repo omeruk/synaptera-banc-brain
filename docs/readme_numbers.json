@@ -629,6 +629,7 @@
   {
    "string": "-0.832",
    "files": [
+    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "data",
@@ -654,8 +655,21 @@
    }
   },
   {
+   "string": "12",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/affine/n_params",
+    "format": "{}"
+   }
+  },
+  {
    "string": "14.5",
    "files": [
+    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "data",
@@ -1047,6 +1061,72 @@
    }
   },
   {
+   "string": "DLM1-4",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "docs/results/SUMMARY_F0_F3.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "F3 prep",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "docs/results/SUMMARY_F0_F3.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "F3a-3",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "docs/results/SUMMARY_F0_F3.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "F3b-1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "docs/results/SUMMARY_F0_F3.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "F3b-2",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "docs/results/SUMMARY_F0_F3.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "F3b-3",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "docs/results/SUMMARY_F0_F3.md",
+    "verbatim": true
+   }
+  },
+  {
    "string": "FlyWire (fly 1)",
    "files": [
     "README.md"
@@ -1088,6 +1168,17 @@
    "source": {
     "code": "scripts/f5_train.py:LATERAL",
     "formula": "the types with sign -1"
+   }
+  },
+  {
+   "string": "github.com/omeruk/synaptera",
+   "files": [
+    "README.md"
+   ],
+   "kind": "name",
+   "source": {
+    "file": "CLAUDE.md",
+    "verbatim": true
    }
   },
   {
@@ -1220,6 +1311,18 @@
    }
   },
   {
+   "string": "0.0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/summary_f0_f3.json",
+    "key": "f2_full/values/0",
+    "format": "{}"
+   }
+  },
+  {
    "string": "0.0000",
    "files": [
     "README.md"
@@ -1340,6 +1443,18 @@
    }
   },
   {
+   "string": "0.100",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3b3_specificity.json",
+    "key": "primary/perm/hg4/p_perm",
+    "format": "{:.3f}"
+   }
+  },
+  {
    "string": "0.1036",
    "files": [
     "README.md"
@@ -1385,6 +1500,30 @@
    }
   },
   {
+   "string": "0.250",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3b3_specificity.json",
+    "key": "primary/perm/b3/p_perm",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.250",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3b3_specificity.json",
+    "key": "primary/perm/i1/p_perm",
+    "format": "{:.3f}"
+   }
+  },
+  {
    "string": "0.2546",
    "files": [
     "README.md"
@@ -1397,6 +1536,18 @@
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
     "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.27",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/summary_f0_f3.json",
+    "key": "f0_posdiff/values/0",
+    "format": "{}"
    }
   },
   {
@@ -1439,6 +1590,18 @@
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
     "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.450",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3b3_specificity.json",
+    "key": "primary/perm/hg1/p_perm",
+    "format": "{:.3f}"
    }
   },
   {
@@ -1727,6 +1890,30 @@
    }
   },
   {
+   "string": "1,299",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/flywire_dn_neurons",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,316",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/banc_dn_neurons",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "1.000",
    "files": [
     "README.md"
@@ -1902,6 +2089,18 @@
    }
   },
   {
+   "string": "112",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/n_shared_gate_both",
+    "format": "{}"
+   }
+  },
+  {
    "string": "14",
    "files": [
     "README.md"
@@ -1968,6 +2167,42 @@
    }
   },
   {
+   "string": "25",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/summary_f0_f3.json",
+    "key": "b1_max/values/2",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "27",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_rate_lif.json",
+    "key": "c2/n_agree",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "27",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_rate_lif.json",
+    "key": "c2/n",
+    "format": "{}"
+   }
+  },
+  {
    "string": "305",
    "files": [
     "README.md"
@@ -1976,6 +2211,46 @@
    "source": {
     "file": "docs/results/f5_stageA_posthoc.json",
     "key": "B/sources/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "348",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/shared_families",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "39",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3b3_specificity.json",
+    "keys": [
+     "primary/perm/b3/n_smaller",
+     "primary/perm/b3/n_ge"
+    ],
+    "formula": "n_smaller + n_ge",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "454",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/flywire_families",
     "format": "{}"
    }
   },
@@ -1993,6 +2268,30 @@
    }
   },
   {
+   "string": "53.8",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/summary_f0_f3.json",
+    "key": "a_dlm/values/0",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "537",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/banc_families",
+    "format": "{}"
+   }
+  },
+  {
    "string": "54",
    "files": [
     "README.md"
@@ -2001,6 +2300,30 @@
    "source": {
     "file": "docs/results/f5_stageA_posthoc.json",
     "key": "B/correlations/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "59.7",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/summary_f0_f3.json",
+    "key": "f2_full/values/1",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "6.9",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/summary_f0_f3.json",
+    "key": "b1_max/values/1",
     "format": "{}"
    }
   },
@@ -2020,6 +2343,21 @@
    }
   },
   {
+   "string": "7",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/side_audit.json",
+    "keys": [
+     "section1/relabelled_readout_types"
+    ],
+    "formula": "len(section1/relabelled_readout_types)",
+    "format": "{}"
+   }
+  },
+  {
    "string": "8",
    "files": [
     "README.md"
@@ -2031,6 +2369,30 @@
      "B/targets/names"
     ],
     "formula": "number of MN types in B/targets/names",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "8",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_rate_lif.json",
+    "key": "c1/n_agree",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "8",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_rate_lif.json",
+    "key": "c1/n",
     "format": "{}"
    }
   },
@@ -2089,6 +2451,51 @@
      "primary/guards/leakage/interval/level"
     ],
     "formula": "level x 100",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "ADNM1, ADNM2, CvN6, CvN7, CvN9, DLM5, PSI",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/side_audit.json",
+    "keys": [
+     "section1/relabelled_readout_types"
+    ],
+    "formula": "comma-separated list",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "ADNM1, CvN7",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/side_audit_post_audit.json",
+    "keys": [
+     "not_recomputable_types"
+    ],
+    "formula": "comma-separated list",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "ADNM2, CvN6, CvN9, DLM5, PSI",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/side_audit_post_audit.json",
+    "keys": [
+     "swapped_types"
+    ],
+    "formula": "comma-separated list",
     "format": "{}"
    }
   },
