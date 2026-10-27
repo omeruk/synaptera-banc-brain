@@ -170,6 +170,11 @@ def lateral():
     return plus, minus
 
 
+def _np_std(v):
+    import numpy as _np
+    return float(_np.std(v))
+
+
 def img(src, alt):
     return f'<img src="{src}" width="100%" alt="{alt.replace("`", "")}">'
 
@@ -241,7 +246,7 @@ def readme():
           "Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)", ""]
     toc = ["Result in brief", "The stage-A circuit", "Activity on the circuit", "Post-hoc analyses",
            "How we got here (F0-F3)", "Key numbers",
-           "How it works", "Training", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
+           "How it works", "Joining two flies: cell types and coordinates", "Training", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
            "Data, credits and licences", "Authorship", "How to cite"]
     L += ["**Contents:** " + " · ".join(f"[{t}](#{anchor(t)})" for t in toc), ""]
     speed = C("scripts/viz_video.py", "SPEED")
@@ -438,17 +443,8 @@ def readme():
           f"*Figure 0 | The stage-A pipeline: light blue is {T('scripts/readme_figures.py', 'FlyWire (fly 1)', 'name')}, "
           f"darker blue {T('scripts/readme_figures.py', 'BANC (fly 2)', 'name')}, grey neither; only the BANC VNC "
           f"subgraph is trained.*", "",
-          f"**Two flies, joined by cell type.** The brain ({fw}) and the nerve cord (BANC {banc}) come from two "
-          f"different female flies ([`docs/07_HYBRID_INTERFACE.md`](docs/07_HYBRID_INTERFACE.md)), so the model joins them by DN cell type, "
-          f"not by position. FlyWire has {J(XWALK, 'summary/flywire_dn_neurons', '{:,}')} DNs in "
-          f"{J(XWALK, 'summary/flywire_families')} type families, BANC {J(XWALK, 'summary/banc_dn_neurons', '{:,}')} DNs "
-          f"in {J(XWALK, 'summary/banc_families')}; {J(XWALK, 'summary/shared_families')} families are shared by name, "
-          f"and {J(XWALK, 'summary/n_shared_gate_both')} of them pass the symmetry gate in both datasets. They form the "
-          f"bridge: {units} units into {targets} BANC DNs. The spatial FlyWire -> BANC alignment "
-          f"({J(TRANSFORMS, 'transforms/affine/n_params')}-parameter affine on DN landmarks, with a reflection: "
-          f"determinant {J(TRANSFORMS, 'transforms/affine/determinant', '{:.3f}')}; median error "
-          f"{J(WARP, 'error/median_um', '{:.1f}')} µm against the BANC team's warp) is used only for the figures and "
-          f"does not enter the model.", "",
+          "The brain and the nerve cord come from two different flies and are joined by DN cell type; see "
+          "[Joining two flies: cell types and coordinates](#joining-two-flies-cell-types-and-coordinates).", "",
           f"- **Stimulus and brain.** A rotating grating (rot_left / rot_right at {held30}, {sp1}, {held90} and {sp2} "
           f"deg/s), a static grating and grey were rendered for the FlyGym eyes and passed through FlyVis to a visual "
           f"boundary layer that drives the {fw} brain, the unmodified spiking reference model of Shiu et al. "
@@ -501,6 +497,189 @@ def readme():
           f"- `bridge_off`: `true` with every bridged DN clamped to {zero_off} (DNg02 kept).",
           "- `untrained`: `true` at initialisation, one deterministic evaluation on the test set.", "",
           f"Training seeds: {n_true} per trained arm, {seeds_n('bridge_off')} for `bridge_off`.", "", "</details>", ""]
+
+    H(2, "Joining two flies: cell types and coordinates")
+    xw = _load(XWALK)
+    dng02 = next(x for x in xw["families"] if x["family"] == "DNg02")
+    if dng02["flywire"]["gate"] or not dng02["banc"]["gate"]:
+        raise SystemExit("DNg02 does not fail the gate in FlyWire and pass in BANC; the README text differs")
+    trf, wcj = _load(TRANSFORMS), _load(WARP)
+    if not (trf["transforms"]["affine"]["reflection"] and trf["transforms"]["similarity"]["reflection"]):
+        raise SystemExit("a transform has no reflection; the README text differs")
+    if trf["transforms"]["similarity"]["outliers"] or trf["landmarks"]["dropped"]:
+        raise SystemExit("the similarity rejected landmarks, or a landmark was dropped; the README text differs")
+    if "mirror" not in wcj["note"]:
+        raise SystemExit("the warp pipeline note does not name a mirror step")
+    import csv as _csv
+    with open(ROOT / "docs/figures/landmarks.csv", newline="") as f:
+        _lm = list(_csv.DictReader(f))
+    _sd = [_np_std([float(r[f"banc_{a}"]) for r in _lm]) for a in "xyz"]
+    ax2 = sorted(sorted(range(3), key=lambda k: -_sd[k])[:2])
+    axes_txt = " and ".join("xyz"[k] for k in ax2)
+    XWMD, VP, P10, P11 = "docs/results/f3_dn_crosswalk.md", "scripts/viz_positions.py", "prereg/10_f3b2_dn_ensemble.md", \
+        "prereg/11_f3b3_specificity.md"
+    LAT = "train/f5_stageA.py"
+    win_ms = C(LAT, "LATENCIES", fn=lambda l: int(l["bridge_window_intervals"] * _const(LAT, "INTERVAL_MS")),
+               formula="LATENCIES[bridge_window_intervals] x INTERVAL_MS")
+    lat_ms = C(LAT, "LATENCIES", fn=lambda l: int(l["bridge_latency_intervals"] * _const(LAT, "INTERVAL_MS")),
+               formula="LATENCIES[bridge_latency_intervals] x INTERVAL_MS")
+    tA, tS = "transforms/affine", "transforms/similarity"
+    b_units = P(P10, "4", r"\*\*`ensemble`:\*\* (\d+) units")
+    b_type = P(P10, "4", r"units \((\d+) by exact type")
+    b_fam = P(P10, "4", r"by exact type, (\d+) by family\)")
+    b_tgt = P(P10, "4", r"(\d+) BANC neurons \(\d+ left")
+    b_tgt_l = P(P10, "4", r"BANC neurons \((\d+) left")
+    b_tgt_r = P(P10, "4", r"BANC neurons \(\d+ left, (\d+) right")
+    b_src = P(P10, "4", r"from (\d+) FlyWire neurons")
+    sattolo_seed = P(P10, "5", r"Sattolo.s\s+algorithm, `numpy\.random\.default_rng\((\d+)\)`")
+    rej = JX(TRANSFORMS, [f"{tA}/outliers"], lambda o: " and ".join(f"{x['cell_type']} ({x['side']})" for x in o), "{}",
+             "outlier list: cell_type (side), joined with and")
+    L += [f"The model joins the brain and the nerve cord by DN cell type; positions in space are used only for the "
+          f"figures.", "",
+          f"**By cell type (the model).** The brain ({fw}) and the brain and nerve cord of BANC ({banc}) come from two "
+          f"different female flies (`docs/07_HYBRID_INTERFACE.md`), so DNs are matched by type, not by position. "
+          f"FlyWire has {J(XWALK, 'summary/flywire_dn_neurons', '{:,}')} DNs in {J(XWALK, 'summary/flywire_families')} "
+          f"type families, BANC {J(XWALK, 'summary/banc_dn_neurons', '{:,}')} in {J(XWALK, 'summary/banc_families')}; "
+          f"{J(XWALK, 'summary/shared_families')} families are shared by name, and "
+          f"{J(XWALK, 'summary/n_shared_gate_both')} of them pass the symmetry gate in both datasets. These form the DN "
+          f"bridge (details below).", "",
+          "<details><summary>Matching by cell type: rules and numbers</summary>", "",
+          "- **Matching key:** exact `cell_type` first, then the family (`cell_type` without a single trailing "
+          "`_<letter>`), else silent; left to left and right to right; centre neurons only to same-name centre "
+          "neurons (`docs/07_HYBRID_INTERFACE.md`).",
+          f"- **Shared families:** their neurons number {J(XWALK, 'summary/shared_neurons_flywire', '{:,}')} in FlyWire "
+          f"and {J(XWALK, 'summary/shared_neurons_banc', '{:,}')} in BANC; "
+          f"{JX(XWALK, ['summary/shared_count_equal'], len, '{}', 'len(summary/shared_count_equal)')} shared families "
+          f"have identical left/right counts in both datasets.",
+          f"- **Symmetry gate:** {T(XWMD, '|log2(R/L)| < 0.5', 'text')} of the input synapses, total and excitatory, on "
+          f"each dataset's own graph; the bridge uses the shared families that pass it in both datasets.",
+          f"- **The bridge:** {b_units} units ({b_type} by exact type, {b_fam} by family; "
+          f"{J(RUNNER, 'design/bridge_unit_sides/left')} left, {J(RUNNER, 'design/bridge_unit_sides/right')} right); "
+          f"{b_tgt} BANC targets ({b_tgt_l} left, {b_tgt_r} right) from {b_src} FlyWire neurons (prereg/10 section 4).",
+          f"- **Rate transfer:** per BANC unit, the mean rate per neuron of the matched FlyWire DNs over a trailing "
+          f"window of {win_ms} ms, applied {lat_ms} ms later; in the spiking hybrid (F3b) every BANC neuron of the unit "
+          f"receives an independent Poisson process at that rate; in the stage-A rate model the BANC DN state is the "
+          f"rate / {C('engine/rate_torch.py', 'R_IN', '{:g}')} Hz.",
+          "- **Unmatched DNs:** unmatched BANC DNs are silent; unmatched FlyWire DNs are dropped.",
+          f"- **Coverage gap:** {J(XWALK, 'summary/banc_mn_dn_families')} BANC DN families have direct synapses onto "
+          f"wing, haltere, neck or TTMn motor neurons; {J(XWALK, 'summary/banc_mn_dn_families_absent_in_flywire')} of "
+          f"them have no FlyWire family of the same name, and {J(XWALK, 'summary/banc_mn_dn_families_shared_gate_both')} "
+          f"are shared and pass the gate in both datasets.",
+          f"- **DNg02:** it fails the gate in FlyWire (log2(R/L) of the total input synapses "
+          f"{JX(XWALK, ['families'], lambda fam: next(x for x in fam if x['family'] == 'DNg02')['flywire']['log2_total'], '{:+.2f}', 'flywire log2_total of family DNg02')}) "
+          f"and passes in BANC, and it is silent in the FlyWire brain model; in the hybrid it is a fixed `HAND` "
+          f"baseline ([summary of F0-F3](docs/results/SUMMARY_F0_F3.md)).",
+          f"- **Controls on the mapping:** in F3b-2 a single random cycle over the shared, gate-passing families (a "
+          f"derangement, drawn with Sattolo's algorithm, `default_rng({sattolo_seed})`, "
+          f"side kept); in F3b-3 "
+          f"{JX(F3B3, ['primary/perm/b3/n_smaller', 'primary/perm/b3/n_ge'], lambda a, b: a + b, '{}', 'n_smaller + n_ge')} "
+          f"random derangements; in stage A the `derange` arm: the same rate streams and targets with the family "
+          f"mapping deranged ({J(RUNNER, 'design/derange_units/t0')} units).",
+          "- **Motor-neuron sides** were audited against their exit nerves "
+          "([Methods and safeguards](#methods-and-safeguards)).", "", "</details>", "",
+          f"**In space (the figures).** For the figures only, FlyWire positions were mapped into BANC space. Our own "
+          f"transform, an affine fitted to DN-type landmarks, is a visualisation scaffold for viewing only "
+          f"(`scripts/viz_positions.py`) and includes a reflection. The anatomy figure, the activity figure and the "
+          f"video do not use it: they draw the BANC team's warped FlyWire skeletons "
+          f"({T(WARP, 'FAFB14 -> JRC2018F -> mirror -> BANC, elastix + thin-plate spline', 'text')}) and BANC "
+          f"skeletons. Our affine places the brain-model positions of Figure S15 and is compared with the BANC team's "
+          f"warp in Figure 6. None of this enters the model.", "",
+          img("docs/figures/fig6_alignment.png",
+              "Four panels: landmark points of the two datasets in BANC coordinates joined by residual lines; strips of "
+              "residual norms for the affine and the similarity; a cumulative distribution of the distance between our "
+              "affine and the BANC team's warp; and a scatter of that distance against the distance from the landmark "
+              "centroid."), "",
+          f"**Figure 6 | Our FlyWire -> BANC affine, used only for the figures, against its landmarks and against the "
+          f"BANC team's warp.** a, The landmarks in BANC coordinates on the two axes with the largest spread of the "
+          f"BANC landmarks ({axes_txt}): BANC landmark points (blue), FlyWire landmark points after our affine (sky "
+          f"blue) and a grey line per landmark for its residual; circles, control; squares, check; crosses, the "
+          f"rejected outliers. This is a 2-D view of 3-D residuals. b, Residual norms (µm) of the affine and the "
+          f"similarity for the control points (crosses, the affine's rejected outliers) and the check points; bars, "
+          f"medians. c, Distance between our affine-placed FlyWire soma and the root node of the BANC team's warped "
+          f"skeleton, as a cumulative distribution over the DNs used; dashed, the median. d, The same distance against "
+          f"the distance of the warped root from the centroid of the fitted landmarks. "
+          f"{J(TRANSFORMS, 'landmarks/n')} landmarks ({J(TRANSFORMS, 'landmarks/n_control')} control, "
+          f"{J(TRANSFORMS, 'landmarks/n_check')} check); c and d, {J(WARP, 'used')} DNs.", "",
+          "<details><summary>Positions, landmarks, the two transforms and the check against the warp</summary>", "",
+          f"- **Positions:** FlyWire brain-model neurons at their soma ({T(VP, 'voxels x (4, 4, 40) nm', 'text')}) "
+          f"where present ({J(TRANSFORMS, 'brain/soma', '{:,}')} of {J(TRANSFORMS, 'brain/n', '{:,}')}), else at the "
+          f"centroid of their synapses ({J(TRANSFORMS, 'brain/centroid_synapses', '{:,}')}) or a fallback centroid "
+          f"({J(TRANSFORMS, 'brain/centroid_fallback', '{:,}')}); BANC VNC neurons at their root position "
+          f"({J(TRANSFORMS, 'vnc/root_position', '{:,}')}), else at the synapse-weighted mean position of their "
+          f"partners ({J(TRANSFORMS, 'vnc/filled')}), else dropped ({J(TRANSFORMS, 'vnc/dropped')}).",
+          f"- **Landmarks:** one per bridged DN type and side matched by exact type (family matches are not used): the "
+          f"FlyWire mean soma against the BANC mean root position of the type's neurons with a nucleus id, as type "
+          f"means {T(VP, '(neurons within a type have no one-to-one match)', 'text')}; "
+          f"{J(TRANSFORMS, 'landmarks/n_types')} types, none dropped.",
+          f"- **Hold-out:** {JX(TRANSFORMS, ['landmarks/holdout_frac'], lambda v: round(100 * v), '{}', 'fraction x 100')} % "
+          f"of the landmark types, both sides together (`default_rng({J(TRANSFORMS, 'landmarks/split_seed')})`), are "
+          f"check points: {J(TRANSFORMS, 'landmarks/n_check_types')} types.",
+          f"- **Fit:** least squares on the control points, refitted after rejecting every point whose residual exceeds "
+          f"{J(TRANSFORMS, 'sigma_k', '{:g}')} x the RMSE of the kept points, until none is rejected; the affine "
+          f"rejected {rej}, the similarity none.", "",
+          "| | affine | similarity |", "|---|---:|---:|",
+          f"| parameters | {J(TRANSFORMS, f'{tA}/n_params')} | {J(TRANSFORMS, f'{tS}/n_params')} |",
+          f"| RMSE, control points (µm) | {J(TRANSFORMS, f'{tA}/rmse_control_um', '{:.1f}')} | "
+          f"{J(TRANSFORMS, f'{tS}/rmse_control_um', '{:.1f}')} |",
+          f"| RMSE, check points (µm) | {J(TRANSFORMS, f'{tA}/rmse_check_um', '{:.1f}')} | "
+          f"{J(TRANSFORMS, f'{tS}/rmse_check_um', '{:.1f}')} |",
+          f"| outliers removed | {J(TRANSFORMS, f'{tA}/outliers_removed')} | {J(TRANSFORMS, f'{tS}/outliers_removed')} |",
+          f"| determinant | {J(TRANSFORMS, f'{tA}/determinant', '{:.3f}')} | {J(TRANSFORMS, f'{tS}/determinant', '{:.3f}')} |",
+          f"| scale | {J(TRANSFORMS, f'{tA}/scale', '{:.3f}')} | {J(TRANSFORMS, f'{tS}/scale', '{:.3f}')} |",
+          f"| side check, left DNs | {J(TRANSFORMS, f'{tA}/side_check/left/fraction_same_side', '{:.3f}')} | "
+          f"{J(TRANSFORMS, f'{tS}/side_check/left/fraction_same_side', '{:.3f}')} |",
+          f"| side check, right DNs | {J(TRANSFORMS, f'{tA}/side_check/right/fraction_same_side', '{:.3f}')} | "
+          f"{J(TRANSFORMS, f'{tS}/side_check/right/fraction_same_side', '{:.3f}')} |", "",
+          f"Side check: the fraction of the FlyWire left ({J(TRANSFORMS, f'{tA}/side_check/left/n')}) and right "
+          f"({J(TRANSFORMS, f'{tA}/side_check/right/n')}) DNs that land on the same BANC side, by the majority label "
+          f"of the {J(TRANSFORMS, 'side_k')} nearest BANC neurons with a nucleus id.",
+          "- **Reflection:** both determinants are negative, so both maps include a mirror image (this follows from "
+          "the definition of the determinant); this is consistent with the mirror step of the BANC team's pipeline "
+          "named in `docs/figures/warp_check.json`.",
+          f"- **Unit check of the native skeletons:** read in {J(WARP, 'native_unit')} (not voxels), the native "
+          f"skeleton's root lies within {J(WARP, 'root_tol_um', '{:g}')} µm of the FlyWire soma for "
+          f"{J(WARP, 'root_within_tol')} DNs (median root-soma distance {J(WARP, 'root_soma_um_median', '{:.2f}')} µm).",
+          f"- **Excluded:** {J(WARP, 'excluded_other_tree/n')} DNs ({J(WARP, 'excluded_other_tree/cell_types')} types): "
+          f"their warped file is another skeleton than the native one, so its root is not the soma.",
+          f"- **Our affine against the warp,** over the DNs used: median {J(WARP, 'error/median_um', '{:.1f}')} µm, RMSE "
+          f"{J(WARP, 'error/rmse_um', '{:.1f}')} µm, 95th percentile {J(WARP, 'error/p95_um', '{:.1f}')} µm, maximum "
+          f"{J(WARP, 'error/max_um', '{:.1f}')} µm; median by landmark set: control "
+          f"{J(WARP, 'error_by_landmark_set/control/median_um', '{:.1f}')} µm (n = "
+          f"{J(WARP, 'error_by_landmark_set/control/n')}), rejected outliers "
+          f"{J(WARP, 'error_by_landmark_set/control_outlier/median_um', '{:.1f}')} µm (n = "
+          f"{J(WARP, 'error_by_landmark_set/control_outlier/n')}), check "
+          f"{J(WARP, 'error_by_landmark_set/check/median_um', '{:.1f}')} µm (n = "
+          f"{J(WARP, 'error_by_landmark_set/check/n')}), no landmark "
+          f"{J(WARP, 'error_by_landmark_set/none/median_um', '{:.1f}')} µm (n = "
+          f"{J(WARP, 'error_by_landmark_set/none/n')}); mean signed difference x "
+          f"{J(WARP, 'mean_signed_diff_um/x', '{:+.2f}')}, y {J(WARP, 'mean_signed_diff_um/y', '{:+.2f}')}, z "
+          f"{J(WARP, 'mean_signed_diff_um/z', '{:+.2f}')} µm.",
+          f"- **Distance dependence, as measured:** Spearman rho "
+          f"{J(WARP, 'distance_dependence/spearman_rho', '{:.2f}')} (p = "
+          f"{J(WARP, 'distance_dependence/spearman_p', '{:.1e}')}) between the error and the distance from the "
+          f"landmark centroid; slope "
+          f"{JX(WARP, ['distance_dependence/slope_um_per_100um'], lambda v: v / 100, '{:.3f}', 'slope_um_per_100um / 100')} "
+          f"µm of error per µm of distance; "
+          f"median error by distance third, nearest to farthest: "
+          f"{J(WARP, 'distance_dependence/tertiles/0/median_err_um', '{:.1f}')}, "
+          f"{J(WARP, 'distance_dependence/tertiles/1/median_err_um', '{:.1f}')} and "
+          f"{J(WARP, 'distance_dependence/tertiles/2/median_err_um', '{:.1f}')} µm.",
+          "- **Verified:** `scripts/verify_report.py` (`check_alignment`) refits both transforms from the committed "
+          "landmarks on every run and reproduces the stored matrices, the rejected outliers and the hold-out. The side "
+          "check is the one value it cannot recompute: it needs the BANC neuron table and the position of every "
+          "FlyWire DN, which are not committed.",
+          "- **Which positions each figure uses:** Figure 2 (`scripts/viz_anatomy.py`, `load_circuit_lines`), "
+          "Figure 3 (`scripts/viz_activity_figure.py`, `circuit_lines`) and the video and GIF "
+          "(`scripts/viz_video.py`, through `circuit_lines`) draw the BANC team's warped FlyWire skeletons "
+          "(`fafb_banc`) and BANC skeletons (`banc`); our affine places the brain-model positions of Figure S15 "
+          "(`scripts/viz_preview.py`) and is compared with the warp in Figure 6 (`check` step of "
+          "`scripts/viz_anatomy.py`).", "", "</details>", ""]
+    for code_file, needle in (("scripts/viz_anatomy.py", 'man["kind"].isin(["fafb_banc", "banc"])'),
+                              ("scripts/viz_activity_figure.py", 'man["kind"].isin(["fafb_banc", "banc"])'),
+                              ("scripts/viz_video.py", "AF.circuit_lines("),
+                              ("scripts/viz_preview.py", '(brain["xyz_nm"] @ M.T + t)')):
+        if needle not in (ROOT / code_file).read_text():
+            raise SystemExit(f"{code_file} no longer contains {needle!r}; the position sources in the README differ")
 
     H(2, "Training")
     rn, rc = _load(RUNNER)["design"], _load(RECORDS)

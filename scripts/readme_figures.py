@@ -1,10 +1,10 @@
-"""Figures 0, 1 and 5 of the README: the pipeline schematic, the pre-registered stage-A result on the test split (no
-post-hoc data; that is Figure 4) and the training on the validation split.
+"""Figures 0, 1, 5 and 6 of the README: the pipeline schematic, the pre-registered stage-A result on the test split (no
+post-hoc data; that is Figure 4), the training on the validation split and the FlyWire -> BANC alignment of the figures.
 
     env -u PYTHONPATH python scripts/readme_figures.py [--out DIR] [--overwrite]
 
-Writes fig0_pipeline.png, fig1_stageA_result.png and fig5_training.png (each 180 mm wide, exactly 2000 px, at most
-1.5 MB) to --out (default docs/figures/). Without --overwrite nothing is written if any of them exists (rule 13); --out
+Writes fig0_pipeline.png, fig1_stageA_result.png, fig5_training.png and fig6_alignment.png (each 180 mm wide, exactly
+2000 px, at most 1.5 MB) to --out (default docs/figures/). Without --overwrite nothing is written if any of them exists (rule 13); --out
 inside the local preview folder is refused.
 
 Figure 0 (no data): six boxes in two rows, stimulus -> FlyGym eyes and FlyVis -> FlyWire brain model -> DN bridge ->
@@ -22,6 +22,14 @@ Figure 5 reads only docs/results/f5_stageA_curves.json and the lr_grid of docs/r
 - a: the learning-rate grid at training seed 0, final validation loss per arm and rate, the selected rate marked;
 - b, c: validation loss and R2 over training trials presented at the selected rate, mean +- 1 SD over training seeds;
 - d: training trials until the validation turn-sign accuracy first reached the set accuracy, per training seed.
+
+Figure 6 reads only docs/figures/landmarks.csv, transforms.json, warp_check.csv and warp_check.json (the alignment used
+by the figures; it does not enter the model):
+- a: the landmarks in BANC coordinates on the two axes with the largest spread of the BANC landmarks: BANC landmark
+  points and the affine-transformed FlyWire points, a line per landmark for its residual;
+- b: residual norms of the affine and the similarity, control and check points;
+- c: our affine against the BANC team's warp, an ECDF over the used DNs with the median marked;
+- d: that difference against the distance from the landmark centroid, per used DN.
 """
 import argparse
 import io
@@ -39,10 +47,13 @@ ROOT = Path(__file__).resolve().parent.parent
 REPORT = ROOT / "docs" / "results" / "f5_stageA_report.json"
 CURVES = ROOT / "docs" / "results" / "f5_stageA_curves.json"
 VALIDATION = ROOT / "docs" / "results" / "f5_stageA_validation.json"
+FIGDATA = ROOT / "docs" / "figures"                    # landmarks.csv, transforms.json, warp_check.csv, warp_check.json
 OUT = ROOT / "docs" / "figures"
 NAME = "fig1_stageA_result.png"
 NAME0 = "fig0_pipeline.png"
 NAME5 = "fig5_training.png"
+NAME6 = "fig6_alignment.png"
+FIG6_HEIGHT_MM = 112
 FIG5_HEIGHT_MM = 118
 FIG5_ARMS = ("true", "shuffled", "derange", "mlp", "linear", "bridge_off")      # the trained arms, legend order
 FIG5_D_MAX = 4000                                     # panel d axis end (training trials); later or never: right edge
@@ -301,6 +312,94 @@ def draw_fig5(cur, val):
     return fig
 
 
+def _csv(path):
+    import csv
+    with open(path, newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def draw_fig6(lm, tr, wr):
+    """lm, wr: rows of landmarks.csv and warp_check.csv; tr: transforms.json."""
+    X = np.array([[float(r[k]) for k in ("fw_x", "fw_y", "fw_z")] for r in lm])
+    Y = np.array([[float(r[k]) for k in ("banc_x", "banc_y", "banc_z")] for r in lm]) / 1e3
+    sets = np.array([r["set"] for r in lm])
+    aff = tr["transforms"]["affine"]
+    out = {(o["cell_type"], o["side"]) for o in aff["outliers"]}
+    rejected = np.array([(r["cell_type"], r["side"]) in out for r in lm])
+    group = np.where(rejected, "outlier", sets)                        # control (fitted), check, outlier
+    fig = plt.figure(figsize=(WIDTH_MM * MM, FIG6_HEIGHT_MM * MM))
+    gs = fig.add_gridspec(2, 2, width_ratios=(1.25, 1), left=0.075, right=0.985, bottom=0.085, top=0.885,
+                          wspace=0.3, hspace=0.45)
+    axa, axb, axc, axd = (fig.add_subplot(gs[i, j]) for i in (0, 1) for j in (0, 1))
+    marker = {"control": "o", "check": "s", "outlier": "X"}
+
+    # a: landmarks on the two BANC axes with the largest spread
+    i, j = sorted(np.argsort(Y.std(0))[::-1][:2])
+    F = (X @ np.array(aff["matrix"]).T + np.array(aff["translation"])) / 1e3
+    for k in range(len(Y)):
+        axa.plot([F[k, i], Y[k, i]], [F[k, j], Y[k, j]], color=FAINT, lw=0.4, zorder=1)
+    for g in ("control", "check", "outlier"):
+        m = group == g
+        axa.scatter(Y[m, i], Y[m, j], s=7 if g != "outlier" else 16, marker=marker[g], color=BANC_DN, lw=0, zorder=3)
+        axa.scatter(F[m, i], F[m, j], s=7 if g != "outlier" else 16, marker=marker[g], color=FW_DN, lw=0, zorder=2)
+    axa.set_aspect("equal", adjustable="datalim")
+    axa.set_xlabel(f"BANC {'xyz'[i]} (um)")
+    axa.set_ylabel(f"BANC {'xyz'[j]} (um)")
+    from matplotlib.lines import Line2D
+    hd = [Line2D([], [], ls="", marker="o", color=BANC_DN, ms=3.5, label="BANC landmark"),
+          Line2D([], [], ls="", marker="o", color=FW_DN, ms=3.5, label="FlyWire landmark, affine"),
+          Line2D([], [], color=FAINT, lw=0.8, label="residual"),
+          Line2D([], [], ls="", marker="o", color=INK2, ms=3.5, label="control"),
+          Line2D([], [], ls="", marker="s", color=INK2, ms=3.5, label="check"),
+          Line2D([], [], ls="", marker="X", color=INK2, ms=4.5, label="rejected outlier")]
+    axa.legend(handles=hd, frameon=False, ncol=3, loc="lower left", bbox_to_anchor=(0.0, 1.03), handletextpad=0.2,
+               columnspacing=1.0, borderaxespad=0.0)
+
+    # b: residual norms, affine and similarity, control and check
+    rng = np.random.default_rng(0)                                     # horizontal jitter only
+    cats = []
+    for name in ("affine", "similarity"):
+        T = tr["transforms"][name]
+        Fn = (X @ np.array(T["matrix"]).T + np.array(T["translation"])) / 1e3
+        res = np.linalg.norm(Fn - Y, axis=1)
+        tout = {(o["cell_type"], o["side"]) for o in T["outliers"]}
+        rej = np.array([(r["cell_type"], r["side"]) in tout for r in lm])
+        for st in ("control", "check"):
+            x0 = len(cats)
+            cats.append(f"{name}\n{st}")
+            m = sets == st
+            for g, mm in (("control" if st == "control" else "check", m & ~rej), ("outlier", m & rej)):
+                if mm.any():
+                    axb.scatter(x0 + rng.uniform(-0.18, 0.18, mm.sum()), res[mm], s=5 if g != "outlier" else 16,
+                                marker=marker[g], color=INK2, lw=0, alpha=0.8 if g != "outlier" else 1, zorder=2)
+            med = float(np.median(res[m]))
+            axb.plot([x0 - 0.3, x0 + 0.3], [med, med], color=INK, lw=1.2, solid_capstyle="butt", zorder=3)
+    axb.set_xticks(range(len(cats)), cats)
+    axb.set_xlim(-0.6, len(cats) - 0.4)
+    axb.set_ylim(0, None)
+    axb.set_ylabel("residual norm (um)")
+
+    # c, d: our affine against the BANC team's warp, the used DNs
+    used = np.array([r["used"] == "True" for r in wr])
+    err = np.array([float(r["affine_vs_warp_um"]) for r, u in zip(wr, used) if u])
+    rad = np.array([float(r["dist_from_landmark_centroid_um"]) for r, u in zip(wr, used) if u])
+    e = np.sort(err)
+    axc.step(e, np.arange(1, len(e) + 1) / len(e), where="post", color=BANC_DN, lw=1.0)
+    axc.axvline(float(np.median(err)), color=INK, lw=0.7, ls=(0, (3, 2)))
+    axc.set_xlim(0, None)
+    axc.set_ylim(0, 1.0)
+    axc.set_xlabel("our affine vs the BANC team's warp (um)")
+    axc.set_ylabel("fraction of DNs")
+    axd.scatter(rad, err, s=5, color=BANC_DN, lw=0, alpha=0.75)
+    axd.set_xlabel("distance from the landmark centroid (um)")
+    axd.set_ylabel("our affine vs the warp (um)")
+    axd.set_ylim(0, None)
+    for ax, lab in zip((axa, axb, axc, axd), "abcd"):
+        pos = ax.get_position()
+        fig.text(pos.x0 - 0.06, pos.y1 + 0.012, lab, ha="left", va="bottom", fontsize=FONT_PT + 1, fontweight="bold")
+    return fig
+
+
 def render_png(fig) -> bytes:
     """PNG bytes exactly WIDTH_PX wide (no bbox_inches="tight"); the dpi is raised slightly if rounding loses a pixel."""
     from PIL import Image
@@ -331,23 +430,25 @@ def main(argv=None):
     out = Path(a.out)
     if inside(out, PREVIEW):
         raise SystemExit(f"{out}: inside the local preview folder, which is never written")
-    paths = (out / NAME0, out / NAME, out / NAME5)
+    paths = (out / NAME0, out / NAME, out / NAME5, out / NAME6)
     exist = [str(p) for p in paths if p.exists()]
     if exist and not a.overwrite:
         raise SystemExit(f"{', '.join(exist)} exists; pass --overwrite to replace it (nothing written)")
     fam = font_setup()
     pngs = []
     for draw_fn in (lambda: draw(json.loads(REPORT.read_text())), draw_fig0,      # Figure 1 first, as before
-                    lambda: draw_fig5(json.loads(CURVES.read_text()), json.loads(VALIDATION.read_text()))):
+                    lambda: draw_fig5(json.loads(CURVES.read_text()), json.loads(VALIDATION.read_text())),
+                    lambda: draw_fig6(_csv(FIGDATA / "landmarks.csv"), json.loads((FIGDATA / "transforms.json").read_text()),
+                                      _csv(FIGDATA / "warp_check.csv"))):
         fig = draw_fn()
         pngs.append(render_png(fig))
         plt.close(fig)
-    png1, png0, png5 = pngs
-    for path, png in zip(paths, (png0, png1, png5)):
+    png1, png0, png5, png6 = pngs
+    for path, png in zip(paths, (png0, png1, png5, png6)):
         if len(png) > MAX_BYTES:
             raise SystemExit(f"{path.name}: {len(png):,} bytes, over {MAX_BYTES:,} (nothing written)")
     out.mkdir(parents=True, exist_ok=True)
-    for path, png in zip(paths, (png0, png1, png5)):
+    for path, png in zip(paths, (png0, png1, png5, png6)):
         path.write_bytes(png)
         print(f"{path}: {WIDTH_PX} px wide, {len(png):,} bytes, font {fam}")
     return 0
