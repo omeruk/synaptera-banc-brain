@@ -468,6 +468,18 @@
    }
   },
   {
+   "string": "25",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "train/f5_stageA.py:LATENCIES",
+    "format": "{}",
+    "formula": "LATENCIES[bridge_window_intervals] x INTERVAL_MS"
+   }
+  },
+  {
    "string": "299",
    "files": [
     "README.md"
@@ -551,6 +563,18 @@
    }
   },
   {
+   "string": "5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "train/f5_stageA.py:LATENCIES",
+    "format": "{}",
+    "formula": "LATENCIES[bridge_latency_intervals] x INTERVAL_MS"
+   }
+  },
+  {
    "string": "50",
    "files": [
     "README.md"
@@ -612,6 +636,42 @@
    }
   },
   {
+   "string": "+0.33",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "mean_signed_diff_um/z",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+1.51",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "mean_signed_diff_um/x",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.78",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "mean_signed_diff_um/y",
+    "format": "{:+.2f}"
+   }
+  },
+  {
    "string": "-0.832",
    "files": [
     "README.md",
@@ -622,6 +682,42 @@
     "file": "docs/figures/transforms.json",
     "key": "transforms/affine/determinant",
     "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.921",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/similarity/determinant",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "landmarks/split_seed",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/similarity/outliers_removed",
+    "format": "{}"
    }
   },
   {
@@ -640,6 +736,189 @@
    }
   },
   {
+   "string": "0.057",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "keys": [
+     "distance_dependence/slope_um_per_100um"
+    ],
+    "formula": "slope_um_per_100um / 100",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.29",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "distance_dependence/spearman_rho",
+    "format": "{:.2f}"
+   }
+  },
+  {
+   "string": "0.41",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "root_soma_um_median",
+    "format": "{:.2f}"
+   }
+  },
+  {
+   "string": "0.941",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/affine/scale",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.961",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/affine/side_check/left/fraction_same_side",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.973",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/similarity/scale",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.974",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/affine/side_check/right/fraction_same_side",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.975",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/similarity/side_check/right/fraction_same_side",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.991",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/similarity/side_check/left/fraction_same_side",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.9e-06",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "distance_dependence/spearman_p",
+    "format": "{:.1e}"
+   }
+  },
+  {
+   "string": "10.5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error_by_landmark_set/control_outlier/median_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "11",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error_by_landmark_set/none/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "11.6",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "distance_dependence/tertiles/0/median_err_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "111",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "landmarks/n_types",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "118,078",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "brain/soma",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "12",
    "files": [
     "README.md"
@@ -649,6 +928,30 @@
     "file": "docs/figures/transforms.json",
     "key": "transforms/affine/n_params",
     "format": "{}"
+   }
+  },
+  {
+   "string": "13.5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error_by_landmark_set/control/median_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "138,639",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "brain/n",
+    "format": "{:,}"
    }
   },
   {
@@ -665,6 +968,54 @@
    }
   },
   {
+   "string": "15",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "side_k",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "15.4",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error_by_landmark_set/none/median_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "15.5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error/rmse_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "15.8",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "distance_dependence/tertiles/2/median_err_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "159",
    "files": [
     "README.md"
@@ -677,6 +1028,18 @@
     ],
     "formula": "max of train",
     "format": "{}"
+   }
+  },
+  {
+   "string": "16,492",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "brain/centroid_synapses",
+    "format": "{:,}"
    }
   },
   {
@@ -711,6 +1074,54 @@
    }
   },
   {
+   "string": "17.1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "distance_dependence/tertiles/1/median_err_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "17.6",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error_by_landmark_set/check/median_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "177",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "landmarks/n_control",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "198",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error_by_landmark_set/control/n",
+    "format": "{}"
+   }
+  },
+  {
    "string": "199",
    "files": [
     "README.md",
@@ -723,6 +1134,33 @@
      "val"
     ],
     "formula": "max of val",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "2",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/affine/outliers_removed",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "20",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "keys": [
+     "landmarks/holdout_frac"
+    ],
+    "formula": "fraction x 100",
     "format": "{}"
    }
   },
@@ -742,6 +1180,42 @@
    }
   },
   {
+   "string": "21.9",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error/p95_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "22",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "landmarks/n_check_types",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "221",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "landmarks/n",
+    "format": "{}"
+   }
+  },
+  {
    "string": "239",
    "files": [
     "README.md"
@@ -753,6 +1227,30 @@
      "test"
     ],
     "formula": "max of test",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "24,950",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "vnc/root_position",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "264",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "used",
     "format": "{}"
    }
   },
@@ -771,6 +1269,7 @@
   {
    "string": "28.2",
    "files": [
+    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "data",
@@ -778,6 +1277,54 @@
     "file": "docs/figures/transforms.json",
     "key": "transforms/affine/rmse_control_um",
     "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "29.4",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error/max_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "3",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "vnc/dropped",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "3",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "sigma_k",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "320",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "root_within_tol",
+    "format": "{}"
    }
   },
   {
@@ -790,6 +1337,42 @@
     "file": "docs/figures/warp_check.json",
     "key": "bridged_dns",
     "format": "{}"
+   }
+  },
+  {
+   "string": "39.0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/similarity/rmse_control_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "4",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error_by_landmark_set/control_outlier/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "4,069",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "brain/centroid_fallback",
+    "format": "{:,}"
    }
   },
   {
@@ -808,8 +1391,21 @@
    }
   },
   {
+   "string": "42",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "excluded_other_tree/cell_types",
+    "format": "{}"
+   }
+  },
+  {
    "string": "42.3",
    "files": [
+    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "data",
@@ -817,6 +1413,141 @@
     "file": "docs/figures/transforms.json",
     "key": "transforms/affine/rmse_check_um",
     "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "44",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "landmarks/n_check",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "48.9",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/similarity/rmse_check_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "root_tol_um",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "51",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "error_by_landmark_set/check/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "56",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "excluded_other_tree/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "645",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/affine/side_check/left/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "646",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/affine/side_check/right/n",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "7",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "transforms/similarity/n_params",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "865",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "key": "vnc/filled",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "DNge024 (left) and DNg111 (left)",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/transforms.json",
+    "keys": [
+     "transforms/affine/outliers"
+    ],
+    "formula": "outlier list: cell_type (side), joined with and",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "nm",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/warp_check.json",
+    "key": "native_unit",
+    "format": "{}"
    }
   },
   {
@@ -929,6 +1660,30 @@
    }
   },
   {
+   "string": "152",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/10_f3b2_dn_ensemble.md",
+    "section": "4",
+    "match": "BANC neurons (152 left"
+   }
+  },
+  {
+   "string": "153",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/10_f3b2_dn_ensemble.md",
+    "section": "4",
+    "match": "BANC neurons (152 left, 153 right"
+   }
+  },
+  {
    "string": "2",
    "files": [
     "README.md"
@@ -938,6 +1693,30 @@
     "file": "prereg/14_f5_training.md",
     "section": "6",
     "match": "deg)^2."
+   }
+  },
+  {
+   "string": "20261013",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/10_f3b2_dn_ensemble.md",
+    "section": "5",
+    "match": "Sattolo's\n  algorithm, `numpy.random.default_rng(20261013)`"
+   }
+  },
+  {
+   "string": "221",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/10_f3b2_dn_ensemble.md",
+    "section": "4",
+    "match": "units (221 by exact type"
    }
   },
   {
@@ -962,6 +1741,18 @@
     "file": "prereg/19_f5_gpu_reproducibility_bridge_units_readout.md",
     "section": "2",
     "match": "is the 225 units of the `true` bridge"
+   }
+  },
+  {
+   "string": "225",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/10_f3b2_dn_ensemble.md",
+    "section": "4",
+    "match": "**`ensemble`:** 225 units"
    }
   },
   {
@@ -998,6 +1789,42 @@
     "file": "prereg/19_f5_gpu_reproducibility_bridge_units_readout.md",
     "section": "2",
     "match": "units**, 305 BANC targets"
+   }
+  },
+  {
+   "string": "305",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/10_f3b2_dn_ensemble.md",
+    "section": "4",
+    "match": "305 BANC neurons (152 left"
+   }
+  },
+  {
+   "string": "321",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/10_f3b2_dn_ensemble.md",
+    "section": "4",
+    "match": "from 321 FlyWire neurons"
+   }
+  },
+  {
+   "string": "4",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/10_f3b2_dn_ensemble.md",
+    "section": "4",
+    "match": "by exact type, 4 by family)"
    }
   },
   {
@@ -1293,6 +2120,21 @@
    "kind": "reference",
    "source": {
     "source": "Crossref (api.crossref.org/works/<doi>), checked 2026-10-27; no copy in the repository"
+   }
+  },
+  {
+   "string": "+0.58",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "keys": [
+     "families"
+    ],
+    "formula": "flywire log2_total of family DNg02",
+    "format": "{:+.2f}"
    }
   },
   {
@@ -2031,6 +2873,18 @@
    }
   },
   {
+   "string": "1,064",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/shared_neurons_flywire",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "1,299",
    "files": [
     "README.md"
@@ -2326,6 +3180,42 @@
    }
   },
   {
+   "string": "112",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/bridge_unit_sides/right",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "113",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/bridge_unit_sides/left",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "132",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/banc_mn_dn_families_absent_in_flywire",
+    "format": "{}"
+   }
+  },
+  {
    "string": "14",
    "files": [
     "README.md"
@@ -2404,6 +3294,21 @@
    }
   },
   {
+   "string": "187",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "keys": [
+     "summary/shared_count_equal"
+    ],
+    "formula": "len(summary/shared_count_equal)",
+    "format": "{}"
+   }
+  },
+  {
    "string": "2,000",
    "files": [
     "README.md"
@@ -2448,6 +3353,18 @@
    "source": {
     "file": "docs/results/f5_stageA_validation.json",
     "key": "guard/last",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "224",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_runner.json",
+    "key": "design/derange_units/t0",
     "format": "{}"
    }
   },
@@ -2608,6 +3525,18 @@
    "source": {
     "file": "docs/results/f3_dn_crosswalk.json",
     "key": "summary/shared_families",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "386",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/banc_mn_dn_families",
     "format": "{}"
    }
   },
@@ -2993,6 +3922,18 @@
    }
   },
   {
+   "string": "85",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/banc_mn_dn_families_shared_gate_both",
+    "format": "{}"
+   }
+  },
+  {
    "string": "87",
    "files": [
     "README.md"
@@ -3014,6 +3955,18 @@
     "file": "docs/results/f5_stageA_validation.json",
     "key": "summary/mlp/trials_to_090/mean",
     "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "927",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.json",
+    "key": "summary/shared_neurons_banc",
+    "format": "{:,}"
    }
   },
   {
@@ -3213,6 +4166,17 @@
    }
   },
   {
+   "string": "(neurons within a type have no one-to-one match)",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "scripts/viz_positions.py",
+    "verbatim": true
+   }
+  },
+  {
    "string": "Body and physics: arena, quasi-steady wing model, FlyGym body, physical noise.",
    "files": [
     "README.md"
@@ -3242,6 +4206,17 @@
    "kind": "text",
    "source": {
     "file": "coupling/__init__.py",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "FAFB14 -> JRC2018F -> mirror -> BANC, elastix + thin-plate spline",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "docs/figures/warp_check.json",
     "verbatim": true
    }
   },
@@ -3334,6 +4309,17 @@
    }
   },
   {
+   "string": "voxels x (4, 4, 40) nm",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "scripts/viz_positions.py",
+    "verbatim": true
+   }
+  },
+  {
    "string": "| A | rate BANC VNC subgraph | recorded FlyWire DN spike counts (spiking reference brain R) through the bridge | open-loop dA |",
    "files": [
     "README.md"
@@ -3374,6 +4360,17 @@
    "kind": "text",
    "source": {
     "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "|log2(R/L)| < 0.5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "docs/results/f3_dn_crosswalk.md",
     "verbatim": true
    }
   },

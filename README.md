@@ -4,7 +4,7 @@ A simulation test of whether the real wiring of a BANC v888 ventral nerve cord (
 
 Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)
 
-**Contents:** [Result in brief](#result-in-brief) · [The stage-A circuit](#the-stage-a-circuit) · [Activity on the circuit](#activity-on-the-circuit) · [Post-hoc analyses](#post-hoc-analyses) · [How we got here (F0-F3)](#how-we-got-here-f0-f3) · [Key numbers](#key-numbers) · [How it works](#how-it-works) · [Training](#training) · [Methods and safeguards](#methods-and-safeguards) · [Limitations](#limitations) · [Reproduce](#reproduce) · [Repository layout](#repository-layout) · [Data, credits and licences](#data-credits-and-licences) · [Authorship](#authorship) · [How to cite](#how-to-cite)
+**Contents:** [Result in brief](#result-in-brief) · [The stage-A circuit](#the-stage-a-circuit) · [Activity on the circuit](#activity-on-the-circuit) · [Post-hoc analyses](#post-hoc-analyses) · [How we got here (F0-F3)](#how-we-got-here-f0-f3) · [Key numbers](#key-numbers) · [How it works](#how-it-works) · [Joining two flies: cell types and coordinates](#joining-two-flies-cell-types-and-coordinates) · [Training](#training) · [Methods and safeguards](#methods-and-safeguards) · [Limitations](#limitations) · [Reproduce](#reproduce) · [Repository layout](#repository-layout) · [Data, credits and licences](#data-credits-and-licences) · [Authorship](#authorship) · [How to cite](#how-to-cite)
 
 <img src="docs/figures/stageA_circuit_direction.gif" width="100%" alt="Animation of the stage-A circuit seen from behind: brain and nerve-cord neurons light up orange or blue by their preference for rightward or leftward drum rotation, above a trace of the turn command for both directions.">
 
@@ -79,7 +79,7 @@ Test split, mean over training seeds (standard deviations in [docs/results/f5_st
 
 *Figure 0 | The stage-A pipeline: light blue is FlyWire (fly 1), darker blue BANC (fly 2), grey neither; only the BANC VNC subgraph is trained.*
 
-**Two flies, joined by cell type.** The brain (FlyWire v783) and the nerve cord (BANC v888) come from two different female flies ([`docs/07_HYBRID_INTERFACE.md`](docs/07_HYBRID_INTERFACE.md)), so the model joins them by DN cell type, not by position. FlyWire has 1,299 DNs in 454 type families, BANC 1,316 DNs in 537; 348 families are shared by name, and 112 of them pass the symmetry gate in both datasets. They form the bridge: 225 units into 305 BANC DNs. The spatial FlyWire -> BANC alignment (12-parameter affine on DN landmarks, with a reflection: determinant -0.832; median error 14.5 µm against the BANC team's warp) is used only for the figures and does not enter the model.
+The brain and the nerve cord come from two different flies and are joined by DN cell type; see [Joining two flies: cell types and coordinates](#joining-two-flies-cell-types-and-coordinates).
 
 - **Stimulus and brain.** A rotating grating (rot_left / rot_right at 30, 60, 90 and 120 deg/s), a static grating and grey were rendered for the FlyGym eyes and passed through FlyVis to a visual boundary layer that drives the FlyWire v783 brain, the unmodified spiking reference model of Shiu et al. Each trial is 300 intervals of 5 ms (100 grey lead-in intervals, then the stimulus). The brain was run once per trial and its DN spike counts recorded; stage A replays these records, so the brain is the same for every arm and is never trained.
 - **DN bridge.** The recorded FlyWire DN counts are turned into unit rates (window 5 intervals, latency 1 interval) that clamp the BANC DNs of the same types (BANC DN state = unit rate / 100 Hz). DNg02 is clamped at a fixed baseline; every other BANC DN is 0.
@@ -108,6 +108,62 @@ Arms (the same data, budget and test for each):
 - `untrained`: `true` at initialisation, one deterministic evaluation on the test set.
 
 Training seeds: 10 per trained arm, 5 for `bridge_off`.
+
+</details>
+
+## Joining two flies: cell types and coordinates
+
+The model joins the brain and the nerve cord by DN cell type; positions in space are used only for the figures.
+
+**By cell type (the model).** The brain (FlyWire v783) and the brain and nerve cord of BANC (v888) come from two different female flies (`docs/07_HYBRID_INTERFACE.md`), so DNs are matched by type, not by position. FlyWire has 1,299 DNs in 454 type families, BANC 1,316 in 537; 348 families are shared by name, and 112 of them pass the symmetry gate in both datasets. These form the DN bridge (details below).
+
+<details><summary>Matching by cell type: rules and numbers</summary>
+
+- **Matching key:** exact `cell_type` first, then the family (`cell_type` without a single trailing `_<letter>`), else silent; left to left and right to right; centre neurons only to same-name centre neurons (`docs/07_HYBRID_INTERFACE.md`).
+- **Shared families:** their neurons number 1,064 in FlyWire and 927 in BANC; 187 shared families have identical left/right counts in both datasets.
+- **Symmetry gate:** |log2(R/L)| < 0.5 of the input synapses, total and excitatory, on each dataset's own graph; the bridge uses the shared families that pass it in both datasets.
+- **The bridge:** 225 units (221 by exact type, 4 by family; 113 left, 112 right); 305 BANC targets (152 left, 153 right) from 321 FlyWire neurons (prereg/10 section 4).
+- **Rate transfer:** per BANC unit, the mean rate per neuron of the matched FlyWire DNs over a trailing window of 25 ms, applied 5 ms later; in the spiking hybrid (F3b) every BANC neuron of the unit receives an independent Poisson process at that rate; in the stage-A rate model the BANC DN state is the rate / 100 Hz.
+- **Unmatched DNs:** unmatched BANC DNs are silent; unmatched FlyWire DNs are dropped.
+- **Coverage gap:** 386 BANC DN families have direct synapses onto wing, haltere, neck or TTMn motor neurons; 132 of them have no FlyWire family of the same name, and 85 are shared and pass the gate in both datasets.
+- **DNg02:** it fails the gate in FlyWire (log2(R/L) of the total input synapses +0.58) and passes in BANC, and it is silent in the FlyWire brain model; in the hybrid it is a fixed `HAND` baseline ([summary of F0-F3](docs/results/SUMMARY_F0_F3.md)).
+- **Controls on the mapping:** in F3b-2 a single random cycle over the shared, gate-passing families (a derangement, drawn with Sattolo's algorithm, `default_rng(20261013)`, side kept); in F3b-3 39 random derangements; in stage A the `derange` arm: the same rate streams and targets with the family mapping deranged (224 units).
+- **Motor-neuron sides** were audited against their exit nerves ([Methods and safeguards](#methods-and-safeguards)).
+
+</details>
+
+**In space (the figures).** For the figures only, FlyWire positions were mapped into BANC space. Our own transform, an affine fitted to DN-type landmarks, is a visualisation scaffold for viewing only (`scripts/viz_positions.py`) and includes a reflection. The anatomy figure, the activity figure and the video do not use it: they draw the BANC team's warped FlyWire skeletons (FAFB14 -> JRC2018F -> mirror -> BANC, elastix + thin-plate spline) and BANC skeletons. Our affine places the brain-model positions of Figure S15 and is compared with the BANC team's warp in Figure 6. None of this enters the model.
+
+<img src="docs/figures/fig6_alignment.png" width="100%" alt="Four panels: landmark points of the two datasets in BANC coordinates joined by residual lines; strips of residual norms for the affine and the similarity; a cumulative distribution of the distance between our affine and the BANC team's warp; and a scatter of that distance against the distance from the landmark centroid.">
+
+**Figure 6 | Our FlyWire -> BANC affine, used only for the figures, against its landmarks and against the BANC team's warp.** a, The landmarks in BANC coordinates on the two axes with the largest spread of the BANC landmarks (x and z): BANC landmark points (blue), FlyWire landmark points after our affine (sky blue) and a grey line per landmark for its residual; circles, control; squares, check; crosses, the rejected outliers. This is a 2-D view of 3-D residuals. b, Residual norms (µm) of the affine and the similarity for the control points (crosses, the affine's rejected outliers) and the check points; bars, medians. c, Distance between our affine-placed FlyWire soma and the root node of the BANC team's warped skeleton, as a cumulative distribution over the DNs used; dashed, the median. d, The same distance against the distance of the warped root from the centroid of the fitted landmarks. 221 landmarks (177 control, 44 check); c and d, 264 DNs.
+
+<details><summary>Positions, landmarks, the two transforms and the check against the warp</summary>
+
+- **Positions:** FlyWire brain-model neurons at their soma (voxels x (4, 4, 40) nm) where present (118,078 of 138,639), else at the centroid of their synapses (16,492) or a fallback centroid (4,069); BANC VNC neurons at their root position (24,950), else at the synapse-weighted mean position of their partners (865), else dropped (3).
+- **Landmarks:** one per bridged DN type and side matched by exact type (family matches are not used): the FlyWire mean soma against the BANC mean root position of the type's neurons with a nucleus id, as type means (neurons within a type have no one-to-one match); 111 types, none dropped.
+- **Hold-out:** 20 % of the landmark types, both sides together (`default_rng(0)`), are check points: 22 types.
+- **Fit:** least squares on the control points, refitted after rejecting every point whose residual exceeds 3 x the RMSE of the kept points, until none is rejected; the affine rejected DNge024 (left) and DNg111 (left), the similarity none.
+
+| | affine | similarity |
+|---|---:|---:|
+| parameters | 12 | 7 |
+| RMSE, control points (µm) | 28.2 | 39.0 |
+| RMSE, check points (µm) | 42.3 | 48.9 |
+| outliers removed | 2 | 0 |
+| determinant | -0.832 | -0.921 |
+| scale | 0.941 | 0.973 |
+| side check, left DNs | 0.961 | 0.991 |
+| side check, right DNs | 0.974 | 0.975 |
+
+Side check: the fraction of the FlyWire left (645) and right (646) DNs that land on the same BANC side, by the majority label of the 15 nearest BANC neurons with a nucleus id.
+- **Reflection:** both determinants are negative, so both maps include a mirror image (this follows from the definition of the determinant); this is consistent with the mirror step of the BANC team's pipeline named in `docs/figures/warp_check.json`.
+- **Unit check of the native skeletons:** read in nm (not voxels), the native skeleton's root lies within 5 µm of the FlyWire soma for 320 DNs (median root-soma distance 0.41 µm).
+- **Excluded:** 56 DNs (42 types): their warped file is another skeleton than the native one, so its root is not the soma.
+- **Our affine against the warp,** over the DNs used: median 14.5 µm, RMSE 15.5 µm, 95th percentile 21.9 µm, maximum 29.4 µm; median by landmark set: control 13.5 µm (n = 198), rejected outliers 10.5 µm (n = 4), check 17.6 µm (n = 51), no landmark 15.4 µm (n = 11); mean signed difference x +1.51, y -0.78, z +0.33 µm.
+- **Distance dependence, as measured:** Spearman rho 0.29 (p = 1.9e-06) between the error and the distance from the landmark centroid; slope 0.057 µm of error per µm of distance; median error by distance third, nearest to farthest: 11.6, 17.1 and 15.8 µm.
+- **Verified:** `scripts/verify_report.py` (`check_alignment`) refits both transforms from the committed landmarks on every run and reproduces the stored matrices, the rejected outliers and the hold-out. The side check is the one value it cannot recompute: it needs the BANC neuron table and the position of every FlyWire DN, which are not committed.
+- **Which positions each figure uses:** Figure 2 (`scripts/viz_anatomy.py`, `load_circuit_lines`), Figure 3 (`scripts/viz_activity_figure.py`, `circuit_lines`) and the video and GIF (`scripts/viz_video.py`, through `circuit_lines`) draw the BANC team's warped FlyWire skeletons (`fafb_banc`) and BANC skeletons (`banc`); our affine places the brain-model positions of Figure S15 (`scripts/viz_preview.py`) and is compared with the warp in Figure 6 (`check` step of `scripts/viz_anatomy.py`).
 
 </details>
 

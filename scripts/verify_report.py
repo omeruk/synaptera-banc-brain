@@ -1709,6 +1709,17 @@ FORMULAS = {
     "comma-separated list": lambda a, c: ", ".join(a[0]),
     "steps x batch": lambda a, c: a[0] * a[1],
     "eval_every x batch": lambda a, c: a[0] * a[1],
+    "len(summary/shared_count_equal)": lambda a, c: len(a[0]),
+    "LATENCIES[bridge_window_intervals] x INTERVAL_MS": lambda a, c: int(a[0]["bridge_window_intervals"]
+                                                                       * c("INTERVAL_MS")),
+    "LATENCIES[bridge_latency_intervals] x INTERVAL_MS": lambda a, c: int(a[0]["bridge_latency_intervals"]
+                                                                        * c("INTERVAL_MS")),
+    "outlier list: cell_type (side), joined with and": lambda a, c: " and ".join(
+        f"{o['cell_type']} ({o['side']})" for o in a[0]),
+    "fraction x 100": lambda a, c: round(100 * a[0]),
+    "slope_um_per_100um / 100": lambda a, c: a[0] / 100,
+    "flywire log2_total of family DNg02": lambda a, c: next(
+        x for x in a[0] if x["family"] == "DNg02")["flywire"]["log2_total"],
 }
 
 # Numeric tokens of README.md / docs/FIGURES.md that are not recorded numbers. Categories only; a single number is
