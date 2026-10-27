@@ -1,4 +1,4 @@
-"""scripts/readme_figures.py: --help, a run into a temporary folder (Figures 0, 1 and 5, each 2000 px wide, at most
+"""scripts/readme_figures.py: --help, a run into a temporary folder (Figures 0, 1, 5 and 6, each 2000 px wide, at most
 1.5 MB), the refusal to overwrite without --overwrite (one existing output blocks all), and the refusal of an --out
 inside the local preview folder. Every call runs in its own subprocess; only committed JSON files are read."""
 import os
@@ -31,7 +31,7 @@ def test_writes_every_figure_2000_px_and_refuses_to_overwrite(tmp_path):
     out = tmp_path / "out"
     r = _run("--out", str(out), tmp=tmp_path)
     assert r.returncode == 0, r.stderr
-    names = ["fig0_pipeline.png", "fig1_stageA_result.png", "fig5_training.png"]
+    names = ["fig0_pipeline.png", "fig1_stageA_result.png", "fig5_training.png", "fig6_alignment.png"]
     assert sorted(p.name for p in out.iterdir()) == names
     for n in names:
         with Image.open(out / n) as im:
@@ -43,7 +43,7 @@ def test_writes_every_figure_2000_px_and_refuses_to_overwrite(tmp_path):
     assert {n: ((out / n).read_bytes(), (out / n).stat().st_mtime_ns) for n in names} == before
 
 
-@pytest.mark.parametrize("existing", ["fig0_pipeline.png", "fig5_training.png"])
+@pytest.mark.parametrize("existing", ["fig0_pipeline.png", "fig5_training.png", "fig6_alignment.png"])
 def test_one_existing_output_blocks_all(tmp_path, existing):
     out = tmp_path / "out"
     out.mkdir()
