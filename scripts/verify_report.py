@@ -9,7 +9,7 @@ per arm from `runs/f3b1/f3b1_v3.json`; F3b-2 and F3b-3 (`docs/results/f3b2_dn_en
 `check_f3b2` and `check_f3b3`; F5 step 2a (`docs/results/f5_rate_lif.md`): see `check_f5_rate_lif`; F5 step 2a-2
 (`docs/results/f5_reachability.md`): see `check_f5_reachability`; machine change (`docs/results/machine_x86_repro.md`,
 docs/05 section 7.1): see `check_machine_repro`; F5 step 2b (`docs/results/f5_benchmark.md`): see
-`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. Rebuilt JSON is compared value by value with floats within a relative
+`check_f5_benchmark`; F5 step 2c (`docs/results/f5_stageA_records.md`): see `check_f5_stageA`. F5 step 3 (`docs/results/f5_stageA_runner.md`): see `check_f5_runner`. F5 stage-A test report (`docs/results/f5_stageA_report.md`, once it exists): see `check_f5_stageA_report`. F5 stage-A post-hoc analyses (`docs/results/f5_stageA_posthoc.md`): see `check_f5_stageA_posthoc`. README (`README.md`, `docs/FIGURES.md`, every entry of `docs/readme_numbers.json`): see `check_readme`. Rebuilt JSON is compared value by value with floats within a relative
 JSON_REL_TOL; every float that needed it is printed.
 
     env -u PYTHONPATH python scripts/verify_report.py            # exit 1 on a mismatch
@@ -1627,6 +1627,222 @@ def check_f5_stageA_posthoc():
     return n, bad
 
 
+README_MD = ROOT / "README.md"
+FIGURES_MD = ROOT / "docs" / "FIGURES.md"
+README_NUMBERS = ROOT / "docs" / "readme_numbers.json"
+
+
+def _readme_const(path, name):
+    """A module-level constant of a source file, parsed with ast (the file is not imported)."""
+    for node in __import__("ast").parse((ROOT / path).read_text()).body:
+        if node.__class__.__name__ != "Assign":
+            continue
+        for t in node.targets:
+            names = [t.id] if hasattr(t, "id") else [e.id for e in getattr(t, "elts", []) if hasattr(e, "id")]
+            if name not in names:
+                continue
+            import ast
+            val = node.value
+            if isinstance(val, ast.Call) and getattr(val.func, "id", None) == "dict" and not val.args:
+                return {k.arg: ast.literal_eval(k.value) for k in val.keywords}
+            v = ast.literal_eval(val)
+            return v[names.index(name)] if len(names) > 1 else v
+    raise KeyError(f"{path}: no constant {name}")
+
+
+def _readme_get(obj, path):
+    for k in path.split("/"):
+        obj = obj[int(k)] if isinstance(obj, list) else obj[k]
+    return obj
+
+
+def _speeds(conditions):
+    return sorted({v for _, v in conditions if v})
+
+
+# One explicit function per formula text of docs/readme_numbers.json: f(args, const) with args the values of the entry's
+# JSON keys (or [the code constant]) and const(name) another constant of the same source file. A formula that is not
+# here is a mismatch (fail closed).
+FORMULAS = {
+    "min of train": lambda a, c: min(a[0]),
+    "max of train": lambda a, c: max(a[0]),
+    "min of val": lambda a, c: min(a[0]),
+    "max of val": lambda a, c: max(a[0]),
+    "min of test": lambda a, c: min(a[0]),
+    "max of test": lambda a, c: max(a[0]),
+    "len(val)": lambda a, c: len(a[0]),
+    "len(primary/d)": lambda a, c: len(a[0]),
+    "len(B/measures)": lambda a, c: len(a[0]),
+    "number of arms in runs": lambda a, c: len(a[0]),
+    "2 directions x test_seeds": lambda a, c: 2 * a[0],
+    "2 directions x 2 speeds x len(val)": lambda a, c: 2 * 2 * len(a[0]),
+    "level x 100": lambda a, c: round(100 * a[0]),
+    "mean rounded to 4 decimals (+ 0.0: no negative zero)": lambda a, c: round(a[0], 4) + 0.0,
+    "number of measures with outside_shuffled_range": lambda a, c: sum(m["outside_shuffled_range"] for m in a[0].values()),
+    "number of MN types in B/targets/names": lambda a, c: len({n.split("|")[0] for n in a[0]}),
+    "HELD_OUT['primary']": lambda a, c: a[0]["primary"],
+    "HELD_OUT['secondary']": lambda a, c: a[0]["secondary"],
+    "lowest speed of TRAIN_CONDITIONS": lambda a, c: _speeds(a[0])[0],
+    "highest speed of TRAIN_CONDITIONS": lambda a, c: _speeds(a[0])[-1],
+    "LATENCIES[bridge_window_intervals]": lambda a, c: a[0]["bridge_window_intervals"],
+    "LATENCIES[bridge_latency_intervals]": lambda a, c: a[0]["bridge_latency_intervals"],
+    "WINDOW[0]": lambda a, c: a[0][0],
+    "WINDOW[1] - 1": lambda a, c: a[0][1] - 1,
+    "(WINDOW[0] - N_GREY) x INTERVAL_MS": lambda a, c: int((a[0][0] - c("N_GREY")) * c("INTERVAL_MS")),
+    "LR_GRID[0]": lambda a, c: a[0][0],
+    "LR_GRID[1]": lambda a, c: a[0][1],
+    "LR_GRID[2]": lambda a, c: a[0][2],
+    "FILTER_MS[0]": lambda a, c: a[0][0],
+    "FILTER_MS[1]": lambda a, c: a[0][1],
+    "FILTER_MS[2]": lambda a, c: a[0][2],
+    "FILTER_MS[3]": lambda a, c: a[0][3],
+    "STILLS[0][0]": lambda a, c: a[0][0][0],
+    "STILLS[1][0]": lambda a, c: a[0][1][0],
+    "STILLS[2][0]": lambda a, c: a[0][2][0],
+    "STILLS[0][1]": lambda a, c: a[0][0][1],
+    "STILLS[1][1]": lambda a, c: a[0][1][1],
+    "STILLS[2][1]": lambda a, c: a[0][2][1],
+    "the types with sign +1": lambda a, c: ", ".join(m for m, s in a[0].items() if s > 0),
+    "the types with sign -1": lambda a, c: ", ".join(m for m, s in a[0].items() if s < 0),
+}
+
+# Numeric tokens of README.md / docs/FIGURES.md that are not recorded numbers. Categories only; a single number is
+# excluded only with a comment naming its source.
+EXCLUSIONS = [
+    ("list and step numbers", r"(?m)^\d+\. |\b[Ss]teps? \d+(?:-\d+)?\b"),
+    ("identifiers with letters and digits (R2, Brian2, T4/T5, float32, WSL2, v783, v888, hg1, S16, D3, x86_64, DNg02, "
+     "SHA-256)", r"\b[A-Za-z][A-Za-z_]*-?\d\w*"),
+    ("licence names", r"CC BY(?:-NC)? \d\.\d"),
+    ("Figure and S numbers", r"\bFigures? S?\d+(?:(?:-| and )S?\d+)?"),
+    ("prereg and section numbers", r"prereg/\d+(?:-\d+)?|\bsections? \d+(?:\.\d+)?(?:-\d+)?"),
+    # single number: "item 31" names the open fetch_data.py item of MIGRATION_CHECKLIST.md (checked below)
+    ("MIGRATION_CHECKLIST.md item 31", r"\bitem 31\b"),
+]
+
+
+def _readme_scan(text, recorded):
+    """Numeric tokens outside code blocks, code spans, URLs, DOIs and the reference list that are neither a recorded
+    string nor in EXCLUSIONS. Image alt text is kept and scanned."""
+    import re
+    t = re.sub(r"```.*?```", " ", text, flags=re.S)
+    t = re.sub(r"Works this repository uses:\n\n(?:- .*\n)+", " ", t)
+    t = re.sub(r'<img [^>]*?alt="([^"]*)"[^>]*>', r" \1 ", t)
+    t = re.sub(r"`[^`\n]*`", " ", t)
+    t = re.sub(r"\]\([^)]*\)", "]", t)
+    t = re.sub(r"https?://\S+|doi:\S+", " ", t)
+    def mask(t, strings):
+        for s in sorted(strings, key=len, reverse=True):
+            t = re.sub(r"(?<![\d.,])" + re.escape(s) + r"(?!\d|[.,]\d)", " ", t)
+        return t
+    # 1. long recorded strings (titles, copied text, multi-digit numbers), 2. the categories, 3. short pure numbers
+    long_ = [s for s in recorded if len(s) >= 4 or not s.isdigit()]
+    t = mask(t, long_)
+    for _, rx in EXCLUSIONS:
+        t = re.sub(rx, " ", t)
+    t = mask(t, [s for s in recorded if s not in long_])
+    return re.findall(r"\S*\d\S*", t)
+
+
+def check_readme():
+    """README.md and docs/FIGURES.md (scripts/readme_text.py), independently of that script (it is not imported). For
+    every entry of docs/readme_numbers.json the printed string is recomputed here and must occur in each listed file:
+    JSON key + format; JSON keys or a code constant + a formula of FORMULAS (fail closed); code constants parsed with
+    ast; design numbers whose match text occurs in the named section of a pre-registration; verbatim text; docstring
+    commands. References confirmed on Crossref have no copy in the repository and verify_report has no network, so
+    for them only the occurrence in the file is checked. Then every numeric token of the two files must be a recorded
+    string or fall under EXCLUSIONS."""
+    import ast
+    import re
+    bad, n = [], 0
+    counts = {}
+
+    def chk(key, ok, v=None):
+        nonlocal n
+        n += 1
+        if not ok:
+            bad.append((key, v))
+
+    texts = {"README.md": README_MD.read_text(), "docs/FIGURES.md": FIGURES_MD.read_text()}
+    entries = json.loads(README_NUMBERS.read_text())["entries"]
+    jsons = {}
+
+    def js(f):
+        if f not in jsons:
+            jsons[f] = json.loads((ROOT / f).read_text())
+        return jsons[f]
+
+    def section(path, sec):
+        text = (ROOT / path).read_text()
+        if sec == "docstring":
+            return ast.get_docstring(ast.parse(text), clean=False) or ""
+        m = re.search(r"(?m)^(#+) " + re.escape(sec) + r"[. ]", text)
+        if not m:
+            return ""
+        body = text[m.end():]
+        nxt = re.search(r"(?m)^#{1,%d} " % len(m.group(1)), body)       # the next heading of the same or a higher level
+        return text[m.start():m.end()] + (body[:nxt.start()] if nxt else body)
+
+    for e in entries:
+        s, src, kind = e["string"], e["source"], e["kind"]
+        key = f"readme:{kind}:{s[:60]}"
+        how = "recomputed"
+        try:
+            if "key" in src:
+                got = src["format"].format(_readme_get(js(src["file"]), src["key"]))
+            elif "keys" in src:
+                f = FORMULAS.get(src["formula"])
+                got = None if f is None else src["format"].format(
+                    f([_readme_get(js(src["file"]), k) for k in src["keys"]], None))
+            elif "code" in src:
+                path, name = src["code"].split(":")
+                v = _readme_const(path, name)
+                if "note" in src:                                     # the gate parts of scripts/f5_train.py
+                    code = (ROOT / path).read_text()
+                    flags = [w for w in s.split() if w.startswith("--")]
+                    words = [w for w in s.split() if not w.startswith("--")]
+                    calls = re.findall(r"add_argument\(([^)]*)\)", code)
+                    ok = all(any(f'"{fl}"' in c for c in calls) for fl in flags) and all(
+                        w in v or f'"{w}"' in code for w in words)
+                    got = s if ok else None
+                    how = "command flags and parts"
+                else:
+                    if "formula" in src:
+                        f = FORMULAS.get(src["formula"])
+                        v = None if f is None else f([v], lambda nm, p=path: _readme_const(p, nm))
+                    got = None if v is None else (src["format"].format(v) if "format" in src else str(v))
+            elif "section" in src:
+                got = s if (src["match"] in section(src["file"], src["section"]) and s in src["match"]) else None
+                how = "match in the prereg section"
+            elif "match" in src:
+                got = s if (src["match"] in (ROOT / src["file"]).read_text() and s in src["match"]) else None
+                how = "match in the file"
+            elif src.get("verbatim"):
+                got = s if s in (ROOT / src["file"]).read_text() else None
+                how = "verbatim in the file"
+            elif src.get("docstring"):
+                got = s if s in (ast.get_docstring(ast.parse((ROOT / src["file"]).read_text()), clean=False) or "") \
+                    else None
+                how = "docstring line"
+            elif set(src) == {"source"} and src["source"].startswith("Crossref"):
+                got = s                                                # occurrence only (no network here)
+                how = "occurrence only (Crossref)"
+            else:
+                got = None
+        except (KeyError, IndexError, ValueError, TypeError) as err:
+            got = f"error: {err}"
+        chk(key, got == s, (got, s))
+        counts[(kind, how)] = counts.get((kind, how), 0) + 1
+        for f in e["files"]:
+            chk(f"{key}:in:{f}", f in texts and s in texts[f], f)
+    mig = (ROOT / "MIGRATION_CHECKLIST.md").read_text()
+    chk("readme:exclusion:item_31", "**31.**" in mig and "fetch_data.py" in mig.split("**31.**")[1].split("\n")[0])
+    for f, t in texts.items():
+        left = _readme_scan(t, [e["string"] for e in entries if f in e["files"]])
+        chk(f"readme:unrecorded_numbers:{f}", not left, left[:20])
+    print("check_readme entries: " + ", ".join(f"{k} / {h}: {c}" for (k, h), c in sorted(counts.items())))
+    return n, bad
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     bad = []
@@ -1751,6 +1967,10 @@ def main(argv=None):
         bad += b
     if F5PH_MD.exists():
         k, b = check_f5_stageA_posthoc()
+        n += k
+        bad += b
+    if README_NUMBERS.exists():
+        k, b = check_readme()
         n += k
         bad += b
     if "--print" in argv:

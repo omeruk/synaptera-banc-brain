@@ -251,6 +251,18 @@
    }
   },
   {
+   "string": "1",
+   "files": [
+    "docs/FIGURES.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/viz_video.py:STILLS",
+    "format": "{}",
+    "formula": "STILLS[0][0]"
+   }
+  },
+  {
    "string": "10",
    "files": [
     "README.md"
@@ -409,6 +421,30 @@
    "source": {
     "code": "train/f5_stageA.py:BATCH",
     "format": "{}"
+   }
+  },
+  {
+   "string": "2",
+   "files": [
+    "docs/FIGURES.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/viz_video.py:STILLS",
+    "format": "{}",
+    "formula": "STILLS[1][0]"
+   }
+  },
+  {
+   "string": "2",
+   "files": [
+    "docs/FIGURES.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/viz_video.py:STILLS",
+    "format": "{}",
+    "formula": "STILLS[2][0]"
    }
   },
   {
@@ -800,6 +836,42 @@
   {
    "string": "0",
    "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "5",
+    "match": "every bridged DN clamped to 0"
+   }
+  },
+  {
+   "string": "0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "2",
+    "match": "every other BANC DN is clamped at 0"
+   }
+  },
+  {
+   "string": "0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "4",
+    "match": "dA* = 0 under grey"
+   }
+  },
+  {
+   "string": "0",
+   "files": [
     "docs/FIGURES.md"
    ],
    "kind": "design",
@@ -822,6 +894,30 @@
    }
   },
   {
+   "string": "1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "8.1",
+    "match": "| **R2 (primary A, B)** | 1 - SSE / SST"
+   }
+  },
+  {
+   "string": "1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/21_f5_stageA_posthoc_plan.md",
+    "section": "3.3",
+    "match": "G = 1 is the teacher"
+   }
+  },
+  {
    "string": "10 x E",
    "files": [
     "README.md"
@@ -831,6 +927,18 @@
     "file": "prereg/14_f5_training.md",
     "section": "5",
     "match": "10 x E successful swaps"
+   }
+  },
+  {
+   "string": "2",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "6",
+    "match": "deg)^2."
    }
   },
   {
@@ -891,6 +999,18 @@
     "file": "prereg/19_f5_gpu_reproducibility_bridge_units_readout.md",
     "section": "2",
     "match": "units**, 305 BANC targets"
+   }
+  },
+  {
+   "string": "5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/21_f5_stageA_posthoc_plan.md",
+    "section": "4.4",
+    "match": "two-sided 5 % critical value"
    }
   },
   {
@@ -1920,6 +2040,37 @@
    }
   },
   {
+   "string": "95",
+   "files": [
+    "README.md",
+    "docs/FIGURES.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "keys": [
+     "primary/effect/level"
+    ],
+    "formula": "level x 100",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "95",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "keys": [
+     "primary/guards/leakage/interval/level"
+    ],
+    "formula": "level x 100",
+    "format": "{}"
+   }
+  },
+  {
    "string": "AMD Ryzen 9 8945HS w/ Radeon 780M Graphics",
    "files": [
     "README.md"
@@ -2001,6 +2152,83 @@
     "file": "docs/results/f5_stageA_posthoc.json",
     "key": "B/measures/S16/description",
     "format": "{}"
+   }
+  },
+  {
+   "string": "Body and physics: arena, quasi-steady wing model, FlyGym body, physical noise.",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "body/__init__.py",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "Connectome data layer: common schema, dataset adapters, homolog/crosswalk selection, sign rules.",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "connectome/__init__.py",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "Coupling of the neural engine and the body: causal command queue, recording, replay.",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "coupling/__init__.py",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "Motor interfaces: readouts, the hand-made bridge and reflexes (control arms).",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "motor/__init__.py",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "Neural engines behind one protocol (docs/05_ARCHITECTURE_PLAN.md section 3.1).",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "engine/__init__.py",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "Sensory interfaces: FlyVis vision and its boundary layer, stimuli, gaze / odour / surface sensors.",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "sense/__init__.py",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "Task ladder: open-loop stimuli, tasks and criteria.",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "tasks/__init__.py",
+    "verbatim": true
    }
   },
   {

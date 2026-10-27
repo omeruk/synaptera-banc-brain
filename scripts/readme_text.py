@@ -27,6 +27,7 @@ SPLITS = "configs/f5_splits.json"
 TRANSFORMS = "docs/figures/transforms.json"
 WARP = "docs/figures/warp_check.json"
 P19 = "prereg/19_f5_gpu_reproducibility_bridge_units_readout.md"
+P14, P21 = "prereg/14_f5_training.md", "prereg/21_f5_stageA_posthoc_plan.md"
 REPO_URL = "https://github.com/omeruk/synaptera-banc-brain"
 AUTHOR = "Ömer Faruk Topal, Department of Geomatics Engineering, Istanbul Technical University."
 CREDIT = "Designed and directed by Ömer Faruk Topal; implemented with the help of Claude Code (Anthropic)."
@@ -198,6 +199,15 @@ def readme():
     fw, banc = fw_version(), banc_version()
     n_true = seeds_n("true")
     seed0 = P("prereg/14_f5_training.md", "6", r"final validation loss\s+at training seed (\d+) is used")
+    r2_one = P(P14, "8.1", r"\| \*\*R2 \(primary A, B\)\*\* \| (\d) - SSE / SST")
+    sq = P(P14, "6", r"deg\)\^(\d)\.")
+    zero_off = P(P14, "5", r"every bridged DN clamped to (\d+)")
+    zero_dn = P(P14, "2", r"every other BANC DN is clamped at (\d+)")
+    zero_teacher = P(P14, "4", r"dA\* = (\d+) under grey")
+    g_teacher = P(P21, "3.3", r"G = (\d+) is the teacher")
+    crit_pct = P(P21, "4.4", r"two-sided (\d+) % critical value")
+    ci_pct = JX(REPORT, ["primary/effect/level"], lambda v: round(100 * v), "{}", "level x 100")
+    bin_pct = JX(REPORT, ["primary/guards/leakage/interval/level"], lambda v: round(100 * v), "{}", "level x 100")
     cc_nc = T("docs/figures/README.md", "CC BY-NC 4.0", "name")
     cc_by = T("docs/figures/README.md", "CC BY 4.0", "name")
     units = P(P19, "2", r"unchanged: \*\*(\d+) units\*\*")
@@ -241,8 +251,8 @@ def readme():
           f"In plain words: on the sealed test split, the VNC subgraph trained with its real wiring (`true`) reached a "
           f"higher test R2 at the training speeds than the same subgraph with degree-preserving shuffled wiring "
           f"(`shuffled`), in all {JX(REPORT, ['primary/d'], len, '{}', 'len(primary/d)')} training seeds. R2 is "
-          f"1 - SSE / SST of the window-mean turn command dA against the teacher dA*; d is the per-seed difference "
-          f"R2(`true`) - R2(`shuffled`). Mean d was {J(REPORT, 'primary/effect/mean', '{:.4f}')} (95 % bootstrap "
+          f"{r2_one} - SSE / SST of the window-mean turn command dA against the teacher dA*; d is the per-seed difference "
+          f"R2(`true`) - R2(`shuffled`). Mean d was {J(REPORT, 'primary/effect/mean', '{:.4f}')} ({ci_pct} % bootstrap "
           f"interval {J(REPORT, 'primary/effect/lo', '{:.4f}')} to {J(REPORT, 'primary/effect/hi', '{:.4f}')}), "
           f"one-sided exact sign-flip p = {J(REPORT, 'primary/test/p_greater', '{:.4f}')} "
           f"({J(REPORT, 'primary/test/count_greater')}/{J(REPORT, 'primary/test/n_patterns')}), Holm-adjusted p = "
@@ -258,7 +268,7 @@ def readme():
           "trained networks on new trials, so it is not an independent replication of training.", "",
           img("docs/figures/fig1_stageA_result.png",
               "Three scatter panels of test R2: true above shuffled for every training seed; the five trained arms "
-              "with mlp highest; every arm per condition, where true is highest at 30 deg/s."), "",
+              "with mlp highest; every arm per condition, where true is highest at the slowest held-out speed."), "",
           f"**Figure 1 | On the test split, `true` reached a higher R2 than `shuffled` at the training speeds; `mlp` "
           f"was higher still, and at {held30} deg/s `true` was highest.** a, Test R2 at the training speeds "
           f"({sp1} and {sp2} deg/s) of `true` and `shuffled` per training seed; grey lines join the two runs of a seed, "
@@ -318,21 +328,21 @@ def readme():
     L += ["These analyses were planned after the test result (prereg/21, committed before they were computed) and "
           "are exploratory; none of them enters a verdict.", "",
           img("docs/figures/posthoc_stageA_figure.png",
-              "Four panels: gain ratio against drum speed per arm; validation R2 at 30 deg/s, true above shuffled for "
-              "every seed; z-scores of 18 graph measures of the true graph against 10 shuffled graphs; a scatter of "
+              "Four panels: gain ratio against drum speed per arm; validation R2 at the slowest held-out speed, true "
+              "above shuffled for every seed; z-scores of graph measures of the true graph against the shuffled graphs; a scatter of "
               "one graph measure against the per-seed deficit."), "",
           f"**Figure 4 | Post-hoc, exploratory: on the validation data seeds `true` kept its advantage at {held30} "
           f"deg/s, and its graph lay outside the range of the shuffles on {n_out} of {n_meas} structure measures.** "
           f"a, Speed tuning: gain ratio G(v) = mean sign(dA*) dA / (K_P v) of the window-mean output against drum "
           f"speed, per arm; lines, means over the training seeds; small dots, single seeds; `untrained`, one run; "
-          f"dashed line, the teacher (G = 1); the held-out speeds are shaded. b, Validation R2 at {held30} deg/s, "
+          f"dashed line, the teacher (G = {g_teacher}); the held-out speeds are shaded. b, Validation R2 at {held30} deg/s, "
           f"`true` against `shuffled` per training seed (lines pair the seeds), with the primary post-hoc test in the "
           f"panel. c, Structure of the `true` VNC graph against the shuffled graphs: per measure S1-S18 "
           f"([definitions](docs/results/f5_stageA_posthoc.md)), z = (value - shuffled mean) / shuffled SD; grey, the "
           f"shuffled graphs; blue, `true` (filled where it lies outside the shuffled range); symmetric-log axis. d, The "
           f"strongest structure-deficit correlation, selected as the largest |rho| of "
           f"{J(POSTHOC, 'B/correlations/n')} uncorrected Spearman correlations, none of which reached |rho| >= "
-          f"{J(POSTHOC, 'B/correlations/rho_crit')} (the two-sided 5 % level at n = {n_true}): "
+          f"{J(POSTHOC, 'B/correlations/rho_crit')} (the two-sided {crit_pct} % level at n = {n_true}): "
           f"{J(POSTHOC, 'B/correlations/strongest/measure')} "
           f"({J(POSTHOC, 'B/measures/' + s['measure'] + '/description')}) of each training seed's shuffled graph "
           f"against {J(POSTHOC, 'B/correlations/strongest/deficit')}, the "
@@ -379,18 +389,18 @@ def readme():
           f"intervals, latency {C('train/f5_stageA.py', 'LATENCIES', fn=lambda l: l['bridge_latency_intervals'], formula='LATENCIES[bridge_latency_intervals]')} "
           f"interval) that clamp the BANC DNs of the same types (BANC DN state = unit rate / "
           f"{C('engine/rate_torch.py', 'R_IN', '{:g}')} Hz). DNg02 is clamped at a fixed baseline; every other BANC DN "
-          f"is 0.",
+          f"is {zero_dn}.",
           f"- **VNC subgraph.** A rate model of the BANC VNC subgraph "
           f"({n_neu} neurons, {n_edge} edges), one update per interval. Trained: a gain per edge and a leak rate per neuron; the topology "
           f"and the synapse signs are fixed (prereg/14 section 2).",
           f"- **Readout (fixed).** dA = {C('train/f5_stageA.py', 'G1', '{:g}')} deg/Hz x "
           f"{C('engine/rate_torch.py', 'R_IN', '{:g}')} Hz x sum over types of sigma (s_left - s_right), one MN per "
           f"type and side, over the wing steering MN types {plus} (sigma +) and {minus} "
-          f"(sigma -) (`LATERAL` in `scripts/f5_train.py`; types of Lindsay et al. 2017).",
-          f"- **Teacher and loss.** dA* = K_P v during the stimulus (v = +speed for rot_right, -speed for rot_left; 0 "
+          f"(sigma -) (`LATERAL` in `scripts/f5_train.py`; the types of Lindsay et al., see the references).",
+          f"- **Teacher and loss.** dA* = K_P v during the stimulus (v = +speed for rot_right, -speed for rot_left; {zero_teacher} "
           f"under static, grey and the lead-in), clipped at ±{C('train/f5_stageA.py', 'A_MAX', '{:g}')} deg, K_P = "
           f"{C('train/f5_stageA.py', 'A_MAX', '{:g}')} / {C('train/f5_stageA.py', 'V_MAX', '{:g}')} deg per deg/s. "
-          f"Loss: the mean over every interval of ((dA - dA*) / {C('train/f5_stageA.py', 'A_MAX', '{:g}')} deg)^2. "
+          f"Loss: the mean over every interval of ((dA - dA*) / {C('train/f5_stageA.py', 'A_MAX', '{:g}')} deg)^{sq}. "
           f"Metrics use the window mean over intervals {C('train/f5_stageA.py', 'WINDOW', fn=lambda w: w[0], formula='WINDOW[0]')}-"
           f"{C('train/f5_stageA.py', 'WINDOW', fn=lambda w: w[1] - 1, formula='WINDOW[1] - 1')} (the stimulus after its "
           f"first {C('train/f5_stageA.py', 'WINDOW', fn=lambda w: int((w[0] - _const('train/f5_stageA.py', 'N_GREY')) * _const('train/f5_stageA.py', 'INTERVAL_MS')), formula='(WINDOW[0] - N_GREY) x INTERVAL_MS')} ms).",
@@ -406,7 +416,7 @@ def readme():
           "- `derange`: `true`, with the bridge feeding DN families into the wrong BANC targets.",
           "- `mlp`: an unconstrained two-layer ReLU network from the filtered bridge input to the readout MN states.",
           "- `linear`: one linear map from the same filtered input to the readout MN states.",
-          "- `bridge_off`: `true` with every bridged DN clamped to 0: the ablation and leakage check.",
+          f"- `bridge_off`: `true` with every bridged DN clamped to {zero_off}: the ablation and leakage check.",
           "- `untrained`: `true` at initialisation, evaluated without training.", "",
           "<details><summary>Full arm definitions (prereg/14 section 5, prereg/19 sections 2-3)</summary>", "",
           f"- `true`: the graphs of prereg/14 section 2.",
@@ -421,7 +431,7 @@ def readme():
           f"units of the `true` bridge, each through exponential filters of "
           f"{', '.join(C('train/f5_stageA.py', 'FILTER_MS', '{:g}', fn=lambda f, i=i: f[i], formula=f'FILTER_MS[{i}]') for i in range(4))} ms.",
           "- `linear`: one linear map from the same filtered input to the readout MN states, then the fixed readout.",
-          "- `bridge_off`: `true` with every bridged DN clamped to 0 (DNg02 kept).",
+          f"- `bridge_off`: `true` with every bridged DN clamped to {zero_off} (DNg02 kept).",
           "- `untrained`: `true` at initialisation, one deterministic evaluation on the test set.", "",
           f"Training seeds: {n_true} per trained arm, {seeds_n('bridge_off')} for `bridge_off`.", "", "</details>", ""]
 
@@ -444,7 +454,7 @@ def readme():
           f"{J(REPORT, 'primary/test/n_patterns')} sign patterns, Holm-adjusted over stages A, B and C.",
           f"- **Guards.** Ceiling: the verdict is qualified if both `true` and `shuffled` have mean test R2 >= "
           f"{J(REPORT, 'primary/guards/ceiling/threshold')} (not triggered). Leakage: the verdict is withheld if "
-          f"`bridge_off` has a mean test turn-sign accuracy outside the binomial 95 % interval around chance "
+          f"`bridge_off` has a mean test turn-sign accuracy outside the binomial {bin_pct} % interval around chance "
           f"({J(REPORT, 'primary/guards/leakage/interval/lo')}-{J(REPORT, 'primary/guards/leakage/interval/hi')} for "
           f"{J(REPORT, 'primary/guards/leakage/interval/n')} rotation trials); it was "
           f"{J(REPORT, 'primary/guards/leakage/mean_sign_accuracy')} (not triggered).",
@@ -536,7 +546,7 @@ def readme():
     layout = [("body/", "body/__init__.py"), ("connectome/", "connectome/__init__.py"),
               ("coupling/", "coupling/__init__.py"), ("engine/", "engine/__init__.py"), ("motor/", "motor/__init__.py"),
               ("sense/", "sense/__init__.py"), ("tasks/", "tasks/__init__.py")]
-    rows = {d: ast.get_docstring(ast.parse((ROOT / f).read_text())).split("\n")[0] for d, f in layout}
+    rows = {d: T(f, ast.get_docstring(ast.parse((ROOT / f).read_text())).split("\n")[0], "text") for d, f in layout}
     L += ["<details><summary>Top-level folders</summary>", "",
           f"- `body/`: {rows['body/']}",
           "- `configs/`: configuration files, the data sources (`data_sources.yaml`), the parameter registry "
@@ -626,12 +636,14 @@ def gallery():
     stim_seed = P(pv, "docstring", r"training data seed (\d+) \(phase")
     stim_phase = P(pv, "docstring", r"\(phase (\d+); never")
     st = [C("scripts/viz_video.py", "STILLS", fn=lambda v, i=i: v[i][1], formula=f"STILLS[{i}][1]") for i in range(3)]
+    act = [C("scripts/viz_video.py", "STILLS", fn=lambda v, i=i: v[i][0], formula=f"STILLS[{i}][0]") for i in range(3)]
+    ci_pct = JX(REPORT, ["primary/effect/level"], lambda v: round(100 * v), "{}", "level x 100")
     cap = {
         "test_a_true_vs_shuffled_paired_r2.png": (
             f"On the test split, `true` had a higher R2 than `shuffled` at the training speeds in every training seed.",
             f"Test R2 at the training speeds ({sp1} and {sp2} deg/s) per training seed, `shuffled` (orange) and `true` "
             f"(blue); grey lines join the two runs of a seed. The title gives the pre-registered verdict, the "
-            f"one-sided exact p, the Holm-adjusted p and mean d with its 95 % bootstrap interval. Test split, "
+            f"one-sided exact p, the Holm-adjusted p and mean d with its {ci_pct} % bootstrap interval. Test split, "
             f"{J(REPORT, 'summary/true/r2/n')} training seeds per arm."),
         "test_b_test_r2_per_arm.png": (
             "Test R2 at the training speeds for every arm.",
@@ -681,18 +693,18 @@ def gallery():
             f"FlyVis T4/T5 boundary rates during rightward rotation at {sp1} deg/s.",
             f"As Figure S9. Training data seed {stim_seed}."),
         "video_still_act1_+0300ms.png": (
-            f"Act 1 of the circuit video at +{st[0]} ms: change from the pre-stimulus baseline during rightward "
+            f"Act {act[0]} of the circuit video at +{st[0]} ms: change from the pre-stimulus baseline during rightward "
             f"rotation.",
             f"Each drawn neuron is coloured by its change from its own baseline (colour bars: FlyWire DNs in Hz, BANC "
             f"neurons in model units); the inset trace is the turn command dA; dashed, the teacher dA*. "
             f"{C('scripts/viz_video.py', 'SPEED')} deg/s, mean over the validation data seeds {v_lo}-{v_hi}."),
         "video_still_act2_+0300ms.png": (
-            f"Act 2 of the circuit video at +{st[1]} ms: direction preference, rightward minus leftward rotation.",
+            f"Act {act[1]} of the circuit video at +{st[1]} ms: direction preference, rightward minus leftward rotation.",
             f"Orange prefers rightward, blue leftward (colour bars as in Figure S12); the inset shows dA for both "
             f"directions. {C('scripts/viz_video.py', 'SPEED')} deg/s, mean over the validation data seeds "
             f"{v_lo}-{v_hi}."),
         "video_still_act2_+0800ms.png": (
-            f"Act 2 of the circuit video at +{st[2]} ms.",
+            f"Act {act[2]} of the circuit video at +{st[2]} ms.",
             "As Figure S13, later in the trial."),
         "alignment_positions_affine_by_source.png": (
             "FlyWire brain-model neurons mapped into BANC space by our affine transform (a visualisation scaffold).",
