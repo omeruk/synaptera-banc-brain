@@ -1,11 +1,11 @@
-"""Figures 0 and 1 of the README: the pipeline schematic and the pre-registered stage-A result on the test split (no
-post-hoc data; that is Figure 4).
+"""Figures 0, 1 and 5 of the README: the pipeline schematic, the pre-registered stage-A result on the test split (no
+post-hoc data; that is Figure 4) and the training on the validation split.
 
     env -u PYTHONPATH python scripts/readme_figures.py [--out DIR] [--overwrite]
 
-Writes fig0_pipeline.png and fig1_stageA_result.png (each 180 mm wide, exactly 2000 px, at most 1.5 MB) to --out
-(default docs/figures/). Without --overwrite nothing is written if either file exists (rule 13); --out inside the local
-preview folder is refused.
+Writes fig0_pipeline.png, fig1_stageA_result.png and fig5_training.png (each 180 mm wide, exactly 2000 px, at most
+1.5 MB) to --out (default docs/figures/). Without --overwrite nothing is written if any of them exists (rule 13); --out
+inside the local preview folder is refused.
 
 Figure 0 (no data): six boxes in two rows, stimulus -> FlyGym eyes and FlyVis -> FlyWire brain model -> DN bridge ->
 BANC VNC subgraph -> fixed readout, coloured by dataset (FlyWire, fly 1; BANC, fly 2); 9 pt text, no numbers.
@@ -16,6 +16,12 @@ Figure 1 reads only docs/results/f5_stageA_report.json and computes nothing new:
 - b: test R2 at the training speeds of the five trained comparison arms, one dot per seed, means as short bars
   (bridge_off and untrained lie far below this axis and are shown in c);
 - c: test R2 per condition (training speeds, 90 deg/s held out, 30 deg/s held out) for every arm in the JSON.
+
+Figure 5 reads only docs/results/f5_stageA_curves.json and the lr_grid of docs/results/f5_stageA_validation.json
+(validation split; every value a stored evaluation, every line or band a mean / SD of stored values):
+- a: the learning-rate grid at training seed 0, final validation loss per arm and rate, the selected rate marked;
+- b, c: validation loss and R2 over training trials presented at the selected rate, mean +- 1 SD over training seeds;
+- d: training trials until the validation turn-sign accuracy first reached the set accuracy, per training seed.
 """
 import argparse
 import io
@@ -31,9 +37,17 @@ import numpy as np  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 REPORT = ROOT / "docs" / "results" / "f5_stageA_report.json"
+CURVES = ROOT / "docs" / "results" / "f5_stageA_curves.json"
+VALIDATION = ROOT / "docs" / "results" / "f5_stageA_validation.json"
 OUT = ROOT / "docs" / "figures"
 NAME = "fig1_stageA_result.png"
 NAME0 = "fig0_pipeline.png"
+NAME5 = "fig5_training.png"
+FIG5_HEIGHT_MM = 118
+FIG5_ARMS = ("true", "shuffled", "derange", "mlp", "linear", "bridge_off")      # the trained arms, legend order
+FIG5_D_MAX = 4000                                     # panel d axis end (training trials); later or never: right edge
+FIG5_R2_LIM = (-0.3, 1.02)                            # panel c axis (the linear mean leaves it at some evaluations)
+FIG5_LOSS_LIM = (0.02, 2.0)                           # panel b axis (log); a band below it is cut at the axis
 PREVIEW = Path("/mnt/c/Users/omerf/Desktop/synaptera_preview")      # local preview folder: never written
 WIDTH_MM, HEIGHT_MM, WIDTH_PX, MAX_BYTES = 180, 60, 2000, 1_500_000
 MM = 1 / 25.4
@@ -209,6 +223,84 @@ def draw_fig0():
     return fig
 
 
+def draw_fig5(cur, val):
+    regs = [r for r in cur["runs"] if r["selected_rate"] and not r["replicate"]]
+    fig = plt.figure(figsize=(WIDTH_MM * MM, FIG5_HEIGHT_MM * MM))
+    gs = fig.add_gridspec(2, 2, left=0.075, right=0.985, bottom=0.075, top=0.955, wspace=0.26, hspace=0.42)
+    axa, axb, axc, axd = (fig.add_subplot(gs[i, j]) for i in (0, 1) for j in (0, 1))
+
+    # a: the learning-rate grid at training seed 0
+    for arm in FIG5_ARMS:
+        col, mk = STYLE[arm]
+        g = val["lr_grid"][arm]
+        lrs, loss = [x["lr"] for x in g], [x["final_val_loss"] for x in g]
+        axa.plot(lrs, loss, color=col, lw=0.8, marker=mk, ms=3, zorder=2, label=arm)
+        k = lrs.index(cur["selected_lr"][arm])
+        axa.scatter([lrs[k]], [loss[k]], s=48, facecolor="none", edgecolor=col, lw=0.9, zorder=3)
+    axa.set_xscale("log")
+    axa.set_yscale("log")
+    axa.set_xticks(cur["lr_grid"], [f"{x:g}" for x in cur["lr_grid"]])
+    axa.minorticks_off()
+    axa.set_xlabel("learning rate")
+    axa.set_ylabel("final validation loss")
+
+    # b, c: mean +- 1 SD over training seeds at the selected rate
+    for ax, metric in ((axb, "loss"), (axc, "r2")):
+        for arm in FIG5_ARMS:
+            col, _ = STYLE[arm]
+            rs = [r for r in regs if r["arm"] == arm]
+            x = np.array(rs[0]["evaluations"]["trials"])
+            if any(r["evaluations"]["trials"] != list(x) for r in rs):
+                raise SystemExit(f"{arm}: the runs have different evaluation steps")
+            y = np.array([r["evaluations"][metric] for r in rs])
+            m, sd = y.mean(0), y.std(0, ddof=1)
+            lo = np.maximum(m - sd, FIG5_LOSS_LIM[0]) if metric == "loss" else m - sd    # log axis: cut at the axis
+            ax.fill_between(x, lo, m + sd, color=col, alpha=0.18, lw=0, zorder=1)
+            ax.plot(x, m, color=col, lw=0.9, zorder=2)
+        ax.set_xlim(0, cur["steps"] * cur["batch"])
+        ax.set_xlabel("training trials presented")
+    un = next(r for r in cur["runs"] if r["arm"] == "untrained")
+    axc.axhline(un["evaluations"]["r2"][0], color=STYLE["untrained"][0], lw=0.9, ls=(0, (1, 1.5)), zorder=1,
+                label="untrained")
+    axb.set_yscale("log")
+    axb.set_ylim(*FIG5_LOSS_LIM)
+    axb.set_ylabel("validation loss")
+    axc.set_ylim(*FIG5_R2_LIM)
+    axc.set_ylabel("validation R2")
+
+    # d: training trials until the turn-sign accuracy first reached the set accuracy
+    rng = np.random.default_rng(0)                    # vertical jitter only
+    step_trials = cur["eval_every"] * cur["batch"]
+    for i, arm in enumerate(FIG5_ARMS):
+        col, mk = STYLE[arm]
+        for r in [r for r in regs if r["arm"] == arm]:
+            e = r["evaluations"]
+            hit = next((t for s, t, acc in zip(e["step"], e["trials"], e["sign_accuracy"])
+                        if s > 0 and acc >= cur["set_accuracy"]), None)
+            y = i + rng.uniform(-0.22, 0.22)
+            if hit is not None and hit <= FIG5_D_MAX:
+                axd.scatter([hit], [y], s=12, color=col, marker=mk, lw=0, zorder=2)
+            else:                                     # later than the axis, or never within the budget
+                axd.scatter([FIG5_D_MAX], [y], s=14, facecolor="none", edgecolor=col, marker=mk, lw=0.7, zorder=2,
+                            clip_on=False)
+    axd.set_xlim(0, FIG5_D_MAX)
+    axd.set_xticks(np.arange(0, FIG5_D_MAX + 1, step_trials))
+    axd.set_yticks(range(len(FIG5_ARMS)), FIG5_ARMS)
+    axd.set_ylim(len(FIG5_ARMS) - 0.5, -0.5)
+    axd.tick_params(axis="y", length=0)
+    axd.set_xlabel("training trials until turn-sign accuracy first reached the set level")
+
+    handles, labels = axa.get_legend_handles_labels()
+    h2, l2 = axc.get_legend_handles_labels()
+    axa.legend(handles + h2, labels + l2, frameon=False, ncol=2, loc="upper left", handlelength=1.6,
+               columnspacing=0.8, borderaxespad=0.2)
+    for ax, lab in zip((axa, axb, axc, axd), "abcd"):
+        pos = ax.get_position()
+        fig.text(pos.x0 - 0.06, pos.y1 + 0.012, lab, ha="left", va="bottom", fontsize=FONT_PT + 1,
+                 fontweight="bold")
+    return fig
+
+
 def render_png(fig) -> bytes:
     """PNG bytes exactly WIDTH_PX wide (no bbox_inches="tight"); the dpi is raised slightly if rounding loses a pixel."""
     from PIL import Image
@@ -239,22 +331,23 @@ def main(argv=None):
     out = Path(a.out)
     if inside(out, PREVIEW):
         raise SystemExit(f"{out}: inside the local preview folder, which is never written")
-    paths = (out / NAME0, out / NAME)
+    paths = (out / NAME0, out / NAME, out / NAME5)
     exist = [str(p) for p in paths if p.exists()]
     if exist and not a.overwrite:
         raise SystemExit(f"{', '.join(exist)} exists; pass --overwrite to replace it (nothing written)")
     fam = font_setup()
     pngs = []
-    for draw_fn in (lambda: draw(json.loads(REPORT.read_text())), draw_fig0):     # Figure 1 first, as before
+    for draw_fn in (lambda: draw(json.loads(REPORT.read_text())), draw_fig0,      # Figure 1 first, as before
+                    lambda: draw_fig5(json.loads(CURVES.read_text()), json.loads(VALIDATION.read_text()))):
         fig = draw_fn()
         pngs.append(render_png(fig))
         plt.close(fig)
-    png1, png0 = pngs
-    for path, png in zip(paths, (png0, png1)):
+    png1, png0, png5 = pngs
+    for path, png in zip(paths, (png0, png1, png5)):
         if len(png) > MAX_BYTES:
             raise SystemExit(f"{path.name}: {len(png):,} bytes, over {MAX_BYTES:,} (nothing written)")
     out.mkdir(parents=True, exist_ok=True)
-    for path, png in zip(paths, (png0, png1)):
+    for path, png in zip(paths, (png0, png1, png5)):
         path.write_bytes(png)
         print(f"{path}: {WIDTH_PX} px wide, {len(png):,} bytes, font {fam}")
     return 0
