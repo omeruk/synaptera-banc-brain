@@ -1,6 +1,6 @@
 # Figures
 
-Copies of finished figures for the repository README and gallery. The originals are in the machine-2 preview folder (`C:\Users\omerf\Desktop\synaptera_preview\`, never committed). They were copied out of it and re-saved here; the preview folder itself was not changed. Every figure is a demonstration or a summary of committed results; the numbers behind them are in `docs/results/`.
+Copies of finished figures for the repository README and gallery. The originals are in a local preview folder (not committed); the source paths below are relative to it. They were copied out of it and re-saved here; the preview folder itself was not changed. Every figure is a demonstration or a summary of committed results; the numbers behind them are in `docs/results/`.
 
 ## Main figures
 
@@ -9,11 +9,11 @@ Copies of finished figures for the repository README and gallery. The originals 
 | `stageA_circuit_anatomy.png` | The stage-A circuit in BANC space: frontal, dorsal, lateral and posterior views of the FlyWire DNs, the BANC DNs they drive, 150 VNC interneurons and the 16 steering motor neurons. | `figure/stageA_circuit_anatomy.png` | `scripts/viz_anatomy.py (step figure)` | 4251 x 2157 -> 2000 x 1015 | RGBA (fully opaque) -> RGB, LANCZOS resize to 2000 px wide, PNG optimize; 979,764 bytes | `27c8025e5d6db531d4c9d4ac62191cbaece465ec2bc14ed9e156457c63f1c107` | `3c70b1a1406d997004acf3285b7b8c1711e47e07a24e2b35dbcd2ca3196d9e78` | A |
 | `stageA_circuit_activity.png` | Direction preference (rightward minus leftward rotation) of every drawn neuron on the anatomy; steering motor-neuron states; the turn command dA against the teacher (validation trials). | `figure/stageA_circuit_activity.png` | `scripts/viz_activity_figure.py (step figure)` | 4251 x 2156 -> 2000 x 1014 | RGBA (fully opaque) -> RGB, LANCZOS resize to 2000 px wide, PNG optimize; 883,280 bytes | `71cd17c85489f7e722ca05c6d0de99204ccf211aa30ed205468a527aca7be24f` | `7998621f7badbce2377e975ca08ba5c0d71fc228c602ee402beae4c9b90a8231` | A |
 | `posthoc_stageA_figure.png` | Post-hoc, exploratory: speed tuning, the 30 deg/s replication per seed, graph structure of true against the shuffles, and the strongest structure-deficit correlation (largest of 54, uncorrected). | `posthoc/posthoc_stageA_figure.png` | `scripts/f5_stageA_posthoc.py (figure)` | 2125 x 1771 -> 2000 x 1667 | RGBA (fully opaque) -> RGB, LANCZOS resize to 2000 px wide, PNG optimize; 467,654 bytes | `c84ea3bfb100a9b2dcfc90b998fbebec6cc01934d3d4efed14138f5aed96a8ba` | `5a281bf33bb39bbe433ef7ec1b807bbd17799fd8d8064a03e84ad5ecacb1219a` | B |
-| `stageA_circuit_video.gif` | Act 1 ("activity") of the stage-A circuit video: each neuron's change from its pre-stimulus baseline, rightward rotation at 120 deg/s, validation seeds 160-199, -200 to 1000 ms around onset (slowed 10x). | `video/stageA_circuit_video.mp4` | `scripts/viz_video.py` (step video) | 1920 x 1080 -> 960 x 540 | source frames 60-420 only (act 1; no title card, cross-fade or end card), 12 fps, LANCZOS, ffmpeg palettegen/paletteuse (defaults), loop forever; 144 frames, 12.0 s; 2,694,531 bytes | `eb88631ec6c8cdb6ebb41698832735c2b828803c41710322c7439cb2cd5ce5f8` | `e61e4477c529e17d2bfd4e32ae6551b06e0ef4907d273b3e972dedd4c859c917` | A |
+| `stageA_circuit_direction.gif` | Act 2 ("direction") of the stage-A circuit video: per neuron and interval, the trial-mean rightward minus leftward rotation at 120 deg/s (validation seeds 160-199), -200 to 1000 ms around onset (slowed 10x). | `video/stageA_circuit_video.mp4` | `scripts/viz_video.py` (step video) | 1920 x 1080 -> 1120 x 630 | source frames 436-796 only (act 2; no title card, act 1, cross-fade or end card), 12 fps, LANCZOS, ffmpeg palettegen/paletteuse (defaults), loop forever; 144 frames, 12.0 s; 6,680,003 bytes | `eb88631ec6c8cdb6ebb41698832735c2b828803c41710322c7439cb2cd5ce5f8` | `ea8714ab6b618a6e45d49814b16fd8f2e02f38c5e88a8528935294eba7febb18` | A |
 
 ## Supplementary figures (`supplementary/`)
 
-Named `<group>_<original name>`, group `test`, `validation`, `stimulus` or `video`.
+Named `<group>_<original name>`, group `test`, `validation`, `stimulus`, `video` or `alignment`.
 
 | file | shows | source (preview folder) | script | pixels (original -> copy) | settings | SHA-256 original | SHA-256 copy | credits |
 |---|---|---|---|---|---|---|---|---|
@@ -31,6 +31,7 @@ Named `<group>_<original name>`, group `test`, `validation`, `stimulus` or `vide
 | `supplementary/video_still_act1_+0300ms.png` | Video still, act 1 (activity, change from baseline), rightward rotation at 120 deg/s, +300 ms. | `video/still_act1_+0300ms.png` | `scripts/viz_video.py (step stills)` | 1920 x 1080 -> 1920 x 1080 | RGB, no resize, PNG optimize; 574,809 bytes | `70ba65740aac9d086a9754a124caa37ed0a0fa7a2d2f8221c78e58044a28f77f` | `3e6bd25dc1580800a23c3a96ee820d3e11a3922c7ccf6c055d614a164814d8fa` | A |
 | `supplementary/video_still_act2_+0300ms.png` | Video still, act 2 (direction preference, rightward minus leftward), +300 ms. | `video/still_act2_+0300ms.png` | `scripts/viz_video.py (step stills)` | 1920 x 1080 -> 1920 x 1080 | RGB, no resize, PNG optimize; 604,885 bytes | `4534b749b356a1a9308d74db8bdbd8aab09335ff07339941728481283fa1dc39` | `ee91454f33c56eb0eea675aa177434f6f30306dc9b5ebd9f35dc3b40063a2b35` | A |
 | `supplementary/video_still_act2_+0800ms.png` | Video still, act 2 (direction preference), +800 ms. | `video/still_act2_+0800ms.png` | `scripts/viz_video.py (step stills)` | 1920 x 1080 -> 1920 x 1080 | RGB, no resize, PNG optimize; 613,087 bytes | `fd4ebadecbaf32d2fd528129442101a1bdc41a73fc752027a1376bd06807fb78` | `df6e678cb173a47c0aa075f2c0bdea00cc3f3a0fadf1b06b1b3f84a25a590c22` | A |
+| `supplementary/alignment_positions_affine_by_source.png` | Neuron positions of the FlyWire brain model mapped into BANC space by our 12-parameter affine (front, side and top projections), coloured by position source (soma, synapse centroid, fallback centroid), with the BANC VNC subgraph in light grey and the DN landmarks (BANC mean soma; transformed FlyWire mean soma). A visualisation scaffold: the RMSE in its title is the landmark fit of `runs/viz/transforms.json`, not the comparison with the BANC team's warp in `warp_check.json`. | `viz/positions_affine_by_source.png` | `scripts/viz_preview.py --by-source` | 2340 x 975 -> 2000 x 833 | RGBA (fully opaque) -> RGB, LANCZOS resize to 2000 px wide, PNG optimize; 550,973 bytes | `e6347df9188c444ad69e0966d3eacc2d841c810e2f24935a8e8bf5a6b0ec5c9f` | `0157a69f16a31a4be6c81b95df6c98f72987d4d3f5832547e849afaf87f4ac6c` | B |
 
 ## Data file
 
@@ -38,7 +39,7 @@ Named `<group>_<original name>`, group `test`, `validation`, `stimulus` or `vide
 
 ## Licence
 
-Every figure in this folder is released under **CC BY-NC 4.0**. Figures with FlyWire-derived content must be, because FlyWire data are CC BY-NC 4.0. BANC data are CC BY 4.0 and need their attribution, given below.
+Every figure in this folder is released under CC BY-NC 4.0. Figures with FlyWire-derived content have to carry this licence, because FlyWire data are CC BY-NC 4.0. BANC data are CC BY 4.0 and need their attribution, given below.
 
 ## Credits
 
@@ -46,15 +47,15 @@ Every figure in this folder is released under **CC BY-NC 4.0**. Figures with Fly
 
 > Data: FlyWire v783 connectome of the female adult fly brain (Dorkenwald et al. 2024; Schlegel et al. 2024; EM: Zheng et al. 2018), CC BY-NC 4.0. BANC brain-and-nerve-cord connectome, materialisation v888 (Bates, Phelps, Kim, Yang et al. 2026, Nature 656:957-970), CC BY 4.0, Harvard Dataverse doi:10.7910/DVN/7WTH1N; skeletons, warped FlyWire skeletons and region outlines from gs://lee-lab_brain-and-nerve-cord-fly-connectome (compiled_data/, region_outlines/). This figure combines both sources and carries the more restrictive licence, CC BY-NC 4.0.
 
-**B.** Result figures (test, validation, post-hoc): the stage-A nerve-cord model is driven by recorded activity of the FlyWire brain model (the unmodified Shiu et al. 2023 LIF network, per the activity-figure methods text) and built on the BANC VNC graph. Data credits verbatim from `END_CREDITS` in `scripts/viz_video.py`:
+**B.** Result figures (test, validation, post-hoc) and the alignment figure: the stage-A nerve-cord model is driven by recorded activity of the FlyWire brain model of Shiu et al. 2024 (Shiu, P. K. et al. (2024). *Nature* 634, 210–219. doi:10.1038/s41586-024-07763-9) and built on the BANC VNC graph. Data credits verbatim from `END_CREDITS` in `scripts/viz_video.py`:
 
 > FlyWire v783: Dorkenwald et al. 2024; Schlegel et al. 2024; EM: Zheng et al. 2018. CC BY-NC 4.0.  
 > BANC v888: Bates, Phelps, Kim, Yang et al. 2026, Nature 656:957-970. CC BY 4.0. doi:10.7910/DVN/7WTH1N.  
 
 **C.** Stimulus figures: FlyGym eyes and FlyVis visual network. Citation and licence verbatim from the table in `docs/provenance/synaptera_v1_NOTICE.md`:
 
-> FlyGym / NeuroMechFly v2: Wang-Chen, S. et al. (2024). *Nature Methods*. doi:10.1038/s41592-024-02497-y Licence: **Apache-2.0** (flygym 1.2.1 metadata).  
-> FlyVis: Lappalainen, J. K. et al. (2024). *Nature* 634, 1132–1140. doi:10.1038/s41586-024-07939-3 Licence: **MIT** (flyvis 1.2.0 metadata).
+> FlyGym / NeuroMechFly v2: Wang-Chen, S. et al. (2024). *Nature Methods*. doi:10.1038/s41592-024-02497-y. Licence: **Apache-2.0** (flygym 1.2.1 metadata).  
+> FlyVis: Lappalainen, J. K. et al. (2024). *Nature* 634, 1132–1140. doi:10.1038/s41586-024-07939-3. Licence: **MIT** (flyvis 1.2.0 metadata).
 
 **D.** The T4/T5 boundary rates are the FlyVis input to the FlyWire brain model, so these figures also carry the FlyWire credit:
 
