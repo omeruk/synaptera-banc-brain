@@ -9,7 +9,7 @@ flight). Goal: hand the hand-made DN → wing bridge, the reflexes and the trigg
 connectome, and show this with measurable, pre-registered, controlled experiments.
 - Architecture and roadmap: `docs/05_ARCHITECTURE_PLAN.md` (phases F1–F6, gates, risk register).
 - Review of the previous study: `docs/01_CODE_REVIEW.md` … `docs/04_RESEARCH_NOTES.md`.
-- Origin of the carried code: `docs/06_NEW_PROJECT_SETUP.md` and `vendor/synaptera_v1/MANIFEST.md`.
+- Origin of the carried code: `docs/06_NEW_PROJECT_SETUP.md` and `docs/provenance/synaptera_v1_MANIFEST.md`.
 - Synaptera v1.0.0 (github.com/omeruk/synaptera) is a **frozen archive**; no code is written there.
 
 ## Environment and commands

@@ -1,0 +1,131 @@
+{
+ "note": "visualisation scaffold (origin class E); FlyWire nm -> BANC nm",
+ "landmarks": {
+  "n": 221,
+  "n_types": 111,
+  "n_control": 177,
+  "n_check": 44,
+  "n_check_types": 22,
+  "dropped": [],
+  "holdout_frac": 0.2,
+  "split_seed": 0
+ },
+ "side_check_dns": 1291,
+ "sigma_k": 3.0,
+ "side_k": 15,
+ "transforms": {
+  "affine": {
+   "name": "affine",
+   "n_params": 12,
+   "matrix": [
+    [
+     -1.1925823244963218,
+     -0.04327223671018521,
+     0.013127472494565758
+    ],
+    [
+     0.06622791315556553,
+     0.3589887709189281,
+     0.8244353566217407
+    ],
+    [
+     0.0399561295489845,
+     -0.7379219912847058,
+     0.24557127152937175
+    ]
+   ],
+   "translation": [
+    1123461.53062953,
+    -66694.43151178845,
+    255694.42570439965
+   ],
+   "determinant": -0.832216491542453,
+   "reflection": true,
+   "scale": 0.9406154455895228,
+   "n_control": 177,
+   "n_check": 44,
+   "outliers_removed": 2,
+   "outliers": [
+    {
+     "cell_type": "DNge024",
+     "side": "left"
+    },
+    {
+     "cell_type": "DNg111",
+     "side": "left"
+    }
+   ],
+   "rmse_control_um": 28.244679859337758,
+   "rmse_control_all_um": 30.11062328390392,
+   "rmse_check_um": 42.309518105518066,
+   "side_check": {
+    "left": {
+     "n": 645,
+     "fraction_same_side": 0.9612403100775194
+    },
+    "right": {
+     "n": 646,
+     "fraction_same_side": 0.9736842105263158
+    }
+   }
+  },
+  "similarity": {
+   "name": "similarity",
+   "n_params": 7,
+   "matrix": [
+    [
+     -0.9699181765548092,
+     -0.027587290353337797,
+     0.06938967694321585
+    ],
+    [
+     0.053981810824067854,
+     0.36554311598312833,
+     0.899878574877871
+    ],
+    [
+     0.051594088377233414,
+     -0.9010740407064421,
+     0.36293371058116974
+    ]
+   ],
+   "translation": [
+    994441.6052813441,
+    -73753.5340963261,
+    273700.86074000516
+   ],
+   "determinant": -0.9205664406139995,
+   "reflection": true,
+   "scale": 0.9727883917207939,
+   "n_control": 177,
+   "n_check": 44,
+   "outliers_removed": 0,
+   "outliers": [],
+   "rmse_control_um": 38.975056129337595,
+   "rmse_control_all_um": 38.975056129337595,
+   "rmse_check_um": 48.89762722321856,
+   "side_check": {
+    "left": {
+     "n": 645,
+     "fraction_same_side": 0.9906976744186047
+    },
+    "right": {
+     "n": 646,
+     "fraction_same_side": 0.9752321981424149
+    }
+   }
+  }
+ },
+ "brain": {
+  "n": 138639,
+  "soma": 118078,
+  "centroid_synapses": 16492,
+  "centroid_fallback": 4069
+ },
+ "vnc": {
+  "n": 25818,
+  "root_position": 24950,
+  "filled": 865,
+  "dropped": 3
+ }
+}

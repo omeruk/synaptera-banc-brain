@@ -1,0 +1,131 @@
+{
+ "note": "visualisation (origin class E); our affine FlyWire -> BANC soma vs the root node of the BANC team's warped skeleton (FAFB14 -> JRC2018F -> mirror -> BANC, elastix + thin-plate spline)",
+ "bridged_dns": 321,
+ "with_flywire_soma": 321,
+ "with_both_skeletons": 321,
+ "native_unit": "nm",
+ "native_unit_votes": {
+  "nm": 320,
+  "voxel": 0
+ },
+ "root_tol_um": 5.0,
+ "root_soma_um_median": 0.4064023528535465,
+ "native_multiple_roots": 0,
+ "root_within_tol": 320,
+ "used": 264,
+ "error": {
+  "n": 264,
+  "median_um": 14.53261198146467,
+  "rmse_um": 15.50971480326021,
+  "p95_um": 21.857718553968784,
+  "max_um": 29.409732357202476
+ },
+ "error_by_landmark_set": {
+  "control": {
+   "n": 198,
+   "median_um": 13.46130985081083,
+   "rmse_um": 14.991663713792452,
+   "p95_um": 21.56841557971666,
+   "max_um": 29.409732357202476
+  },
+  "control_outlier": {
+   "n": 4,
+   "median_um": 10.52145365202862,
+   "rmse_um": 10.698848075003665,
+   "p95_um": 11.16285725916437,
+   "max_um": 11.27195644963033
+  },
+  "check": {
+   "n": 51,
+   "median_um": 17.565197100682852,
+   "rmse_um": 17.66762760287753,
+   "p95_um": 24.35124031647409,
+   "max_um": 26.368375532111187
+  },
+  "none": {
+   "n": 11,
+   "median_um": 15.358094246530007,
+   "rmse_um": 15.456022434643975,
+   "p95_um": 19.40297490821444,
+   "max_um": 19.53247265118837
+  }
+ },
+ "mean_signed_diff_um": {
+  "x": 1.51,
+  "y": -0.78,
+  "z": 0.33
+ },
+ "landmark_centroid_banc_um": [
+  484.8,
+  183.5,
+  125.6
+ ],
+ "n_fitted_landmarks": 175,
+ "distance_dependence": {
+  "spearman_rho": 0.28806161913271455,
+  "spearman_p": 1.9406622356979575e-06,
+  "slope_um_per_100um": 5.7355012190797865,
+  "intercept_um": 7.5310586035668585,
+  "tertiles": [
+   {
+    "dist_um": [
+     46.858098652962866,
+     114.73456959926808
+    ],
+    "n": 88,
+    "median_err_um": 11.564656222338314
+   },
+   {
+    "dist_um": [
+     114.73456959926808,
+     135.81650934757084
+    ],
+    "n": 88,
+    "median_err_um": 17.07536237271256
+   },
+   {
+    "dist_um": [
+     135.81650934757084,
+     185.90684084321873
+    ],
+    "n": 88,
+    "median_err_um": 15.819585352085621
+   }
+  ]
+ },
+ "excluded_other_tree": {
+  "n": 56,
+  "note": "warped file is not the native tree node for node (other skeleton; its root is not the soma)",
+  "median_node_ratio_native_to_warped": 5.963563833019384,
+  "root_vs_root": {
+   "n": 56,
+   "median_um": 124.4072261713987,
+   "rmse_um": 136.36271126611666,
+   "p95_um": 252.99466703082584,
+   "max_um": 292.2116844673396
+  },
+  "nearest_warped_node_um": {
+   "n": 56,
+   "median_um": 8.397322308847269,
+   "rmse_um": 11.129309973244787,
+   "p95_um": 18.828572015771126,
+   "max_um": 30.052145602610164
+  },
+  "cell_types": 42
+ },
+ "all_root_within_tol_root_vs_root": {
+  "n": 320,
+  "median_um": 15.911965288720353,
+  "rmse_um": 58.75834292360396,
+  "p95_um": 147.72676431399807,
+  "max_um": 292.2116844673396
+ },
+ "root_outside_tol": [
+  {
+   "id": 720575940624655285,
+   "cell_type": "DNpe008",
+   "side": "left",
+   "root_soma_um": 108.64391734285708
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "synaptera-banc-brain"
+authors:
+  - family-names: Topal
+    given-names: Ömer Faruk
+    affiliation: Istanbul Technical University
+repository-code: "https://github.com/omeruk/synaptera-banc-brain"
+license: MIT
+abstract: >-
+  A simulation in which a FlyWire brain model drives a BANC ventral nerve cord subgraph through a descending-neuron
+  bridge, and the subgraph is trained to produce an open-loop steering command. A pre-registered test compares the
+  real wiring of the subgraph with degree-preserving shuffled wiring and with unconstrained and ablated control arms.
+keywords:
+  - Drosophila
+  - connectome
+  - FlyWire
+  - BANC
+  - ventral nerve cord
+  - descending neurons
+  - pre-registration
+  - computational neuroscience
