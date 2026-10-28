@@ -38,19 +38,19 @@ Every file of `docs/figures/supplementary/`, by group. Sources, scripts and hash
 
 <img src="figures/supplementary/stimulus_eye_images_rot_left_v060_seed0.png" width="100%" alt="Figure S8: What the two eyes see: raw eye images during leftward rotation at 60 deg/s.">
 
-**Figure S8 | What the two eyes see: raw eye images during leftward rotation at 60 deg/s.** Luminance seen by the left (top row) and right (bottom row) FlyGym eye in the grey lead-in and at three times after the drum starts (times in the panel titles). Training data seed 0, grating phase 0.
+**Figure S8 | What the two eyes see: raw eye images during leftward rotation at 60 deg/s.** Luminance seen by the left (top row) and right (bottom row) FlyGym eye in the grey lead-in and at three times after the drum starts (times in the panel titles). Training data seed 0, grating phase 0. Figure 7 in the [README](../README.md#what-the-fly-sees) redraws this render: two of its frames (the grey lead-in and the first stimulus time) in panel a, with a space-time plot of the middle image row.
 
 <img src="figures/supplementary/stimulus_t4t5_rot_left_v060_seed0.png" width="100%" alt="Figure S9: FlyVis T4/T5 boundary rates during leftward rotation at 60 deg/s.">
 
-**Figure S9 | FlyVis T4/T5 boundary rates during leftward rotation at 60 deg/s.** Heat maps of the rates (Hz, colour bar) of the T4 and T5 boundary neurons over time, left and right eye, rows grouped by subtype (T4a-d, T5a-d); the cyan line marks the drum start. Training data seed 0.
+**Figure S9 | FlyVis T4/T5 boundary rates during leftward rotation at 60 deg/s.** Heat maps of the rates (Hz, colour bar) of the T4 and T5 boundary neurons over time, left and right eye, rows grouped by subtype (T4a-d, T5a-d); the cyan line marks the drum start. Training data seed 0. Figure 7 in the [README](../README.md#what-the-fly-sees) redraws this render in panel b, on one colour scale shared with Figure S11 and against time from drum onset.
 
 <img src="figures/supplementary/stimulus_t4t5_rot_left_v120_seed0.png" width="100%" alt="Figure S10: FlyVis T4/T5 boundary rates during leftward rotation at 120 deg/s.">
 
-**Figure S10 | FlyVis T4/T5 boundary rates during leftward rotation at 120 deg/s.** As Figure S9. Training data seed 0.
+**Figure S10 | FlyVis T4/T5 boundary rates during leftward rotation at 120 deg/s.** As Figure S9. Training data seed 0. Figure 7 in the [README](../README.md#what-the-fly-sees) does not redraw this heat map; the per-subtype means of this render enter its panel c only.
 
 <img src="figures/supplementary/stimulus_t4t5_rot_right_v060_seed0.png" width="100%" alt="Figure S11: FlyVis T4/T5 boundary rates during rightward rotation at 60 deg/s.">
 
-**Figure S11 | FlyVis T4/T5 boundary rates during rightward rotation at 60 deg/s.** As Figure S9. Training data seed 0.
+**Figure S11 | FlyVis T4/T5 boundary rates during rightward rotation at 60 deg/s.** As Figure S9. Training data seed 0. Figure 7 in the [README](../README.md#what-the-fly-sees) redraws this render in panel b, on one colour scale shared with Figure S9 and against time from drum onset.
 
 ## Video stills
 

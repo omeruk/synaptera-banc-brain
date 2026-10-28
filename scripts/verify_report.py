@@ -1660,6 +1660,48 @@ def _speeds(conditions):
     return sorted({v for _, v in conditions if v})
 
 
+def _ic_values(rows, speed, col=None):
+    """docs/figures/input_checks.csv: the train and validation rows at a drum speed (col None), or their float values
+    of col; an empty selection or a missing column raises (a mismatch: fail closed)."""
+    sel = [r for r in rows if r["split"] in ("train", "val") and int(r["speed_deg_s"]) == speed]
+    if not sel:
+        raise ValueError(f"no train / val rows at {speed} deg/s")
+    return sel if col is None else np.array([float(r[col]) for r in sel], dtype=float)
+
+
+def _ic_formulas():
+    """The input_checks.csv formulas of the README, one per speed of SPEEDS (scripts/f5_stageA_records.py) and column.
+    Every SD is the sample SD (ddof = 1)."""
+    out = {}
+    for v in _readme_const("scripts/f5_stageA_records.py", "SPEEDS"):
+        out[f"train + val seed groups at {v} deg/s (count of rows)"] = lambda a, c, v=v: len(_ic_values(a[0], v))
+        for col in ("A_in_rot_left", "A_in_rot_right"):
+            sfx = f"{col} over the train + val rows at {v} deg/s"
+            out[f"mean of {sfx}"] = lambda a, c, v=v, col=col: float(np.mean(_ic_values(a[0], v, col)))
+            out[f"sample SD (ddof = 1) of {sfx}"] = lambda a, c, v=v, col=col: float(
+                np.std(_ic_values(a[0], v, col), ddof=1))
+        out[f"min of A_in_rot_left over the train + val rows at {v} deg/s"] = lambda a, c, v=v: float(
+            np.min(_ic_values(a[0], v, "A_in_rot_left")))                 # the rot_left value nearest zero
+        out[f"max of A_in_rot_right over the train + val rows at {v} deg/s"] = lambda a, c, v=v: float(
+            np.max(_ic_values(a[0], v, "A_in_rot_right")))                # the rot_right value nearest zero
+    return out
+
+
+def _all_equal(values):
+    if not values or len(set(values)) != 1:
+        raise ValueError(f"values differ: {values}")
+    return values[0]
+
+
+def _left_right_sums(asym):
+    """|asymmetry(rot_left_<x>) + asymmetry(rot_right_<x>)| for every subtype and every rot_left key."""
+    sums = [abs(asym[k][t] + asym["rot_right" + k[len("rot_left"):]][t]) for k in asym if k.startswith("rot_left")
+            for t in asym[k]]
+    if not sums:
+        raise ValueError("no rot_left / rot_right pair")
+    return max(sums)
+
+
 # One explicit function per formula text of docs/readme_numbers.json: f(args, const) with args the values of the entry's
 # JSON keys (or [the code constant]) and const(name) another constant of the same source file. A formula that is not
 # here is a mismatch (fail closed).
@@ -1720,7 +1762,29 @@ FORMULAS = {
     "slope_um_per_100um / 100": lambda a, c: a[0] / 100,
     "flywire log2_total of family DNg02": lambda a, c: next(
         x for x in a[0] if x["family"] == "DNg02")["flywire"]["log2_total"],
+    # What the fly sees (docs/figures/visual_input.json, input_checks.csv, scripts/readme_visual_input.py)
+    "GATE_SPEEDS[0]": lambda a, c: a[0][0],
+    "GATE_SPEEDS[1]": lambda a, c: a[0][1],
+    "SPEEDS[0]": lambda a, c: a[0][0],
+    "SPEEDS[1]": lambda a, c: a[0][1],
+    "SPEEDS[2]": lambda a, c: a[0][2],
+    "SPEEDS[3]": lambda a, c: a[0][3],
+    "min of SPEEDS": lambda a, c: min(a[0]),
+    "max of SPEEDS": lambda a, c: max(a[0]),
+    "lead-in mean of eye L, equal for every key": lambda a, c: _all_equal([v["L"] for v in a[0].values()]),
+    "lead-in mean of eye R, equal for every key": lambda a, c: _all_equal([v["R"] for v in a[0].values()]),
+    "min over eyes and subtypes": lambda a, c: min(x for eye in a[0].values() for x in eye.values()),
+    "max over eyes and subtypes": lambda a, c: max(x for eye in a[0].values() for x in eye.values()),
+    "largest |asymmetry(rot_left) + asymmetry(rot_right)| over subtypes and speeds": lambda a, c: _left_right_sums(a[0]),
+    "largest |asymmetry| over subtypes and keys": lambda a, c: max(abs(x) for k in a[0].values() for x in k.values()),
+    "fraction x 100 (not rounded)": lambda a, c: 100 * a[0],
+    "largest sample SD (ddof = 1) of A_in over speeds and directions, train + val rows": lambda a, c: max(
+        float(np.std(_ic_values(a[0], v, col), ddof=1))
+        for v in _readme_const("scripts/f5_stageA_records.py", "SPEEDS") for col in ("A_in_rot_left", "A_in_rot_right")),
+    "train + val seed groups per speed (equal at every speed)": lambda a, c: _all_equal(
+        [len(_ic_values(a[0], v)) for v in _readme_const("scripts/f5_stageA_records.py", "SPEEDS")]),
 }
+FORMULAS.update(_ic_formulas())
 
 # Numeric tokens of README.md / docs/FIGURES.md that are not recorded numbers. Categories only; a single number is
 # excluded only with a comment naming its source.
@@ -1762,7 +1826,7 @@ def _readme_scan(text, recorded):
 def check_readme():
     """README.md and docs/FIGURES.md (scripts/readme_text.py), independently of that script (it is not imported). For
     every entry of docs/readme_numbers.json the printed string is recomputed here and must occur in each listed file:
-    JSON key + format; JSON keys or a code constant + a formula of FORMULAS (fail closed); code constants parsed with
+    JSON key + format (a committed CSV loads as {"rows": [...]}; a missing file is a mismatch); JSON keys or a code constant + a formula of FORMULAS (fail closed); code constants parsed with
     ast; design numbers whose match text occurs in the named section of a pre-registration; verbatim text; docstring
     commands. References confirmed on Crossref have no copy in the repository and verify_report has no network, so
     for them only the occurrence in the file is checked. Then every numeric token of the two files must be a recorded
@@ -1784,7 +1848,12 @@ def check_readme():
 
     def js(f):
         if f not in jsons:
-            jsons[f] = json.loads((ROOT / f).read_text())
+            if f.endswith(".csv"):                                     # a committed CSV: {"rows": [...]}
+                import csv
+                with open(ROOT / f, newline="") as fh:
+                    jsons[f] = {"rows": list(csv.DictReader(fh))}
+            else:
+                jsons[f] = json.loads((ROOT / f).read_text())
         return jsons[f]
 
     def section(path, sec):
@@ -1844,7 +1913,7 @@ def check_readme():
                 how = "occurrence only (Crossref)"
             else:
                 got = None
-        except (KeyError, IndexError, ValueError, TypeError) as err:
+        except (KeyError, IndexError, ValueError, TypeError, OSError) as err:   # a missing file is a mismatch too
             got = f"error: {err}"
         chk(key, got == s, (got, s))
         counts[(kind, how)] = counts.get((kind, how), 0) + 1

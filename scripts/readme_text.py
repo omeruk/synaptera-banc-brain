@@ -4,7 +4,8 @@
     env -u PYTHONPATH python scripts/readme_text.py --check      # exit 1 if a committed output differs; writes nothing
 
 Writes README.md, docs/FIGURES.md and docs/readme_numbers.json. No number is typed here (CLAUDE.md rule 11): each one
-is read from a committed JSON (docs/results/*.json, docs/figures/*.json, configs/f5_splits.json), from a code constant
+is read from a committed JSON (docs/results/*.json, docs/figures/*.json, configs/f5_splits.json) or a committed CSV
+(docs/figures/input_checks.csv, loaded as {"rows": [...]} by csv.DictReader, so its key is "rows"), from a code constant
 (parsed from the source, not imported), or from the text of a pre-registration, and docs/readme_numbers.json records
 for each printed string the file(s) it appears in and its source. References and the commands of the Reproduce
 section are copied from repository files and checked against them. Refuses to overwrite an existing output without
@@ -12,8 +13,10 @@ section are copied from repository files and checked against them. Refuses to ov
 """
 import argparse
 import ast
+import csv
 import json
 import re
+import statistics
 import sys
 from pathlib import Path
 
@@ -35,6 +38,7 @@ BENCH = "docs/results/f5_benchmark.json"
 SPLITS = "configs/f5_splits.json"
 TRANSFORMS = "docs/figures/transforms.json"
 WARP = "docs/figures/warp_check.json"
+VI, ICSV = "docs/figures/visual_input.json", "docs/figures/input_checks.csv"
 P19 = "prereg/19_f5_gpu_reproducibility_bridge_units_readout.md"
 P14, P21 = "prereg/14_f5_training.md", "prereg/21_f5_stageA_posthoc_plan.md"
 REPO_URL = "https://github.com/omeruk/synaptera-banc-brain"
@@ -47,8 +51,13 @@ _JSON = {}
 
 
 def _load(f):
+    """A committed JSON, or a committed CSV as {"rows": [one dict per row]}."""
     if f not in _JSON:
-        _JSON[f] = json.loads((ROOT / f).read_text())
+        if f.endswith(".csv"):
+            with open(ROOT / f, newline="") as fh:
+                _JSON[f] = {"rows": list(csv.DictReader(fh))}
+        else:
+            _JSON[f] = json.loads((ROOT / f).read_text())
     return _JSON[f]
 
 
@@ -179,6 +188,180 @@ def img(src, alt):
     return f'<img src="{src}" width="100%" alt="{alt.replace("`", "")}">'
 
 
+# ── What the fly sees (Figure 7) ──────────────────────────────────────────────────────────────────────────────────
+def _ic_sel(rows, v):
+    """The train and validation rows of input_checks.csv at drum speed v (test rows carry no values)."""
+    sel = [r for r in rows if r["split"] in ("train", "val") and int(r["speed_deg_s"]) == v]
+    if not sel:
+        raise SystemExit(f"{ICSV}: no train / val rows at {v} deg/s")
+    return sel
+
+
+def _ic_vals(rows, v, col):
+    return [float(r[col]) for r in _ic_sel(rows, v)]
+
+
+def IC(v, what, col=None, fmt="{:.3f}"):
+    """A statistic of the train + val rows of input_checks.csv at speed v; every SD is the sample SD (ddof = 1)."""
+    fns = {"n": (lambda rows: len(_ic_sel(rows, v)), f"train + val seed groups at {v} deg/s (count of rows)"),
+           "mean": (lambda rows: statistics.mean(_ic_vals(rows, v, col)),
+                    f"mean of {col} over the train + val rows at {v} deg/s"),
+           "sd": (lambda rows: statistics.stdev(_ic_vals(rows, v, col)),
+                  f"sample SD (ddof = 1) of {col} over the train + val rows at {v} deg/s"),
+           "min": (lambda rows: min(_ic_vals(rows, v, col)), f"min of {col} over the train + val rows at {v} deg/s"),
+           "max": (lambda rows: max(_ic_vals(rows, v, col)), f"max of {col} over the train + val rows at {v} deg/s")}
+    fn, formula = fns[what]
+    return JX(ICSV, ["rows"], fn, "{}" if what == "n" else fmt, formula)
+
+
+def what_the_fly_sees(fw):
+    """The body of the section "What the fly sees": text, Figure 7 and its two tables."""
+    vi, rows = _load(VI), _load(ICSV)["rows"]
+    rec = _load(RECORDS)["completion"]
+    subtypes = vi["subtypes"]
+    speeds = _const("scripts/f5_stageA_records.py", "SPEEDS")
+    held = _const("train/f5_stageA.py", "HELD_OUT")
+    gs = _const("scripts/readme_visual_input.py", "GATE_SPEEDS")
+    used = [r for r in rows if r["split"] in ("train", "val")]
+    # the statements below, checked against the data before they are printed
+    if sorted({int(r["speed_deg_s"]) for r in used}) != sorted(speeds):
+        raise SystemExit("input_checks.csv: the train / val speeds differ from SPEEDS")
+    if not all(float(r["A_in_rot_left"]) > 0 > float(r["A_in_rot_right"]) for r in used):
+        raise SystemExit("input_checks.csv: a train / val group without rot_left > 0 > rot_right")
+    for col, sgn in (("A_in_rot_left", 1), ("A_in_rot_right", -1)):
+        m = [sgn * statistics.mean(_ic_vals(rows, v, col)) for v in sorted(speeds)]
+        if not all(a < b for a, b in zip(m, m[1:])):
+            raise SystemExit(f"input_checks.csv: |mean {col}| does not grow with speed")
+    if not (rec["input_checks_passed"] == rec["input_checks_total"] == len(rows)
+            and rec["input_checks"]["test"]["values_kept"] == 0
+            and all(r["A_in_rot_left"] == r["A_in_rot_right"] == "" for r in rows if r["split"] == "test")):
+        raise SystemExit("not every input check passed, or test values were kept; the README text differs")
+    for k in ("rot_left", "rot_right"):
+        for v in gs:
+            a = vi["gate"]["A_in_T4aT5a"][f"p0_v{v:03d}"][k]["recomputed"]
+            if (a > 0) != (k == "rot_left"):
+                raise SystemExit(f"gate A_in of {k} at {v} deg/s has the other sign; the README text differs")
+    imgs = vi["eye_images"]["images"]
+    if not (imgs[0]["t_s"] is None and imgs[1]["t_s"] is not None):
+        raise SystemExit("the first two eye images are not the grey lead-in and the first stimulus time")
+    if vi["heatmap_vmax_hz"]["value"] != vi["heatmap_vmax_hz"]["r_clip_hz"]:
+        raise SystemExit("the heat-map colour limit is not the boundary-layer clip; the caption differs")
+
+    v1 = C("scripts/readme_visual_input.py", "GATE_SPEEDS", fn=lambda g: g[0], formula="GATE_SPEEDS[0]")
+    v2 = C("scripts/readme_visual_input.py", "GATE_SPEEDS", fn=lambda g: g[1], formula="GATE_SPEEDS[1]")
+    h30 = C("train/f5_stageA.py", "HELD_OUT", fn=lambda h: h["secondary"], formula="HELD_OUT['secondary']")
+    h90 = C("train/f5_stageA.py", "HELD_OUT", fn=lambda h: h["primary"], formula="HELD_OUT['primary']")
+    k1 = f"rot_left_v{gs[0]:03d}_p0"
+    lead = {e: JX(VI, ["lead_in_mean_hz/values"],
+                  lambda d, e=e: _same([x[e] for x in d.values()]), "{:.3f}",
+                  f"lead-in mean of eye {e}, equal for every key") for e in ("L", "R")}
+    lo = JX(VI, [f"mean_rate_hz/{k1}"], lambda d: min(min(x.values()) for x in d.values()), "{:.1f}",
+            "min over eyes and subtypes")
+    hi = JX(VI, [f"mean_rate_hz/{k1}"], lambda d: max(max(x.values()) for x in d.values()), "{:.1f}",
+            "max over eyes and subtypes")
+    gate = {(k, v): J(VI, f"gate/A_in_T4aT5a/p0_v{v:03d}/{k}/recomputed", "{:.3f}")
+            for k in ("rot_left", "rot_right") for v in gs}
+    sym = JX(VI, ["asymmetry/values"], _max_sum, "{:.3f}",
+             "largest |asymmetry(rot_left) + asymmetry(rot_right)| over subtypes and speeds")
+    big = JX(VI, ["asymmetry/values"], lambda d: max(abs(x) for k in d.values() for x in k.values()), "{:.2f}",
+             "largest |asymmetry| over subtypes and keys")
+    sd_max = JX(ICSV, ["rows"], lambda r: max(statistics.stdev(_ic_vals(r, v, c)) for v in speeds
+                                              for c in ("A_in_rot_left", "A_in_rot_right")), "{:.3f}",
+                "largest sample SD (ddof = 1) of A_in over speeds and directions, train + val rows")
+    n_same = JX(ICSV, ["rows"], lambda r: _same([len(_ic_sel(r, v)) for v in speeds]), "{}",
+                "train + val seed groups per speed (equal at every speed)")
+    s_lo, s_hi = min(speeds), max(speeds)
+    m_lo, m_hi = IC(s_lo, "mean", "A_in_rot_left"), IC(s_hi, "mean", "A_in_rot_left")
+    pv = "scripts/f5_stageA_preview.py"
+    stim_seed = P(pv, "docstring", r"training data seed (\d+) \(phase")
+    stim_phase = P(pv, "docstring", r"\(phase (\d+); never")
+    pct = JX(VI, ["heatmap_vmax_hz/fraction_at_clip"], lambda f: 100 * f, "{:.1f}", "fraction x 100 (not rounded)")
+    L = [f"The drum is rendered for the two FlyGym eyes and passed through FlyVis, whose boundary layer drives the "
+          f"{fw} brain. T4 and T5 are the direction-selective motion detectors of the fly optic lobe, T4 for ON "
+          f"(brightening) and T5 for OFF (darkening) edges, each in four subtypes, a to d; FlyVis models them "
+          f"(Lappalainen et al., see the references), and the boundary layer carries their rates per eye. The "
+          f"statements below are measurements; no preferred direction is attributed to any subtype.", "",
+          f"In the grey lead-in the mean T4/T5 rate is {lead['L']} Hz in the left eye and {lead['R']} Hz in the "
+          f"right; during leftward rotation at {v1} deg/s the per-subtype, per-eye means over the stimulus lie between {lo} and "
+          f"{hi} Hz. With the input asymmetry `A_in = (L - R) / (L + R + 1)` of the mean left-eye and right-eye rates, "
+          f"leftward rotation gives a positive A_in of T4a + T5a (left eye higher: {gate[('rot_left', gs[0])]} at {v1} "
+          f"deg/s, {gate[('rot_left', gs[1])]} at {v2} deg/s) and rightward rotation a negative one "
+          f"({gate[('rot_right', gs[0])]} and {gate[('rot_right', gs[1])]}). Per subtype, the asymmetry under rightward "
+          f"rotation is close to the negative of that under leftward rotation: their sum is at most {sym} in absolute "
+          f"value over the subtypes and both speeds, against single asymmetries of up to {big}.", "",
+          f"Over every training and validation seed group (they differ in grating phase), A_in of T4a + T5a is "
+          f"positive for rot_left and negative for rot_right in every group, and its size grows with drum speed: the "
+          f"rot_left mean rises from {m_lo} at {C('scripts/f5_stageA_records.py', 'SPEEDS', fn=min, formula='min of SPEEDS')} "
+          f"deg/s to {m_hi} at {C('scripts/f5_stageA_records.py', 'SPEEDS', fn=max, formula='max of SPEEDS')} deg/s. "
+          f"The grating phase hardly changes it: the largest SD over speeds and directions is {sd_max}. All "
+          f"{J(RECORDS, 'completion/input_checks_total')} input checks passed (training, validation and test); for the test split only the pass was kept, not the values.",
+          "",
+          img("docs/figures/fig7_visual_input.png",
+              "Four panels: for each eye, small grey and striped eye images above a space-time plot of luminance with "
+              "slanted stripes; heat maps of motion-detector rates grouped by subtype over time for both eyes and both "
+              "rotation directions; dots of the per-subtype eye asymmetry; and the input-check asymmetry per seed "
+              "group against drum speed."), "",
+          f"**Figure 7 | What the fly sees and how its T4/T5 motion detectors respond.** a, Raw images of the left and "
+          f"right FlyGym eye (the grey lead-in and the first stimulus time, t = "
+          f"{J(VI, 'eye_images/images/1/t_s', '{:g}')} s) and, per eye, the luminance of the middle image row against "
+          f"time from drum onset and azimuth (positive to the left of the fly; the left plot's axis label applies to "
+          f"both); the drum turns as one body, so the stripes have the same slope in both eyes. b, T4/T5 boundary "
+          f"rates of the left and right eye during leftward and rightward rotation at {v1} deg/s; rows are neurons "
+          f"grouped by subtype, so each pixel row averages several neurons; the colour scale runs from 0 to the "
+          f"boundary-layer clip of {J(VI, 'heatmap_vmax_hz/r_clip_hz', '{:g}')} Hz, which {pct} % of the plotted "
+          f"rates reach. c, Per-subtype A_in at {v1} (circles) and {v2} deg/s (squares); blue, rot_left; vermillion, rot_right. d, A_in of T4a + T5a of the input check per seed "
+          f"group ({n_same} training and validation seed groups per speed); the held-out speeds {h30} and {h90} deg/s on "
+          f"the grey band; dashed lines at ±{C('scripts/f3b1_common.py', 'INPUT_CHECK_MIN', '{:g}')}, the input-check "
+          f"minimum. a-c, training data seed {stim_seed}, grating phase {stim_phase} (the renders were re-made and shown "
+          f"identical to the originals); d, every training and validation seed group of `docs/figures/input_checks.csv`. "
+          f"The original previews are Figures S8-S11 in [docs/FIGURES.md](docs/FIGURES.md).", ""]
+    hdr = [f"rot_left {v1}", f"rot_right {v1}", f"rot_left {v2}", f"rot_right {v2}"]
+    keys = [f"{k}_v{v:03d}_p0" for v in gs for k in ("rot_left", "rot_right")]
+    L += ["<details><summary>T4/T5 per subtype</summary>", "",
+          f"| subtype | neurons, left / right eye | mean rate, rot_left {v1} deg/s, left / right eye (Hz) | "
+          + " | ".join(f"A_in, {h}" for h in hdr) + " |",
+          "|---|---:|---:|" + "---:|" * len(hdr)]
+    for t in subtypes:
+        L.append(f"| {t} | {J(VI, f'neurons/L/per_subtype/{t}', '{:,}')} / {J(VI, f'neurons/R/per_subtype/{t}', '{:,}')} "
+                 f"| {J(VI, f'mean_rate_hz/{k1}/L/{t}', '{:.1f}')} / {J(VI, f'mean_rate_hz/{k1}/R/{t}', '{:.1f}')} | "
+                 + " | ".join(J(VI, f"asymmetry/values/{k}/{t}", "{:+.2f}") for k in keys) + " |")
+    L += [f"| all | {J(VI, 'neurons/L/t4t5_total', '{:,}')} / {J(VI, 'neurons/R/t4t5_total', '{:,}')} | | "
+          + " | " * (len(hdr) - 1) + " |", "",
+          "Mean rates and A_in over the whole stimulus (the input-check window of `scripts/f3b1_common.py`), training "
+          f"data seed {stim_seed}, grating phase {stim_phase}; `docs/figures/visual_input.json`.", "", "</details>", ""]
+    L += ["<details><summary>The input check over the training data</summary>", "",
+          "| speed (deg/s) | held out? | seed groups (train + val) | A_in rot_left, mean ± SD (min) | "
+          "A_in rot_right, mean ± SD (max) |", "|---:|---|---:|---:|---:|"]
+    for i, v in enumerate(speeds):
+        L.append(f"| {C('scripts/f5_stageA_records.py', 'SPEEDS', fn=lambda s, i=i: s[i], formula=f'SPEEDS[{i}]')} | "
+                 f"{'yes' if v in held.values() else 'no'} | {IC(v, 'n')} | "
+                 f"{IC(v, 'mean', 'A_in_rot_left')} ± {IC(v, 'sd', 'A_in_rot_left')} ({IC(v, 'min', 'A_in_rot_left')}) | "
+                 f"{IC(v, 'mean', 'A_in_rot_right')} ± {IC(v, 'sd', 'A_in_rot_right')} "
+                 f"({IC(v, 'max', 'A_in_rot_right')}) |")
+    L += ["", "A_in of T4a + T5a over the whole stimulus, one value per seed group and direction (prereg/09 input "
+          "check: it passes when rot_left and rot_right have opposite signs and both are at least the input-check "
+          "minimum in size); SD, the sample SD over seed groups (`ddof = 1`); min, the smallest rot_left value; max, "
+          "the largest (least negative) rot_right value. `docs/figures/input_checks.csv`; the test rows carry only the "
+          "pass.", "", "</details>", ""]
+    return L
+
+
+def _same(values):
+    """The common value of a list whose values are all equal."""
+    if not values or any(x != values[0] for x in values):
+        raise SystemExit(f"values differ: {values}")
+    return values[0]
+
+
+def _max_sum(asym):
+    out = []
+    for k, v in asym.items():
+        if k.startswith("rot_left_"):
+            w = asym["rot_right_" + k[len("rot_left_"):]]
+            out += [abs(v[t] + w[t]) for t in v]
+    return max(out)
+
+
 # ── README ────────────────────────────────────────────────────────────────────────────────────────────────────────
 def readme():
     CUR["file"] = "README.md"
@@ -246,7 +429,7 @@ def readme():
           "Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)", ""]
     toc = ["Result in brief", "The stage-A circuit", "Activity on the circuit", "Post-hoc analyses",
            "How we got here (F0-F3)", "Key numbers",
-           "How it works", "Joining two flies: cell types and coordinates", "Training", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
+           "How it works", "What the fly sees", "Joining two flies: cell types and coordinates", "Training", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
            "Data, credits and licences", "Authorship", "How to cite"]
     L += ["**Contents:** " + " · ".join(f"[{t}](#{anchor(t)})" for t in toc), ""]
     speed = C("scripts/viz_video.py", "SPEED")
@@ -497,6 +680,9 @@ def readme():
           f"- `bridge_off`: `true` with every bridged DN clamped to {zero_off} (DNg02 kept).",
           "- `untrained`: `true` at initialisation, one deterministic evaluation on the test set.", "",
           f"Training seeds: {n_true} per trained arm, {seeds_n('bridge_off')} for `bridge_off`.", "", "</details>", ""]
+
+    H(2, "What the fly sees")
+    L += what_the_fly_sees(fw)
 
     H(2, "Joining two flies: cell types and coordinates")
     xw = _load(XWALK)
@@ -1094,17 +1280,24 @@ def gallery():
         "stimulus_eye_images_rot_left_v060_seed0.png": (
             f"What the two eyes see: raw eye images during leftward rotation at {sp1} deg/s.",
             "Luminance seen by the left (top row) and right (bottom row) FlyGym eye in the grey lead-in and at three "
-            f"times after the drum starts (times in the panel titles). Training data seed {stim_seed}, grating phase {stim_phase}."),
+            f"times after the drum starts (times in the panel titles). Training data seed {stim_seed}, grating phase {stim_phase}. "
+            "Figure 7 in the [README](../README.md#what-the-fly-sees) redraws this render: two of its frames (the grey "
+            "lead-in and the first stimulus time) in panel a, with a space-time plot of the middle image row."),
         "stimulus_t4t5_rot_left_v060_seed0.png": (
             f"FlyVis T4/T5 boundary rates during leftward rotation at {sp1} deg/s.",
             "Heat maps of the rates (Hz, colour bar) of the T4 and T5 boundary neurons over time, left and right eye, "
-            f"rows grouped by subtype (T4a-d, T5a-d); the cyan line marks the drum start. Training data seed {stim_seed}."),
+            f"rows grouped by subtype (T4a-d, T5a-d); the cyan line marks the drum start. Training data seed {stim_seed}. "
+            "Figure 7 in the [README](../README.md#what-the-fly-sees) redraws this render in panel b, on one colour "
+            "scale shared with Figure S11 and against time from drum onset."),
         "stimulus_t4t5_rot_left_v120_seed0.png": (
             f"FlyVis T4/T5 boundary rates during leftward rotation at {sp2} deg/s.",
-            f"As Figure S9. Training data seed {stim_seed}."),
+            f"As Figure S9. Training data seed {stim_seed}. Figure 7 in the [README](../README.md#what-the-fly-sees) "
+            f"does not redraw this heat map; the per-subtype means of this render enter its panel c only."),
         "stimulus_t4t5_rot_right_v060_seed0.png": (
             f"FlyVis T4/T5 boundary rates during rightward rotation at {sp1} deg/s.",
-            f"As Figure S9. Training data seed {stim_seed}."),
+            f"As Figure S9. Training data seed {stim_seed}. Figure 7 in the [README](../README.md#what-the-fly-sees) "
+            f"redraws this render in panel b, on one colour scale shared with Figure S9 and against time from drum "
+            f"onset."),
         "video_still_act1_+0300ms.png": (
             f"Act {act[0]} of the circuit video at +{st[0]} ms: change from the pre-stimulus baseline during rightward "
             f"rotation.",
