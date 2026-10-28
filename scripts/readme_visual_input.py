@@ -448,7 +448,8 @@ def draw_fig7(d, rows, lums, space_time, rates, tcode, fw_types, held_out):
         for sp in ax.spines.values():
             sp.set_visible(False)
         ax.set_xlabel("time from drum onset (s)")
-        ax.set_ylabel("azimuth (deg, + = left)")
+        if c == 0:                                              # names the axis of both eyes
+            ax.set_ylabel("azimuth (deg, + = left)")
     cax = ax_mm(xb[1] + hw + 3.0, ys, 2.2, hs)
     cb = fig.colorbar(st, cax=cax)
     cb.set_ticks(np.linspace(st.norm.vmin, st.norm.vmax, 3), labels=[f"{v:g}" for v in
