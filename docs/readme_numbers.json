@@ -611,6 +611,17 @@
    }
   },
   {
+   "string": "4",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/readme_text.py:LR_MIN_DECIMALS",
+    "format": "{}"
+   }
+  },
+  {
    "string": "5",
    "files": [
     "README.md"
@@ -3152,6 +3163,30 @@
    }
   },
   {
+   "string": "0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "**Grating phase.** 0 for data seeds"
+   }
+  },
+  {
+   "string": "0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "phase.** 0 for data seeds 0-39;"
+   }
+  },
+  {
    "string": "1",
    "files": [
     "README.md"
@@ -3173,6 +3208,18 @@
     "file": "prereg/21_f5_stageA_posthoc_plan.md",
     "section": "3.3",
     "match": "G = 1 is the teacher"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "static, grey (10)."
    }
   },
   {
@@ -3344,6 +3391,18 @@
    }
   },
   {
+   "string": "39",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "phase.** 0 for data seeds 0-39;"
+   }
+  },
+  {
    "string": "4",
    "files": [
     "README.md"
@@ -3353,6 +3412,18 @@
     "file": "prereg/10_f3b2_dn_ensemble.md",
     "section": "4",
     "match": "by exact type, 4 by family)"
+   }
+  },
+  {
+   "string": "40",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "`default_rng(seed)` for seeds 40-239."
    }
   },
   {
@@ -3723,6 +3794,93 @@
    }
   },
   {
+   "string": "0.0000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "summary/bridge_off/best_r2/mean"
+    ],
+    "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0001",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0002",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0003",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0008",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.001",
    "files": [
     "README.md"
@@ -3771,6 +3929,18 @@
    }
   },
   {
+   "string": "0.0023",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.0029",
    "files": [
     "README.md"
@@ -3804,6 +3974,42 @@
     "file": "docs/results/f5_stageA_validation.json",
     "key": "selected_lr/mlp",
     "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.0032",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0037",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0052",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_loss/sd",
+    "format": "{:.4f}"
    }
   },
   {
@@ -3867,6 +4073,30 @@
    }
   },
   {
+   "string": "0.0124",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0130",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.0242",
    "files": [
     "README.md"
@@ -3915,6 +4145,162 @@
    }
   },
   {
+   "string": "0.0326",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/mlp/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0331",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/mlp/0/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0378",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/mlp/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0516",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0520",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/true/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0546",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0600",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/true/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0616",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/derange/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0618",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0628",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/shuffled/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0639",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0670",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/linear/0/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0772",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/derange/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.0833",
    "files": [
     "README.md"
@@ -3926,6 +4312,30 @@
      "summary/untrained/r2/mean"
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0837",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/untrained/best_r2/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0899",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/true/0/final_val_loss",
     "format": "{:.4f}"
    }
   },
@@ -3957,6 +4367,42 @@
    }
   },
   {
+   "string": "0.1142",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/derange/0/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.1166",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/shuffled/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.2122",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/linear/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.2377",
    "files": [
     "README.md"
@@ -3983,6 +4429,18 @@
      "summary/shuffled/g30_r2/mean"
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.2467",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/shuffled/0/final_val_loss",
     "format": "{:.4f}"
    }
   },
@@ -4026,6 +4484,18 @@
    }
   },
   {
+   "string": "0.2572",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/untrained/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.27",
    "files": [
     "README.md"
@@ -4035,6 +4505,54 @@
     "file": "docs/results/summary_f0_f3.json",
     "key": "f0_posdiff/values/0",
     "format": "{}"
+   }
+  },
+  {
+   "string": "0.277778",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/bridge_off/0/final_val_loss",
+    "format": "{:.6f}"
+   }
+  },
+  {
+   "string": "0.277784",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/bridge_off/1/final_val_loss",
+    "format": "{:.6f}"
+   }
+  },
+  {
+   "string": "0.2778",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.277808",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/bridge_off/2/final_val_loss",
+    "format": "{:.6f}"
    }
   },
   {
@@ -4128,6 +4646,18 @@
    }
   },
   {
+   "string": "0.500",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
    "string": "0.575",
    "files": [
     "README.md"
@@ -4191,6 +4721,18 @@
    }
   },
   {
+   "string": "0.9403",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_r2/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.9444",
    "files": [
     "README.md"
@@ -4202,6 +4744,18 @@
      "summary/derange/r2/mean"
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.9455",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_r2/mean",
     "format": "{:.4f}"
    }
   },
@@ -4221,6 +4775,18 @@
    }
   },
   {
+   "string": "0.9621",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_r2/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.9673",
    "files": [
     "README.md"
@@ -4232,6 +4798,18 @@
      "summary/linear/r2/mean"
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.9750",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_r2/mean",
     "format": "{:.4f}"
    }
   },
@@ -4338,6 +4916,30 @@
    }
   },
   {
+   "string": "0.994",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/untrained/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.9983",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_r2/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.9984",
    "files": [
     "README.md"
@@ -4350,6 +4952,18 @@
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
     "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.999",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_sign_accuracy/mean",
+    "format": "{:.3f}"
    }
   },
   {
@@ -4401,6 +5015,18 @@
    }
   },
   {
+   "string": "1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/untrained/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
    "string": "1,064",
    "files": [
     "README.md"
@@ -4410,6 +5036,21 @@
     "file": "docs/results/f3_dn_crosswalk.json",
     "key": "summary/shared_neurons_flywire",
     "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,175",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/linear"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
    }
   },
   {
@@ -4467,6 +5108,18 @@
    ],
    "kind": "result",
    "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "plan/per_split/train",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,600",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
     "file": "docs/results/f5_stageA_validation.json",
     "key": "summary/shuffled/trials_to_090/mean",
     "format": "{:,.0f}"
@@ -4482,6 +5135,111 @@
     "file": "docs/results/f5_stageA_validation.json",
     "key": "summary/derange/trials_to_090/mean",
     "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "1,675",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/mlp"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "1,800",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/bridge_off"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "1,900",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/true"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,900",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/shuffled"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,900",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/derange"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,900",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/bridge_off"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,950",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/linear"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
    }
   },
   {
@@ -4553,6 +5311,54 @@
    "source": {
     "file": "docs/results/f5_stageA_report.json",
     "key": "summary/untrained/sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_sign_accuracy/mean",
     "format": "{:.3f}"
    }
   },
@@ -4656,6 +5462,54 @@
    "source": {
     "file": "docs/results/f5_stageA_validation.json",
     "key": "summary/true/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/n_seeds",
     "format": "{}"
    }
   },
@@ -4771,6 +5625,18 @@
    }
   },
   {
+   "string": "14.6099",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/linear/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "16",
    "files": [
     "README.md"
@@ -4791,6 +5657,21 @@
    "source": {
     "file": "docs/results/f5_stageA_runner.json",
     "key": "design/batch",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "160",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "keys": [
+     "test_seeds"
+    ],
+    "formula": "rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x test_seeds",
     "format": "{}"
    }
   },
@@ -4845,6 +5726,111 @@
    "source": {
     "file": "docs/results/f5_stageA_runner.json",
     "key": "design/steps",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/true"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/true"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/shuffled"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/shuffled"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/derange"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/derange"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/mlp"
+    ],
+    "formula": "max of selected_step over the runs",
     "format": "{:,}"
    }
   },
@@ -4905,6 +5891,21 @@
    "source": {
     "file": "docs/results/f5_stageA_report.json",
     "key": "runs/true/t0/n_test_trials",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "240",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "keys": [
+     "runs"
+    ],
+    "formula": "n_test_trials, equal for every run",
     "format": "{}"
    }
   },
@@ -5097,6 +6098,46 @@
    }
   },
   {
+   "string": "400",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "keys": [
+     "runs",
+     "test_seeds"
+    ],
+    "formula": "n_test_trials (equal for every run) + rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x test_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "400",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "plan/per_split/val",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "400",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "plan/per_split/test",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "454",
    "files": [
     "README.md"
@@ -5170,6 +6211,21 @@
    }
   },
   {
+   "string": "500",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/linear"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "53.8",
    "files": [
     "README.md"
@@ -5239,6 +6295,21 @@
     "file": "docs/results/summary_f0_f3.json",
     "key": "b1_max/values/1",
     "format": "{}"
+   }
+  },
+  {
+   "string": "650",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/mlp"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
    }
   },
   {
@@ -5529,6 +6600,21 @@
    }
   },
   {
+   "string": "950",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/bridge_off"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "960",
    "files": [
     "README.md"
@@ -5682,6 +6768,18 @@
    }
   },
   {
+   "string": "sample sd over training seeds, ddof = 1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "sd",
+    "format": "{}"
+   }
+  },
+  {
    "string": "signed lateral influence index L_hg3",
    "files": [
     "README.md"
@@ -5811,6 +6909,17 @@
    "kind": "text",
    "source": {
     "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "lowest final validation loss at training seed 0 (prereg/14 section 6); a tie goes to the smaller rate.",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.md",
     "verbatim": true
    }
   },

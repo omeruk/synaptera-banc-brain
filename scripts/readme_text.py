@@ -44,6 +44,7 @@ P14, P21 = "prereg/14_f5_training.md", "prereg/21_f5_stageA_posthoc_plan.md"
 REPO_URL = "https://github.com/omeruk/synaptera-banc-brain"
 AUTHOR = "Ömer Faruk Topal, Department of Geomatics Engineering, Istanbul Technical University."
 CREDIT = "Designed and directed by Ömer Faruk Topal; implemented with the help of Claude Code (Anthropic)."
+LR_MIN_DECIMALS = 4            # learning-rate grid table: at least this many decimals, more where an arm's values would tie
 
 ENTRIES = []
 CUR = {"file": None}
@@ -343,6 +344,183 @@ def what_the_fly_sees(fw):
           "minimum in size); SD, the sample SD over seed groups (`ddof = 1`); min, the smallest rot_left value; max, "
           "the largest (least negative) rot_right value. `docs/figures/input_checks.csv`; the test rows carry only the "
           "pass.", "", "</details>", ""]
+    return L
+
+
+# ── Training tables ───────────────────────────────────────────────────────────────────────────────────────────────
+def _held_out_trials(n_test_seeds):
+    """Rotation trials of the held-out speeds per test evaluation: every rotation stimulus of TRAIN_CONDITIONS at every
+    speed of HELD_OUT, on every test seed (the groups of A.TEST_GROUPS, as scripts/f5_stageA_report.py checks)."""
+    cond, held = _const("train/f5_stageA.py", "TRAIN_CONDITIONS"), _const("train/f5_stageA.py", "HELD_OUT")
+    return len({s for s, _ in cond if s.startswith("rot")}) * len(held) * n_test_seeds
+
+
+def _n_test_trials(runs):
+    return _same([r["n_test_trials"] for arm in runs.values() for r in arm.values()])
+
+
+def training_data(sp1, sp2, held30, held90, v_lo, v_hi, t_lo, t_hi):
+    """The training-data table: data seeds and grating phase (prereg/14 section 7), records per split (the records
+    plan), the trials stage A uses (the runner design and the test report). The counts are checked against the split
+    file and the conditions, and the statements of the held-out-speed note against the code, before printing."""
+    sp, plan = _load(SPLITS), _load(RECORDS)["plan"]
+    rn, rep = _load(RUNNER)["design"], _load(REPORT)
+    cond = _const("train/f5_stageA.py", "TRAIN_CONDITIONS")
+    speeds = _const("scripts/f5_stageA_records.py", "SPEEDS")
+    held = _const("train/f5_stageA.py", "HELD_OUT")
+    n_cond = P(P14, "7", r"static, grey \((\d+)\)\.")
+    ph0 = P(P14, "7", r"\*\*Grating phase\.\*\* (\d+) for data seeds")
+    ph_lo = P(P14, "7", r"phase\.\*\* \d+ for data seeds (\d+)-\d+;")
+    ph_hi = P(P14, "7", r"phase\.\*\* \d+ for data seeds \d+-(\d+);")
+    ph_next = P(P14, "7", r"`default_rng\(seed\)` for seeds (\d+)-\d+\.")
+    m = re.search(r"^PHASE0_SEEDS = range\((\d+), (\d+)\)$", (ROOT / "scripts/f5_stageA_records.py").read_text(), re.M)
+    if not m or (int(m.group(1)), int(m.group(2)) - 1) != (int(ph_lo), int(ph_hi)) or int(ph_next) != int(ph_hi) + 1:
+        raise SystemExit("the phase-0 seeds of scripts/f5_stageA_records.py differ from prereg/14 section 7")
+    if not (min(sp["train"]) == int(ph_lo) and int(ph_next) <= max(sp["train"]) < min(sp["val"])):
+        raise SystemExit("the phase-0 seeds are not the first training seeds")
+    if sorted(speeds) != sorted({v for _, v in cond if v} | set(held.values())):
+        raise SystemExit("the record speeds are not the training plus the held-out speeds")
+    for s in ("train", "val", "test"):
+        if plan["per_split"][s] != len(sp[s]) * int(n_cond):
+            raise SystemExit(f"{s}: the records are not {n_cond} conditions per data seed")
+    if sum(plan["per_split"].values()) != plan["n_records"]:
+        raise SystemExit("the records per split do not add up to the records")
+    n_tt, n_ho = _n_test_trials(rep["runs"]), _held_out_trials(rep["test_seeds"])
+    if (rn["n_train_trials"], rn["n_val_trials"], n_tt) != tuple(len(sp[s]) * len(cond) for s in ("train", "val", "test")):
+        raise SystemExit("the stage-A trials are not one per data seed and training condition")
+    if rep["test_seeds"] != len(sp["test"]) or n_tt + n_ho != plan["per_split"]["test"]:
+        raise SystemExit("a test evaluation does not use every test record once")
+    for code_file, needle in (
+            ("train/f5_stageA.py", 'raise SealedSplitError("the held-out drum speeds (90, 30 deg/s) are read only by '
+                                   'the final evaluation")'),
+            ("scripts/f5_stageA_posthoc.py", "raise A.SealedSplitError(f\"data seed {seed} is a sealed test seed; the "
+                                             "post-hoc reader never reads it\")"),
+            ("scripts/f5_stageA_posthoc.py", 'raise PosthocRefusal(f"data seed {seed} is not a validation seed '
+                                             '160-199")'),
+            ("scripts/f5_stageA_posthoc.py", 'data_cache[key] = A.load_trials("val", setup, bridge, A.TRAIN_CONDITIONS)'),
+            ("scripts/f5_stageA_records_report.py", '"""File integrity and record format of one training-seed record; no '
+                                                    'statistic of its content."""')):
+        if needle not in (ROOT / code_file).read_text():
+            raise SystemExit(f"{code_file} no longer contains {needle!r}; the held-out-speed note differs")
+    tr_lo, tr_hi = JX(SPLITS, ["train"], min, "{}", "min of train"), JX(SPLITS, ["train"], max, "{}", "max of train")
+    s = [C("scripts/f5_stageA_records.py", "SPEEDS", fn=lambda x, i=i: x[i], formula=f"SPEEDS[{i}]")
+         for i in range(len(speeds))]
+    uniform = "uniform over one wavelength"
+    tt = JX(REPORT, ["runs"], _n_test_trials, "{}", "n_test_trials, equal for every run")
+    ho = JX(REPORT, ["test_seeds"], _held_out_trials, "{}", "rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x "
+                                                                "test_seeds")
+    total = JX(REPORT, ["runs", "test_seeds"], lambda r, n: _n_test_trials(r) + _held_out_trials(n), "{}",
+               "n_test_trials (equal for every run) + rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x test_seeds")
+    return ["The training data (prereg/14 section 7):", "",
+            "| split | data seeds | grating phase | records: drum speeds and conditions | trials stage A uses: the "
+            "training set; one validation evaluation; one test evaluation |", "|---|---|---|---|---:|",
+            f"| training | {tr_lo}-{tr_hi} | {ph0} for seeds {ph_lo}-{ph_hi}; {uniform} (`default_rng(seed)`) for "
+            f"{ph_next}-{tr_hi} | {J(RECORDS, 'plan/per_split/train', '{:,}')}: rot_left / rot_right at {s[0]}, {s[1]}, "
+            f"{s[2]} and {s[3]} deg/s, static, grey ({n_cond} per data seed) | "
+            f"{J(RUNNER, 'design/n_train_trials', '{:,}')} |",
+            f"| validation | {v_lo}-{v_hi} | {uniform} | {J(RECORDS, 'plan/per_split/val', '{:,}')}, the same "
+            f"{n_cond} conditions | {J(RUNNER, 'design/n_val_trials')} |",
+            f"| test | {t_lo}-{t_hi} | {uniform} | {J(RECORDS, 'plan/per_split/test', '{:,}')}, the same {n_cond} "
+            f"conditions | {total}: {tt} at the training speeds, {ho} held-out rotation trials |", "",
+            f"- **Trials:** one per data seed and condition. Training and validation use rot_left / rot_right at {sp1} "
+            f"and {sp2} deg/s, static and grey; a test evaluation adds rot_left / rot_right at the held-out speeds "
+            f"{held30} and {held90} deg/s. The {J(RUNNER, 'design/n_train_trials', '{:,}')} trials of the training set "
+            f"are not the trials presented: training draws its batches from them, "
+            f"{JX(RUNNER, ['design/steps', 'design/batch'], lambda a, b: a * b, '{:,}', 'steps x batch')} trials per "
+            f"run (How it was trained, below).",
+            "- **Test:** each run was evaluated on the test split once, on the CPU, from its selected checkpoint, after "
+            "training and learning-rate selection; no selection step used it (see "
+            "[Methods and safeguards](#methods-and-safeguards)).",
+            f"- **Held-out speeds:** the {held30} and {held90} deg/s records of the training and validation seeds were "
+            f"read by neither training nor selection; the training code refuses them (`SealedSplitError` in "
+            f"`load_trials` of `train/f5_stageA.py`). The post-hoc analyses (prereg/21, Figure 4) later read the "
+            f"validation records at those speeds through their own reader in `scripts/f5_stageA_posthoc.py`, which "
+            f"bypasses `load_trials` for the held-out speeds only, accepts only validation seeds and refuses every test "
+            f"seed. Apart from that, a few training-seed records at those speeds were opened for file and format checks "
+            f"only (`scripts/f5_stageA_records_report.py`, no statistic of their content), and the SHA-256 of every "
+            f"record is recomputed from its bytes (`scripts/verify_report.py`).",
+            "- **Input:** what the fly's eyes see in these records and how its T4/T5 motion detectors respond is shown "
+            "in [What the fly sees](#what-the-fly-sees).", ""]
+
+
+def _nz4(path):
+    """A mean at 4 decimals; one that would print as -0.0000 goes through the no-negative-zero formula of the Key
+    numbers table."""
+    if "{:.4f}".format(_get(VALID, path)) != "-0.0000":
+        return J(VALID, path, "{:.4f}")
+    return JX(VALID, [path], lambda v: round(v, 4) + 0.0, "{:.4f}", "mean rounded to 4 decimals (+ 0.0: no negative zero)")
+
+
+def _steps(arm):
+    return [r["selected_step"] for r in _load(VALID)["runs"][arm].values()]
+
+
+def lr_decimals(values):
+    """The fewest decimals, at least LR_MIN_DECIMALS, at which the printed values are all distinct."""
+    for d in range(LR_MIN_DECIMALS, 17):
+        if len({f"{v:.{d}f}" for v in values}) == len(values):
+            return d
+    raise SystemExit(f"values equal at every printable precision: {values}")
+
+
+def validation_tables(vs, v_lo, v_hi, seed0):
+    """Validation at the selected checkpoint, one row per arm, and the learning-rate grid of training seed 0 (both from
+    docs/results/f5_stageA_validation.json; its SDs are sample SDs, ddof = 1)."""
+    if vs["sd"] != "sample sd over training seeds, ddof = 1" or vs["split"] != "validation" or vs["test_evaluated"]:
+        raise SystemExit("the validation report is not the validation split with sample SDs")
+    acc = {a: s["best_sign_accuracy"]["mean"] for a, s in vs["summary"].items()}
+    if min(v for a, v in acc.items() if a != "bridge_off") < 0.99:
+        raise SystemExit("an arm other than bridge_off is not near 1 in turn-sign accuracy; the README text differs")
+    L = ["Validation at the selected checkpoint (validation split, descriptive; not the test):", "",
+         "| arm | selected learning rate | runs | best validation loss, mean ± SD | best R2, mean ± SD | best turn-sign "
+         "accuracy, mean | selected step, median (min-max) |", "|---|---:|---:|---:|---:|---:|---:|"]
+    for a, s in vs["summary"].items():
+        if s["n_seeds"] != len(vs["runs"][a]) or (a == "untrained") != (a not in vs["selected_lr"]):
+            raise SystemExit(f"{a}: runs, seeds or selected rate differ")
+        if a == "untrained" and (_steps(a) != [0] or any(s[m]["sd"] is not None for m in ("best_loss", "best_r2"))):
+            raise SystemExit("untrained is not one evaluation at initialisation")
+        ms = [f"{_nz4(f'summary/{a}/{m}/mean')} ± " + ("-" if s[m]["sd"] is None else
+                                                        J(VALID, f"summary/{a}/{m}/sd", "{:.4f}"))
+              for m in ("best_loss", "best_r2")]
+        lr = "-" if a == "untrained" else J(VALID, f"selected_lr/{a}", "{:g}")
+        step = "-" if a == "untrained" else (
+            f"{JX(VALID, [f'runs/{a}'], lambda r: statistics.median(x['selected_step'] for x in r.values()), '{:,.0f}', 'median of selected_step over the runs')} "
+            f"({JX(VALID, [f'runs/{a}'], lambda r: min(x['selected_step'] for x in r.values()), '{:,}', 'min of selected_step over the runs')}-"
+            f"{JX(VALID, [f'runs/{a}'], lambda r: max(x['selected_step'] for x in r.values()), '{:,}', 'max of selected_step over the runs')})")
+        L.append(f"| `{a}` | {lr} | {J(VALID, f'summary/{a}/n_seeds')} | {ms[0]} | {ms[1]} | "
+                 f"{J(VALID, f'summary/{a}/best_sign_accuracy/mean', '{:.3f}')} | {step} |")
+    bo, un = (J(VALID, f"summary/{a}/best_sign_accuracy/mean", "{:.3f}") for a in ("bridge_off", "untrained"))
+    L += ["", f"Validation data seeds {v_lo}-{v_hi}, {J(RUNNER, 'design/n_val_trials')} trials per evaluation. Best: at "
+              f"the selected checkpoint, the evaluation with the lowest validation loss. SD: {J(VALID, 'sd')}. "
+              f"`untrained` is one evaluation at initialisation (no learning rate, no SD). Turn-sign accuracy is at or "
+              f"near ceiling in every arm but `bridge_off` ({bo}), and `untrained` already reaches {un} at "
+              f"initialisation, so it separates the arms little (prereg/20 limitation b, see [Limitations](#limitations)); loss and R2 are "
+              f"the informative columns.", ""]
+    grid = _load(RUNNER)["design"]["lr_grid"]
+    dmin = C("scripts/readme_text.py", "LR_MIN_DECIMALS")
+    L += [f"<details><summary>Learning-rate grid (training seed {seed0})</summary>", "",
+          "| arm | " + " | ".join(f"lr {J(RUNNER, f'design/lr_grid/{i}', '{:g}')}" for i in range(len(grid))) + " |",
+          "|---|" + "---:|" * len(grid)]
+    for a, g in vs["lr_grid"].items():
+        losses = [x["final_val_loss"] for x in g]
+        if [x["lr"] for x in g] != grid or min(g, key=lambda x: (x["final_val_loss"], x["lr"]))["lr"] != vs["selected_lr"][a]:
+            raise SystemExit(f"{a}: the learning-rate grid or its selection differs from the rule")
+        d = lr_decimals(losses)
+        cells = [J(VALID, f"lr_grid/{a}/{i}/final_val_loss", f"{{:.{d}f}}") for i in range(len(g))]
+        L.append(f"| `{a}` | " + " | ".join(f"**{c}**" if x["lr"] == vs["selected_lr"][a] else c
+                                             for c, x in zip(cells, g)) + " |")
+    if [a for a, g in vs["lr_grid"].items() if len({f"{x['final_val_loss']:.{LR_MIN_DECIMALS}f}" for x in g}) < len(g)] \
+            != ["bridge_off"]:
+        raise SystemExit("an arm other than bridge_off would tie at the minimum decimals; the README text differs")
+    rule = T("docs/results/f5_stageA_validation.md", "lowest final validation loss at training seed 0 (prereg/14 "
+             "section 6); a tie goes to the smaller rate.", "text")
+    L += ["", f"Final validation loss (step {J(RUNNER, 'design/steps', '{:,}')}) of the seed-{seed0} run of each arm "
+              f"at each rate; bold, the selected rate. Selection rule (`docs/results/f5_stageA_validation.md`): {rule} "
+              f"Each arm is printed with the fewest decimals, at least {dmin}, that keep its three values apart; "
+              f"`bridge_off` therefore has more: at {dmin} its values would look tied, which they are not. Every run at "
+              f"the selected rate, seed by seed: "
+              f"[docs/results/f5_stageA_validation.md](docs/results/f5_stageA_validation.md#2-runs-at-the-selected-rate).",
+          "", "</details>", ""]
     return L
 
 
@@ -919,7 +1097,8 @@ def readme():
           f"signs, never changes: the comparison asks whether the real wiring is a better substrate for learning the "
           f"turn command than the same neurons with shuffled wiring. Every arm gets the same data, budget, "
           f"learning-rate selection rule and test (H1, prereg/14 section 1).", "",
-          "The curriculum (prereg/14 section 3):", ""] + table + ["",
+          "The curriculum (prereg/14 section 3):", ""] + table + [""] + training_data(
+        sp1, sp2, held30, held90, v_lo, v_hi, t_lo, t_hi) + [
           "What was trained:", "",
           f"- **The graph:** {J(RUNNER, 'design/n_neurons', '{:,}')} neurons, {J(RUNNER, 'design/n_edges', '{:,}')} "
           f"edges and {J(RUNNER, 'design/n_trainable_graph', '{:,}')} trainable parameters, one gain per edge and one "
@@ -933,10 +1112,7 @@ def readme():
           f"{J(RECORDS, 'completion/input_checks_total')} input checks passed, and the gate-5 check reproduced a "
           f"reference record bit for bit (prereg/14 gate 5).", "",
           "<details><summary>How it was trained</summary>", "",
-          f"- **Data:** {J(RUNNER, 'design/n_train_trials', '{:,}')} training and {J(RUNNER, 'design/n_val_trials')} "
-          f"validation trials (rot_left / rot_right at {sp1} and {sp2} deg/s, static and grey); data seeds: training "
-          f"{JX(SPLITS, ['train'], min, '{}', 'min of train')}-{JX(SPLITS, ['train'], max, '{}', 'max of train')}, "
-          f"validation {v_lo}-{v_hi}, test {t_lo}-{t_hi}.",
+          "- **Data:** the data seeds, records and trials of each split are in the training-data table above.",
           f"- **Optimiser and budget:** Adam, batch {J(RUNNER, 'design/batch')}, {J(RUNNER, 'design/steps', '{:,}')} "
           f"steps, so {JX(RUNNER, ['design/steps', 'design/batch'], lambda a, b: a * b, '{:,}', 'steps x batch')} "
           f"training trials presented per run.",
@@ -1000,7 +1176,7 @@ def readme():
           f"- `mlp` reached the lowest validation loss (selected checkpoints, mean "
           f"{J(VALID, 'summary/mlp/best_loss/mean', '{:.4f}')}).",
           "- The `shuffled` validation loss was still falling at the end of the budget (prereg/20 limitation a; see "
-          "[Limitations](#limitations)).", ""]
+          "[Limitations](#limitations)).", ""] + validation_tables(vs, v_lo, v_hi, seed0)
 
     H(2, "Methods and safeguards")
     rl = _load(RATE_LIF)
@@ -1208,8 +1384,20 @@ def readme():
 
 
 # ── gallery ───────────────────────────────────────────────────────────────────────────────────────────────────────
-def gallery():
+def readme_figures(readme_text):
+    """The figure numbers of the "Figure N |" captions of the README, as "lo-hi" when they have no gap."""
+    nums = sorted({int(n) for n in re.findall(r"(?m)^\*{1,2}Figure (\d+) \|", readme_text)})
+    if not nums:
+        raise SystemExit("the README has no figure captions")
+    if nums == list(range(nums[0], nums[-1] + 1)):
+        return f"{nums[0]}-{nums[-1]}" if len(nums) > 1 else f"{nums[0]}"
+    return ", ".join(map(str, nums[:-1])) + f" and {nums[-1]}"
+
+
+def gallery(readme_text):
+    """docs/FIGURES.md; the range of README figures is read from the "Figure N |" captions of readme_text."""
     CUR["file"] = "docs/FIGURES.md"
+    in_readme = readme_figures(readme_text)
     sup = ROOT / "docs" / "figures" / "supplementary"
     groups = [("Test split", "test_"), ("Validation and learning-rate selection", "validation_"),
               ("Stimulus and visual input", "stimulus_"), ("Video stills", "video_"), ("Alignment", "alignment_")]
@@ -1328,7 +1516,7 @@ def gallery():
     assert [s[1] for s in stills] == [int(x.split("_+")[1][:4]) for x in sorted(f for f in files if f.startswith("video_"))]
     L = ["# Supporting figures", "",
          "Every file of `docs/figures/supplementary/`, by group. Sources, scripts and hashes: "
-         "[figures/README.md](figures/README.md). Figures 1-4 are in the [README](../README.md).", ""]
+         f"[figures/README.md](figures/README.md). Figures {in_readme} are in the [README](../README.md).", ""]
     k = 0
     for title, g in groups:
         L += [f"## {title}", ""]
@@ -1345,7 +1533,8 @@ def gallery():
 def build() -> dict:
     """The three outputs as text, keyed by their path; nothing is written."""
     ENTRIES.clear()
-    texts = {"README.md": readme(), "docs/FIGURES.md": gallery()}
+    rd = readme()
+    texts = {"README.md": rd, "docs/FIGURES.md": gallery(rd)}
     for t in texts.values():
         for bad in ("@", "omerf", "C:\\", "/mnt/c"):
             assert bad not in t, bad

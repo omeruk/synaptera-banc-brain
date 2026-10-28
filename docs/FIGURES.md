@@ -1,6 +1,6 @@
 # Supporting figures
 
-Every file of `docs/figures/supplementary/`, by group. Sources, scripts and hashes: [figures/README.md](figures/README.md). Figures 1-4 are in the [README](../README.md).
+Every file of `docs/figures/supplementary/`, by group. Sources, scripts and hashes: [figures/README.md](figures/README.md). Figures 0-7 are in the [README](../README.md).
 
 ## Test split
 

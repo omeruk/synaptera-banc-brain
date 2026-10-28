@@ -223,6 +223,19 @@ The curriculum (prereg/14 section 3):
 | C | as B, warm-started from B | online frozen FlyVis in the docs/08 closed loop | behaviour cloning, then 5 DAgger rounds (beta = 0) | not run |
 | D | optional | - | needs its own pre-registration before any D run; never part of the section 8 verdict | optional, not run |
 
+The training data (prereg/14 section 7):
+
+| split | data seeds | grating phase | records: drum speeds and conditions | trials stage A uses: the training set; one validation evaluation; one test evaluation |
+|---|---|---|---|---:|
+| training | 0-159 | 0 for seeds 0-39; uniform over one wavelength (`default_rng(seed)`) for 40-159 | 1,600: rot_left / rot_right at 30, 60, 90 and 120 deg/s, static, grey (10 per data seed) | 960 |
+| validation | 160-199 | uniform over one wavelength | 400, the same 10 conditions | 240 |
+| test | 200-239 | uniform over one wavelength | 400, the same 10 conditions | 400: 240 at the training speeds, 160 held-out rotation trials |
+
+- **Trials:** one per data seed and condition. Training and validation use rot_left / rot_right at 60 and 120 deg/s, static and grey; a test evaluation adds rot_left / rot_right at the held-out speeds 30 and 90 deg/s. The 960 trials of the training set are not the trials presented: training draws its batches from them, 32,000 trials per run (How it was trained, below).
+- **Test:** each run was evaluated on the test split once, on the CPU, from its selected checkpoint, after training and learning-rate selection; no selection step used it (see [Methods and safeguards](#methods-and-safeguards)).
+- **Held-out speeds:** the 30 and 90 deg/s records of the training and validation seeds were read by neither training nor selection; the training code refuses them (`SealedSplitError` in `load_trials` of `train/f5_stageA.py`). The post-hoc analyses (prereg/21, Figure 4) later read the validation records at those speeds through their own reader in `scripts/f5_stageA_posthoc.py`, which bypasses `load_trials` for the held-out speeds only, accepts only validation seeds and refuses every test seed. Apart from that, a few training-seed records at those speeds were opened for file and format checks only (`scripts/f5_stageA_records_report.py`, no statistic of their content), and the SHA-256 of every record is recomputed from its bytes (`scripts/verify_report.py`).
+- **Input:** what the fly's eyes see in these records and how its T4/T5 motion detectors respond is shown in [What the fly sees](#what-the-fly-sees).
+
 What was trained:
 
 - **The graph:** 25,818 neurons, 3,020,333 edges and 3,044,835 trainable parameters, one gain per edge and one leak rate per neuron; the 1,316 clamped DN inputs have no leak rate.
@@ -231,7 +244,7 @@ What was trained:
 
 <details><summary>How it was trained</summary>
 
-- **Data:** 960 training and 240 validation trials (rot_left / rot_right at 60 and 120 deg/s, static and grey); data seeds: training 0-159, validation 160-199, test 200-239.
+- **Data:** the data seeds, records and trials of each split are in the training-data table above.
 - **Optimiser and budget:** Adam, batch 16, 2,000 steps, so 32,000 training trials presented per run.
 - **Evaluation and checkpoint:** the full validation set every 50 steps; the checkpoint with the lowest validation loss is kept (prereg/14 section 6).
 - **Learning rate:** the grid {0.001, 0.003, 0.01}; per arm, the rate with the lowest final validation loss at training seed 0 is used for every seed.
@@ -256,6 +269,35 @@ What happened (validation split, descriptive):
 - **Registered secondary comparison** of samples to set accuracy, `true` against `shuffled` (prereg/14 section 8.3: counted on the validation evaluations during training, compared in the test report; no Holm, never a verdict): in favour of `true`, one-sided p = 0.0078 (8/1024).
 - `mlp` reached the lowest validation loss (selected checkpoints, mean 0.0325).
 - The `shuffled` validation loss was still falling at the end of the budget (prereg/20 limitation a; see [Limitations](#limitations)).
+
+Validation at the selected checkpoint (validation split, descriptive; not the test):
+
+| arm | selected learning rate | runs | best validation loss, mean ± SD | best R2, mean ± SD | best turn-sign accuracy, mean | selected step, median (min-max) |
+|---|---:|---:|---:|---:|---:|---:|
+| `true` | 0.01 | 10 | 0.0516 ± 0.0001 | 0.9750 ± 0.0023 | 1.000 | 2,000 (1,900-2,000) |
+| `shuffled` | 0.01 | 10 | 0.0618 ± 0.0008 | 0.9455 ± 0.0032 | 1.000 | 2,000 (1,900-2,000) |
+| `derange` | 0.01 | 10 | 0.0639 ± 0.0052 | 0.9403 ± 0.0130 | 1.000 | 2,000 (1,900-2,000) |
+| `mlp` | 0.003 | 10 | 0.0325 ± 0.0002 | 0.9983 ± 0.0003 | 1.000 | 1,675 (650-2,000) |
+| `linear` | 0.001 | 10 | 0.0546 ± 0.0037 | 0.9621 ± 0.0124 | 0.999 | 1,175 (500-1,950) |
+| `bridge_off` | 0.001 | 5 | 0.2778 ± 0.0000 | 0.0000 ± 0.0000 | 0.500 | 1,800 (950-1,900) |
+| `untrained` | - | 1 | 0.2572 ± - | 0.0837 ± - | 0.994 | - |
+
+Validation data seeds 160-199, 240 trials per evaluation. Best: at the selected checkpoint, the evaluation with the lowest validation loss. SD: sample sd over training seeds, ddof = 1. `untrained` is one evaluation at initialisation (no learning rate, no SD). Turn-sign accuracy is at or near ceiling in every arm but `bridge_off` (0.500), and `untrained` already reaches 0.994 at initialisation, so it separates the arms little (prereg/20 limitation b, see [Limitations](#limitations)); loss and R2 are the informative columns.
+
+<details><summary>Learning-rate grid (training seed 0)</summary>
+
+| arm | lr 0.001 | lr 0.003 | lr 0.01 |
+|---|---:|---:|---:|
+| `true` | 0.0899 | 0.0600 | **0.0520** |
+| `shuffled` | 0.2467 | 0.1166 | **0.0628** |
+| `derange` | 0.1142 | 0.0772 | **0.0616** |
+| `mlp` | 0.0331 | **0.0326** | 0.0378 |
+| `linear` | **0.0670** | 0.2122 | 14.6099 |
+| `bridge_off` | **0.277778** | 0.277784 | 0.277808 |
+
+Final validation loss (step 2,000) of the seed-0 run of each arm at each rate; bold, the selected rate. Selection rule (`docs/results/f5_stageA_validation.md`): lowest final validation loss at training seed 0 (prereg/14 section 6); a tie goes to the smaller rate. Each arm is printed with the fewest decimals, at least 4, that keep its three values apart; `bridge_off` therefore has more: at 4 its values would look tied, which they are not. Every run at the selected rate, seed by seed: [docs/results/f5_stageA_validation.md](docs/results/f5_stageA_validation.md#2-runs-at-the-selected-rate).
+
+</details>
 
 ## Methods and safeguards
 

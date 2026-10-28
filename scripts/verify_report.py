@@ -1786,6 +1786,36 @@ FORMULAS = {
 }
 FORMULAS.update(_ic_formulas())
 
+
+def _test_trials_training_speeds(runs):
+    """n_test_trials of the test report; every run must have the same value."""
+    return _all_equal([r["n_test_trials"] for per_seed in runs.values() for r in per_seed.values()])
+
+
+def _test_trials_held_out(n_test_seeds):
+    """rot_left / rot_right (the rotation stimuli of TRAIN_CONDITIONS) at each speed of HELD_OUT on every test seed."""
+    stimuli = {st for st, _ in _readme_const("train/f5_stageA.py", "TRAIN_CONDITIONS") if st.startswith("rot")}
+    return len(stimuli) * len(_readme_const("train/f5_stageA.py", "HELD_OUT")) * n_test_seeds
+
+
+def _selected_steps(runs):
+    steps = np.array([r["selected_step"] for r in runs.values()])
+    if steps.size == 0:
+        raise ValueError("no runs")
+    return steps
+
+
+# Training tables (the trials of each split; the selected step of each arm)
+FORMULAS.update({
+    "n_test_trials, equal for every run": lambda a, c: _test_trials_training_speeds(a[0]),
+    "rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x test_seeds": lambda a, c: _test_trials_held_out(a[0]),
+    "n_test_trials (equal for every run) + rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x test_seeds":
+        lambda a, c: _test_trials_training_speeds(a[0]) + _test_trials_held_out(a[1]),
+    "median of selected_step over the runs": lambda a, c: float(np.median(_selected_steps(a[0]))),
+    "min of selected_step over the runs": lambda a, c: int(_selected_steps(a[0]).min()),
+    "max of selected_step over the runs": lambda a, c: int(_selected_steps(a[0]).max()),
+})
+
 # Numeric tokens of README.md / docs/FIGURES.md that are not recorded numbers. Categories only; a single number is
 # excluded only with a comment naming its source.
 EXCLUSIONS = [
