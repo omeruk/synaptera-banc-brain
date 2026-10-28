@@ -1,0 +1,556 @@
+{
+ "provenance": {
+  "script": "scripts/readme_visual_input.py",
+  "head_commit": "6ae7e7b7decc4ddba281cd1f780579cab1434054",
+  "renders": {
+   "rot_left_v060_p0": {
+    "file": "runs/f5/stageA/readme_renders/rot_left_v060_p0.npz",
+    "sha256": "c4481afff0c2cc3681f41554c54eec1bb9d2341f1619591e9b913a42ca64187a",
+    "shape": {
+     "L": [
+      300,
+      17185
+     ],
+     "R": [
+      300,
+      16936
+     ]
+    },
+    "dtype": {
+     "L": "float32",
+     "R": "float32"
+    },
+    "t0_condition": 2,
+    "tf_hz": 2.0,
+    "phase_deg": 0.0
+   },
+   "rot_right_v060_p0": {
+    "file": "runs/f5/stageA/readme_renders/rot_right_v060_p0.npz",
+    "sha256": "141e7b844d4020a3b648197738d01d90949bd0e155adfbeb662573b9c4bf4e7e",
+    "shape": {
+     "L": [
+      300,
+      17185
+     ],
+     "R": [
+      300,
+      16936
+     ]
+    },
+    "dtype": {
+     "L": "float32",
+     "R": "float32"
+    },
+    "t0_condition": 1,
+    "tf_hz": 2.0,
+    "phase_deg": 0.0
+   },
+   "rot_left_v120_p0": {
+    "file": "runs/f5/stageA/readme_renders/rot_left_v120_p0.npz",
+    "sha256": "26fc7c2caa65dd2f7e9bba9774ce45b61ba179a1f230fea0a2d1fe906567940a",
+    "shape": {
+     "L": [
+      300,
+      17185
+     ],
+     "R": [
+      300,
+      16936
+     ]
+    },
+    "dtype": {
+     "L": "float32",
+     "R": "float32"
+    },
+    "t0_condition": 2,
+    "tf_hz": 4.0,
+    "phase_deg": 0.0
+   },
+   "rot_right_v120_p0": {
+    "file": "runs/f5/stageA/readme_renders/rot_right_v120_p0.npz",
+    "sha256": "e259d2f71f965713f17309cbef4e5d3f2024e89266b8bc1f64a280e62c3767b6",
+    "shape": {
+     "L": [
+      300,
+      17185
+     ],
+     "R": [
+      300,
+      16936
+     ]
+    },
+    "dtype": {
+     "L": "float32",
+     "R": "float32"
+    },
+    "t0_condition": 1,
+    "tf_hz": 4.0,
+    "phase_deg": 0.0
+   },
+   "static_p0": {
+    "file": "runs/f5/stageA/readme_renders/static_p0.npz",
+    "sha256": "9f3700bec9769186edc22ddbee38b6ec11dde0d20a7532d222d7c49ff53a3efe",
+    "shape": {
+     "L": [
+      300,
+      17185
+     ],
+     "R": [
+      300,
+      16936
+     ]
+    },
+    "dtype": {
+     "L": "float32",
+     "R": "float32"
+    },
+    "t0_condition": 3,
+    "tf_hz": 2.0,
+    "phase_deg": 0.0
+   },
+   "grey": {
+    "file": "runs/f5/stageA/readme_renders/grey.npz",
+    "sha256": "df63cfd61c248d5bd66e763e893e6ee2e30f269853042095d7ce783b11084022",
+    "shape": {
+     "L": [
+      300,
+      17185
+     ],
+     "R": [
+      300,
+      16936
+     ]
+    },
+    "dtype": {
+     "L": "float32",
+     "R": "float32"
+    },
+    "t0_condition": 10,
+    "tf_hz": null,
+    "phase_deg": 0.0
+   }
+  },
+  "boundary_meta_sha256": "7a44641735f84c1e2bda7660b637ebbf74af976a70b748d0cec7f391ae6cec3c",
+  "note": "renders re-made by `render` (not committed); `gate` showed them identical to the originals; the rates are FlyVis boundary-layer rates in Hz, one row per 5 ms interval"
+ },
+ "window": {
+  "window": [
+   100,
+   300
+  ],
+  "n_grey": 100,
+  "interval_ms": 5.0,
+  "note": "input-check window of scripts/f3b1_common.py (interval indices, end exclusive: the whole stimulus after the grey lead-in); not the stage-A analysis window of train/f5_stageA.py"
+ },
+ "subtypes": [
+  "T4a",
+  "T4b",
+  "T4c",
+  "T4d",
+  "T5a",
+  "T5b",
+  "T5c",
+  "T5d"
+ ],
+ "neurons": {
+  "L": {
+   "per_subtype": {
+    "T4a": 720,
+    "T4b": 759,
+    "T4c": 868,
+    "T4d": 792,
+    "T5a": 740,
+    "T5b": 754,
+    "T5c": 770,
+    "T5d": 742
+   },
+   "t4t5_total": 6145
+  },
+  "R": {
+   "per_subtype": {
+    "T4a": 737,
+    "T4b": 748,
+    "T4c": 842,
+    "T4d": 777,
+    "T5a": 743,
+    "T5b": 760,
+    "T5c": 766,
+    "T5d": 727
+   },
+   "t4t5_total": 6100
+  }
+ },
+ "mean_rate_hz": {
+  "rot_left_v060_p0": {
+   "L": {
+    "T4a": 40.56347495804573,
+    "T4b": 7.958749165128246,
+    "T4c": 6.81331432621909,
+    "T4d": 20.227579486490505,
+    "T5a": 47.313018075853215,
+    "T5b": 26.57738092746049,
+    "T5c": 18.422350550519557,
+    "T5d": 15.601572484630386
+   },
+   "R": {
+    "T4a": 19.328839769312136,
+    "T4b": 28.85512758176578,
+    "T4c": 24.94605505208297,
+    "T4d": 21.271302737749643,
+    "T5a": 36.09235877445752,
+    "T5b": 32.16825040744316,
+    "T5c": 5.474356391967038,
+    "T5d": 4.515345070014901
+   }
+  },
+  "rot_right_v060_p0": {
+   "L": {
+    "T4a": 19.81143940504413,
+    "T4b": 29.02004628207191,
+    "T4c": 25.27281671515049,
+    "T4d": 21.624563642759036,
+    "T5a": 35.28008993921582,
+    "T5b": 32.45328027557647,
+    "T5c": 5.869558976509822,
+    "T5d": 4.306723650227476
+   },
+   "R": {
+    "T4a": 41.27205997124527,
+    "T4b": 8.257788431357492,
+    "T4c": 7.2706336106328875,
+    "T4d": 20.16243378157963,
+    "T5a": 46.770003782962405,
+    "T5b": 25.546984076293285,
+    "T5c": 17.23747295174361,
+    "T5d": 15.234324353322402
+   }
+  },
+  "rot_left_v120_p0": {
+   "L": {
+    "T4a": 41.91751665883811,
+    "T4b": 8.046186860491149,
+    "T4c": 8.877638527810753,
+    "T4d": 10.802034946839528,
+    "T5a": 48.3950288561549,
+    "T5b": 24.061731058160966,
+    "T5c": 29.108522271160286,
+    "T5d": 23.296931451001743
+   },
+   "R": {
+    "T4a": 16.771064387357175,
+    "T4b": 32.8187719607543,
+    "T4c": 30.15197572753695,
+    "T4d": 13.471988181813721,
+    "T5a": 27.900962745091068,
+    "T5b": 34.41766788791311,
+    "T5c": 10.593538186787741,
+    "T5d": 7.873716907353464
+   }
+  },
+  "rot_right_v120_p0": {
+   "L": {
+    "T4a": 17.181948646814053,
+    "T4b": 33.0352672143901,
+    "T4c": 30.613460482565895,
+    "T4d": 13.883417918315201,
+    "T5a": 26.803557841430298,
+    "T5b": 33.863298034809,
+    "T5c": 10.128793668869706,
+    "T5d": 7.038511909128565
+   },
+   "R": {
+    "T4a": 42.34842344820464,
+    "T4b": 8.400597079272732,
+    "T4c": 9.349986615344669,
+    "T4d": 10.925463401082663,
+    "T5a": 48.51462243416079,
+    "T5b": 23.894359221900828,
+    "T5c": 28.84827240274554,
+    "T5d": 23.609894582909057
+   }
+  }
+ },
+ "asymmetry": {
+  "formula": "f3b1_brain.a_in(mean left eye, mean right eye) = (l - r) / (l + r + 1), per subtype",
+  "values": {
+   "rot_left_v060_p0": {
+    "T4a": 0.34872438802516464,
+    "T4b": -0.5526113748269392,
+    "T4c": -0.5535131191467311,
+    "T4d": -0.02455884005965286,
+    "T5a": 0.13293773122173297,
+    "T5b": -0.09357787933720373,
+    "T5c": 0.5200685451478957,
+    "T5d": 0.524992692987843
+   },
+   "rot_right_v060_p0": {
+    "T4a": -0.345673500717604,
+    "T4b": 0.5424094128143091,
+    "T4c": 0.5366825096904273,
+    "T4d": 0.034172294135968,
+    "T5a": -0.13834919780082375,
+    "T5b": 0.11705534331329345,
+    "T5c": -0.4715600829279442,
+    "T5d": -0.5319884701698974
+   },
+   "rot_left_v120_p0": {
+    "T4a": 0.4212941877780464,
+    "T4b": -0.5917260113890681,
+    "T4c": -0.5314649565198866,
+    "T4d": -0.10564021491090816,
+    "T5a": 0.26513750178390205,
+    "T5b": -0.17410964154397673,
+    "T5c": 0.4548905848022507,
+    "T5d": 0.47941882836323485
+   },
+   "rot_right_v120_p0": {
+    "T4a": -0.4157660680143357,
+    "T4b": 0.5805153387389872,
+    "T4c": 0.5190840950566834,
+    "T4d": 0.11460994688713418,
+    "T5a": -0.284480899758486,
+    "T5b": 0.16966195179216012,
+    "T5c": -0.46825544176607664,
+    "T5d": -0.5236087535070576
+   }
+  }
+ },
+ "lead_in_mean_hz": {
+  "intervals": [
+   0,
+   100
+  ],
+  "note": "mean T4/T5 rate over intervals 0..N_GREY-1",
+  "values": {
+   "rot_left_v060_p0": {
+    "L": 0.09086890879424472,
+    "R": 0.09107063311592804
+   },
+   "rot_right_v060_p0": {
+    "L": 0.09086890879424472,
+    "R": 0.09107063311592804
+   },
+   "rot_left_v120_p0": {
+    "L": 0.09086890879424472,
+    "R": 0.09107063311592804
+   },
+   "rot_right_v120_p0": {
+    "L": 0.09086890879424472,
+    "R": 0.09107063311592804
+   },
+   "static_p0": {
+    "L": 0.09086890879424472,
+    "R": 0.09107063311592804
+   },
+   "grey": {
+    "L": 0.09086890879424472,
+    "R": 0.09107063311592804
+   }
+  }
+ },
+ "heatmap_vmax_hz": {
+  "value": 150.0,
+  "keys": [
+   "rot_left_v060_p0",
+   "rot_right_v060_p0"
+  ],
+  "note": "numpy percentile 99 (default method) of the T4/T5 rates, both eyes, all intervals",
+  "r_clip_hz": 150.0,
+  "fraction_at_clip": 0.02204586906220226,
+  "clip_source": "sense/vision_flyvis.py R_CLIP (configs r_clip); rates are clipped to it"
+ },
+ "eye_images": {
+  "key": "rot_left_v060_p0",
+  "source": "scripts/f5_stageA_preview.py eye_images() (recomputed; the images are not stored)",
+  "eyes": [
+   "left",
+   "right"
+  ],
+  "hash_of": "np.ascontiguousarray(lum).tobytes(), lum of shape (eye, row, column)",
+  "images": [
+   {
+    "interval": 50,
+    "t_s": null,
+    "shape": [
+     2,
+     512,
+     450
+    ],
+    "dtype": "float64",
+    "sha256": "4c06ae269897584f3baca7b414bd1fc989d5ddabfed83cae03e17f5f83640ce0"
+   },
+   {
+    "interval": 120,
+    "t_s": 0.105,
+    "shape": [
+     2,
+     512,
+     450
+    ],
+    "dtype": "float64",
+    "sha256": "a8d3ddf4c648ada38aebdc98b6908f317c502ddd1c5ecec76614115bc9466cc8"
+   },
+   {
+    "interval": 200,
+    "t_s": 0.505,
+    "shape": [
+     2,
+     512,
+     450
+    ],
+    "dtype": "float64",
+    "sha256": "f60253c37894af7aadb2fd9cfd1f1d74f4e42a8ac377bc2b13be19d6bf20a095"
+   },
+   {
+    "interval": 299,
+    "t_s": 1.0,
+    "shape": [
+     2,
+     512,
+     450
+    ],
+    "dtype": "float64",
+    "sha256": "71c5b26b29ebe244c775dbb4fd560feef9bce8e68b12aeea96770df8275cea14"
+   }
+  ]
+ },
+ "gate": {
+  "comparisons": [
+   {
+    "test": "a",
+    "what": "rot_left_v060_p0 == runs/f5/stageA_gate5/stim_rates.npz rot_left__L/__R",
+    "equal": true
+   },
+   {
+    "test": "a",
+    "what": "rot_right_v060_p0 == runs/f5/stageA_gate5/stim_rates.npz rot_right__L/__R",
+    "equal": true
+   },
+   {
+    "test": "a",
+    "what": "static_p0 == runs/f5/stageA_gate5/stim_rates.npz static__L/__R",
+    "equal": true
+   },
+   {
+    "test": "a",
+    "what": "grey == runs/f5/stageA_gate5/stim_rates.npz grey__L/__R",
+    "equal": true
+   },
+   {
+    "test": "b",
+    "what": "window mean of rot_left_v060_p0 == runs/f5/A/gates/flyvis_wm/rot_left_v060_p0.npy",
+    "equal": true
+   },
+   {
+    "test": "b",
+    "what": "window mean of rot_right_v060_p0 == runs/f5/A/gates/flyvis_wm/rot_right_v060_p0.npy",
+    "equal": true
+   },
+   {
+    "test": "b",
+    "what": "window mean of rot_left_v120_p0 == runs/f5/A/gates/flyvis_wm/rot_left_v120_p0.npy",
+    "equal": true
+   },
+   {
+    "test": "b",
+    "what": "window mean of rot_right_v120_p0 == runs/f5/A/gates/flyvis_wm/rot_right_v120_p0.npy",
+    "equal": true
+   },
+   {
+    "test": "b",
+    "what": "window mean of static_p0 == runs/f5/A/gates/flyvis_wm/static_p0.npy",
+    "equal": true
+   },
+   {
+    "test": "b",
+    "what": "window mean of grey == runs/f5/A/gates/flyvis_wm/grey.npy",
+    "equal": true
+   },
+   {
+    "test": "c",
+    "what": "A_in_T4aT5a p0_v060 rot_left: 0.22329312562942505 == 0.22329312562942505 == 0.22329312562942505",
+    "equal": true
+   },
+   {
+    "test": "c",
+    "what": "A_in_T4aT5a p0_v060 rot_right: -0.22536581754684448 == -0.22536581754684448 == -0.22536581754684448",
+    "equal": true
+   },
+   {
+    "test": "c",
+    "what": "input check p0_v060 passed",
+    "equal": true
+   },
+   {
+    "test": "c",
+    "what": "A_in_T4aT5a p0_v120 rot_left: 0.3331727981567383 == 0.3331727981567383 == 0.3331727981567383",
+    "equal": true
+   },
+   {
+    "test": "c",
+    "what": "A_in_T4aT5a p0_v120 rot_right: -0.3413788974285126 == -0.3413788974285126 == -0.3413788974285126",
+    "equal": true
+   },
+   {
+    "test": "c",
+    "what": "input check p0_v120 passed",
+    "equal": true
+   }
+  ],
+  "covered": {
+   "rot_left_v060_p0": [
+    "a",
+    "b"
+   ],
+   "rot_right_v060_p0": [
+    "a",
+    "b"
+   ],
+   "rot_left_v120_p0": [
+    "b"
+   ],
+   "rot_right_v120_p0": [
+    "b"
+   ],
+   "static_p0": [
+    "a",
+    "b"
+   ],
+   "grey": [
+    "a",
+    "b"
+   ]
+  },
+  "passed": true,
+  "A_in_T4aT5a": {
+   "p0_v060": {
+    "rot_left": {
+     "recomputed": 0.22329312562942505,
+     "input_checks_json": 0.22329312562942505,
+     "records_json": 0.22329312562942505,
+     "equal": true
+    },
+    "rot_right": {
+     "recomputed": -0.22536581754684448,
+     "input_checks_json": -0.22536581754684448,
+     "records_json": -0.22536581754684448,
+     "equal": true
+    }
+   },
+   "p0_v120": {
+    "rot_left": {
+     "recomputed": 0.3331727981567383,
+     "input_checks_json": 0.3331727981567383,
+     "records_json": 0.3331727981567383,
+     "equal": true
+    },
+    "rot_right": {
+     "recomputed": -0.3413788974285126,
+     "input_checks_json": -0.3413788974285126,
+     "records_json": -0.3413788974285126,
+     "equal": true
+    }
+   }
+  }
+ }
+}

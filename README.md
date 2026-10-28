@@ -4,7 +4,7 @@ A simulation test of whether the real wiring of a BANC v888 ventral nerve cord (
 
 Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)
 
-**Contents:** [Result in brief](#result-in-brief) · [The stage-A circuit](#the-stage-a-circuit) · [Activity on the circuit](#activity-on-the-circuit) · [Post-hoc analyses](#post-hoc-analyses) · [How we got here (F0-F3)](#how-we-got-here-f0-f3) · [Key numbers](#key-numbers) · [How it works](#how-it-works) · [Joining two flies: cell types and coordinates](#joining-two-flies-cell-types-and-coordinates) · [Training](#training) · [Methods and safeguards](#methods-and-safeguards) · [Limitations](#limitations) · [Reproduce](#reproduce) · [Repository layout](#repository-layout) · [Data, credits and licences](#data-credits-and-licences) · [Authorship](#authorship) · [How to cite](#how-to-cite)
+**Contents:** [Result in brief](#result-in-brief) · [The stage-A circuit](#the-stage-a-circuit) · [Activity on the circuit](#activity-on-the-circuit) · [Post-hoc analyses](#post-hoc-analyses) · [How we got here (F0-F3)](#how-we-got-here-f0-f3) · [Key numbers](#key-numbers) · [How it works](#how-it-works) · [What the fly sees](#what-the-fly-sees) · [Joining two flies: cell types and coordinates](#joining-two-flies-cell-types-and-coordinates) · [Training](#training) · [Methods and safeguards](#methods-and-safeguards) · [Limitations](#limitations) · [Reproduce](#reproduce) · [Repository layout](#repository-layout) · [Data, credits and licences](#data-credits-and-licences) · [Authorship](#authorship) · [How to cite](#how-to-cite)
 
 <img src="docs/figures/stageA_circuit_direction.gif" width="100%" alt="Animation of the stage-A circuit seen from behind: brain and nerve-cord neurons light up orange or blue by their preference for rightward or leftward drum rotation, above a trace of the turn command for both directions.">
 
@@ -111,6 +111,49 @@ Training seeds: 10 per trained arm, 5 for `bridge_off`.
 
 </details>
 
+## What the fly sees
+
+The drum is rendered for the two FlyGym eyes and passed through FlyVis, whose boundary layer drives the FlyWire v783 brain. T4 and T5 are the direction-selective motion detectors of the fly optic lobe, T4 for ON (brightening) and T5 for OFF (darkening) edges, each in four subtypes, a to d; FlyVis models them (Lappalainen et al., see the references), and the boundary layer carries their rates per eye. The statements below are measurements; no preferred direction is attributed to any subtype.
+
+In the grey lead-in the mean T4/T5 rate is 0.091 Hz in the left eye and 0.091 Hz in the right; during leftward rotation at 60 deg/s the per-subtype, per-eye means over the stimulus lie between 4.5 and 47.3 Hz. With the input asymmetry `A_in = (L - R) / (L + R + 1)` of the mean left-eye and right-eye rates, leftward rotation gives a positive A_in of T4a + T5a (left eye higher: 0.223 at 60 deg/s, 0.333 at 120 deg/s) and rightward rotation a negative one (-0.225 and -0.341). Per subtype, the asymmetry under rightward rotation is close to the negative of that under leftward rotation: their sum is at most 0.049 in absolute value over the subtypes and both speeds, against single asymmetries of up to 0.59.
+
+Over every training and validation seed group (they differ in grating phase), A_in of T4a + T5a is positive for rot_left and negative for rot_right in every group, and its size grows with drum speed: the rot_left mean rises from 0.185 at 30 deg/s to 0.342 at 120 deg/s. The grating phase hardly changes it: the largest SD over speeds and directions is 0.007. All 804 input checks passed (training, validation and test); for the test split only the pass was kept, not the values.
+
+<img src="docs/figures/fig7_visual_input.png" width="100%" alt="Four panels: for each eye, small grey and striped eye images above a space-time plot of luminance with slanted stripes; heat maps of motion-detector rates grouped by subtype over time for both eyes and both rotation directions; dots of the per-subtype eye asymmetry; and the input-check asymmetry per seed group against drum speed.">
+
+**Figure 7 | What the fly sees and how its T4/T5 motion detectors respond.** a, Raw images of the left and right FlyGym eye (the grey lead-in and the first stimulus time, t = 0.105 s) and, per eye, the luminance of the middle image row against time from drum onset and azimuth (positive to the left of the fly; the left plot's axis label applies to both); the drum turns as one body, so the stripes have the same slope in both eyes. b, T4/T5 boundary rates of the left and right eye during leftward and rightward rotation at 60 deg/s; rows are neurons grouped by subtype, so each pixel row averages several neurons; the colour scale runs from 0 to the boundary-layer clip of 150 Hz, which 2.2 % of the plotted rates reach. c, Per-subtype A_in at 60 (circles) and 120 deg/s (squares); blue, rot_left; vermillion, rot_right. d, A_in of T4a + T5a of the input check per seed group (161 training and validation seed groups per speed); the held-out speeds 30 and 90 deg/s on the grey band; dashed lines at ±0.05, the input-check minimum. a-c, training data seed 0, grating phase 0 (the renders were re-made and shown identical to the originals); d, every training and validation seed group of `docs/figures/input_checks.csv`. The original previews are Figures S8-S11 in [docs/FIGURES.md](docs/FIGURES.md).
+
+<details><summary>T4/T5 per subtype</summary>
+
+| subtype | neurons, left / right eye | mean rate, rot_left 60 deg/s, left / right eye (Hz) | A_in, rot_left 60 | A_in, rot_right 60 | A_in, rot_left 120 | A_in, rot_right 120 |
+|---|---:|---:|---:|---:|---:|---:|
+| T4a | 720 / 737 | 40.6 / 19.3 | +0.35 | -0.35 | +0.42 | -0.42 |
+| T4b | 759 / 748 | 8.0 / 28.9 | -0.55 | +0.54 | -0.59 | +0.58 |
+| T4c | 868 / 842 | 6.8 / 24.9 | -0.55 | +0.54 | -0.53 | +0.52 |
+| T4d | 792 / 777 | 20.2 / 21.3 | -0.02 | +0.03 | -0.11 | +0.11 |
+| T5a | 740 / 743 | 47.3 / 36.1 | +0.13 | -0.14 | +0.27 | -0.28 |
+| T5b | 754 / 760 | 26.6 / 32.2 | -0.09 | +0.12 | -0.17 | +0.17 |
+| T5c | 770 / 766 | 18.4 / 5.5 | +0.52 | -0.47 | +0.45 | -0.47 |
+| T5d | 742 / 727 | 15.6 / 4.5 | +0.52 | -0.53 | +0.48 | -0.52 |
+| all | 6,145 / 6,100 | |  |  |  |  |
+
+Mean rates and A_in over the whole stimulus (the input-check window of `scripts/f3b1_common.py`), training data seed 0, grating phase 0; `docs/figures/visual_input.json`.
+
+</details>
+
+<details><summary>The input check over the training data</summary>
+
+| speed (deg/s) | held out? | seed groups (train + val) | A_in rot_left, mean ± SD (min) | A_in rot_right, mean ± SD (max) |
+|---:|---|---:|---:|---:|
+| 30 | yes | 161 | 0.185 ± 0.007 (0.174) | -0.182 ± 0.007 (-0.170) |
+| 60 | no | 161 | 0.224 ± 0.003 (0.220) | -0.223 ± 0.002 (-0.220) |
+| 90 | yes | 161 | 0.280 ± 0.004 (0.272) | -0.281 ± 0.004 (-0.273) |
+| 120 | no | 161 | 0.342 ± 0.005 (0.333) | -0.343 ± 0.004 (-0.334) |
+
+A_in of T4a + T5a over the whole stimulus, one value per seed group and direction (prereg/09 input check: it passes when rot_left and rot_right have opposite signs and both are at least the input-check minimum in size); SD, the sample SD over seed groups (`ddof = 1`); min, the smallest rot_left value; max, the largest (least negative) rot_right value. `docs/figures/input_checks.csv`; the test rows carry only the pass.
+
+</details>
+
 ## Joining two flies: cell types and coordinates
 
 The model joins the brain and the nerve cord by DN cell type; positions in space are used only for the figures.
@@ -180,6 +223,19 @@ The curriculum (prereg/14 section 3):
 | C | as B, warm-started from B | online frozen FlyVis in the docs/08 closed loop | behaviour cloning, then 5 DAgger rounds (beta = 0) | not run |
 | D | optional | - | needs its own pre-registration before any D run; never part of the section 8 verdict | optional, not run |
 
+The training data (prereg/14 section 7):
+
+| split | data seeds | grating phase | records: drum speeds and conditions | trials stage A uses: the training set; one validation evaluation; one test evaluation |
+|---|---|---|---|---:|
+| training | 0-159 | 0 for seeds 0-39; uniform over one wavelength (`default_rng(seed)`) for 40-159 | 1,600: rot_left / rot_right at 30, 60, 90 and 120 deg/s, static, grey (10 per data seed) | 960 |
+| validation | 160-199 | uniform over one wavelength | 400, the same 10 conditions | 240 |
+| test | 200-239 | uniform over one wavelength | 400, the same 10 conditions | 400: 240 at the training speeds, 160 held-out rotation trials |
+
+- **Trials:** one per data seed and condition. Training and validation use rot_left / rot_right at 60 and 120 deg/s, static and grey; a test evaluation adds rot_left / rot_right at the held-out speeds 30 and 90 deg/s. The 960 trials of the training set are not the trials presented: training draws its batches from them, 32,000 trials per run (How it was trained, below).
+- **Test:** each run was evaluated on the test split once, on the CPU, from its selected checkpoint, after training and learning-rate selection; no selection step used it (see [Methods and safeguards](#methods-and-safeguards)).
+- **Held-out speeds:** the 30 and 90 deg/s records of the training and validation seeds were read by neither training nor selection; the training code refuses them (`SealedSplitError` in `load_trials` of `train/f5_stageA.py`). The post-hoc analyses (prereg/21, Figure 4) later read the validation records at those speeds through their own reader in `scripts/f5_stageA_posthoc.py`, which bypasses `load_trials` for the held-out speeds only, accepts only validation seeds and refuses every test seed. Apart from that, a few training-seed records at those speeds were opened for file and format checks only (`scripts/f5_stageA_records_report.py`, no statistic of their content), and the SHA-256 of every record is recomputed from its bytes (`scripts/verify_report.py`).
+- **Input:** what the fly's eyes see in these records and how its T4/T5 motion detectors respond is shown in [What the fly sees](#what-the-fly-sees).
+
 What was trained:
 
 - **The graph:** 25,818 neurons, 3,020,333 edges and 3,044,835 trainable parameters, one gain per edge and one leak rate per neuron; the 1,316 clamped DN inputs have no leak rate.
@@ -188,7 +244,7 @@ What was trained:
 
 <details><summary>How it was trained</summary>
 
-- **Data:** 960 training and 240 validation trials (rot_left / rot_right at 60 and 120 deg/s, static and grey); data seeds: training 0-159, validation 160-199, test 200-239.
+- **Data:** the data seeds, records and trials of each split are in the training-data table above.
 - **Optimiser and budget:** Adam, batch 16, 2,000 steps, so 32,000 training trials presented per run.
 - **Evaluation and checkpoint:** the full validation set every 50 steps; the checkpoint with the lowest validation loss is kept (prereg/14 section 6).
 - **Learning rate:** the grid {0.001, 0.003, 0.01}; per arm, the rate with the lowest final validation loss at training seed 0 is used for every seed.
@@ -213,6 +269,35 @@ What happened (validation split, descriptive):
 - **Registered secondary comparison** of samples to set accuracy, `true` against `shuffled` (prereg/14 section 8.3: counted on the validation evaluations during training, compared in the test report; no Holm, never a verdict): in favour of `true`, one-sided p = 0.0078 (8/1024).
 - `mlp` reached the lowest validation loss (selected checkpoints, mean 0.0325).
 - The `shuffled` validation loss was still falling at the end of the budget (prereg/20 limitation a; see [Limitations](#limitations)).
+
+Validation at the selected checkpoint (validation split, descriptive; not the test):
+
+| arm | selected learning rate | runs | best validation loss, mean ± SD | best R2, mean ± SD | best turn-sign accuracy, mean | selected step, median (min-max) |
+|---|---:|---:|---:|---:|---:|---:|
+| `true` | 0.01 | 10 | 0.0516 ± 0.0001 | 0.9750 ± 0.0023 | 1.000 | 2,000 (1,900-2,000) |
+| `shuffled` | 0.01 | 10 | 0.0618 ± 0.0008 | 0.9455 ± 0.0032 | 1.000 | 2,000 (1,900-2,000) |
+| `derange` | 0.01 | 10 | 0.0639 ± 0.0052 | 0.9403 ± 0.0130 | 1.000 | 2,000 (1,900-2,000) |
+| `mlp` | 0.003 | 10 | 0.0325 ± 0.0002 | 0.9983 ± 0.0003 | 1.000 | 1,675 (650-2,000) |
+| `linear` | 0.001 | 10 | 0.0546 ± 0.0037 | 0.9621 ± 0.0124 | 0.999 | 1,175 (500-1,950) |
+| `bridge_off` | 0.001 | 5 | 0.2778 ± 0.0000 | 0.0000 ± 0.0000 | 0.500 | 1,800 (950-1,900) |
+| `untrained` | - | 1 | 0.2572 ± - | 0.0837 ± - | 0.994 | - |
+
+Validation data seeds 160-199, 240 trials per evaluation. Best: at the selected checkpoint, the evaluation with the lowest validation loss. SD: sample sd over training seeds, ddof = 1. `untrained` is one evaluation at initialisation (no learning rate, no SD). Turn-sign accuracy is at or near ceiling in every arm but `bridge_off` (0.500), and `untrained` already reaches 0.994 at initialisation, so it separates the arms little (prereg/20 limitation b, see [Limitations](#limitations)); loss and R2 are the informative columns.
+
+<details><summary>Learning-rate grid (training seed 0)</summary>
+
+| arm | lr 0.001 | lr 0.003 | lr 0.01 |
+|---|---:|---:|---:|
+| `true` | 0.0899 | 0.0600 | **0.0520** |
+| `shuffled` | 0.2467 | 0.1166 | **0.0628** |
+| `derange` | 0.1142 | 0.0772 | **0.0616** |
+| `mlp` | 0.0331 | **0.0326** | 0.0378 |
+| `linear` | **0.0670** | 0.2122 | 14.6099 |
+| `bridge_off` | **0.277778** | 0.277784 | 0.277808 |
+
+Final validation loss (step 2,000) of the seed-0 run of each arm at each rate; bold, the selected rate. Selection rule (`docs/results/f5_stageA_validation.md`): lowest final validation loss at training seed 0 (prereg/14 section 6); a tie goes to the smaller rate. Each arm is printed with the fewest decimals, at least 4, that keep its three values apart; `bridge_off` therefore has more: at 4 its values would look tied, which they are not. Every run at the selected rate, seed by seed: [docs/results/f5_stageA_validation.md](docs/results/f5_stageA_validation.md#2-runs-at-the-selected-rate).
+
+</details>
 
 ## Methods and safeguards
 

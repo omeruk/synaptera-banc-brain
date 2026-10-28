@@ -214,6 +214,17 @@
    }
   },
   {
+   "string": "0.05",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/f3b1_common.py:INPUT_CHECK_MIN",
+    "format": "{:g}"
+   }
+  },
+  {
    "string": "0.395",
    "files": [
     "README.md"
@@ -399,6 +410,42 @@
    }
   },
   {
+   "string": "120",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/readme_visual_input.py:GATE_SPEEDS",
+    "format": "{}",
+    "formula": "GATE_SPEEDS[1]"
+   }
+  },
+  {
+   "string": "120",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/f5_stageA_records.py:SPEEDS",
+    "format": "{}",
+    "formula": "max of SPEEDS"
+   }
+  },
+  {
+   "string": "120",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/f5_stageA_records.py:SPEEDS",
+    "format": "{}",
+    "formula": "SPEEDS[3]"
+   }
+  },
+  {
    "string": "150",
    "files": [
     "README.md"
@@ -505,6 +552,30 @@
    }
   },
   {
+   "string": "30",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/f5_stageA_records.py:SPEEDS",
+    "format": "{}",
+    "formula": "min of SPEEDS"
+   }
+  },
+  {
+   "string": "30",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/f5_stageA_records.py:SPEEDS",
+    "format": "{}",
+    "formula": "SPEEDS[0]"
+   }
+  },
+  {
    "string": "300",
    "files": [
     "README.md"
@@ -537,6 +608,17 @@
     "code": "scripts/viz_video.py:STILLS",
     "format": "{}",
     "formula": "STILLS[1][1]"
+   }
+  },
+  {
+   "string": "4",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/readme_text.py:LR_MIN_DECIMALS",
+    "format": "{}"
    }
   },
   {
@@ -600,6 +682,30 @@
    }
   },
   {
+   "string": "60",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/readme_visual_input.py:GATE_SPEEDS",
+    "format": "{}",
+    "formula": "GATE_SPEEDS[0]"
+   }
+  },
+  {
+   "string": "60",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/f5_stageA_records.py:SPEEDS",
+    "format": "{}",
+    "formula": "SPEEDS[1]"
+   }
+  },
+  {
    "string": "8",
    "files": [
     "README.md"
@@ -636,6 +742,90 @@
    }
   },
   {
+   "string": "90",
+   "files": [
+    "README.md"
+   ],
+   "kind": "constant",
+   "source": {
+    "code": "scripts/f5_stageA_records.py:SPEEDS",
+    "format": "{}",
+    "formula": "SPEEDS[2]"
+   }
+  },
+  {
+   "string": "+0.03",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v060_p0/T4d",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.11",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v120_p0/T4d",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.12",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v060_p0/T5b",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.13",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v060_p0/T5a",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.17",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v120_p0/T5b",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.27",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v120_p0/T5a",
+    "format": "{:+.2f}"
+   }
+  },
+  {
    "string": "+0.33",
    "files": [
     "README.md"
@@ -648,6 +838,126 @@
    }
   },
   {
+   "string": "+0.35",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v060_p0/T4a",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.42",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v120_p0/T4a",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.45",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v120_p0/T5c",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.48",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v120_p0/T5d",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.52",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v120_p0/T4c",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.52",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v060_p0/T5c",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.52",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v060_p0/T5d",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.54",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v060_p0/T4b",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.54",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v060_p0/T4c",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "+0.58",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v120_p0/T4b",
+    "format": "{:+.2f}"
+   }
+  },
+  {
    "string": "+1.51",
    "files": [
     "README.md"
@@ -656,6 +966,342 @@
    "source": {
     "file": "docs/figures/warp_check.json",
     "key": "mean_signed_diff_um/x",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.02",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v060_p0/T4d",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.09",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v060_p0/T5b",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.11",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v120_p0/T4d",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.14",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v060_p0/T5a",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.17",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v120_p0/T5b",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.170",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "max of A_in_rot_right over the train + val rows at 30 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.182",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "mean of A_in_rot_right over the train + val rows at 30 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.220",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "max of A_in_rot_right over the train + val rows at 60 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.223",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "mean of A_in_rot_right over the train + val rows at 60 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.225",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "gate/A_in_T4aT5a/p0_v060/rot_right/recomputed",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.273",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "max of A_in_rot_right over the train + val rows at 90 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.28",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v120_p0/T5a",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.281",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "mean of A_in_rot_right over the train + val rows at 90 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.334",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "max of A_in_rot_right over the train + val rows at 120 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.341",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "gate/A_in_T4aT5a/p0_v120/rot_right/recomputed",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.343",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "mean of A_in_rot_right over the train + val rows at 120 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "-0.35",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v060_p0/T4a",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.42",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v120_p0/T4a",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.47",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v060_p0/T5c",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.47",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v120_p0/T5c",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.52",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v120_p0/T5d",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.53",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v120_p0/T4c",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.53",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_right_v060_p0/T5d",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.55",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v060_p0/T4b",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.55",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v060_p0/T4c",
+    "format": "{:+.2f}"
+   }
+  },
+  {
+   "string": "-0.59",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "asymmetry/values/rot_left_v120_p0/T4b",
     "format": "{:+.2f}"
    }
   },
@@ -736,6 +1382,156 @@
    }
   },
   {
+   "string": "0.002",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "sample SD (ddof = 1) of A_in_rot_right over the train + val rows at 60 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.003",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "sample SD (ddof = 1) of A_in_rot_left over the train + val rows at 60 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.004",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "sample SD (ddof = 1) of A_in_rot_left over the train + val rows at 90 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.004",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "sample SD (ddof = 1) of A_in_rot_right over the train + val rows at 90 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.004",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "sample SD (ddof = 1) of A_in_rot_right over the train + val rows at 120 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.005",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "sample SD (ddof = 1) of A_in_rot_left over the train + val rows at 120 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.007",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "largest sample SD (ddof = 1) of A_in over speeds and directions, train + val rows",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.007",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "sample SD (ddof = 1) of A_in_rot_left over the train + val rows at 30 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.007",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "sample SD (ddof = 1) of A_in_rot_right over the train + val rows at 30 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.049",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "keys": [
+     "asymmetry/values"
+    ],
+    "formula": "largest |asymmetry(rot_left) + asymmetry(rot_right)| over subtypes and speeds",
+    "format": "{:.3f}"
+   }
+  },
+  {
    "string": "0.057",
    "files": [
     "README.md"
@@ -747,6 +1543,150 @@
      "distance_dependence/slope_um_per_100um"
     ],
     "formula": "slope_um_per_100um / 100",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.091",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "keys": [
+     "lead_in_mean_hz/values"
+    ],
+    "formula": "lead-in mean of eye L, equal for every key",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.091",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "keys": [
+     "lead_in_mean_hz/values"
+    ],
+    "formula": "lead-in mean of eye R, equal for every key",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.105",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "eye_images/images/1/t_s",
+    "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.174",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "min of A_in_rot_left over the train + val rows at 30 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.185",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "mean of A_in_rot_left over the train + val rows at 30 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.220",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "min of A_in_rot_left over the train + val rows at 60 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.223",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "gate/A_in_T4aT5a/p0_v060/rot_left/recomputed",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.224",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "mean of A_in_rot_left over the train + val rows at 60 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.272",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "min of A_in_rot_left over the train + val rows at 90 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.280",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "mean of A_in_rot_left over the train + val rows at 90 deg/s",
     "format": "{:.3f}"
    }
   },
@@ -763,6 +1703,48 @@
    }
   },
   {
+   "string": "0.333",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "gate/A_in_T4aT5a/p0_v120/rot_left/recomputed",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.333",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "min of A_in_rot_left over the train + val rows at 120 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.342",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "mean of A_in_rot_left over the train + val rows at 120 deg/s",
+    "format": "{:.3f}"
+   }
+  },
+  {
    "string": "0.41",
    "files": [
     "README.md"
@@ -771,6 +1753,21 @@
    "source": {
     "file": "docs/figures/warp_check.json",
     "key": "root_soma_um_median",
+    "format": "{:.2f}"
+   }
+  },
+  {
+   "string": "0.59",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "keys": [
+     "asymmetry/values"
+    ],
+    "formula": "largest |asymmetry| over subtypes and keys",
     "format": "{:.2f}"
    }
   },
@@ -1004,6 +2001,18 @@
    }
   },
   {
+   "string": "15.6",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/L/T5d",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "15.8",
    "files": [
     "README.md"
@@ -1013,6 +2022,18 @@
     "file": "docs/figures/warp_check.json",
     "key": "distance_dependence/tertiles/2/median_err_um",
     "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "150",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "heatmap_vmax_hz/r_clip_hz",
+    "format": "{:g}"
    }
   },
   {
@@ -1074,6 +2095,81 @@
    }
   },
   {
+   "string": "161",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "train + val seed groups per speed (equal at every speed)",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "161",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "train + val seed groups at 30 deg/s (count of rows)",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "161",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "train + val seed groups at 60 deg/s (count of rows)",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "161",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "train + val seed groups at 90 deg/s (count of rows)",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "161",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/input_checks.csv",
+    "keys": [
+     "rows"
+    ],
+    "formula": "train + val seed groups at 120 deg/s (count of rows)",
+    "format": "{}"
+   }
+  },
+  {
    "string": "17.1",
    "files": [
     "README.md"
@@ -1107,6 +2203,30 @@
     "file": "docs/figures/transforms.json",
     "key": "landmarks/n_control",
     "format": "{}"
+   }
+  },
+  {
+   "string": "18.4",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/L/T5c",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "19.3",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/R/T4a",
+    "format": "{:.1f}"
    }
   },
   {
@@ -1150,6 +2270,21 @@
    }
   },
   {
+   "string": "2.2",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "keys": [
+     "heatmap_vmax_hz/fraction_at_clip"
+    ],
+    "formula": "fraction x 100 (not rounded)",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "20",
    "files": [
     "README.md"
@@ -1165,6 +2300,18 @@
    }
   },
   {
+   "string": "20.2",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/L/T4d",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "200",
    "files": [
     "README.md"
@@ -1177,6 +2324,18 @@
     ],
     "formula": "min of test",
     "format": "{}"
+   }
+  },
+  {
+   "string": "21.3",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/R/T4d",
+    "format": "{:.1f}"
    }
   },
   {
@@ -1243,6 +2402,30 @@
    }
   },
   {
+   "string": "24.9",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/R/T4c",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "26.6",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/L/T5b",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "264",
    "files": [
     "README.md"
@@ -1276,6 +2459,18 @@
    "source": {
     "file": "docs/figures/transforms.json",
     "key": "transforms/affine/rmse_control_um",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "28.9",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/R/T4b",
     "format": "{:.1f}"
    }
   },
@@ -1316,6 +2511,18 @@
    }
   },
   {
+   "string": "32.2",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/R/T5b",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "320",
    "files": [
     "README.md"
@@ -1337,6 +2544,18 @@
     "file": "docs/figures/warp_check.json",
     "key": "bridged_dns",
     "format": "{}"
+   }
+  },
+  {
+   "string": "36.1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/R/T5a",
+    "format": "{:.1f}"
    }
   },
   {
@@ -1376,6 +2595,33 @@
    }
   },
   {
+   "string": "4.5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "keys": [
+     "mean_rate_hz/rot_left_v060_p0"
+    ],
+    "formula": "min over eyes and subtypes",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "4.5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/R/T5d",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "40",
    "files": [
     "README.md"
@@ -1388,6 +2634,18 @@
     ],
     "formula": "len(val)",
     "format": "{}"
+   }
+  },
+  {
+   "string": "40.6",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/L/T4a",
+    "format": "{:.1f}"
    }
   },
   {
@@ -1428,6 +2686,33 @@
    }
   },
   {
+   "string": "47.3",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "keys": [
+     "mean_rate_hz/rot_left_v060_p0"
+    ],
+    "formula": "max over eyes and subtypes",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "47.3",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/L/T5a",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "48.9",
    "files": [
     "README.md"
@@ -1452,6 +2737,18 @@
    }
   },
   {
+   "string": "5.5",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/R/T5c",
+    "format": "{:.1f}"
+   }
+  },
+  {
    "string": "51",
    "files": [
     "README.md"
@@ -1473,6 +2770,42 @@
     "file": "docs/figures/warp_check.json",
     "key": "excluded_other_tree/n",
     "format": "{}"
+   }
+  },
+  {
+   "string": "6,100",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/t4t5_total",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "6,145",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/t4t5_total",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "6.8",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/L/T4c",
+    "format": "{:.1f}"
    }
   },
   {
@@ -1512,6 +2845,198 @@
    }
   },
   {
+   "string": "720",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/per_subtype/T4a",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "727",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/per_subtype/T5d",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "737",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/per_subtype/T4a",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "740",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/per_subtype/T5a",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "742",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/per_subtype/T5d",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "743",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/per_subtype/T5a",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "748",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/per_subtype/T4b",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "754",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/per_subtype/T5b",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "759",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/per_subtype/T4b",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "760",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/per_subtype/T5b",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "766",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/per_subtype/T5c",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "770",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/per_subtype/T5c",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "777",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/per_subtype/T4d",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "792",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/per_subtype/T4d",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "8.0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "mean_rate_hz/rot_left_v060_p0/L/T4b",
+    "format": "{:.1f}"
+   }
+  },
+  {
+   "string": "842",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/R/per_subtype/T4c",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "865",
    "files": [
     "README.md"
@@ -1521,6 +3046,18 @@
     "file": "docs/figures/transforms.json",
     "key": "vnc/filled",
     "format": "{}"
+   }
+  },
+  {
+   "string": "868",
+   "files": [
+    "README.md"
+   ],
+   "kind": "data",
+   "source": {
+    "file": "docs/figures/visual_input.json",
+    "key": "neurons/L/per_subtype/T4c",
+    "format": "{:,}"
    }
   },
   {
@@ -1602,6 +3139,7 @@
   {
    "string": "0",
    "files": [
+    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "design",
@@ -1614,6 +3152,7 @@
   {
    "string": "0",
    "files": [
+    "README.md",
     "docs/FIGURES.md"
    ],
    "kind": "design",
@@ -1621,6 +3160,30 @@
     "file": "scripts/f5_stageA_preview.py",
     "section": "docstring",
     "match": "(phase 0; never"
+   }
+  },
+  {
+   "string": "0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "**Grating phase.** 0 for data seeds"
+   }
+  },
+  {
+   "string": "0",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "phase.** 0 for data seeds 0-39;"
    }
   },
   {
@@ -1645,6 +3208,18 @@
     "file": "prereg/21_f5_stageA_posthoc_plan.md",
     "section": "3.3",
     "match": "G = 1 is the teacher"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "static, grey (10)."
    }
   },
   {
@@ -1816,6 +3391,18 @@
    }
   },
   {
+   "string": "39",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "phase.** 0 for data seeds 0-39;"
+   }
+  },
+  {
    "string": "4",
    "files": [
     "README.md"
@@ -1825,6 +3412,18 @@
     "file": "prereg/10_f3b2_dn_ensemble.md",
     "section": "4",
     "match": "by exact type, 4 by family)"
+   }
+  },
+  {
+   "string": "40",
+   "files": [
+    "README.md"
+   ],
+   "kind": "design",
+   "source": {
+    "file": "prereg/14_f5_training.md",
+    "section": "7",
+    "match": "`default_rng(seed)` for seeds 40-239."
    }
   },
   {
@@ -2195,6 +3794,93 @@
    }
   },
   {
+   "string": "0.0000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "summary/bridge_off/best_r2/mean"
+    ],
+    "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0001",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0002",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0003",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0008",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.001",
    "files": [
     "README.md"
@@ -2243,6 +3929,18 @@
    }
   },
   {
+   "string": "0.0023",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.0029",
    "files": [
     "README.md"
@@ -2276,6 +3974,42 @@
     "file": "docs/results/f5_stageA_validation.json",
     "key": "selected_lr/mlp",
     "format": "{:g}"
+   }
+  },
+  {
+   "string": "0.0032",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0037",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_loss/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0052",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_loss/sd",
+    "format": "{:.4f}"
    }
   },
   {
@@ -2339,6 +4073,30 @@
    }
   },
   {
+   "string": "0.0124",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0130",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_r2/sd",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.0242",
    "files": [
     "README.md"
@@ -2387,6 +4145,162 @@
    }
   },
   {
+   "string": "0.0326",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/mlp/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0331",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/mlp/0/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0378",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/mlp/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0516",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0520",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/true/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0546",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0600",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/true/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0616",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/derange/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0618",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0628",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/shuffled/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0639",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0670",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/linear/0/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0772",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/derange/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.0833",
    "files": [
     "README.md"
@@ -2398,6 +4312,30 @@
      "summary/untrained/r2/mean"
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0837",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/untrained/best_r2/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.0899",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/true/0/final_val_loss",
     "format": "{:.4f}"
    }
   },
@@ -2429,6 +4367,42 @@
    }
   },
   {
+   "string": "0.1142",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/derange/0/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.1166",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/shuffled/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.2122",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/linear/1/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.2377",
    "files": [
     "README.md"
@@ -2455,6 +4429,18 @@
      "summary/shuffled/g30_r2/mean"
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.2467",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/shuffled/0/final_val_loss",
     "format": "{:.4f}"
    }
   },
@@ -2498,6 +4484,18 @@
    }
   },
   {
+   "string": "0.2572",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/untrained/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.27",
    "files": [
     "README.md"
@@ -2507,6 +4505,54 @@
     "file": "docs/results/summary_f0_f3.json",
     "key": "f0_posdiff/values/0",
     "format": "{}"
+   }
+  },
+  {
+   "string": "0.277778",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/bridge_off/0/final_val_loss",
+    "format": "{:.6f}"
+   }
+  },
+  {
+   "string": "0.277784",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/bridge_off/1/final_val_loss",
+    "format": "{:.6f}"
+   }
+  },
+  {
+   "string": "0.2778",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/best_loss/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.277808",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/bridge_off/2/final_val_loss",
+    "format": "{:.6f}"
    }
   },
   {
@@ -2600,6 +4646,18 @@
    }
   },
   {
+   "string": "0.500",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/bridge_off/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
    "string": "0.575",
    "files": [
     "README.md"
@@ -2663,6 +4721,18 @@
    }
   },
   {
+   "string": "0.9403",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_r2/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.9444",
    "files": [
     "README.md"
@@ -2674,6 +4744,18 @@
      "summary/derange/r2/mean"
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.9455",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_r2/mean",
     "format": "{:.4f}"
    }
   },
@@ -2693,6 +4775,18 @@
    }
   },
   {
+   "string": "0.9621",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_r2/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.9673",
    "files": [
     "README.md"
@@ -2704,6 +4798,18 @@
      "summary/linear/r2/mean"
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
+    "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.9750",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_r2/mean",
     "format": "{:.4f}"
    }
   },
@@ -2810,6 +4916,30 @@
    }
   },
   {
+   "string": "0.994",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/untrained/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "0.9983",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_r2/mean",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "0.9984",
    "files": [
     "README.md"
@@ -2822,6 +4952,18 @@
     ],
     "formula": "mean rounded to 4 decimals (+ 0.0: no negative zero)",
     "format": "{:.4f}"
+   }
+  },
+  {
+   "string": "0.999",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/best_sign_accuracy/mean",
+    "format": "{:.3f}"
    }
   },
   {
@@ -2873,6 +5015,18 @@
    }
   },
   {
+   "string": "1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/untrained/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
    "string": "1,064",
    "files": [
     "README.md"
@@ -2882,6 +5036,21 @@
     "file": "docs/results/f3_dn_crosswalk.json",
     "key": "summary/shared_neurons_flywire",
     "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,175",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/linear"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
    }
   },
   {
@@ -2939,6 +5108,18 @@
    ],
    "kind": "result",
    "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "plan/per_split/train",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,600",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
     "file": "docs/results/f5_stageA_validation.json",
     "key": "summary/shuffled/trials_to_090/mean",
     "format": "{:,.0f}"
@@ -2954,6 +5135,111 @@
     "file": "docs/results/f5_stageA_validation.json",
     "key": "summary/derange/trials_to_090/mean",
     "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "1,675",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/mlp"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "1,800",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/bridge_off"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "1,900",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/true"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,900",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/shuffled"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,900",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/derange"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,900",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/bridge_off"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "1,950",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/linear"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
    }
   },
   {
@@ -3025,6 +5311,54 @@
    "source": {
     "file": "docs/results/f5_stageA_report.json",
     "key": "summary/untrained/sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/true/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/best_sign_accuracy/mean",
+    "format": "{:.3f}"
+   }
+  },
+  {
+   "string": "1.000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/best_sign_accuracy/mean",
     "format": "{:.3f}"
    }
   },
@@ -3128,6 +5462,54 @@
    "source": {
     "file": "docs/results/f5_stageA_validation.json",
     "key": "summary/true/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/shuffled/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/derange/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/mlp/n_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "10",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "summary/linear/n_seeds",
     "format": "{}"
    }
   },
@@ -3243,6 +5625,18 @@
    }
   },
   {
+   "string": "14.6099",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "lr_grid/linear/2/final_val_loss",
+    "format": "{:.4f}"
+   }
+  },
+  {
    "string": "16",
    "files": [
     "README.md"
@@ -3263,6 +5657,21 @@
    "source": {
     "file": "docs/results/f5_stageA_runner.json",
     "key": "design/batch",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "160",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "keys": [
+     "test_seeds"
+    ],
+    "formula": "rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x test_seeds",
     "format": "{}"
    }
   },
@@ -3317,6 +5726,111 @@
    "source": {
     "file": "docs/results/f5_stageA_runner.json",
     "key": "design/steps",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/true"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/true"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/shuffled"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/shuffled"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/derange"
+    ],
+    "formula": "median of selected_step over the runs",
+    "format": "{:,.0f}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/derange"
+    ],
+    "formula": "max of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "2,000",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/mlp"
+    ],
+    "formula": "max of selected_step over the runs",
     "format": "{:,}"
    }
   },
@@ -3377,6 +5891,21 @@
    "source": {
     "file": "docs/results/f5_stageA_report.json",
     "key": "runs/true/t0/n_test_trials",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "240",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "keys": [
+     "runs"
+    ],
+    "formula": "n_test_trials, equal for every run",
     "format": "{}"
    }
   },
@@ -3569,6 +6098,46 @@
    }
   },
   {
+   "string": "400",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_report.json",
+    "keys": [
+     "runs",
+     "test_seeds"
+    ],
+    "formula": "n_test_trials (equal for every run) + rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x test_seeds",
+    "format": "{}"
+   }
+  },
+  {
+   "string": "400",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "plan/per_split/val",
+    "format": "{:,}"
+   }
+  },
+  {
+   "string": "400",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_records.json",
+    "key": "plan/per_split/test",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "454",
    "files": [
     "README.md"
@@ -3642,6 +6211,21 @@
    }
   },
   {
+   "string": "500",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/linear"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
+   }
+  },
+  {
    "string": "53.8",
    "files": [
     "README.md"
@@ -3711,6 +6295,21 @@
     "file": "docs/results/summary_f0_f3.json",
     "key": "b1_max/values/1",
     "format": "{}"
+   }
+  },
+  {
+   "string": "650",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/mlp"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
    }
   },
   {
@@ -3905,7 +6504,7 @@
    "kind": "result",
    "source": {
     "file": "docs/results/f5_stageA_records.json",
-    "key": "completion/input_checks_passed",
+    "key": "completion/input_checks_total",
     "format": "{}"
    }
   },
@@ -3917,7 +6516,7 @@
    "kind": "result",
    "source": {
     "file": "docs/results/f5_stageA_records.json",
-    "key": "completion/input_checks_total",
+    "key": "completion/input_checks_passed",
     "format": "{}"
    }
   },
@@ -3998,6 +6597,21 @@
     ],
     "formula": "level x 100",
     "format": "{}"
+   }
+  },
+  {
+   "string": "950",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "keys": [
+     "runs/bridge_off"
+    ],
+    "formula": "min of selected_step over the runs",
+    "format": "{:,}"
    }
   },
   {
@@ -4154,6 +6768,18 @@
    }
   },
   {
+   "string": "sample sd over training seeds, ddof = 1",
+   "files": [
+    "README.md"
+   ],
+   "kind": "result",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.json",
+    "key": "sd",
+    "format": "{}"
+   }
+  },
+  {
    "string": "signed lateral influence index L_hg3",
    "files": [
     "README.md"
@@ -4283,6 +6909,17 @@
    "kind": "text",
    "source": {
     "file": "prereg/14_f5_training.md",
+    "verbatim": true
+   }
+  },
+  {
+   "string": "lowest final validation loss at training seed 0 (prereg/14 section 6); a tie goes to the smaller rate.",
+   "files": [
+    "README.md"
+   ],
+   "kind": "text",
+   "source": {
+    "file": "docs/results/f5_stageA_validation.md",
     "verbatim": true
    }
   },

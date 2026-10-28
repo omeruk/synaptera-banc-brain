@@ -4,7 +4,8 @@
     env -u PYTHONPATH python scripts/readme_text.py --check      # exit 1 if a committed output differs; writes nothing
 
 Writes README.md, docs/FIGURES.md and docs/readme_numbers.json. No number is typed here (CLAUDE.md rule 11): each one
-is read from a committed JSON (docs/results/*.json, docs/figures/*.json, configs/f5_splits.json), from a code constant
+is read from a committed JSON (docs/results/*.json, docs/figures/*.json, configs/f5_splits.json) or a committed CSV
+(docs/figures/input_checks.csv, loaded as {"rows": [...]} by csv.DictReader, so its key is "rows"), from a code constant
 (parsed from the source, not imported), or from the text of a pre-registration, and docs/readme_numbers.json records
 for each printed string the file(s) it appears in and its source. References and the commands of the Reproduce
 section are copied from repository files and checked against them. Refuses to overwrite an existing output without
@@ -12,8 +13,10 @@ section are copied from repository files and checked against them. Refuses to ov
 """
 import argparse
 import ast
+import csv
 import json
 import re
+import statistics
 import sys
 from pathlib import Path
 
@@ -35,11 +38,13 @@ BENCH = "docs/results/f5_benchmark.json"
 SPLITS = "configs/f5_splits.json"
 TRANSFORMS = "docs/figures/transforms.json"
 WARP = "docs/figures/warp_check.json"
+VI, ICSV = "docs/figures/visual_input.json", "docs/figures/input_checks.csv"
 P19 = "prereg/19_f5_gpu_reproducibility_bridge_units_readout.md"
 P14, P21 = "prereg/14_f5_training.md", "prereg/21_f5_stageA_posthoc_plan.md"
 REPO_URL = "https://github.com/omeruk/synaptera-banc-brain"
 AUTHOR = "Ömer Faruk Topal, Department of Geomatics Engineering, Istanbul Technical University."
 CREDIT = "Designed and directed by Ömer Faruk Topal; implemented with the help of Claude Code (Anthropic)."
+LR_MIN_DECIMALS = 4            # learning-rate grid table: at least this many decimals, more where an arm's values would tie
 
 ENTRIES = []
 CUR = {"file": None}
@@ -47,8 +52,13 @@ _JSON = {}
 
 
 def _load(f):
+    """A committed JSON, or a committed CSV as {"rows": [one dict per row]}."""
     if f not in _JSON:
-        _JSON[f] = json.loads((ROOT / f).read_text())
+        if f.endswith(".csv"):
+            with open(ROOT / f, newline="") as fh:
+                _JSON[f] = {"rows": list(csv.DictReader(fh))}
+        else:
+            _JSON[f] = json.loads((ROOT / f).read_text())
     return _JSON[f]
 
 
@@ -179,6 +189,357 @@ def img(src, alt):
     return f'<img src="{src}" width="100%" alt="{alt.replace("`", "")}">'
 
 
+# ── What the fly sees (Figure 7) ──────────────────────────────────────────────────────────────────────────────────
+def _ic_sel(rows, v):
+    """The train and validation rows of input_checks.csv at drum speed v (test rows carry no values)."""
+    sel = [r for r in rows if r["split"] in ("train", "val") and int(r["speed_deg_s"]) == v]
+    if not sel:
+        raise SystemExit(f"{ICSV}: no train / val rows at {v} deg/s")
+    return sel
+
+
+def _ic_vals(rows, v, col):
+    return [float(r[col]) for r in _ic_sel(rows, v)]
+
+
+def IC(v, what, col=None, fmt="{:.3f}"):
+    """A statistic of the train + val rows of input_checks.csv at speed v; every SD is the sample SD (ddof = 1)."""
+    fns = {"n": (lambda rows: len(_ic_sel(rows, v)), f"train + val seed groups at {v} deg/s (count of rows)"),
+           "mean": (lambda rows: statistics.mean(_ic_vals(rows, v, col)),
+                    f"mean of {col} over the train + val rows at {v} deg/s"),
+           "sd": (lambda rows: statistics.stdev(_ic_vals(rows, v, col)),
+                  f"sample SD (ddof = 1) of {col} over the train + val rows at {v} deg/s"),
+           "min": (lambda rows: min(_ic_vals(rows, v, col)), f"min of {col} over the train + val rows at {v} deg/s"),
+           "max": (lambda rows: max(_ic_vals(rows, v, col)), f"max of {col} over the train + val rows at {v} deg/s")}
+    fn, formula = fns[what]
+    return JX(ICSV, ["rows"], fn, "{}" if what == "n" else fmt, formula)
+
+
+def what_the_fly_sees(fw):
+    """The body of the section "What the fly sees": text, Figure 7 and its two tables."""
+    vi, rows = _load(VI), _load(ICSV)["rows"]
+    rec = _load(RECORDS)["completion"]
+    subtypes = vi["subtypes"]
+    speeds = _const("scripts/f5_stageA_records.py", "SPEEDS")
+    held = _const("train/f5_stageA.py", "HELD_OUT")
+    gs = _const("scripts/readme_visual_input.py", "GATE_SPEEDS")
+    used = [r for r in rows if r["split"] in ("train", "val")]
+    # the statements below, checked against the data before they are printed
+    if sorted({int(r["speed_deg_s"]) for r in used}) != sorted(speeds):
+        raise SystemExit("input_checks.csv: the train / val speeds differ from SPEEDS")
+    if not all(float(r["A_in_rot_left"]) > 0 > float(r["A_in_rot_right"]) for r in used):
+        raise SystemExit("input_checks.csv: a train / val group without rot_left > 0 > rot_right")
+    for col, sgn in (("A_in_rot_left", 1), ("A_in_rot_right", -1)):
+        m = [sgn * statistics.mean(_ic_vals(rows, v, col)) for v in sorted(speeds)]
+        if not all(a < b for a, b in zip(m, m[1:])):
+            raise SystemExit(f"input_checks.csv: |mean {col}| does not grow with speed")
+    if not (rec["input_checks_passed"] == rec["input_checks_total"] == len(rows)
+            and rec["input_checks"]["test"]["values_kept"] == 0
+            and all(r["A_in_rot_left"] == r["A_in_rot_right"] == "" for r in rows if r["split"] == "test")):
+        raise SystemExit("not every input check passed, or test values were kept; the README text differs")
+    for k in ("rot_left", "rot_right"):
+        for v in gs:
+            a = vi["gate"]["A_in_T4aT5a"][f"p0_v{v:03d}"][k]["recomputed"]
+            if (a > 0) != (k == "rot_left"):
+                raise SystemExit(f"gate A_in of {k} at {v} deg/s has the other sign; the README text differs")
+    imgs = vi["eye_images"]["images"]
+    if not (imgs[0]["t_s"] is None and imgs[1]["t_s"] is not None):
+        raise SystemExit("the first two eye images are not the grey lead-in and the first stimulus time")
+    if vi["heatmap_vmax_hz"]["value"] != vi["heatmap_vmax_hz"]["r_clip_hz"]:
+        raise SystemExit("the heat-map colour limit is not the boundary-layer clip; the caption differs")
+
+    v1 = C("scripts/readme_visual_input.py", "GATE_SPEEDS", fn=lambda g: g[0], formula="GATE_SPEEDS[0]")
+    v2 = C("scripts/readme_visual_input.py", "GATE_SPEEDS", fn=lambda g: g[1], formula="GATE_SPEEDS[1]")
+    h30 = C("train/f5_stageA.py", "HELD_OUT", fn=lambda h: h["secondary"], formula="HELD_OUT['secondary']")
+    h90 = C("train/f5_stageA.py", "HELD_OUT", fn=lambda h: h["primary"], formula="HELD_OUT['primary']")
+    k1 = f"rot_left_v{gs[0]:03d}_p0"
+    lead = {e: JX(VI, ["lead_in_mean_hz/values"],
+                  lambda d, e=e: _same([x[e] for x in d.values()]), "{:.3f}",
+                  f"lead-in mean of eye {e}, equal for every key") for e in ("L", "R")}
+    lo = JX(VI, [f"mean_rate_hz/{k1}"], lambda d: min(min(x.values()) for x in d.values()), "{:.1f}",
+            "min over eyes and subtypes")
+    hi = JX(VI, [f"mean_rate_hz/{k1}"], lambda d: max(max(x.values()) for x in d.values()), "{:.1f}",
+            "max over eyes and subtypes")
+    gate = {(k, v): J(VI, f"gate/A_in_T4aT5a/p0_v{v:03d}/{k}/recomputed", "{:.3f}")
+            for k in ("rot_left", "rot_right") for v in gs}
+    sym = JX(VI, ["asymmetry/values"], _max_sum, "{:.3f}",
+             "largest |asymmetry(rot_left) + asymmetry(rot_right)| over subtypes and speeds")
+    big = JX(VI, ["asymmetry/values"], lambda d: max(abs(x) for k in d.values() for x in k.values()), "{:.2f}",
+             "largest |asymmetry| over subtypes and keys")
+    sd_max = JX(ICSV, ["rows"], lambda r: max(statistics.stdev(_ic_vals(r, v, c)) for v in speeds
+                                              for c in ("A_in_rot_left", "A_in_rot_right")), "{:.3f}",
+                "largest sample SD (ddof = 1) of A_in over speeds and directions, train + val rows")
+    n_same = JX(ICSV, ["rows"], lambda r: _same([len(_ic_sel(r, v)) for v in speeds]), "{}",
+                "train + val seed groups per speed (equal at every speed)")
+    s_lo, s_hi = min(speeds), max(speeds)
+    m_lo, m_hi = IC(s_lo, "mean", "A_in_rot_left"), IC(s_hi, "mean", "A_in_rot_left")
+    pv = "scripts/f5_stageA_preview.py"
+    stim_seed = P(pv, "docstring", r"training data seed (\d+) \(phase")
+    stim_phase = P(pv, "docstring", r"\(phase (\d+); never")
+    pct = JX(VI, ["heatmap_vmax_hz/fraction_at_clip"], lambda f: 100 * f, "{:.1f}", "fraction x 100 (not rounded)")
+    L = [f"The drum is rendered for the two FlyGym eyes and passed through FlyVis, whose boundary layer drives the "
+          f"{fw} brain. T4 and T5 are the direction-selective motion detectors of the fly optic lobe, T4 for ON "
+          f"(brightening) and T5 for OFF (darkening) edges, each in four subtypes, a to d; FlyVis models them "
+          f"(Lappalainen et al., see the references), and the boundary layer carries their rates per eye. The "
+          f"statements below are measurements; no preferred direction is attributed to any subtype.", "",
+          f"In the grey lead-in the mean T4/T5 rate is {lead['L']} Hz in the left eye and {lead['R']} Hz in the "
+          f"right; during leftward rotation at {v1} deg/s the per-subtype, per-eye means over the stimulus lie between {lo} and "
+          f"{hi} Hz. With the input asymmetry `A_in = (L - R) / (L + R + 1)` of the mean left-eye and right-eye rates, "
+          f"leftward rotation gives a positive A_in of T4a + T5a (left eye higher: {gate[('rot_left', gs[0])]} at {v1} "
+          f"deg/s, {gate[('rot_left', gs[1])]} at {v2} deg/s) and rightward rotation a negative one "
+          f"({gate[('rot_right', gs[0])]} and {gate[('rot_right', gs[1])]}). Per subtype, the asymmetry under rightward "
+          f"rotation is close to the negative of that under leftward rotation: their sum is at most {sym} in absolute "
+          f"value over the subtypes and both speeds, against single asymmetries of up to {big}.", "",
+          f"Over every training and validation seed group (they differ in grating phase), A_in of T4a + T5a is "
+          f"positive for rot_left and negative for rot_right in every group, and its size grows with drum speed: the "
+          f"rot_left mean rises from {m_lo} at {C('scripts/f5_stageA_records.py', 'SPEEDS', fn=min, formula='min of SPEEDS')} "
+          f"deg/s to {m_hi} at {C('scripts/f5_stageA_records.py', 'SPEEDS', fn=max, formula='max of SPEEDS')} deg/s. "
+          f"The grating phase hardly changes it: the largest SD over speeds and directions is {sd_max}. All "
+          f"{J(RECORDS, 'completion/input_checks_total')} input checks passed (training, validation and test); for the test split only the pass was kept, not the values.",
+          "",
+          img("docs/figures/fig7_visual_input.png",
+              "Four panels: for each eye, small grey and striped eye images above a space-time plot of luminance with "
+              "slanted stripes; heat maps of motion-detector rates grouped by subtype over time for both eyes and both "
+              "rotation directions; dots of the per-subtype eye asymmetry; and the input-check asymmetry per seed "
+              "group against drum speed."), "",
+          f"**Figure 7 | What the fly sees and how its T4/T5 motion detectors respond.** a, Raw images of the left and "
+          f"right FlyGym eye (the grey lead-in and the first stimulus time, t = "
+          f"{J(VI, 'eye_images/images/1/t_s', '{:g}')} s) and, per eye, the luminance of the middle image row against "
+          f"time from drum onset and azimuth (positive to the left of the fly; the left plot's axis label applies to "
+          f"both); the drum turns as one body, so the stripes have the same slope in both eyes. b, T4/T5 boundary "
+          f"rates of the left and right eye during leftward and rightward rotation at {v1} deg/s; rows are neurons "
+          f"grouped by subtype, so each pixel row averages several neurons; the colour scale runs from 0 to the "
+          f"boundary-layer clip of {J(VI, 'heatmap_vmax_hz/r_clip_hz', '{:g}')} Hz, which {pct} % of the plotted "
+          f"rates reach. c, Per-subtype A_in at {v1} (circles) and {v2} deg/s (squares); blue, rot_left; vermillion, rot_right. d, A_in of T4a + T5a of the input check per seed "
+          f"group ({n_same} training and validation seed groups per speed); the held-out speeds {h30} and {h90} deg/s on "
+          f"the grey band; dashed lines at ±{C('scripts/f3b1_common.py', 'INPUT_CHECK_MIN', '{:g}')}, the input-check "
+          f"minimum. a-c, training data seed {stim_seed}, grating phase {stim_phase} (the renders were re-made and shown "
+          f"identical to the originals); d, every training and validation seed group of `docs/figures/input_checks.csv`. "
+          f"The original previews are Figures S8-S11 in [docs/FIGURES.md](docs/FIGURES.md).", ""]
+    hdr = [f"rot_left {v1}", f"rot_right {v1}", f"rot_left {v2}", f"rot_right {v2}"]
+    keys = [f"{k}_v{v:03d}_p0" for v in gs for k in ("rot_left", "rot_right")]
+    L += ["<details><summary>T4/T5 per subtype</summary>", "",
+          f"| subtype | neurons, left / right eye | mean rate, rot_left {v1} deg/s, left / right eye (Hz) | "
+          + " | ".join(f"A_in, {h}" for h in hdr) + " |",
+          "|---|---:|---:|" + "---:|" * len(hdr)]
+    for t in subtypes:
+        L.append(f"| {t} | {J(VI, f'neurons/L/per_subtype/{t}', '{:,}')} / {J(VI, f'neurons/R/per_subtype/{t}', '{:,}')} "
+                 f"| {J(VI, f'mean_rate_hz/{k1}/L/{t}', '{:.1f}')} / {J(VI, f'mean_rate_hz/{k1}/R/{t}', '{:.1f}')} | "
+                 + " | ".join(J(VI, f"asymmetry/values/{k}/{t}", "{:+.2f}") for k in keys) + " |")
+    L += [f"| all | {J(VI, 'neurons/L/t4t5_total', '{:,}')} / {J(VI, 'neurons/R/t4t5_total', '{:,}')} | | "
+          + " | " * (len(hdr) - 1) + " |", "",
+          "Mean rates and A_in over the whole stimulus (the input-check window of `scripts/f3b1_common.py`), training "
+          f"data seed {stim_seed}, grating phase {stim_phase}; `docs/figures/visual_input.json`.", "", "</details>", ""]
+    L += ["<details><summary>The input check over the training data</summary>", "",
+          "| speed (deg/s) | held out? | seed groups (train + val) | A_in rot_left, mean ± SD (min) | "
+          "A_in rot_right, mean ± SD (max) |", "|---:|---|---:|---:|---:|"]
+    for i, v in enumerate(speeds):
+        L.append(f"| {C('scripts/f5_stageA_records.py', 'SPEEDS', fn=lambda s, i=i: s[i], formula=f'SPEEDS[{i}]')} | "
+                 f"{'yes' if v in held.values() else 'no'} | {IC(v, 'n')} | "
+                 f"{IC(v, 'mean', 'A_in_rot_left')} ± {IC(v, 'sd', 'A_in_rot_left')} ({IC(v, 'min', 'A_in_rot_left')}) | "
+                 f"{IC(v, 'mean', 'A_in_rot_right')} ± {IC(v, 'sd', 'A_in_rot_right')} "
+                 f"({IC(v, 'max', 'A_in_rot_right')}) |")
+    L += ["", "A_in of T4a + T5a over the whole stimulus, one value per seed group and direction (prereg/09 input "
+          "check: it passes when rot_left and rot_right have opposite signs and both are at least the input-check "
+          "minimum in size); SD, the sample SD over seed groups (`ddof = 1`); min, the smallest rot_left value; max, "
+          "the largest (least negative) rot_right value. `docs/figures/input_checks.csv`; the test rows carry only the "
+          "pass.", "", "</details>", ""]
+    return L
+
+
+# ── Training tables ───────────────────────────────────────────────────────────────────────────────────────────────
+def _held_out_trials(n_test_seeds):
+    """Rotation trials of the held-out speeds per test evaluation: every rotation stimulus of TRAIN_CONDITIONS at every
+    speed of HELD_OUT, on every test seed (the groups of A.TEST_GROUPS, as scripts/f5_stageA_report.py checks)."""
+    cond, held = _const("train/f5_stageA.py", "TRAIN_CONDITIONS"), _const("train/f5_stageA.py", "HELD_OUT")
+    return len({s for s, _ in cond if s.startswith("rot")}) * len(held) * n_test_seeds
+
+
+def _n_test_trials(runs):
+    return _same([r["n_test_trials"] for arm in runs.values() for r in arm.values()])
+
+
+def training_data(sp1, sp2, held30, held90, v_lo, v_hi, t_lo, t_hi):
+    """The training-data table: data seeds and grating phase (prereg/14 section 7), records per split (the records
+    plan), the trials stage A uses (the runner design and the test report). The counts are checked against the split
+    file and the conditions, and the statements of the held-out-speed note against the code, before printing."""
+    sp, plan = _load(SPLITS), _load(RECORDS)["plan"]
+    rn, rep = _load(RUNNER)["design"], _load(REPORT)
+    cond = _const("train/f5_stageA.py", "TRAIN_CONDITIONS")
+    speeds = _const("scripts/f5_stageA_records.py", "SPEEDS")
+    held = _const("train/f5_stageA.py", "HELD_OUT")
+    n_cond = P(P14, "7", r"static, grey \((\d+)\)\.")
+    ph0 = P(P14, "7", r"\*\*Grating phase\.\*\* (\d+) for data seeds")
+    ph_lo = P(P14, "7", r"phase\.\*\* \d+ for data seeds (\d+)-\d+;")
+    ph_hi = P(P14, "7", r"phase\.\*\* \d+ for data seeds \d+-(\d+);")
+    ph_next = P(P14, "7", r"`default_rng\(seed\)` for seeds (\d+)-\d+\.")
+    m = re.search(r"^PHASE0_SEEDS = range\((\d+), (\d+)\)$", (ROOT / "scripts/f5_stageA_records.py").read_text(), re.M)
+    if not m or (int(m.group(1)), int(m.group(2)) - 1) != (int(ph_lo), int(ph_hi)) or int(ph_next) != int(ph_hi) + 1:
+        raise SystemExit("the phase-0 seeds of scripts/f5_stageA_records.py differ from prereg/14 section 7")
+    if not (min(sp["train"]) == int(ph_lo) and int(ph_next) <= max(sp["train"]) < min(sp["val"])):
+        raise SystemExit("the phase-0 seeds are not the first training seeds")
+    if sorted(speeds) != sorted({v for _, v in cond if v} | set(held.values())):
+        raise SystemExit("the record speeds are not the training plus the held-out speeds")
+    for s in ("train", "val", "test"):
+        if plan["per_split"][s] != len(sp[s]) * int(n_cond):
+            raise SystemExit(f"{s}: the records are not {n_cond} conditions per data seed")
+    if sum(plan["per_split"].values()) != plan["n_records"]:
+        raise SystemExit("the records per split do not add up to the records")
+    n_tt, n_ho = _n_test_trials(rep["runs"]), _held_out_trials(rep["test_seeds"])
+    if (rn["n_train_trials"], rn["n_val_trials"], n_tt) != tuple(len(sp[s]) * len(cond) for s in ("train", "val", "test")):
+        raise SystemExit("the stage-A trials are not one per data seed and training condition")
+    if rep["test_seeds"] != len(sp["test"]) or n_tt + n_ho != plan["per_split"]["test"]:
+        raise SystemExit("a test evaluation does not use every test record once")
+    for code_file, needle in (
+            ("train/f5_stageA.py", 'raise SealedSplitError("the held-out drum speeds (90, 30 deg/s) are read only by '
+                                   'the final evaluation")'),
+            ("scripts/f5_stageA_posthoc.py", "raise A.SealedSplitError(f\"data seed {seed} is a sealed test seed; the "
+                                             "post-hoc reader never reads it\")"),
+            ("scripts/f5_stageA_posthoc.py", 'raise PosthocRefusal(f"data seed {seed} is not a validation seed '
+                                             '160-199")'),
+            ("scripts/f5_stageA_posthoc.py", 'data_cache[key] = A.load_trials("val", setup, bridge, A.TRAIN_CONDITIONS)'),
+            ("scripts/f5_stageA_records_report.py", '"""File integrity and record format of one training-seed record; no '
+                                                    'statistic of its content."""')):
+        if needle not in (ROOT / code_file).read_text():
+            raise SystemExit(f"{code_file} no longer contains {needle!r}; the held-out-speed note differs")
+    tr_lo, tr_hi = JX(SPLITS, ["train"], min, "{}", "min of train"), JX(SPLITS, ["train"], max, "{}", "max of train")
+    s = [C("scripts/f5_stageA_records.py", "SPEEDS", fn=lambda x, i=i: x[i], formula=f"SPEEDS[{i}]")
+         for i in range(len(speeds))]
+    uniform = "uniform over one wavelength"
+    tt = JX(REPORT, ["runs"], _n_test_trials, "{}", "n_test_trials, equal for every run")
+    ho = JX(REPORT, ["test_seeds"], _held_out_trials, "{}", "rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x "
+                                                                "test_seeds")
+    total = JX(REPORT, ["runs", "test_seeds"], lambda r, n: _n_test_trials(r) + _held_out_trials(n), "{}",
+               "n_test_trials (equal for every run) + rotation stimuli of TRAIN_CONDITIONS x len(HELD_OUT) x test_seeds")
+    return ["The training data (prereg/14 section 7):", "",
+            "| split | data seeds | grating phase | records: drum speeds and conditions | trials stage A uses: the "
+            "training set; one validation evaluation; one test evaluation |", "|---|---|---|---|---:|",
+            f"| training | {tr_lo}-{tr_hi} | {ph0} for seeds {ph_lo}-{ph_hi}; {uniform} (`default_rng(seed)`) for "
+            f"{ph_next}-{tr_hi} | {J(RECORDS, 'plan/per_split/train', '{:,}')}: rot_left / rot_right at {s[0]}, {s[1]}, "
+            f"{s[2]} and {s[3]} deg/s, static, grey ({n_cond} per data seed) | "
+            f"{J(RUNNER, 'design/n_train_trials', '{:,}')} |",
+            f"| validation | {v_lo}-{v_hi} | {uniform} | {J(RECORDS, 'plan/per_split/val', '{:,}')}, the same "
+            f"{n_cond} conditions | {J(RUNNER, 'design/n_val_trials')} |",
+            f"| test | {t_lo}-{t_hi} | {uniform} | {J(RECORDS, 'plan/per_split/test', '{:,}')}, the same {n_cond} "
+            f"conditions | {total}: {tt} at the training speeds, {ho} held-out rotation trials |", "",
+            f"- **Trials:** one per data seed and condition. Training and validation use rot_left / rot_right at {sp1} "
+            f"and {sp2} deg/s, static and grey; a test evaluation adds rot_left / rot_right at the held-out speeds "
+            f"{held30} and {held90} deg/s. The {J(RUNNER, 'design/n_train_trials', '{:,}')} trials of the training set "
+            f"are not the trials presented: training draws its batches from them, "
+            f"{JX(RUNNER, ['design/steps', 'design/batch'], lambda a, b: a * b, '{:,}', 'steps x batch')} trials per "
+            f"run (How it was trained, below).",
+            "- **Test:** each run was evaluated on the test split once, on the CPU, from its selected checkpoint, after "
+            "training and learning-rate selection; no selection step used it (see "
+            "[Methods and safeguards](#methods-and-safeguards)).",
+            f"- **Held-out speeds:** the {held30} and {held90} deg/s records of the training and validation seeds were "
+            f"read by neither training nor selection; the training code refuses them (`SealedSplitError` in "
+            f"`load_trials` of `train/f5_stageA.py`). The post-hoc analyses (prereg/21, Figure 4) later read the "
+            f"validation records at those speeds through their own reader in `scripts/f5_stageA_posthoc.py`, which "
+            f"bypasses `load_trials` for the held-out speeds only, accepts only validation seeds and refuses every test "
+            f"seed. Apart from that, a few training-seed records at those speeds were opened for file and format checks "
+            f"only (`scripts/f5_stageA_records_report.py`, no statistic of their content), and the SHA-256 of every "
+            f"record is recomputed from its bytes (`scripts/verify_report.py`).",
+            "- **Input:** what the fly's eyes see in these records and how its T4/T5 motion detectors respond is shown "
+            "in [What the fly sees](#what-the-fly-sees).", ""]
+
+
+def _nz4(path):
+    """A mean at 4 decimals; one that would print as -0.0000 goes through the no-negative-zero formula of the Key
+    numbers table."""
+    if "{:.4f}".format(_get(VALID, path)) != "-0.0000":
+        return J(VALID, path, "{:.4f}")
+    return JX(VALID, [path], lambda v: round(v, 4) + 0.0, "{:.4f}", "mean rounded to 4 decimals (+ 0.0: no negative zero)")
+
+
+def _steps(arm):
+    return [r["selected_step"] for r in _load(VALID)["runs"][arm].values()]
+
+
+def lr_decimals(values):
+    """The fewest decimals, at least LR_MIN_DECIMALS, at which the printed values are all distinct."""
+    for d in range(LR_MIN_DECIMALS, 17):
+        if len({f"{v:.{d}f}" for v in values}) == len(values):
+            return d
+    raise SystemExit(f"values equal at every printable precision: {values}")
+
+
+def validation_tables(vs, v_lo, v_hi, seed0):
+    """Validation at the selected checkpoint, one row per arm, and the learning-rate grid of training seed 0 (both from
+    docs/results/f5_stageA_validation.json; its SDs are sample SDs, ddof = 1)."""
+    if vs["sd"] != "sample sd over training seeds, ddof = 1" or vs["split"] != "validation" or vs["test_evaluated"]:
+        raise SystemExit("the validation report is not the validation split with sample SDs")
+    acc = {a: s["best_sign_accuracy"]["mean"] for a, s in vs["summary"].items()}
+    if min(v for a, v in acc.items() if a != "bridge_off") < 0.99:
+        raise SystemExit("an arm other than bridge_off is not near 1 in turn-sign accuracy; the README text differs")
+    L = ["Validation at the selected checkpoint (validation split, descriptive; not the test):", "",
+         "| arm | selected learning rate | runs | best validation loss, mean ± SD | best R2, mean ± SD | best turn-sign "
+         "accuracy, mean | selected step, median (min-max) |", "|---|---:|---:|---:|---:|---:|---:|"]
+    for a, s in vs["summary"].items():
+        if s["n_seeds"] != len(vs["runs"][a]) or (a == "untrained") != (a not in vs["selected_lr"]):
+            raise SystemExit(f"{a}: runs, seeds or selected rate differ")
+        if a == "untrained" and (_steps(a) != [0] or any(s[m]["sd"] is not None for m in ("best_loss", "best_r2"))):
+            raise SystemExit("untrained is not one evaluation at initialisation")
+        ms = [f"{_nz4(f'summary/{a}/{m}/mean')} ± " + ("-" if s[m]["sd"] is None else
+                                                        J(VALID, f"summary/{a}/{m}/sd", "{:.4f}"))
+              for m in ("best_loss", "best_r2")]
+        lr = "-" if a == "untrained" else J(VALID, f"selected_lr/{a}", "{:g}")
+        step = "-" if a == "untrained" else (
+            f"{JX(VALID, [f'runs/{a}'], lambda r: statistics.median(x['selected_step'] for x in r.values()), '{:,.0f}', 'median of selected_step over the runs')} "
+            f"({JX(VALID, [f'runs/{a}'], lambda r: min(x['selected_step'] for x in r.values()), '{:,}', 'min of selected_step over the runs')}-"
+            f"{JX(VALID, [f'runs/{a}'], lambda r: max(x['selected_step'] for x in r.values()), '{:,}', 'max of selected_step over the runs')})")
+        L.append(f"| `{a}` | {lr} | {J(VALID, f'summary/{a}/n_seeds')} | {ms[0]} | {ms[1]} | "
+                 f"{J(VALID, f'summary/{a}/best_sign_accuracy/mean', '{:.3f}')} | {step} |")
+    bo, un = (J(VALID, f"summary/{a}/best_sign_accuracy/mean", "{:.3f}") for a in ("bridge_off", "untrained"))
+    L += ["", f"Validation data seeds {v_lo}-{v_hi}, {J(RUNNER, 'design/n_val_trials')} trials per evaluation. Best: at "
+              f"the selected checkpoint, the evaluation with the lowest validation loss. SD: {J(VALID, 'sd')}. "
+              f"`untrained` is one evaluation at initialisation (no learning rate, no SD). Turn-sign accuracy is at or "
+              f"near ceiling in every arm but `bridge_off` ({bo}), and `untrained` already reaches {un} at "
+              f"initialisation, so it separates the arms little (prereg/20 limitation b, see [Limitations](#limitations)); loss and R2 are "
+              f"the informative columns.", ""]
+    grid = _load(RUNNER)["design"]["lr_grid"]
+    dmin = C("scripts/readme_text.py", "LR_MIN_DECIMALS")
+    L += [f"<details><summary>Learning-rate grid (training seed {seed0})</summary>", "",
+          "| arm | " + " | ".join(f"lr {J(RUNNER, f'design/lr_grid/{i}', '{:g}')}" for i in range(len(grid))) + " |",
+          "|---|" + "---:|" * len(grid)]
+    for a, g in vs["lr_grid"].items():
+        losses = [x["final_val_loss"] for x in g]
+        if [x["lr"] for x in g] != grid or min(g, key=lambda x: (x["final_val_loss"], x["lr"]))["lr"] != vs["selected_lr"][a]:
+            raise SystemExit(f"{a}: the learning-rate grid or its selection differs from the rule")
+        d = lr_decimals(losses)
+        cells = [J(VALID, f"lr_grid/{a}/{i}/final_val_loss", f"{{:.{d}f}}") for i in range(len(g))]
+        L.append(f"| `{a}` | " + " | ".join(f"**{c}**" if x["lr"] == vs["selected_lr"][a] else c
+                                             for c, x in zip(cells, g)) + " |")
+    if [a for a, g in vs["lr_grid"].items() if len({f"{x['final_val_loss']:.{LR_MIN_DECIMALS}f}" for x in g}) < len(g)] \
+            != ["bridge_off"]:
+        raise SystemExit("an arm other than bridge_off would tie at the minimum decimals; the README text differs")
+    rule = T("docs/results/f5_stageA_validation.md", "lowest final validation loss at training seed 0 (prereg/14 "
+             "section 6); a tie goes to the smaller rate.", "text")
+    L += ["", f"Final validation loss (step {J(RUNNER, 'design/steps', '{:,}')}) of the seed-{seed0} run of each arm "
+              f"at each rate; bold, the selected rate. Selection rule (`docs/results/f5_stageA_validation.md`): {rule} "
+              f"Each arm is printed with the fewest decimals, at least {dmin}, that keep its three values apart; "
+              f"`bridge_off` therefore has more: at {dmin} its values would look tied, which they are not. Every run at "
+              f"the selected rate, seed by seed: "
+              f"[docs/results/f5_stageA_validation.md](docs/results/f5_stageA_validation.md#2-runs-at-the-selected-rate).",
+          "", "</details>", ""]
+    return L
+
+
+def _same(values):
+    """The common value of a list whose values are all equal."""
+    if not values or any(x != values[0] for x in values):
+        raise SystemExit(f"values differ: {values}")
+    return values[0]
+
+
+def _max_sum(asym):
+    out = []
+    for k, v in asym.items():
+        if k.startswith("rot_left_"):
+            w = asym["rot_right_" + k[len("rot_left_"):]]
+            out += [abs(v[t] + w[t]) for t in v]
+    return max(out)
+
+
 # ── README ────────────────────────────────────────────────────────────────────────────────────────────────────────
 def readme():
     CUR["file"] = "README.md"
@@ -246,7 +607,7 @@ def readme():
           "Ömer Faruk Topal · [github.com/omeruk](https://github.com/omeruk)", ""]
     toc = ["Result in brief", "The stage-A circuit", "Activity on the circuit", "Post-hoc analyses",
            "How we got here (F0-F3)", "Key numbers",
-           "How it works", "Joining two flies: cell types and coordinates", "Training", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
+           "How it works", "What the fly sees", "Joining two flies: cell types and coordinates", "Training", "Methods and safeguards", "Limitations", "Reproduce", "Repository layout",
            "Data, credits and licences", "Authorship", "How to cite"]
     L += ["**Contents:** " + " · ".join(f"[{t}](#{anchor(t)})" for t in toc), ""]
     speed = C("scripts/viz_video.py", "SPEED")
@@ -498,6 +859,9 @@ def readme():
           "- `untrained`: `true` at initialisation, one deterministic evaluation on the test set.", "",
           f"Training seeds: {n_true} per trained arm, {seeds_n('bridge_off')} for `bridge_off`.", "", "</details>", ""]
 
+    H(2, "What the fly sees")
+    L += what_the_fly_sees(fw)
+
     H(2, "Joining two flies: cell types and coordinates")
     xw = _load(XWALK)
     dng02 = next(x for x in xw["families"] if x["family"] == "DNg02")
@@ -733,7 +1097,8 @@ def readme():
           f"signs, never changes: the comparison asks whether the real wiring is a better substrate for learning the "
           f"turn command than the same neurons with shuffled wiring. Every arm gets the same data, budget, "
           f"learning-rate selection rule and test (H1, prereg/14 section 1).", "",
-          "The curriculum (prereg/14 section 3):", ""] + table + ["",
+          "The curriculum (prereg/14 section 3):", ""] + table + [""] + training_data(
+        sp1, sp2, held30, held90, v_lo, v_hi, t_lo, t_hi) + [
           "What was trained:", "",
           f"- **The graph:** {J(RUNNER, 'design/n_neurons', '{:,}')} neurons, {J(RUNNER, 'design/n_edges', '{:,}')} "
           f"edges and {J(RUNNER, 'design/n_trainable_graph', '{:,}')} trainable parameters, one gain per edge and one "
@@ -747,10 +1112,7 @@ def readme():
           f"{J(RECORDS, 'completion/input_checks_total')} input checks passed, and the gate-5 check reproduced a "
           f"reference record bit for bit (prereg/14 gate 5).", "",
           "<details><summary>How it was trained</summary>", "",
-          f"- **Data:** {J(RUNNER, 'design/n_train_trials', '{:,}')} training and {J(RUNNER, 'design/n_val_trials')} "
-          f"validation trials (rot_left / rot_right at {sp1} and {sp2} deg/s, static and grey); data seeds: training "
-          f"{JX(SPLITS, ['train'], min, '{}', 'min of train')}-{JX(SPLITS, ['train'], max, '{}', 'max of train')}, "
-          f"validation {v_lo}-{v_hi}, test {t_lo}-{t_hi}.",
+          "- **Data:** the data seeds, records and trials of each split are in the training-data table above.",
           f"- **Optimiser and budget:** Adam, batch {J(RUNNER, 'design/batch')}, {J(RUNNER, 'design/steps', '{:,}')} "
           f"steps, so {JX(RUNNER, ['design/steps', 'design/batch'], lambda a, b: a * b, '{:,}', 'steps x batch')} "
           f"training trials presented per run.",
@@ -814,7 +1176,7 @@ def readme():
           f"- `mlp` reached the lowest validation loss (selected checkpoints, mean "
           f"{J(VALID, 'summary/mlp/best_loss/mean', '{:.4f}')}).",
           "- The `shuffled` validation loss was still falling at the end of the budget (prereg/20 limitation a; see "
-          "[Limitations](#limitations)).", ""]
+          "[Limitations](#limitations)).", ""] + validation_tables(vs, v_lo, v_hi, seed0)
 
     H(2, "Methods and safeguards")
     rl = _load(RATE_LIF)
@@ -1022,8 +1384,20 @@ def readme():
 
 
 # ── gallery ───────────────────────────────────────────────────────────────────────────────────────────────────────
-def gallery():
+def readme_figures(readme_text):
+    """The figure numbers of the "Figure N |" captions of the README, as "lo-hi" when they have no gap."""
+    nums = sorted({int(n) for n in re.findall(r"(?m)^\*{1,2}Figure (\d+) \|", readme_text)})
+    if not nums:
+        raise SystemExit("the README has no figure captions")
+    if nums == list(range(nums[0], nums[-1] + 1)):
+        return f"{nums[0]}-{nums[-1]}" if len(nums) > 1 else f"{nums[0]}"
+    return ", ".join(map(str, nums[:-1])) + f" and {nums[-1]}"
+
+
+def gallery(readme_text):
+    """docs/FIGURES.md; the range of README figures is read from the "Figure N |" captions of readme_text."""
     CUR["file"] = "docs/FIGURES.md"
+    in_readme = readme_figures(readme_text)
     sup = ROOT / "docs" / "figures" / "supplementary"
     groups = [("Test split", "test_"), ("Validation and learning-rate selection", "validation_"),
               ("Stimulus and visual input", "stimulus_"), ("Video stills", "video_"), ("Alignment", "alignment_")]
@@ -1094,17 +1468,24 @@ def gallery():
         "stimulus_eye_images_rot_left_v060_seed0.png": (
             f"What the two eyes see: raw eye images during leftward rotation at {sp1} deg/s.",
             "Luminance seen by the left (top row) and right (bottom row) FlyGym eye in the grey lead-in and at three "
-            f"times after the drum starts (times in the panel titles). Training data seed {stim_seed}, grating phase {stim_phase}."),
+            f"times after the drum starts (times in the panel titles). Training data seed {stim_seed}, grating phase {stim_phase}. "
+            "Figure 7 in the [README](../README.md#what-the-fly-sees) redraws this render: two of its frames (the grey "
+            "lead-in and the first stimulus time) in panel a, with a space-time plot of the middle image row."),
         "stimulus_t4t5_rot_left_v060_seed0.png": (
             f"FlyVis T4/T5 boundary rates during leftward rotation at {sp1} deg/s.",
             "Heat maps of the rates (Hz, colour bar) of the T4 and T5 boundary neurons over time, left and right eye, "
-            f"rows grouped by subtype (T4a-d, T5a-d); the cyan line marks the drum start. Training data seed {stim_seed}."),
+            f"rows grouped by subtype (T4a-d, T5a-d); the cyan line marks the drum start. Training data seed {stim_seed}. "
+            "Figure 7 in the [README](../README.md#what-the-fly-sees) redraws this render in panel b, on one colour "
+            "scale shared with Figure S11 and against time from drum onset."),
         "stimulus_t4t5_rot_left_v120_seed0.png": (
             f"FlyVis T4/T5 boundary rates during leftward rotation at {sp2} deg/s.",
-            f"As Figure S9. Training data seed {stim_seed}."),
+            f"As Figure S9. Training data seed {stim_seed}. Figure 7 in the [README](../README.md#what-the-fly-sees) "
+            f"does not redraw this heat map; the per-subtype means of this render enter its panel c only."),
         "stimulus_t4t5_rot_right_v060_seed0.png": (
             f"FlyVis T4/T5 boundary rates during rightward rotation at {sp1} deg/s.",
-            f"As Figure S9. Training data seed {stim_seed}."),
+            f"As Figure S9. Training data seed {stim_seed}. Figure 7 in the [README](../README.md#what-the-fly-sees) "
+            f"redraws this render in panel b, on one colour scale shared with Figure S9 and against time from drum "
+            f"onset."),
         "video_still_act1_+0300ms.png": (
             f"Act {act[0]} of the circuit video at +{st[0]} ms: change from the pre-stimulus baseline during rightward "
             f"rotation.",
@@ -1135,7 +1516,7 @@ def gallery():
     assert [s[1] for s in stills] == [int(x.split("_+")[1][:4]) for x in sorted(f for f in files if f.startswith("video_"))]
     L = ["# Supporting figures", "",
          "Every file of `docs/figures/supplementary/`, by group. Sources, scripts and hashes: "
-         "[figures/README.md](figures/README.md). Figures 1-4 are in the [README](../README.md).", ""]
+         f"[figures/README.md](figures/README.md). Figures {in_readme} are in the [README](../README.md).", ""]
     k = 0
     for title, g in groups:
         L += [f"## {title}", ""]
@@ -1152,7 +1533,8 @@ def gallery():
 def build() -> dict:
     """The three outputs as text, keyed by their path; nothing is written."""
     ENTRIES.clear()
-    texts = {"README.md": readme(), "docs/FIGURES.md": gallery()}
+    rd = readme()
+    texts = {"README.md": rd, "docs/FIGURES.md": gallery(rd)}
     for t in texts.values():
         for bad in ("@", "omerf", "C:\\", "/mnt/c"):
             assert bad not in t, bad
