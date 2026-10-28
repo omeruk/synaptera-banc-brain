@@ -1,7 +1,9 @@
 """Figure 7 (`figure` of scripts/readme_visual_input.py): the direction colours copied from scripts/viz_activity_figure.py,
-the SHA-256 refusal on a changed render, rule 13 and the preview guard (both before any input is read), the refactored
-eye_images() giving the committed `eye_images` entry (needs MuJoCo), and a run into a temporary folder (2000 px wide,
-at most 1.5 MB; needs the renders in runs/f5/stageA/readme_renders/, which a fresh clone does not have)."""
+the SHA-256 refusal on a changed render, rule 13 and the preview guard (both before any input is read), the A_in axis
+labels (mathtext subscript), the space-time check (a row that differs from the hashed frame stops), the refactored
+eye_images() giving the committed `eye_images` entry and space-time rows equal to row H // 2 of the hashed frames
+(needs MuJoCo), and a run into a temporary folder (2000 px wide, at most 1.5 MB; needs the renders in
+runs/f5/stageA/readme_renders/, which a fresh clone does not have)."""
 import ast
 import hashlib
 import importlib.util
@@ -11,6 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from conftest import ROOT
@@ -107,13 +110,49 @@ def test_out_inside_the_preview_folder_is_refused(tmp_path):
     assert not target.exists()
 
 
+def test_a_in_labels_use_a_mathtext_subscript():
+    from matplotlib.mathtext import MathTextParser
+    for lab in V.A_IN_LABEL.values():
+        assert r"$A_\mathrm{in}$" in lab and "A_in" not in lab.replace(r"$A_\mathrm{in}$", "")
+        MathTextParser("agg").parse(lab)
+
+
+def _fake_space_time():
+    rng = np.random.default_rng(0)
+    frames = [rng.random((2, 6, 5)) for _ in range(3)]
+    entry = dict(images=[dict(interval=k) for k in (1, 4, 7)])
+    rows = rng.random((2, 9, 5))
+    for im, f in zip(entry["images"], frames):
+        rows[:, im["interval"]] = f[:, 3]
+    return entry, frames, dict(rows=rows, row=3)
+
+
+def test_check_space_time_passes_on_equal_rows():
+    V.check_space_time(*_fake_space_time())
+
+
+def test_check_space_time_refuses_a_differing_row():
+    entry, frames, st = _fake_space_time()
+    st["rows"][1, entry["images"][-1]["interval"], 0] += 1e-15
+    with pytest.raises(SystemExit, match="differs from the hashed frame"):
+        V.check_space_time(entry, frames, st)
+
+
 @pytest.mark.skipif(not HAVE_MUJOCO, reason="MuJoCo / FlyGym are not installed")
 def test_eye_images_give_the_committed_entry():
-    entry, lums = V.eye_images()
-    assert entry == VI["eye_images"]                    # what `export` writes, unchanged by the refactor
+    entry, lums, st = V.eye_images()
+    assert entry == VI["eye_images"] and st is None     # what `export` writes, unchanged by the refactor
     assert len(lums) == len(entry["images"])
     for im, lum in zip(entry["images"], lums):
         assert list(lum.shape) == im["shape"] and str(lum.dtype) == im["dtype"]
+    n = VI["window"]["window"][1]                       # the trial length of the input-check window
+    entry2, lums2, st = V.eye_images(n)
+    assert entry2 == entry
+    assert st["rows"].shape == (2, n, im["shape"][2]) and st["row"] == im["shape"][1] // 2
+    V.check_space_time(entry2, lums2, st)
+    for im, lum in zip(entry["images"], lums):
+        assert np.array_equal(st["rows"][:, im["interval"]], lum[:, st["row"]])
+    assert all(np.all(np.diff(a) < 0) or np.all(np.diff(a) > 0) for a in st["azimuth_deg"])
 
 
 @pytest.mark.skipif(not (HAVE_MUJOCO and HAVE_RENDERS), reason="needs MuJoCo and the renders in runs/")

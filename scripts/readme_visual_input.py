@@ -33,8 +33,10 @@ figure: Figure 7 of the README, in the style of scripts/readme_figures.py (whose
 render_png it imports; 180 mm wide, exactly 2000 px, at most 1.5 MB; --out inside the local preview folder refused;
 rule 13). It stops unless every render's SHA-256 and that of boundary_meta.npz equal `provenance` of visual_input.json
 and the recomputed eye images equal its `eye_images` entry. Nothing is computed about the test split.
-- a: what the eyes see, rot_left at 60 deg/s, phase 0: the raw eye images of `eye_images()` (grey lead-in and three
-  stimulus times), left and right eye;
+- a: what the eyes see, rot_left at 60 deg/s, phase 0, one column per eye above its heat maps of b: the raw eye images
+  of `eye_images()` at the grey lead-in and the first stimulus time, and a space-time plot of the middle image row
+  (row H // 2 of every frame of the trial, against the azimuth of tasks/t0_stimuli.py, + = left), each interval over
+  the same time bin as in b; the row equals the hashed frames at their intervals;
 - b: the T4/T5 boundary rates of rot_left and rot_right at 60 deg/s, left and right eye, neurons grouped by subtype
   (within a subtype the stored order, as scripts/f5_stageA_preview.py), magma from 0 to `heatmap_vmax_hz`;
 - c: the per-subtype eye asymmetry of `asymmetry`, the four rotation renders;
@@ -78,11 +80,12 @@ KEYS = tuple([R.render_key(s, v, 0) for v in GATE_SPEEDS for s in ROT] + [R.rend
 ROT_KEYS = KEYS[:4]
 EYES = ("L", "R")
 FIG7 = "fig7_visual_input.png"
-FIG7_HEIGHT_MM = 167
+FIG7_HEIGHT_MM = 170
 # Copied from scripts/viz_activity_figure.py (NEG, POS and DIR_COL, the direction colours of Figure 3), not imported:
 # that module imports pandas and viz_anatomy. Okabe-Ito blue and vermillion.
 NEG, POS = "#0072B2", "#D55E00"
 DIR_COL = {"rot_right": POS, "rot_left": NEG}
+A_IN_LABEL = {"c": r"eye asymmetry $A_\mathrm{in}$", "d": r"$A_\mathrm{in}$ of T4a + T5a"}    # y labels of 7c, 7d
 SPEED_MARKER = dict(zip(GATE_SPEEDS, ("o", "s")))         # Figure 7c: marker shape by drum speed
 
 
@@ -236,10 +239,13 @@ def eye_images_spec():
     return ks, consts["N_GREY"], consts["DT"]
 
 
-def eye_images():
-    """The raw eye images of `eye_images()` in scripts/f5_stageA_preview.py, recomputed by its code: (entry, lums). entry
-    is the `eye_images` entry of visual_input.json (hashes, no arrays); lums the luminance arrays (eye, row, column) in
-    the order of entry["images"]. Used by `export` (entry) and `figure` (both)."""
+def eye_images(n_intervals=None):
+    """The raw eye images of `eye_images()` in scripts/f5_stageA_preview.py, recomputed by its code: (entry, lums,
+    space_time). entry is the `eye_images` entry of visual_input.json (hashes, no arrays); lums the luminance arrays
+    (eye, row, column) in the order of entry["images"]. With n_intervals, space_time holds Figure 7a's space-time data:
+    row H // 2 of the full frame at every interval 0..n_intervals-1, each frame computed by the same S.luminance call
+    and dropped after its row is kept (rows, (eye, interval, column)), and the azimuth of that row (deg, + = left, of
+    S.azimuth); otherwise None. Used by `export` (entry) and `figure` (all three)."""
     import mujoco
 
     from body.flygym_body import FlightBody
@@ -252,16 +258,23 @@ def eye_images():
     b = FlightBody(spawn_pos=(0, 0, 100), spawn_yaw=0.0, legs="tuck", enable_vision=True)
     mujoco.mj_forward(b.m, b.d)
     rays = S.camera_rays(b.m, b.d, b.root)
-    out, lums = [], []
-    for k in ks:
+    mid = rays.shape[1] // 2
+    out, lums, rows = {}, {}, []
+    for k in sorted(set(ks) | set(range(n_intervals or 0))):
         t = None if k < n_grey else (k - n_grey + 1) * dt
         lum = S.luminance(2, t, rays, tf_hz=60 / S.WAVELENGTH_DEG)
-        lums.append(lum)
-        out.append(dict(interval=k, t_s=t, shape=list(lum.shape), dtype=str(lum.dtype),
-                        sha256=hashlib.sha256(np.ascontiguousarray(lum).tobytes()).hexdigest()))
-    return dict(key=key, source="scripts/f5_stageA_preview.py eye_images() (recomputed; the images are not stored)",
-                eyes=["left", "right"], hash_of="np.ascontiguousarray(lum).tobytes(), lum of shape (eye, row, column)",
-                images=out), lums
+        if k < (n_intervals or 0):
+            rows.append(lum[:, mid].copy())
+        if k in ks:
+            lums[k] = lum
+            out[k] = dict(interval=k, t_s=t, shape=list(lum.shape), dtype=str(lum.dtype),
+                          sha256=hashlib.sha256(np.ascontiguousarray(lum).tobytes()).hexdigest())
+    entry = dict(key=key, source="scripts/f5_stageA_preview.py eye_images() (recomputed; the images are not stored)",
+                 eyes=["left", "right"], hash_of="np.ascontiguousarray(lum).tobytes(), lum of shape (eye, row, column)",
+                 images=[out[k] for k in ks])
+    space_time = None if not n_intervals else dict(rows=np.stack(rows, axis=1), row=mid,
+                                                   azimuth_deg=S.azimuth(rays[:, mid]))
+    return entry, [lums[k] for k in ks], space_time
 
 
 def export_csv():
@@ -368,14 +381,23 @@ def check_inputs(d, renders=RENDERS, meta=META):
         raise SystemExit("inputs differ from visual_input.json (nothing written):\n" + "\n".join(bad))
 
 
+def check_space_time(entry, lums, space_time):
+    """Stop unless, at every interval of entry["images"], the space-time row equals row space_time["row"] of the hashed
+    frame (np.array_equal)."""
+    for im, lum in zip(entry["images"], lums):
+        a, b = space_time["rows"][:, im["interval"]], lum[:, space_time["row"]]
+        if not (a.dtype == b.dtype and np.array_equal(a, b)):
+            raise SystemExit(f"interval {im['interval']}: the space-time row differs from the hashed frame")
+
+
 def read_csv(path=OUT_CSV):
     with open(path, newline="") as f:
         return list(csv.DictReader(f))
 
 
-def draw_fig7(d, rows, lums, rates, tcode, fw_types, held_out):
-    """d: visual_input.json; rows: input_checks.csv; lums: the eye images in the order of d["eye_images"]["images"];
-    rates[key][eye]: the renders of the heat-map keys; tcode, fw_types: boundary_meta.npz; held_out: drum speeds."""
+def draw_fig7(d, rows, lums, space_time, rates, tcode, fw_types, held_out):
+    """d: visual_input.json; rows: input_checks.csv; lums, space_time: of eye_images(); rates[key][eye]: the renders of
+    the heat-map keys; tcode, fw_types: boundary_meta.npz; held_out: drum speeds."""
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
 
@@ -389,36 +411,58 @@ def draw_fig7(d, rows, lums, rates, tcode, fw_types, held_out):
     def letter(x, y, lab):
         fig.text(x / W, y / H, lab, ha="left", va="bottom", fontsize=F.FONT_PT + 1, fontweight="bold")
 
-    # a: what the eyes see
-    imgs = d["eye_images"]["images"]
     # rows placed from the bottom (mm): c and d, then b, then a
     yc, hc = 12.0, 30.0                                         # c, d axes
     hh, hw, gap = 23.0, 66.0, 3.0                               # b heat maps
+    xb = (17.0, 17.0 + hw + 13.0)                               # x of each eye's column in a and b
     yb_top = yc + hc + 19.0 + 2 * hh + gap
-    ih = 20.0                                                   # a images
+    ys, hs = yb_top + 15.0, 20.0                                # a, space-time plots
+    imgs = d["eye_images"]["images"]
+    ih = 13.0                                                   # a, eye images
     iw = ih * imgs[0]["shape"][2] / imgs[0]["shape"][1]
-    x0, x1 = 17.0, W - 2.0
-    step = (x1 - x0 - iw) / (len(imgs) - 1)
-    ya = (yb_top + 9.0 + ih + 2.0, yb_top + 9.0)
-    for j, (im, lum) in enumerate(zip(imgs, lums)):
-        for e, side in enumerate(d["eye_images"]["eyes"]):
-            ax = ax_mm(x0 + j * step, ya[e], iw, ih)
-            ax.imshow(lum[e], cmap="gray", vmin=0, vmax=1)
+    yi = ys + hs + 3.0
+    n_grey, dt = d["window"]["n_grey"], d["window"]["interval_ms"] / 1000
+
+    # a: what the eyes see; top, the grey lead-in and the first stimulus time; below, the middle image row over time
+    shown = [next(j for j, im in enumerate(imgs) if im["t_s"] is None),
+             next(j for j, im in enumerate(imgs) if im["t_s"] is not None)]
+    rows_st, az = space_time["rows"], space_time["azimuth_deg"]
+    t_edges = (np.arange(rows_st.shape[1] + 1) - n_grey) * dt         # interval k over the same bin as in b
+    for c, side in enumerate(d["eye_images"]["eyes"]):
+        xs = xb[c] + (hw - 2 * iw - 4.0) / 2
+        for i, j in enumerate(shown):
+            ax = ax_mm(xs + i * (iw + 4.0), yi, iw, ih)
+            ax.imshow(lums[j][c], cmap="gray", vmin=0, vmax=1)
             ax.set_axis_off()
-            if e == 0:
-                ax.set_title("grey lead-in" if im["t_s"] is None else f"t = {im['t_s']:.3f} s", pad=3)
-            if j == 0:
-                fig.text((x0 - 2.5) / W, (ya[e] + ih / 2) / H, f"{side} eye", ha="right", va="center")
-    letter(1.5, ya[0] + ih + 1.0, "a")
+            ax.set_title("grey lead-in" if imgs[j]["t_s"] is None else f"t = {imgs[j]['t_s']:.3f} s", pad=2)
+        fig.text((xb[c] + hw / 2) / W, (yi + ih + 5.0) / H, f"{side} eye", ha="center", va="bottom")
+        if not (np.all(np.diff(az[c]) < 0) or np.all(np.diff(az[c]) > 0)):
+            raise SystemExit(f"{side} eye: the azimuth of the middle row is not monotonic")
+        mids = (az[c][1:] + az[c][:-1]) / 2
+        a_edges = np.r_[2 * az[c][0] - mids[0], mids, 2 * az[c][-1] - mids[-1]]
+        ax = ax_mm(xb[c], ys, hw, hs)
+        st = ax.pcolormesh(t_edges, a_edges, rows_st[c].T, cmap="gray", vmin=0, vmax=1, shading="flat")
+        ax.set_xlim(t_edges[0], t_edges[-1])
+        ax.set_ylim(a_edges.min(), a_edges.max())                      # positive azimuth (left) up
+        ax.axvline(0, color="white", lw=0.6)
+        for sp in ax.spines.values():
+            sp.set_visible(False)
+        ax.set_xlabel("time from drum onset (s)")
+        ax.set_ylabel("azimuth (deg, + = left)")
+    cax = ax_mm(xb[1] + hw + 3.0, ys, 2.2, hs)
+    cb = fig.colorbar(st, cax=cax)
+    cb.set_ticks(np.linspace(st.norm.vmin, st.norm.vmax, 3), labels=[f"{v:g}" for v in
+                                                                      np.linspace(st.norm.vmin, st.norm.vmax, 3)])
+    cb.set_label("luminance")
+    cb.outline.set_linewidth(0.5)
+    letter(1.5, yi + ih + 5.0, "a")
 
     # b: T4/T5 boundary rates
     subtypes = d["subtypes"]
-    n_grey, dt = d["window"]["n_grey"], d["window"]["interval_ms"] / 1000
     vmax = d["heatmap_vmax_hz"]["value"]
     if vmax != d["heatmap_vmax_hz"]["r_clip_hz"]:
         raise SystemExit("heatmap_vmax_hz is not the rate clip; the colour-bar label would be wrong")
     keys = d["heatmap_vmax_hz"]["keys"]
-    xb = (17.0, 17.0 + hw + 13.0)
     t45 = [fw_types.index(t) for t in subtypes]
     for r, key in enumerate(keys):
         y = yb_top - (r + 1) * hh - r * gap
@@ -469,7 +513,7 @@ def draw_fig7(d, rows, lums, rates, tcode, fw_types, held_out):
     axc.set_xticks(x, subtypes)
     axc.set_xlim(-0.6, len(subtypes) - 0.4)
     axc.set_xlabel("T4/T5 subtype")
-    axc.set_ylabel("eye asymmetry A_in")
+    axc.set_ylabel(A_IN_LABEL["c"])
     hd = [Line2D([], [], ls="", marker="o", color=DIR_COL[s], ms=3, label=s) for s in ROT]
     hd += [Line2D([], [], ls="", marker=m, color=F.INK2, ms=3, label=f"{v} deg/s") for v, m in SPEED_MARKER.items()]
     axc.legend(handles=hd, frameon=False, ncol=2, loc="lower left", bbox_to_anchor=(0.0, 1.0), handletextpad=0.1,
@@ -495,7 +539,7 @@ def draw_fig7(d, rows, lums, rates, tcode, fw_types, held_out):
     axd.set_xticks(speeds, [f"{v}\n(held out)" if v in held_out else f"{v}" for v in speeds])
     axd.set_xlim(speeds[0] - 1.25 * half, speeds[-1] + 1.25 * half)
     axd.set_xlabel("drum speed (deg/s)")
-    axd.set_ylabel("A_in of T4a + T5a")
+    axd.set_ylabel(A_IN_LABEL["d"])
     hd = [Line2D([], [], ls="", marker="o", color=DIR_COL[s], ms=3, label=s) for s in ROT]
     hd += [Line2D([], [], color=F.INK2, lw=0.6, ls=(0, (3, 2)), label="input-check minimum")]
     axd.legend(handles=hd, frameon=False, ncol=3, loc="lower left", bbox_to_anchor=(0.0, 1.0), handletextpad=0.1,
@@ -518,20 +562,24 @@ def figure(out=None, overwrite=False):
         raise SystemExit(f"{path} exists; pass --overwrite to replace it (nothing written)")
     d = json.loads(OUT_JSON.read_text())
     check_inputs(d)
-    entry, lums = eye_images()
-    if entry != d["eye_images"]:
-        raise SystemExit("recomputed eye images differ from visual_input.json (nothing written)")
-    print("renders, boundary_meta.npz and eye images equal visual_input.json")
-    tcode, fw_types, _ = load_meta()
     keys = d["heatmap_vmax_hz"]["keys"]
     rates = {k: dict(np.load(RENDERS / f"{k}.npz")) for k in keys}
+    n_int = {rates[k][e].shape[0] for k in keys for e in EYES}
+    if len(n_int) != 1:
+        raise SystemExit(f"the renders differ in length: {n_int}")
+    entry, lums, space_time = eye_images(n_int.pop())
+    if entry != d["eye_images"]:
+        raise SystemExit("recomputed eye images differ from visual_input.json (nothing written)")
+    check_space_time(entry, lums, space_time)
+    print("renders, boundary_meta.npz and eye images equal visual_input.json; space-time rows equal the hashed frames")
+    tcode, fw_types, _ = load_meta()
     from train import f5_stageA as A
     rows = read_csv()
     used = [r for r in rows if r["split"] in ("train", "val")]
     for v in sorted({int(r["speed_deg_s"]) for r in used}):
         print(f"panel d, {v} deg/s: n = {sum(int(r['speed_deg_s']) == v for r in used)} seed groups (train + val)")
     fam = F.font_setup()
-    fig = draw_fig7(d, rows, lums, rates, tcode, fw_types, sorted(A.HELD_OUT.values()))
+    fig = draw_fig7(d, rows, lums, space_time, rates, tcode, fw_types, sorted(A.HELD_OUT.values()))
     png = F.render_png(fig)
     plt.close(fig)
     if len(png) > F.MAX_BYTES:
