@@ -7,6 +7,8 @@ script re-makes the few the README needs, proves them identical to the originals
     env -u PYTHONPATH python scripts/readme_visual_input.py gate                   # exit 1 unless identical
     env -u PYTHONPATH python scripts/readme_visual_input.py export [--overwrite]   # docs/figures/visual_input.json,
                                                                                     # docs/figures/input_checks.csv
+    env -u PYTHONPATH python scripts/readme_visual_input.py figure [--out DIR] [--overwrite]
+                                                                    # docs/figures/fig7_visual_input.png
 
 render: the keys of KEYS (`render_key` names of scripts/f5_stageA_records.py, phase 0), by the code path of its
 `worker_render` (f3b1_brain.build, render_setup, render_stimulus with key_params), in a child process (`render-worker`)
@@ -26,6 +28,17 @@ export (stops unless the gate passes; rule 13: refuses if either output exists, 
   heatmap colour limit (99th percentile, T4/T5, both eyes, rot_left and rot_right at 60 deg/s), the SHA-256 of the
   raw eye images of `eye_images()` in scripts/f5_stageA_preview.py (recomputed, not stored), and the gate values.
 - docs/figures/input_checks.csv: runs/f5/stageA/input_checks.json copied, one row per seed group and speed.
+
+figure: Figure 7 of the README, in the style of scripts/readme_figures.py (whose style constants, font_setup and
+render_png it imports; 180 mm wide, exactly 2000 px, at most 1.5 MB; --out inside the local preview folder refused;
+rule 13). It stops unless every render's SHA-256 and that of boundary_meta.npz equal `provenance` of visual_input.json
+and the recomputed eye images equal its `eye_images` entry. Nothing is computed about the test split.
+- a: what the eyes see, rot_left at 60 deg/s, phase 0: the raw eye images of `eye_images()` (grey lead-in and three
+  stimulus times), left and right eye;
+- b: the T4/T5 boundary rates of rot_left and rot_right at 60 deg/s, left and right eye, neurons grouped by subtype
+  (within a subtype the stored order, as scripts/f5_stageA_preview.py), magma from 0 to `heatmap_vmax_hz`;
+- c: the per-subtype eye asymmetry of `asymmetry`, the four rotation renders;
+- d: A_in of T4a + T5a of the input check (input_checks.csv), training and validation seed groups, per drum speed.
 """
 import argparse
 import ast
@@ -64,6 +77,13 @@ KEYS = tuple([R.render_key(s, v, 0) for v in GATE_SPEEDS for s in ROT] + [R.rend
                                                                           for s in ("static", "grey")])
 ROT_KEYS = KEYS[:4]
 EYES = ("L", "R")
+FIG7 = "fig7_visual_input.png"
+FIG7_HEIGHT_MM = 167
+# Copied from scripts/viz_activity_figure.py (NEG, POS and DIR_COL, the direction colours of Figure 3), not imported:
+# that module imports pandas and viz_anatomy. Okabe-Ito blue and vermillion.
+NEG, POS = "#0072B2", "#D55E00"
+DIR_COL = {"rot_right": POS, "rot_left": NEG}
+SPEED_MARKER = dict(zip(GATE_SPEEDS, ("o", "s")))         # Figure 7c: marker shape by drum speed
 
 
 def sha_file(p):
@@ -217,6 +237,9 @@ def eye_images_spec():
 
 
 def eye_images():
+    """The raw eye images of `eye_images()` in scripts/f5_stageA_preview.py, recomputed by its code: (entry, lums). entry
+    is the `eye_images` entry of visual_input.json (hashes, no arrays); lums the luminance arrays (eye, row, column) in
+    the order of entry["images"]. Used by `export` (entry) and `figure` (both)."""
     import mujoco
 
     from body.flygym_body import FlightBody
@@ -229,15 +252,16 @@ def eye_images():
     b = FlightBody(spawn_pos=(0, 0, 100), spawn_yaw=0.0, legs="tuck", enable_vision=True)
     mujoco.mj_forward(b.m, b.d)
     rays = S.camera_rays(b.m, b.d, b.root)
-    out = []
+    out, lums = [], []
     for k in ks:
         t = None if k < n_grey else (k - n_grey + 1) * dt
         lum = S.luminance(2, t, rays, tf_hz=60 / S.WAVELENGTH_DEG)
+        lums.append(lum)
         out.append(dict(interval=k, t_s=t, shape=list(lum.shape), dtype=str(lum.dtype),
                         sha256=hashlib.sha256(np.ascontiguousarray(lum).tobytes()).hexdigest()))
     return dict(key=key, source="scripts/f5_stageA_preview.py eye_images() (recomputed; the images are not stored)",
                 eyes=["left", "right"], hash_of="np.ascontiguousarray(lum).tobytes(), lum of shape (eye, row, column)",
-                images=out)
+                images=out), lums
 
 
 def export_csv():
@@ -310,7 +334,7 @@ def export(overwrite=False):
                              note="numpy percentile 99 (default method) of the T4/T5 rates, both eyes, all intervals",
                              r_clip_hz=r_clip, fraction_at_clip=float((pooled == r_clip).mean()),
                              clip_source="sense/vision_flyvis.py R_CLIP (configs r_clip); rates are clipped to it"),
-        eye_images=eye_images(),
+        eye_images=eye_images()[0],
         gate=dict(comparisons=g["comparisons"], covered=g["covered"], passed=g["ok"], A_in_T4aT5a=g["A_in_T4aT5a"]),
     )
     rows = export_csv()
@@ -328,10 +352,204 @@ def export(overwrite=False):
     return 0
 
 
+# ── figure ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+def check_inputs(d, renders=RENDERS, meta=META):
+    """Stop unless every render and boundary_meta.npz have the SHA-256 recorded in `provenance` of visual_input.json."""
+    bad = []
+    for k, v in d["provenance"]["renders"].items():
+        p = Path(renders) / f"{k}.npz"
+        if not p.exists():
+            bad.append(f"{p}: missing")
+        elif sha_file(p) != v["sha256"]:
+            bad.append(f"{p}: SHA-256 differs from visual_input.json")
+    if sha_file(meta) != d["provenance"]["boundary_meta_sha256"]:
+        bad.append(f"{meta}: SHA-256 differs from visual_input.json")
+    if bad:
+        raise SystemExit("inputs differ from visual_input.json (nothing written):\n" + "\n".join(bad))
+
+
+def read_csv(path=OUT_CSV):
+    with open(path, newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def draw_fig7(d, rows, lums, rates, tcode, fw_types, held_out):
+    """d: visual_input.json; rows: input_checks.csv; lums: the eye images in the order of d["eye_images"]["images"];
+    rates[key][eye]: the renders of the heat-map keys; tcode, fw_types: boundary_meta.npz; held_out: drum speeds."""
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
+    import readme_figures as F
+    W, H = F.WIDTH_MM, FIG7_HEIGHT_MM
+    fig = plt.figure(figsize=(W * F.MM, H * F.MM))
+
+    def ax_mm(x, y, w, h):                                      # bottom-left corner and size in mm
+        return fig.add_axes((x / W, y / H, w / W, h / H))
+
+    def letter(x, y, lab):
+        fig.text(x / W, y / H, lab, ha="left", va="bottom", fontsize=F.FONT_PT + 1, fontweight="bold")
+
+    # a: what the eyes see
+    imgs = d["eye_images"]["images"]
+    # rows placed from the bottom (mm): c and d, then b, then a
+    yc, hc = 12.0, 30.0                                         # c, d axes
+    hh, hw, gap = 23.0, 66.0, 3.0                               # b heat maps
+    yb_top = yc + hc + 19.0 + 2 * hh + gap
+    ih = 20.0                                                   # a images
+    iw = ih * imgs[0]["shape"][2] / imgs[0]["shape"][1]
+    x0, x1 = 17.0, W - 2.0
+    step = (x1 - x0 - iw) / (len(imgs) - 1)
+    ya = (yb_top + 9.0 + ih + 2.0, yb_top + 9.0)
+    for j, (im, lum) in enumerate(zip(imgs, lums)):
+        for e, side in enumerate(d["eye_images"]["eyes"]):
+            ax = ax_mm(x0 + j * step, ya[e], iw, ih)
+            ax.imshow(lum[e], cmap="gray", vmin=0, vmax=1)
+            ax.set_axis_off()
+            if e == 0:
+                ax.set_title("grey lead-in" if im["t_s"] is None else f"t = {im['t_s']:.3f} s", pad=3)
+            if j == 0:
+                fig.text((x0 - 2.5) / W, (ya[e] + ih / 2) / H, f"{side} eye", ha="right", va="center")
+    letter(1.5, ya[0] + ih + 1.0, "a")
+
+    # b: T4/T5 boundary rates
+    subtypes = d["subtypes"]
+    n_grey, dt = d["window"]["n_grey"], d["window"]["interval_ms"] / 1000
+    vmax = d["heatmap_vmax_hz"]["value"]
+    if vmax != d["heatmap_vmax_hz"]["r_clip_hz"]:
+        raise SystemExit("heatmap_vmax_hz is not the rate clip; the colour-bar label would be wrong")
+    keys = d["heatmap_vmax_hz"]["keys"]
+    xb = (17.0, 17.0 + hw + 13.0)
+    t45 = [fw_types.index(t) for t in subtypes]
+    for r, key in enumerate(keys):
+        y = yb_top - (r + 1) * hh - r * gap
+        st, v = key.split("_v")[0], int(key.split("_v")[1].split("_")[0])
+        fig.text(2.0 / W, (y + hh / 2) / H, f"{st}, {v} deg/s", rotation=90, ha="left", va="center")
+        for c, e in enumerate(EYES):
+            ax = ax_mm(xb[c], y, hw, hh)
+            tc = tcode[e]
+            sel = np.flatnonzero(np.isin(tc, t45))
+            order = sel[np.argsort(tc[sel], kind="stable")]                # as heatmaps() of f5_stageA_preview.py
+            if [fw_types[k] for k in np.unique(tc[order])] != subtypes:
+                raise SystemExit("subtype order differs from visual_input.json")
+            z = rates[key][e][:, order].T
+            if z.shape[0] != d["neurons"][e]["t4t5_total"]:
+                raise SystemExit(f"{key} {e}: neuron count differs from visual_input.json")
+            hm = ax.imshow(z, aspect="auto", cmap="magma", vmin=0, vmax=vmax,     # default interpolation
+                           extent=[-n_grey * dt, (z.shape[1] - n_grey) * dt, z.shape[0], 0])
+            ax.axvline(0, color="white", lw=0.6)
+            bounds = np.flatnonzero(np.diff(tc[order])) + 1
+            for b in bounds:
+                ax.axhline(b, color="white", lw=0.3)
+            mids = np.r_[0, bounds] + np.diff(np.r_[0, bounds, len(order)]) / 2
+            ax.set_yticks(mids, subtypes)
+            ax.tick_params(axis="y", length=0, pad=1.5)
+            for sp in ax.spines.values():
+                sp.set_visible(False)
+            if r == 0:
+                ax.set_title(f"{'left' if e == 'L' else 'right'} eye", pad=3)
+                ax.set_xticklabels([])
+            else:
+                ax.set_xlabel("time from drum onset (s)")
+    cax = ax_mm(xb[1] + hw + 3.0, yb_top - 2 * hh - gap, 2.2, 2 * hh + gap)
+    cb = fig.colorbar(hm, cax=cax)
+    cb.set_label(f"T4/T5 rate (Hz), clipped at {vmax:g}")
+    cb.outline.set_linewidth(0.5)
+    letter(1.5, yb_top + 4.0, "b")
+
+    # c: per-subtype eye asymmetry
+    axc = ax_mm(17.0, yc, 68.0, hc)
+    asym = d["asymmetry"]["values"]
+    x = np.arange(len(subtypes))
+    for key in asym:
+        st, v = key.split("_v")[0], int(key.split("_v")[1].split("_")[0])
+        dx = 0.13 * (-1 if v == min(SPEED_MARKER) else 1)
+        axc.scatter(x + dx, [asym[key][t] for t in subtypes], s=10, color=DIR_COL[st], marker=SPEED_MARKER[v],
+                    lw=0, zorder=3)
+    axc.axhline(0, color=F.INK2, lw=0.5, zorder=1)
+    axc.set_xticks(x, subtypes)
+    axc.set_xlim(-0.6, len(subtypes) - 0.4)
+    axc.set_xlabel("T4/T5 subtype")
+    axc.set_ylabel("eye asymmetry A_in")
+    hd = [Line2D([], [], ls="", marker="o", color=DIR_COL[s], ms=3, label=s) for s in ROT]
+    hd += [Line2D([], [], ls="", marker=m, color=F.INK2, ms=3, label=f"{v} deg/s") for v, m in SPEED_MARKER.items()]
+    axc.legend(handles=hd, frameon=False, ncol=2, loc="lower left", bbox_to_anchor=(0.0, 1.0), handletextpad=0.1,
+               columnspacing=0.8, borderaxespad=0.0)
+    letter(1.5, yc + hc + 5.5, "c")
+
+    # d: A_in of T4a + T5a over the training data
+    axd = ax_mm(108.0, yc, 70.0, hc)
+    used = [r for r in rows if r["split"] in ("train", "val")]
+    speeds = sorted({int(r["speed_deg_s"]) for r in used})
+    half = 0.4 * min(np.diff(speeds))
+    for v in held_out:
+        axd.axvspan(v - half, v + half, color=F.HELD_OUT_BAND, lw=0, zorder=0)
+    rng = np.random.default_rng(0)                                     # horizontal jitter only
+    for st in ROT:
+        sp = np.array([int(r["speed_deg_s"]) for r in used])
+        a = np.array([float(r[f"A_in_{st}"]) for r in used])
+        axd.scatter(sp + rng.uniform(-0.25, 0.25, len(sp)) * half, a, s=3, color=DIR_COL[st], lw=0, alpha=0.6,
+                    zorder=2)
+    for sgn in (1, -1):
+        axd.axhline(sgn * C1.INPUT_CHECK_MIN, color=F.INK2, lw=0.6, ls=(0, (3, 2)), zorder=1)
+    axd.axhline(0, color=F.INK2, lw=0.5, zorder=1)
+    axd.set_xticks(speeds, [f"{v}\n(held out)" if v in held_out else f"{v}" for v in speeds])
+    axd.set_xlim(speeds[0] - 1.25 * half, speeds[-1] + 1.25 * half)
+    axd.set_xlabel("drum speed (deg/s)")
+    axd.set_ylabel("A_in of T4a + T5a")
+    hd = [Line2D([], [], ls="", marker="o", color=DIR_COL[s], ms=3, label=s) for s in ROT]
+    hd += [Line2D([], [], color=F.INK2, lw=0.6, ls=(0, (3, 2)), label="input-check minimum")]
+    axd.legend(handles=hd, frameon=False, ncol=3, loc="lower left", bbox_to_anchor=(0.0, 1.0), handletextpad=0.1,
+               columnspacing=0.8, borderaxespad=0.0)
+    letter(94.0, yc + hc + 5.5, "d")
+    return fig
+
+
+def figure(out=None, overwrite=False):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    import readme_figures as F
+    out = Path(out) if out else OUT_JSON.parent
+    if F.inside(out, F.PREVIEW):
+        raise SystemExit(f"{out}: inside the local preview folder, which is never written")
+    path = out / FIG7
+    if path.exists() and not overwrite:
+        raise SystemExit(f"{path} exists; pass --overwrite to replace it (nothing written)")
+    d = json.loads(OUT_JSON.read_text())
+    check_inputs(d)
+    entry, lums = eye_images()
+    if entry != d["eye_images"]:
+        raise SystemExit("recomputed eye images differ from visual_input.json (nothing written)")
+    print("renders, boundary_meta.npz and eye images equal visual_input.json")
+    tcode, fw_types, _ = load_meta()
+    keys = d["heatmap_vmax_hz"]["keys"]
+    rates = {k: dict(np.load(RENDERS / f"{k}.npz")) for k in keys}
+    from train import f5_stageA as A
+    rows = read_csv()
+    used = [r for r in rows if r["split"] in ("train", "val")]
+    for v in sorted({int(r["speed_deg_s"]) for r in used}):
+        print(f"panel d, {v} deg/s: n = {sum(int(r['speed_deg_s']) == v for r in used)} seed groups (train + val)")
+    fam = F.font_setup()
+    fig = draw_fig7(d, rows, lums, rates, tcode, fw_types, sorted(A.HELD_OUT.values()))
+    png = F.render_png(fig)
+    plt.close(fig)
+    if len(png) > F.MAX_BYTES:
+        raise SystemExit(f"{FIG7}: {len(png):,} bytes, over {F.MAX_BYTES:,} (nothing written)")
+    from PIL import Image
+    import io
+    w, h = Image.open(io.BytesIO(png)).size
+    out.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(png)
+    print(f"{path}: {w} x {h} px, {len(png):,} bytes, font {fam}, {F.WIDTH_MM} x {FIG7_HEIGHT_MM} mm")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("command", choices=["render", "render-worker", "gate", "export"])
+    ap.add_argument("command", choices=["render", "render-worker", "gate", "export", "figure"])
     ap.add_argument("--overwrite", action="store_true")
+    ap.add_argument("--out", default=None, help="figure: output folder (default docs/figures/)")
     a = ap.parse_args(argv)
     if a.command == "render":
         return render()
@@ -341,6 +559,8 @@ def main(argv=None):
         g = gate()
         print_gate(g)
         return 0 if g["ok"] else 1
+    if a.command == "figure":
+        return figure(a.out, a.overwrite)
     return export(a.overwrite)
 
 

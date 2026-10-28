@@ -69,6 +69,7 @@ FONT_PT = 7
 ARM_COLOR = {"true": "#2a78d6", "shuffled": "#eb6834", "derange": "#1baf7a", "mlp": "#8a5cd6", "linear": "#b8860b",
              "untrained": "#8c8a84"}
 INK, INK2, FAINT = "#000000", "#555555", "#bdbdbd"
+HELD_OUT_BAND = "#efefef"                              # light grey behind the held-out speeds (Figure 1c)
 RC = {"font.size": FONT_PT, "pdf.fonttype": 42, "svg.fonttype": "none",
       "axes.linewidth": 0.5, "xtick.major.width": 0.5, "ytick.major.width": 0.5,
       "xtick.major.size": 2.5, "ytick.major.size": 2.5, "xtick.direction": "out",
@@ -168,7 +169,7 @@ def draw(d):
     arms = [a for a in STYLE if a in runs] + [a for a in runs if a not in STYLE]
     off = np.linspace(-0.3, 0.3, len(arms))
     for g in (1, 2):
-        axc.axvspan(g - 0.45, g + 0.45, color="#efefef", lw=0, zorder=0)
+        axc.axvspan(g - 0.45, g + 0.45, color=HELD_OUT_BAND, lw=0, zorder=0)
     for k, arm in enumerate(arms):
         col, mk = STYLE.get(arm, (INK2, "o"))
         for g, (key, _) in enumerate(GROUPS):
